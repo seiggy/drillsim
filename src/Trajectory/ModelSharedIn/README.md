@@ -12,7 +12,7 @@ It supports the distributed shared model approach for dependencies that the Traj
 
 `ModelSharedIn` depends on:
 
-- `Microsoft.OpenApi.Readers`
+- `Microsoft.OpenApi`
 - `NSwag.CodeGeneration.CSharp`
 
 ## Solution Role

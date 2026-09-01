@@ -1,11 +1,8 @@
-using Microsoft.OpenApi.Models;
-using Microsoft.OpenApi.Readers;
 using Microsoft.OpenApi;
 using NJsonSchema;
 using NJsonSchema.CodeGeneration.CSharp;
 using NSwag.CodeGeneration.CSharp;
 using System.Text;
-using Microsoft.OpenApi.Extensions;
 
 /// <summary>
 /// // ### BEGIN CODE SPECIFIC TO ModelSharedIn 1/3 ###
@@ -28,7 +25,7 @@ using Microsoft.OpenApi.Extensions;
 ///     - which means that a microservice handles the external classes it needs by itself, using the OpenAPI schema of its dependencies as a source of truth
 ///     - default option in this program expects the user to manually collect these dependency schemas
 ///             found here (NORCE-generated custom schema registration):    https://someServer:somePort/someMicroserviceDependency/api/swagger/merged/swagger.json
-///             or here (default SwaggerUI schema registration):            https://someServer:somePort/someMicroserviceDependency/api/swagger/v1/swagger.json
+///             or here (built-in OpenAPI schema endpoint):            https://someServer:somePort/someMicroserviceDependency/api/swagger/v1/swagger.json
 ///     - option 2 discovers these dependencies online each time the current program executes, the risk being that modifications brought to the dependencies by another team go unaware
 ///     - more info: https://github.com/NORCE-DrillingAndWells/DrillingAndWells/wiki/MS-Development#distributed-shared-data-model
 /// </summary>
@@ -120,8 +117,9 @@ class Program
                         //    PrettyPrint(msi, "Processing Open Api doc into bundle...");
                         //    HttpClient httpClient = new HttpClient { BaseAddress = new Uri(HOST + msi + "/api/") };
                         //    using var stream = await httpClient.GetStreamAsync(ENDPOINT);
-                        //    var doc = new OpenApiStreamReader().Read(stream, out var diagnostic);
-                        //    var oString = doc.Serialize(OpenApiSpecVersion.OpenApi3_0, OpenApiFormat.Json);
+                        //    var readResult = await OpenApiDocument.LoadAsync(stream, "json");
+                        //    OpenApiDocument doc = readResult.Document ?? throw new InvalidOperationException("Unable to parse the OpenAPI document.");
+                        //    var oString = await doc.SerializeAsJsonAsync(OpenApiSpecVersion.OpenApi3_0);
                         //    // forcing backup of swagger.json in json-schemas/
                         //    PrettyPrint(msi, "Backup OpenApi doc (" + jsonDirectory + ")");
                         //    using (StreamWriter outputFile = new StreamWriter(jsonDirectory + Path.DirectorySeparatorChar + msi + ".json"))
@@ -131,7 +129,7 @@ class Program
                         //}
                         //Thread.Sleep(1000); // make sure files are written
 
-                        // a bundle OpenApi schema (json format) is created to combine OpenApi schema dependencies (Microsoft.OpenApi.Models.OpenApiDocument is used rather than NSwag)
+                        // a bundle OpenApi schema (json format) is created to combine OpenApi schema dependencies (Microsoft.OpenApi.OpenApiDocument is used rather than NSwag)
                         OpenApiDocument document = new OpenApiDocument
                         {
                             Info = new OpenApiInfo
@@ -142,7 +140,7 @@ class Program
                             },
                             Components = new OpenApiComponents
                             {
-                                Schemas = new Dictionary<string, OpenApiSchema> { }
+                                Schemas = new Dictionary<string, IOpenApiSchema>()
                             },
                             Paths = new OpenApiPaths()
                         };
@@ -153,7 +151,8 @@ class Program
                         {
                             PrettyPrint(file, "Processing Open Api doc into API client...");
                             var stream = File.OpenRead(file);
-                            var doc = new OpenApiStreamReader().Read(stream, out var diagnostic);
+                            var readResult = await OpenApiDocument.LoadAsync(stream, "json");
+                            OpenApiDocument doc = readResult.Document ?? throw new InvalidOperationException($"Unable to parse OpenAPI document '{file}'.");
 
                             // Merge paths
                             foreach (var p in doc.Paths)
@@ -169,8 +168,8 @@ class Program
                             });
                         }
 
-                        var outputString = document.Serialize(OpenApiSpecVersion.OpenApi3_0, OpenApiFormat.Json);
-                        // temporary fix waiting for swaggerUI tooling to actually implement latest OpenApi 3.0.4 patch, which is limited to 3.0.3 so far (June 2025)
+                        var outputString = await document.SerializeAsJsonAsync(OpenApiSpecVersion.OpenApi3_0);
+                        // keep compatibility with consumers limited to the OpenAPI 3.0.3 patch level
                         // same fix applied in ModelSharedOut/Program.cs and Service/SwaggerMiddlewareExtensions.cs
                         outputString = outputString.Replace("\"openapi\": \"3.0.4\"", "\"openapi\": \"3.0.3\"");
 
@@ -253,7 +252,7 @@ class Program
 
     /// <summary>
     /// This custom type generator is designed to format type names: getting rid of namespaces; and getting rid of '+' signs (associated with enums type names)
-    /// Note that '+' signs associated with enums should have been filtered out at this stage (Startup.cs::AddSwaggerGen() service settings are tuned to achieve this at the swagger.json stage)
+    /// Note that '+' signs associated with enums should have been filtered out by the service's OpenAPI schema ID configuration.
     /// </summary>
     public class CustomTypeNameGenerator : ITypeNameGenerator
     {

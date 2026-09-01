@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.OpenApi;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
@@ -6,7 +7,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 using OSDC.UnitConversion.Service.Mcp;
@@ -15,11 +15,12 @@ using OSDC.UnitConversion.Service.Mcp.Resources;
 using OSDC.UnitConversion.Service.Mcp.Tools;
 using OSDC.UnitConversion.Service;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
+using System.Threading.Tasks;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,26 +51,15 @@ builder.Services.AddControllersWithViews()
         // allows to serialize enums as strings (and not integers)
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
-builder.Services.AddSwaggerGen(c =>
+builder.Services.AddOpenApi("v1", options =>
 {
-    //// exposes the types according to their fully qualified names / replacing + by . handles enum types that are improperly referenced in swagger.json otherwise ($ref)
-    //c.CustomSchemaIds(x => x.Name);
-    c.CustomSchemaIds(x => x.FullName!.Replace("+", "."));
-
-    // allows to preserve nullable enum types (warning: may have side effects https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/2378)
-    c.UseAllOfToExtendReferenceSchemas();
-
-    // VERY IMPORTANT => Adding this UseOneOfForPolymorphism
-    c.UseOneOfForPolymorphism();
-
-    // enableAnnotationsForPolymorphism Very import for having e.g. CasingSection.Hanger not be of type DerivedType1 and instead be the correct type BaseType
-    c.EnableAnnotations(enableAnnotationsForInheritance: true, enableAnnotationsForPolymorphism: true);
-
-    // ACTIVATE THE CODE BELOW IF THE MODEL CONTAINS A DERIVEDTYPE THAT DERIVES FROM A BASETYPE (SEE WELLCONCEPTARCHITECTURE)
-    // Wire up a schema filter to apply the Discriminator info on the base schema (as per NSwag)
-    // BaseType is a generic type from which a DerivedType may inherit from (e.g. in WellConceptArchitecture BaseType=RelativeTo and DerivedType=RelativeToFixedDepth)
-    //c.DocumentFilter<PolymorphismDocumentFilter<BaseType>>(); // document filter registers the schemas
-    //c.SchemaFilter<PolymorphismSchemaFilter<BaseType>>(); // schema filter sets the schemas (timing is automatically managed)
+    options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
+    options.CreateSchemaReferenceId = jsonTypeInfo => jsonTypeInfo.Type.FullName?.Replace("+", ".");
+    options.AddDocumentTransformer((document, _, _) =>
+    {
+        document.Servers = [new OpenApiServer { Url = "/unitconversion/api" }];
+        return Task.CompletedTask;
+    });
 });
 
 builder.Services.Configure<McpHubOptions>(builder.Configuration.GetSection(McpHubOptions.SectionName));
@@ -141,7 +131,6 @@ var app = builder.Build();
 VectorDocumentSeedInitializer.EnsureSeeded(app.Services);
 
 var basePath = "/unitconversion/api";
-var scheme = "http";
 
 app.UsePathBase(basePath);
 
@@ -182,29 +171,10 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseRateLimiter();
 
-app.UseSwagger(c =>
-{
-    c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
-    {
-        if (httpReq.Headers.ContainsKey("X-Forwarded-Host"))
-        {
-            //scheme = httpReq.Headers["X-Original-Proto"];
-            scheme = "https";
-        }
-        else
-        {
-            scheme = httpReq.Scheme;
-        }
-        swaggerDoc.Servers = new List<OpenApiServer> { new OpenApiServer { Url = $"{scheme}://{httpReq.Host.Value}{basePath}" } };
-    });
-});
-
-//app.UseDeveloperExceptionPage(); // useful for debugging complex errors (e.g. Swagger exceptions)
-
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("v1/swagger.json", "API Version 1");
-});
+app.MapOpenApi("/swagger/{documentName}/swagger.json");
+app.MapScalarApiReference("/swagger", options => options
+    .WithTitle("API Version 1")
+    .WithOpenApiRoutePattern($"{basePath}/swagger/v1/swagger.json"));
 
 app.UseCors(cors => cors
                         .AllowAnyMethod()

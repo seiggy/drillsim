@@ -51,7 +51,7 @@ At runtime it:
    - strip namespace-qualified schema names down to short names
    - update all `$ref` schema references in paths, request bodies, responses, and nested schema graphs
 5. Serializes the merged OpenAPI document.
-6. Applies a compatibility fix that rewrites `openapi: 3.0.4` to `3.0.3` for current Swagger UI tooling compatibility.
+6. Applies a compatibility fix that rewrites `openapi: 3.0.4` to `3.0.3` for current Scalar API reference tooling compatibility.
 7. Uses `NSwag` to generate the C# client and DTO classes.
 
 ## Prerequisites
@@ -107,7 +107,7 @@ This is deliberate because it makes contract changes visible in commits and avoi
 
 The generator relies primarily on:
 
-- `Microsoft.OpenApi.Readers`
+- `Microsoft.OpenApi`
 - `NSwag.CodeGeneration.CSharp`
 
 These are declared in [`ModelSharedOut.csproj`](C:\OSDC\Rig\ModelSharedOut\ModelSharedOut.csproj).

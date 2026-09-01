@@ -6,7 +6,7 @@ The `Service` project hosts the ASP.NET Core microservice that exposes DrillStri
 - Hosts controllers for `DrillString` and `DrillStringComponent`, offering CRUD endpoints as well as light/heavy data listings backed by `DrillStringManager` and `DrillStringComponentManager`.
 - Persists data in `home/DrillString.db` through the singleton `SqlConnectionManager`, which creates, validates, backs up, and indexes the SQLite schema at startup.
 - Enforces consistent JSON serialization via `JsonSettings` (string enums, casing preserved) so API payloads match the types defined in `Model`.
-- Serves a merged OpenAPI document through `SwaggerMiddlewareExtensions`. The middleware rewrites server URLs on the fly to support reverse proxies and hosts Swagger UI under the `/DrillString/api` path base.
+- Serves a merged OpenAPI document through `SwaggerMiddlewareExtensions`. The middleware rewrites server URLs on the fly to support reverse proxies and hosts Scalar API reference under the `/DrillString/api` path base.
 
 ## How other projects use the service
 - `Service/Service.csproj` references `..\\Model\\Model.csproj`, so all API contracts are typed with the classes defined in the Model project.
@@ -18,7 +18,7 @@ The `Service` project hosts the ASP.NET Core microservice that exposes DrillStri
 ## Running locally
 - Seed or inspect the SQLite database under `home/DrillString.db`; it is created automatically when the service starts.
 - Restore dependencies and build with `dotnet build Service.csproj`. The Debug build generates the latest OpenAPI snapshot for `ModelSharedOut`.
-- Launch the API with `dotnet run --project Service.csproj`. The service listens under `/DrillString/api`, while Swagger UI is available at `/DrillString/api/swagger`.
+- Launch the API with `dotnet run --project Service.csproj`. The service listens under `/DrillString/api`, while Scalar API reference is available at `/DrillString/api/swagger`.
 - After modifying the `Model` project, rebuild this service and run `dotnet run --project ..\\ModelSharedOut` to regenerate the merged OpenAPI bundle and shared C# client.
 
 ## Deployment notes

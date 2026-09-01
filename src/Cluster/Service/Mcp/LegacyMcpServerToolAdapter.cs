@@ -67,7 +67,7 @@ internal sealed class LegacyMcpServerToolAdapter : McpServerTool
             string? fallback = result?.ToJsonString(SerializerOptions);
             return new CallToolResult
             {
-                StructuredContent = result?.DeepClone(),
+                StructuredContent = result is null ? null : JsonSerializer.SerializeToElement(result, SerializerOptions),
                 Content = fallback is null ? [] : [new TextContentBlock { Text = fallback }]
             };
         }
@@ -130,7 +130,7 @@ internal sealed class LegacyMcpServerToolAdapter : McpServerTool
         Content = { new TextContentBlock { Text = problem.ToJsonString(SerializerOptions) } }
     };
 
-    private JsonObject? ConvertArguments(IReadOnlyDictionary<string, JsonElement>? arguments)
+    private JsonObject? ConvertArguments(IDictionary<string, JsonElement>? arguments)
     {
         if (arguments is null || arguments.Count == 0)
         {

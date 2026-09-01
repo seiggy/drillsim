@@ -6,6 +6,7 @@ using System.Linq;
 using OSDC.UnitConversion.Conversion.DrillingEngineering;
 using Microsoft.Extensions.Logging;
 using OSDC.DotnetLibraries.General.DataManagement;
+using DrillingUnitChoiceSet = OSDC.UnitConversion.Conversion.UnitSystem.DrillingEngineering.DrillingUnitSystem;
 
 namespace YPLCalibrationFromRheometer.Service
 {
@@ -135,9 +136,7 @@ namespace YPLCalibrationFromRheometer.Service
                             int res = reader.GetInt32(3);
                             MetaInfo metaInfo = new MetaInfo
                             {
-                                ID = reader.GetGuid(0),
-                                Name = reader.GetString(1),
-                                Description = reader.GetString(2)
+                                ID = reader.GetGuid(0)
                             };
                             ids.Add(metaInfo); // Note: the IsDefault flag cannot be passed through a MetaInfo anymore (from OSDC.DotnetLibraries.DataManagement > v1.2)
                         }
@@ -392,7 +391,7 @@ namespace YPLCalibrationFromRheometer.Service
         /// </summary>
         private void FillDefault()
         {
-            DrillingUnitChoiceSet SI = DrillingUnitChoiceSet.DrillingSIUnitChoiceSet;
+            DrillingUnitChoiceSet SI = DrillingUnitChoiceSet.SIUnitSystem;
             if (Get(SI.ID) == null)
             {
                 Add(SI);
@@ -401,7 +400,7 @@ namespace YPLCalibrationFromRheometer.Service
             {
                 Update(SI.ID, SI);
             }
-            DrillingUnitChoiceSet metric = DrillingUnitChoiceSet.DrillingMetricUnitChoiceSet;
+            DrillingUnitChoiceSet metric = DrillingUnitChoiceSet.MetricUnitSystem;
             if (Get(metric.ID) == null)
             {
                 Add(metric);
@@ -410,7 +409,7 @@ namespace YPLCalibrationFromRheometer.Service
             {
                 Update(metric.ID, metric);
             }
-            DrillingUnitChoiceSet US = DrillingUnitChoiceSet.DrillingUSUnitChoiceSet;
+            DrillingUnitChoiceSet US = DrillingUnitChoiceSet.USUnitSystem;
             if (Get(US.ID) == null)
             {
                 Add(US);
@@ -419,7 +418,7 @@ namespace YPLCalibrationFromRheometer.Service
             {
                 Update(US.ID, US);
             }
-            DrillingUnitChoiceSet imperial = DrillingUnitChoiceSet.DrillingImperialUnitChoiceSet;
+            DrillingUnitChoiceSet imperial = DrillingUnitChoiceSet.ImperialUnitSystem;
             if (Get(imperial.ID) == null)
             {
                 Add(imperial);

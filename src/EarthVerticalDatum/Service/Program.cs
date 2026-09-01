@@ -1,11 +1,13 @@
+using Microsoft.OpenApi;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
 using ModelContextProtocol.Protocol;
 using OSDC.Drilling.EarthVerticalDatum.Model;
 using OSDC.Drilling.EarthVerticalDatum.Service;
 using OSDC.Drilling.EarthVerticalDatum.Service.Mcp;
 using OSDC.Drilling.EarthVerticalDatum.Service.Mcp.Tools;
+using System.Threading.Tasks;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,21 +28,21 @@ builder.Services.AddControllers().AddJsonOptions(options => JsonSettings.ApplyTo
 builder.Services.Configure<Microsoft.AspNetCore.Mvc.ApiBehaviorOptions>(options =>
     options.SuppressModelStateInvalidFilter = true);
 builder.Services.AddHealthChecks();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(configuration =>
+builder.Services.AddOpenApi("v1", options =>
 {
-    configuration.SwaggerDoc("v1", new OpenApiInfo
+    options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
+    options.CreateSchemaReferenceId = jsonTypeInfo => jsonTypeInfo.Type.FullName;
+    options.AddDocumentTransformer((document, _, _) =>
     {
-        Title = "OSDC Earth Vertical Datum API",
-        Version = "v1",
-        Description = "Stateless bidirectional conversion between EGM84 mean-sea-level and WGS84 ellipsoidal depths using OSDC SI and positive-down conventions."
+        document.Info = new OpenApiInfo
+        {
+            Title = "OSDC Earth Vertical Datum API",
+            Version = "v1",
+            Description = "Stateless bidirectional conversion between EGM84 mean-sea-level and WGS84 ellipsoidal depths using OSDC SI and positive-down conventions."
+        };
+        document.Servers = [new OpenApiServer { Url = "/EarthVerticalDatum/api" }];
+        return Task.CompletedTask;
     });
-    configuration.CustomSchemaIds(type => type.FullName);
-    foreach (string assemblyName in new[] { "Service", "Model" })
-    {
-        string xmlPath = Path.Combine(AppContext.BaseDirectory, assemblyName + ".xml");
-        if (File.Exists(xmlPath)) configuration.IncludeXmlComments(xmlPath);
-    }
 });
 
 string serverVersion = typeof(Program).Assembly.GetName().Version?.ToString() ?? "1.0.0";
@@ -72,12 +74,10 @@ if (File.Exists(mergedSwaggerFile))
 {
     app.UseCustomSwagger(SwaggerMiddlewareExtensions.ReadOpenApiDocument(mergedSwaggerFile), mergedSwaggerPath);
 }
-else
-{
-    app.UseSwagger();
-}
-app.UseSwaggerUI(configuration =>
-    configuration.SwaggerEndpoint(File.Exists(mergedSwaggerFile) ? $"/EarthVerticalDatum/api{mergedSwaggerPath}" : "/EarthVerticalDatum/api/swagger/v1/swagger.json", "OSDC Earth Vertical Datum API"));
+app.MapOpenApi("/swagger/{documentName}/swagger.json");
+app.MapScalarApiReference("/swagger", options => options
+    .WithTitle("OSDC Earth Vertical Datum API")
+    .WithOpenApiRoutePattern(File.Exists(mergedSwaggerFile) ? $"/EarthVerticalDatum/api{mergedSwaggerPath}" : "/EarthVerticalDatum/api/swagger/v1/swagger.json"));
 
 app.MapGet("/health/live", () => Results.Ok(new { Status = "Healthy" })).ExcludeFromDescription();
 app.MapGet("/health/ready", (EarthVerticalDatumEvaluator evaluator) => Results.Ok(new { Status = "Healthy", evaluator.ModelInfo.ID })).ExcludeFromDescription();

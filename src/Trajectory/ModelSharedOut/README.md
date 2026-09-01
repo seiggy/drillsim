@@ -14,7 +14,7 @@ The generated output includes client types and methods for trajectory realizatio
 
 `ModelSharedOut` depends on:
 
-- `Microsoft.OpenApi.Readers`
+- `Microsoft.OpenApi`
 - `NSwag.CodeGeneration.CSharp`
 - `Microsoft.CodeAnalysis.CSharp`
 

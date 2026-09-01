@@ -23,7 +23,7 @@ Every project carries an in-depth README describing its responsibilities and usa
 ## How the Pieces Fit Together
 - **Domain first:** `Model` defines the canonical geological property structures (light/heavy variants, interpolation cases, and helper types).
 - **Service layer:** `Service` exposes these types over HTTP, persisting payloads to SQLite via manager classes. During `dotnet build`, it emits the merged Swagger document (`CreateSwaggerJson` MSBuild target) into `ModelSharedOut/json-schemas/`.
-- **Shared model generation:** Running `ModelSharedOut` merges the service’s Swagger bundle with optional dependency schemas, producing C# DTOs (`GeologicalPropertiesMergedModel.cs`) and republishing the bundled OpenAPI document into `Service/wwwroot/json-schema/` for Swagger UI.
+- **Shared model generation:** Running `ModelSharedOut` merges the service’s Swagger bundle with optional dependency schemas, producing C# DTOs (`GeologicalPropertiesMergedModel.cs`) and republishing the bundled OpenAPI document into `Service/wwwroot/json-schema/` for Scalar API reference.
 - **Clients:** `WebApp`, `ServiceTest`, and any third-party integrations reference the generated shared model to stay aligned with the API contract without duplicating types.
 - **Testing:** `ModelTest` focuses on numerical accuracy, while `ServiceTest` checks the end-to-end REST surface using the same generated classes the UI relies on.
 
@@ -65,7 +65,7 @@ dotnet test ServiceTest/ServiceTest.csproj
 - Docker images for the microservice and web app are published under the Digiwells organisation: https://hub.docker.com/?namespace=digiwells
 - Kubernetes/Helm manifests for the client live under `WebApp/charts/`; ingress paths align with the runtime base paths configured in `Program.cs`.
 - Hosted environments:
-  - Service (Swagger UI)  
+  - Service (Scalar API reference)
     - https://dev.digiwells.no/GeologicalProperties/api/swagger  
     - https://app.digiwells.no/GeologicalProperties/api/swagger
   - Web application  

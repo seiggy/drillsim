@@ -1,6 +1,6 @@
 # Service
 
-The Service project hosts the CartographicProjection HTTP API. It exposes endpoints to manage projections and conversion sets and serves an OpenAPI document and Swagger UI. Data persist in a local SQLite database under `home/CartographicProjection.db`.
+The Service project hosts the CartographicProjection HTTP API. It exposes endpoints to manage projections and conversion sets and serves an OpenAPI document and Scalar API reference. Data persist in a local SQLite database under `home/CartographicProjection.db`.
 
 ## Purpose
 
@@ -13,9 +13,8 @@ The Service project hosts the CartographicProjection HTTP API. It exposes endpoi
 - Prerequisites: .NET SDK 8.0, Docker (optional), internet access to dependency services if configured.
 
 - Local run (dev):
-  - Restore tools for Swagger CLI: `dotnet tool restore`
   - Build and run: `dotnet run --project Service/Service.csproj`
-  - Swagger UI: `http://localhost:8080/CartographicProjection/api/swagger`
+  - Scalar API reference: `http://localhost:8080/CartographicProjection/api/swagger`
 
 - Configuration:
   - `GeodeticDatumHostURL`: base URL to the GeodeticDatum service (used by `APIUtils`).
@@ -82,7 +81,7 @@ If `HubBaseUrl` or `PublicBaseUrl` is missing, registration is skipped. If the h
 ## Usage Examples
 
 - Base path: `http://localhost:8080/CartographicProjection/api`
-- Swagger UI: `/swagger`
+- Scalar API reference: `/swagger`
 
 - CartographicProjectionType (enumeration and prototypes):
   - `GET /CartographicProjectionType` → list of supported `ProjectionType` values
@@ -129,13 +128,13 @@ If `HubBaseUrl` or `PublicBaseUrl` is missing, registration is skipped. If the h
 }
 ```
 
-Consult Swagger UI for the authoritative schema and examples.
+Consult Scalar API reference for the authoritative schema and examples.
 
 ## Dependencies
 
 - Project: references `Model` (`Service/Service.csproj:1`) for conversion logic and data types.
-- Packages: `Microsoft.Data.Sqlite`, `Microsoft.OpenApi`, `Swashbuckle.AspNetCore.SwaggerGen`/`SwaggerUI`.
-- Tools: `swashbuckle.aspnetcore.cli` (via `.config/dotnet-tools.json:1`) to export OpenAPI during debug builds.
+- Packages: `Microsoft.Data.Sqlite`, `Microsoft.OpenApi`, `Microsoft.AspNetCore.OpenApi`/`Scalar`.
+- Build-time: `Microsoft.Extensions.ApiDescription.Server` exports OpenAPI during Debug builds.
 
 ## Integration
 

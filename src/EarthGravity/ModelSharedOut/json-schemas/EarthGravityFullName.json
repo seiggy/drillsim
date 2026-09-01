@@ -5,6 +5,11 @@
     "description": "Stateless EGM96 evaluation using OSDC SI and WGS84 conventions.",
     "version": "v1"
   },
+  "servers": [
+    {
+      "url": "/EarthGravity/api"
+    }
+  ],
   "paths": {
     "/EarthGravity": {
       "get": {
@@ -53,7 +58,8 @@
                 "$ref": "#/components/schemas/OSDC.Drilling.EarthGravity.Model.EarthGravityEvaluationRequest"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -67,7 +73,7 @@
             }
           },
           "422": {
-            "description": "Unprocessable Content",
+            "description": "Unprocessable Entity",
             "content": {
               "application/json": {
                 "schema": {
@@ -126,252 +132,242 @@
     "schemas": {
       "OSDC.Drilling.EarthGravity.Model.EarthGravityEvaluationRequest": {
         "required": [
-          "Positions"
+          "positions"
         ],
         "type": "object",
         "properties": {
-          "Positions": {
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.EarthGravity.Model.EarthGravityPosition"
-            },
-            "description": "Positions to evaluate. The entire request is rejected when any item is invalid."
+          "positions": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.EarthGravity.Model.EarthGravityPosition, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
         },
-        "additionalProperties": false,
         "description": "A stateless synchronous EGM96 evaluation request."
       },
       "OSDC.Drilling.EarthGravity.Model.EarthGravityEvaluationResponse": {
         "type": "object",
         "properties": {
-          "Model": {
+          "model": {
             "$ref": "#/components/schemas/OSDC.Drilling.EarthGravity.Model.EarthGravityModelInfo"
           },
-          "Samples": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.EarthGravity.Model.EarthGravitySample"
-            },
-            "nullable": true
+          "samples": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.EarthGravity.Model.EarthGravitySample, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
         },
-        "additionalProperties": false,
         "description": "EGM96 results in the same order as the request positions."
       },
       "OSDC.Drilling.EarthGravity.Model.EarthGravityModelInfo": {
         "type": "object",
         "properties": {
-          "Name": {
-            "type": "string",
-            "nullable": true
+          "name": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "ID": {
-            "type": "string",
-            "nullable": true
+          "id": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Publisher": {
-            "type": "string",
-            "nullable": true
+          "publisher": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "ReleaseDate": {
-            "type": "string",
-            "nullable": true
+          "releaseDate": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "DataVersion": {
-            "type": "string",
-            "nullable": true
+          "dataVersion": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Degree": {
-            "type": "integer",
-            "format": "int32"
+          "degree": {
+            "$ref": "#/components/schemas/System.Int32"
           },
-          "Order": {
-            "type": "integer",
-            "format": "int32"
+          "order": {
+            "$ref": "#/components/schemas/System.Int32"
           },
-          "GeographicLibVersion": {
-            "type": "string",
-            "nullable": true
+          "geographicLibVersion": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "ReferenceEllipsoid": {
-            "type": "string",
-            "nullable": true
+          "referenceEllipsoid": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "IncludesCentrifugalAcceleration": {
-            "type": "boolean"
+          "includesCentrifugalAcceleration": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "CoefficientSHA256": {
-            "type": "string",
-            "nullable": true
+          "coefficientSHA256": {
+            "$ref": "#/components/schemas/System.String"
           }
         },
-        "additionalProperties": false,
         "description": "Identity and provenance of the Earth gravity model used for an evaluation."
       },
       "OSDC.Drilling.EarthGravity.Model.EarthGravityPosition": {
         "type": "object",
         "properties": {
-          "Latitude": {
-            "maximum": 1.5707963267948966,
-            "minimum": -1.5707963267948966,
-            "type": "number",
-            "description": "WGS84 geodetic latitude in SI radians, between -π/2 and π/2.",
-            "format": "double"
+          "latitude": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Longitude": {
-            "maximum": 3.141592653589793,
-            "minimum": -3.141592653589793,
-            "type": "number",
-            "description": "WGS84 geodetic longitude in SI radians, between -π and π.",
-            "format": "double"
+          "longitude": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Depth": {
-            "type": "number",
-            "description": "Depth in SI metres, positive downward, with zero at the WGS84 reference ellipsoid. A negative value is above the ellipsoid. This is not a mean-sea-level, geoid, seabed, rig, or local-datum depth.",
-            "format": "double"
+          "depth": {
+            "$ref": "#/components/schemas/System.Double"
           }
         },
-        "additionalProperties": false,
         "description": "A position referred to the WGS84 reference ellipsoid and expressed using OSDC SI conventions."
       },
       "OSDC.Drilling.EarthGravity.Model.EarthGravitySample": {
         "type": "object",
         "properties": {
-          "Position": {
+          "position": {
             "$ref": "#/components/schemas/OSDC.Drilling.EarthGravity.Model.EarthGravityPosition"
           },
-          "Gravity": {
+          "gravity": {
             "$ref": "#/components/schemas/OSDC.Drilling.EarthGravity.Model.EarthGravityVector"
           }
         },
-        "additionalProperties": false,
         "description": "An evaluated WGS84 position and its corresponding EGM96 gravity vector."
       },
       "OSDC.Drilling.EarthGravity.Model.EarthGravityValidationError": {
+        "required": [
+          "positionIndex",
+          "property",
+          "code",
+          "message"
+        ],
         "type": "object",
         "properties": {
-          "PositionIndex": {
-            "type": "integer",
-            "format": "int32",
+          "positionIndex": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Property": {
-            "type": "string",
-            "nullable": true
+          "property": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Code": {
-            "type": "string",
-            "nullable": true
+          "code": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Message": {
-            "type": "string",
-            "nullable": true
+          "message": {
+            "$ref": "#/components/schemas/System.String"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.EarthGravity.Model.EarthGravityValidationProblem": {
         "type": "object",
         "properties": {
-          "Error": {
-            "type": "string",
-            "nullable": true
+          "error": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Message": {
-            "type": "string",
-            "nullable": true
+          "message": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Errors": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.EarthGravity.Model.EarthGravityValidationError"
-            },
-            "nullable": true
+          "errors": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.EarthGravity.Model.EarthGravityValidationError, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
         },
-        "additionalProperties": false,
         "description": "Details returned when an evaluation request is rejected atomically."
       },
       "OSDC.Drilling.EarthGravity.Model.EarthGravityVector": {
         "type": "object",
         "properties": {
-          "East": {
-            "type": "number",
-            "description": "Easterly acceleration component in SI metres per second squared.",
-            "format": "double"
+          "east": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "North": {
-            "type": "number",
-            "description": "Northerly acceleration component in SI metres per second squared.",
-            "format": "double"
+          "north": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Up": {
-            "type": "number",
-            "description": "Upward acceleration component in SI metres per second squared; normally negative.",
-            "format": "double"
+          "up": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Magnitude": {
-            "type": "number",
-            "description": "Magnitude of the gravity vector in SI metres per second squared.",
-            "format": "double",
-            "readOnly": true
+          "magnitude": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "TotalPotential": {
-            "type": "number",
-            "description": "Total gravitational plus centrifugal potential in SI square metres per square second.",
-            "format": "double"
+          "totalPotential": {
+            "$ref": "#/components/schemas/System.Double"
           }
         },
-        "additionalProperties": false,
         "description": "Total gravity acceleration in the local east-north-up frame."
       },
       "OSDC.Drilling.EarthGravity.Model.UsageStatisticsEarthGravity": {
         "type": "object",
         "properties": {
-          "StartedAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
+          "startedAt": {
+            "$ref": "#/components/schemas/System.DateTimeOffset"
           },
-          "Scope": {
-            "type": "string",
-            "nullable": true,
-            "readOnly": true
+          "scope": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "RestEvaluations": {
-            "type": "integer",
-            "format": "int64",
-            "readOnly": true
+          "restEvaluations": {
+            "$ref": "#/components/schemas/System.Int64"
           },
-          "MCPEvaluations": {
-            "type": "integer",
-            "format": "int64",
-            "readOnly": true
+          "mcpEvaluations": {
+            "$ref": "#/components/schemas/System.Int64"
           },
-          "FailedEvaluations": {
-            "type": "integer",
-            "format": "int64",
-            "readOnly": true
+          "failedEvaluations": {
+            "$ref": "#/components/schemas/System.Int64"
           },
-          "PositionsEvaluated": {
-            "type": "integer",
-            "format": "int64",
-            "readOnly": true
+          "positionsEvaluated": {
+            "$ref": "#/components/schemas/System.Int64"
           },
-          "ModelInfoRequests": {
-            "type": "integer",
-            "format": "int64",
-            "readOnly": true
+          "modelInfoRequests": {
+            "$ref": "#/components/schemas/System.Int64"
           },
-          "StatisticsRequests": {
-            "type": "integer",
-            "format": "int64",
-            "readOnly": true
+          "statisticsRequests": {
+            "$ref": "#/components/schemas/System.Int64"
           }
-        },
-        "additionalProperties": false
+        }
+      },
+      "System.Boolean": {
+        "type": "boolean"
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.EarthGravity.Model.EarthGravityPosition, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "minItems": 1,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.EarthGravity.Model.EarthGravityPosition"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.EarthGravity.Model.EarthGravitySample, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.EarthGravity.Model.EarthGravitySample"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.EarthGravity.Model.EarthGravityValidationError, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.EarthGravity.Model.EarthGravityValidationError"
+        }
+      },
+      "System.DateTimeOffset": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Double": {
+        "maximum": 1.5707963267948966,
+        "minimum": -1.5707963267948966,
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
+      },
+      "System.Int32": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int32"
+      },
+      "System.Int64": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int64"
+      },
+      "System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int32"
+      },
+      "System.String": {
+        "type": "string"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "EarthGravity"
+    },
+    {
+      "name": "EarthGravityUsageStatistics"
+    }
+  ]
 }

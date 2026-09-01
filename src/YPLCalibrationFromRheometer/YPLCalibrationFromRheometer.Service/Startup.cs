@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.OpenApi;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.HttpOverrides;
-using System.Collections.Generic;
+using System.Threading.Tasks;
+using Scalar.AspNetCore;
 
 namespace YPLCalibrationFromRheometer.Service
 {
@@ -22,14 +23,21 @@ namespace YPLCalibrationFromRheometer.Service
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-            services.AddSwaggerGen();
+            services.AddOpenApi("v1", options =>
+            {
+                options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
+                options.AddDocumentTransformer((document, _, _) =>
+                {
+                    document.Servers = [new OpenApiServer { Url = "/yplcalibrationfromrheometer/api" }];
+                    return Task.CompletedTask;
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             var basePath = "/yplcalibrationfromrheometer/api";
-            var scheme = "http";
 
             app.UsePathBase(basePath);
 
@@ -52,28 +60,6 @@ namespace YPLCalibrationFromRheometer.Service
             app.UseStaticFiles();
             app.UseRouting();
 
-            app.UseSwagger(c =>
-            {
-                c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
-                {
-                    if (httpReq.Headers.ContainsKey("X-Forwarded-Host"))
-                    {
-                        //scheme = httpReq.Headers["X-Original-Proto"];
-                        scheme = "https";
-                    }
-                    else
-                    {
-                        scheme = httpReq.Scheme;
-                    }
-                    swaggerDoc.Servers = new List<OpenApiServer> { new OpenApiServer { Url = $"{scheme}://{httpReq.Host.Value}{basePath}" } };
-                });
-            });
-
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("v1/swagger.json", "API Version 1");
-            });
-
             app.UseCors(cors => cors
                                     .AllowAnyMethod()
                                     .AllowAnyHeader()
@@ -83,6 +69,10 @@ namespace YPLCalibrationFromRheometer.Service
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapOpenApi("/swagger/{documentName}/swagger.json");
+                endpoints.MapScalarApiReference("/swagger", options => options
+                    .WithTitle("API Version 1")
+                    .WithOpenApiRoutePattern($"{basePath}/swagger/v1/swagger.json"));
                 endpoints.MapControllers();
                 endpoints.MapFallbackToFile("index.html");
             });

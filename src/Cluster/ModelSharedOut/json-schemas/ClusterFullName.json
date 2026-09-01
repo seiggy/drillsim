@@ -1,9 +1,14 @@
 {
   "openapi": "3.0.4",
   "info": {
-    "title": "Service, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
-    "version": "1.0"
+    "title": "Service | v1",
+    "version": "1.0.0"
   },
+  "servers": [
+    {
+      "url": "/cluster/api"
+    }
+  ],
   "paths": {
     "/Cluster": {
       "get": {
@@ -17,11 +22,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uuid"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -37,17 +38,35 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
@@ -78,10 +97,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -101,8 +117,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -130,8 +145,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           },
           {
@@ -139,8 +153,7 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "date-time"
+              "$ref": "#/components/schemas/System.DateTimeOffset"
             }
           }
         ],
@@ -148,17 +161,35 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
@@ -187,14 +218,16 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -211,10 +244,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.Drilling.Cluster.Model.Cluster, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -232,17 +262,35 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchExportRequest"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchExportRequest"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchExportRequest"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchExportRequest"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchExportRequest"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchExportRequest"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
@@ -321,17 +369,35 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchRestoreRequest"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchRestoreRequest"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchRestoreRequest"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchRestoreRequest"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchRestoreRequest"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchRestoreRequest"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
@@ -402,10 +468,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterLight"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.Drilling.Cluster.Model.ClusterLight, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -424,8 +487,7 @@
             "name": "guid",
             "in": "query",
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -435,10 +497,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.Drilling.Cluster.Model.Cluster, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -457,8 +516,7 @@
             "name": "guid",
             "in": "query",
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -468,10 +526,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.Drilling.Cluster.Model.Cluster, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -490,7 +545,7 @@
             "name": "IsSingleWellNullable",
             "in": "query",
             "schema": {
-              "type": "boolean"
+              "$ref": "#/components/schemas/System.Nullable`1[[System.Boolean, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
             }
           }
         ],
@@ -500,10 +555,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.Drilling.Cluster.Model.Cluster, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -522,7 +574,7 @@
             "name": "fixedBool",
             "in": "query",
             "schema": {
-              "type": "boolean"
+              "$ref": "#/components/schemas/System.Boolean"
             }
           }
         ],
@@ -532,10 +584,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.Drilling.Cluster.Model.Cluster, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -555,11 +604,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uuid"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -575,24 +620,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureCategory"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureCategory"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureCategory"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureCategory"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureCategory"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureCategory"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -609,10 +675,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -632,8 +695,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -661,8 +723,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           },
           {
@@ -670,8 +731,7 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "date-time"
+              "$ref": "#/components/schemas/System.DateTimeOffset"
             }
           }
         ],
@@ -679,17 +739,35 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureCategory"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureCategory"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureCategory"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureCategory"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureCategory"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureCategory"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
@@ -718,14 +796,16 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -742,10 +822,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureCategory"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.Drilling.Cluster.Model.ClusterFeatureCategory, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -765,11 +842,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uuid"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -785,24 +858,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterIdentity"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterIdentity"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterIdentity"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterIdentity"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterIdentity"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterIdentity"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -819,10 +913,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -842,8 +933,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -871,8 +961,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           },
           {
@@ -880,8 +969,7 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "date-time"
+              "$ref": "#/components/schemas/System.DateTimeOffset"
             }
           }
         ],
@@ -889,17 +977,35 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterIdentity"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterIdentity"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterIdentity"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterIdentity"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterIdentity"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterIdentity"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
@@ -928,14 +1034,16 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -952,10 +1060,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterIdentity"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.Drilling.Cluster.Model.ClusterIdentity, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -995,11 +1100,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uuid"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -1015,24 +1116,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureCategory"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureCategory"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureCategory"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureCategory"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureCategory"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureCategory"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -1049,10 +1171,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -1072,8 +1191,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -1101,8 +1219,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           },
           {
@@ -1110,8 +1227,7 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "date-time"
+              "$ref": "#/components/schemas/System.DateTimeOffset"
             }
           }
         ],
@@ -1119,17 +1235,35 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureCategory"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureCategory"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureCategory"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureCategory"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureCategory"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureCategory"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
@@ -1158,14 +1292,16 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -1182,10 +1318,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureCategory"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.Drilling.Cluster.Model.SlotFeatureCategory, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -1199,913 +1332,1299 @@
       "OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty": {
         "type": "object",
         "properties": {
-          "GaussianValue": {
+          "gaussianValue": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.Statistics.GaussianDistribution"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.DotnetLibraries.General.DataManagement.MetaInfo": {
         "type": "object",
         "properties": {
-          "ID": {
-            "type": "string",
-            "format": "uuid"
+          "id": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "HttpHostName": {
+          "httpHostName": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "HttpHostBasePath": {
+          "httpHostBasePath": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "HttpEndPoint": {
+          "httpEndPoint": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.DotnetLibraries.General.Math.Point3DGlobalCoordinates": {
         "type": "object",
         "properties": {
-          "X": {
-            "type": "number",
-            "format": "double",
+          "x": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Y": {
-            "type": "number",
-            "format": "double",
+          "y": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Z": {
-            "type": "number",
-            "format": "double",
+          "z": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "RiemannianNorth": {
-            "type": "number",
-            "format": "double",
+          "riemannianNorth": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "RiemannianEast": {
-            "type": "number",
-            "format": "double",
+          "riemannianEast": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Latitude": {
-            "type": "number",
-            "format": "double",
+          "latitude": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Longitude": {
-            "type": "number",
-            "format": "double",
+          "longitude": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "TVD": {
-            "type": "number",
-            "format": "double",
+          "tvd": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.DotnetLibraries.General.Statistics.GaussianDistribution": {
         "type": "object",
         "properties": {
-          "MinValue": {
-            "type": "number",
-            "format": "double"
-          },
-          "MaxValue": {
-            "type": "number",
-            "format": "double"
-          },
-          "Mean": {
-            "type": "number",
-            "format": "double",
+          "mean": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "StandardDeviation": {
-            "type": "number",
-            "format": "double",
+          "standardDeviation": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
+          },
+          "minValue": {
+            "$ref": "#/components/schemas/System.Double"
+          },
+          "maxValue": {
+            "$ref": "#/components/schemas/System.Double"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.Cluster": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
-            "nullable": true
-          },
-          "Description": {
-            "type": "string",
-            "nullable": true
-          },
-          "CreationDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "LastModificationDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "FieldID": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "IsSingleWell": {
-            "type": "boolean"
-          },
-          "RigID": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "IsFixedPlatform": {
-            "type": "boolean"
-          },
-          "ClusterIdentityAssignments": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterIdentityAssignment"
-            },
-            "nullable": true
-          },
-          "ClusterFeatureAssignments": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureAssignment"
-            },
-            "nullable": true
-          },
-          "ReferencePoint": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.Math.Point3DGlobalCoordinates"
-          },
-          "GroundMudLineDepth": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
-          },
-          "TopWaterDepth": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
-          },
-          "Slots": {
+          "metaInfo": {
             "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Slot"
-            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "creationDate": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "lastModificationDate": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "fieldID": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "isSingleWell": {
+            "$ref": "#/components/schemas/System.Boolean"
+          },
+          "rigID": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "isFixedPlatform": {
+            "$ref": "#/components/schemas/System.Boolean"
+          },
+          "clusterIdentityAssignments": {
+            "type": "array",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.ClusterIdentityAssignment, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          },
+          "clusterFeatureAssignments": {
+            "type": "array",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.ClusterFeatureAssignment, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          },
+          "referencePoint": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.Math.Point3DGlobalCoordinates"
+              }
+            ],
+            "nullable": true
+          },
+          "groundMudLineDepth": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "topWaterDepth": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "slots": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.Dictionary`2[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[OSDC.Drilling.Cluster.Model.Slot, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.ClusterBatchCatalogDependencies": {
         "type": "object",
         "properties": {
-          "Identities": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterIdentity"
-            },
-            "nullable": true
+          "identities": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.ClusterIdentity, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           },
-          "ClusterFeatureCategories": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureCategory"
-            },
-            "nullable": true
+          "clusterFeatureCategories": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.ClusterFeatureCategory, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           },
-          "SlotFeatureCategories": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureCategory"
-            },
-            "nullable": true
+          "slotFeatureCategories": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.SlotFeatureCategory, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.ClusterBatchCatalogMapping": {
         "type": "object",
         "properties": {
-          "Catalog": {
-            "type": "string",
-            "nullable": true
+          "catalog": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Name": {
-            "type": "string",
-            "nullable": true
+          "name": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "SourceID": {
-            "type": "string",
-            "format": "uuid"
+          "sourceID": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "LocalID": {
-            "type": "string",
-            "format": "uuid"
+          "localID": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "Resolution": {
-            "type": "string",
-            "nullable": true
+          "resolution": {
+            "$ref": "#/components/schemas/System.String"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.ClusterBatchCatalogRestorePolicy": {
-        "enum": [
-          "Unspecified",
-          "MapExisting",
-          "MapOrCreateMissing"
-        ],
-        "type": "string"
+        "type": "integer"
       },
       "OSDC.Drilling.Cluster.Model.ClusterBatchError": {
         "type": "object",
         "properties": {
-          "PositionIndex": {
-            "type": "integer",
-            "format": "int32",
+          "positionIndex": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Property": {
-            "type": "string",
-            "nullable": true
+          "property": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Code": {
-            "type": "string",
-            "nullable": true
+          "code": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Message": {
-            "type": "string",
-            "nullable": true
+          "message": {
+            "$ref": "#/components/schemas/System.String"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.ClusterBatchErrorEnvelope": {
         "type": "object",
         "properties": {
-          "Error": {
-            "type": "string",
-            "nullable": true
+          "error": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Message": {
-            "type": "string",
-            "nullable": true
+          "message": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Errors": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchError"
-            },
-            "nullable": true
+          "errors": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.ClusterBatchError, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.ClusterBatchExportDocument": {
         "type": "object",
         "properties": {
-          "FormatIdentifier": {
-            "type": "string",
-            "nullable": true
+          "formatIdentifier": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "SchemaVersion": {
-            "type": "integer",
-            "format": "int32"
+          "schemaVersion": {
+            "$ref": "#/components/schemas/System.Int32"
           },
-          "ExportedAtUtc": {
-            "type": "string",
-            "format": "date-time"
+          "exportedAtUtc": {
+            "$ref": "#/components/schemas/System.DateTimeOffset"
           },
-          "CatalogDependencies": {
+          "catalogDependencies": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchCatalogDependencies"
           },
-          "ExternalReferences": {
+          "externalReferences": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchExternalReferences"
           },
-          "Clusters": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
-            },
-            "nullable": true
+          "clusters": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.Cluster, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.ClusterBatchExportRequest": {
         "type": "object",
         "properties": {
-          "Scope": {
+          "scope": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchExportScope"
           },
-          "ClusterIDs": {
+          "clusterIDs": {
             "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.ClusterBatchExportScope": {
-        "enum": [
-          "Unspecified",
-          "All",
-          "Selected"
-        ],
-        "type": "string"
+        "type": "integer"
       },
       "OSDC.Drilling.Cluster.Model.ClusterBatchExternalReference": {
         "type": "object",
         "properties": {
-          "SourceID": {
-            "type": "string",
-            "format": "uuid"
+          "sourceID": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "Name": {
-            "type": "string",
-            "nullable": true
+          "name": {
+            "$ref": "#/components/schemas/System.String"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.ClusterBatchExternalReferenceMapping": {
         "type": "object",
         "properties": {
-          "Resource": {
-            "type": "string",
-            "nullable": true
+          "resource": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Name": {
-            "type": "string",
-            "nullable": true
+          "name": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "SourceID": {
-            "type": "string",
-            "format": "uuid"
+          "sourceID": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "LocalID": {
-            "type": "string",
-            "format": "uuid"
+          "localID": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "Resolution": {
-            "type": "string",
-            "nullable": true
+          "resolution": {
+            "$ref": "#/components/schemas/System.String"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.ClusterBatchExternalReferences": {
         "type": "object",
         "properties": {
-          "Fields": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchExternalReference"
-            },
-            "nullable": true
+          "fields": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.ClusterBatchExternalReference, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           },
-          "Rigs": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchExternalReference"
-            },
-            "nullable": true
+          "rigs": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.ClusterBatchExternalReference, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.ClusterBatchRestoreConflictPolicy": {
-        "enum": [
-          "Unspecified",
-          "FailIfExists",
-          "ReplaceExisting"
-        ],
-        "type": "string"
+        "type": "integer"
       },
       "OSDC.Drilling.Cluster.Model.ClusterBatchRestoreRequest": {
         "type": "object",
         "properties": {
-          "ConflictPolicy": {
+          "conflictPolicy": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchRestoreConflictPolicy"
           },
-          "CatalogPolicy": {
+          "catalogPolicy": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchCatalogRestorePolicy"
           },
-          "Document": {
-            "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchExportDocument"
+          "document": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchExportDocument"
+              }
+            ],
+            "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.ClusterBatchRestoreResponse": {
         "type": "object",
         "properties": {
-          "RestoredAtUtc": {
-            "type": "string",
-            "format": "date-time"
+          "restoredAtUtc": {
+            "$ref": "#/components/schemas/System.DateTimeOffset"
           },
-          "CreatedCount": {
-            "type": "integer",
-            "format": "int32"
+          "createdCount": {
+            "$ref": "#/components/schemas/System.Int32"
           },
-          "ReplacedCount": {
-            "type": "integer",
-            "format": "int32"
+          "replacedCount": {
+            "$ref": "#/components/schemas/System.Int32"
           },
-          "CreatedCatalogDefinitionCount": {
-            "type": "integer",
-            "format": "int32"
+          "createdCatalogDefinitionCount": {
+            "$ref": "#/components/schemas/System.Int32"
           },
-          "CreatedCatalogOptionCount": {
-            "type": "integer",
-            "format": "int32"
+          "createdCatalogOptionCount": {
+            "$ref": "#/components/schemas/System.Int32"
           },
-          "CatalogMappings": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchCatalogMapping"
-            },
-            "nullable": true
+          "catalogMappings": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.ClusterBatchCatalogMapping, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           },
-          "ExternalReferenceMappings": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchExternalReferenceMapping"
-            },
-            "nullable": true
+          "externalReferenceMappings": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.ClusterBatchExternalReferenceMapping, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           },
-          "ClusterIDs": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "nullable": true
+          "clusterIDs": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.ClusterFeatureAssignment": {
         "type": "object",
         "properties": {
-          "ID": {
-            "type": "string",
-            "format": "uuid"
+          "id": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "FeatureCategoryID": {
+          "featureCategoryID": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "FeatureOptionID": {
+          "featureOptionID": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "FromDate": {
+          "fromDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "ToDate": {
+          "toDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.ClusterFeatureCategory": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "IsExclusive": {
-            "type": "boolean"
+          "name": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
           },
-          "HasValidityPeriod": {
-            "type": "boolean"
+          "isExclusive": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "Options": {
+          "hasValidityPeriod": {
+            "$ref": "#/components/schemas/System.Boolean"
+          },
+          "options": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureOption"
-            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.ClusterFeatureOption, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "lastModificationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.ClusterFeatureOption": {
         "type": "object",
         "properties": {
-          "ID": {
-            "type": "string",
-            "format": "uuid"
+          "id": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "Name": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.ClusterIdentity": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "name": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "lastModificationDate": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.ClusterIdentityAssignment": {
         "type": "object",
         "properties": {
-          "ID": {
-            "type": "string",
-            "format": "uuid"
+          "id": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "IdentityID": {
+          "identityID": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Value": {
+          "value": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.ClusterLight": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "description": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "FieldID": {
+          "lastModificationDate": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "IsSingleWell": {
-            "type": "boolean"
-          },
-          "RigID": {
+          "fieldID": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "IsFixedPlatform": {
-            "type": "boolean"
+          "isSingleWell": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "ReferencePoint": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.Math.Point3DGlobalCoordinates"
+          "rigID": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
           },
-          "GroundMudLineDepth": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
+          "isFixedPlatform": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "TopWaterDepth": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
+          "referencePoint": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.Math.Point3DGlobalCoordinates"
+              }
+            ],
+            "nullable": true
+          },
+          "groundMudLineDepth": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "topWaterDepth": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.CountPerDay": {
         "type": "object",
         "properties": {
-          "Date": {
-            "type": "string",
-            "format": "date-time"
+          "date": {
+            "$ref": "#/components/schemas/System.DateTime"
           },
-          "Count": {
-            "type": "integer",
-            "format": "int64"
+          "count": {
+            "$ref": "#/components/schemas/System.UInt64"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.History": {
         "type": "object",
         "properties": {
-          "Data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.CountPerDay"
-            },
-            "nullable": true
+          "data": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.CountPerDay, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.Slot": {
         "type": "object",
         "properties": {
-          "ID": {
-            "type": "string",
-            "format": "uuid"
+          "id": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "Name": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "description": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "lastModificationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Latitude": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
+          "latitude": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "Longitude": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
+          "longitude": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "SlotFeatureAssignments": {
+          "slotFeatureAssignments": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureAssignment"
-            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.SlotFeatureAssignment, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.SlotFeatureAssignment": {
         "type": "object",
         "properties": {
-          "ID": {
-            "type": "string",
-            "format": "uuid"
+          "id": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "FeatureCategoryID": {
+          "featureCategoryID": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "FeatureOptionID": {
+          "featureOptionID": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "FromDate": {
+          "fromDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "ToDate": {
+          "toDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.SlotFeatureCategory": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "IsExclusive": {
-            "type": "boolean"
+          "name": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
           },
-          "HasValidityPeriod": {
-            "type": "boolean"
+          "isExclusive": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "Options": {
+          "hasValidityPeriod": {
+            "$ref": "#/components/schemas/System.Boolean"
+          },
+          "options": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureOption"
-            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.SlotFeatureOption, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "lastModificationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.SlotFeatureOption": {
         "type": "object",
         "properties": {
-          "ID": {
-            "type": "string",
-            "format": "uuid"
+          "id": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "Name": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Cluster.Model.UsageStatisticsCluster": {
         "type": "object",
         "properties": {
-          "LastSaved": {
-            "type": "string",
-            "format": "date-time"
+          "lastSaved": {
+            "$ref": "#/components/schemas/System.DateTime"
           },
-          "BackUpInterval": {
-            "type": "string",
-            "format": "date-span"
+          "backUpInterval": {
+            "$ref": "#/components/schemas/System.TimeSpan"
           },
-          "GetAllClusterIdPerDay": {
+          "getAllClusterIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetAllClusterMetaInfoPerDay": {
+          "getAllClusterMetaInfoPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetClusterByIdPerDay": {
+          "getClusterByIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetAllClusterPerDay": {
+          "getAllClusterPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetAllClusterLightPerDay": {
+          "getAllClusterLightPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetAllClusterByFieldIdPerDay": {
+          "getAllClusterByFieldIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetAllClusterByRigIdPerDay": {
+          "getAllClusterByRigIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetAllSingleWellClusterPerDay": {
+          "getAllSingleWellClusterPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetAllFixedPlatformClusterPerDay": {
+          "getAllFixedPlatformClusterPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "PostClusterPerDay": {
+          "postClusterPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "PutClusterByIdPerDay": {
+          "putClusterByIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "DeleteClusterByIdPerDay": {
+          "deleteClusterByIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "BatchExportClustersPerDay": {
+          "batchExportClustersPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "BatchRestoreClustersPerDay": {
+          "batchRestoreClustersPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetAllClusterIdentityIdPerDay": {
+          "getAllClusterIdentityIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetAllClusterIdentityMetaInfoPerDay": {
+          "getAllClusterIdentityMetaInfoPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetClusterIdentityByIdPerDay": {
+          "getClusterIdentityByIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetAllClusterIdentityPerDay": {
+          "getAllClusterIdentityPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "PostClusterIdentityPerDay": {
+          "postClusterIdentityPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "PutClusterIdentityByIdPerDay": {
+          "putClusterIdentityByIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "DeleteClusterIdentityByIdPerDay": {
+          "deleteClusterIdentityByIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetAllClusterFeatureCategoryIdPerDay": {
+          "getAllClusterFeatureCategoryIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetAllClusterFeatureCategoryMetaInfoPerDay": {
+          "getAllClusterFeatureCategoryMetaInfoPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetClusterFeatureCategoryByIdPerDay": {
+          "getClusterFeatureCategoryByIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetAllClusterFeatureCategoryPerDay": {
+          "getAllClusterFeatureCategoryPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "PostClusterFeatureCategoryPerDay": {
+          "postClusterFeatureCategoryPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "PutClusterFeatureCategoryByIdPerDay": {
+          "putClusterFeatureCategoryByIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "DeleteClusterFeatureCategoryByIdPerDay": {
+          "deleteClusterFeatureCategoryByIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetAllSlotFeatureCategoryIdPerDay": {
+          "getAllSlotFeatureCategoryIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetAllSlotFeatureCategoryMetaInfoPerDay": {
+          "getAllSlotFeatureCategoryMetaInfoPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetSlotFeatureCategoryByIdPerDay": {
+          "getSlotFeatureCategoryByIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetAllSlotFeatureCategoryPerDay": {
+          "getAllSlotFeatureCategoryPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "PostSlotFeatureCategoryPerDay": {
+          "postSlotFeatureCategoryPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "PutSlotFeatureCategoryByIdPerDay": {
+          "putSlotFeatureCategoryByIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "DeleteSlotFeatureCategoryByIdPerDay": {
+          "deleteSlotFeatureCategoryByIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           },
-          "GetClusterUsageStatisticsPerDay": {
+          "getClusterUsageStatisticsPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.History"
           }
-        },
-        "additionalProperties": false
+        }
+      },
+      "System.Boolean": {
+        "type": "boolean"
+      },
+      "System.Collections.Generic.Dictionary`2[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[OSDC.Drilling.Cluster.Model.Slot, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Slot"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[OSDC.Drilling.Cluster.Model.Cluster, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[OSDC.Drilling.Cluster.Model.ClusterFeatureCategory, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureCategory"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[OSDC.Drilling.Cluster.Model.ClusterIdentity, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterIdentity"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[OSDC.Drilling.Cluster.Model.ClusterLight, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterLight"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[OSDC.Drilling.Cluster.Model.SlotFeatureCategory, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureCategory"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.Guid"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.Cluster, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.Cluster"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.ClusterBatchCatalogMapping, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchCatalogMapping"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.ClusterBatchError, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchError"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.ClusterBatchExternalReference, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchExternalReference"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.ClusterBatchExternalReferenceMapping, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterBatchExternalReferenceMapping"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.ClusterFeatureAssignment, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureAssignment"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.ClusterFeatureCategory, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureCategory"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.ClusterFeatureOption, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterFeatureOption"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.ClusterIdentity, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterIdentity"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.ClusterIdentityAssignment, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.ClusterIdentityAssignment"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.CountPerDay, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.CountPerDay"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.SlotFeatureAssignment, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureAssignment"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.SlotFeatureCategory, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureCategory"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.Cluster.Model.SlotFeatureOption, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Cluster.Model.SlotFeatureOption"
+        }
+      },
+      "System.Collections.Generic.List`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.Guid"
+        }
+      },
+      "System.DateTime": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.DateTimeOffset": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Double": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
+      },
+      "System.Guid": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "System.Int32": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int32"
+      },
+      "System.Nullable`1[[System.Boolean, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "boolean"
+      },
+      "System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
+      },
+      "System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int32"
+      },
+      "System.String": {
+        "type": "string"
+      },
+      "System.TimeSpan": {
+        "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+        "type": "string"
+      },
+      "System.UInt64": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "uint64"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "Cluster"
+    },
+    {
+      "name": "ClusterFeatureCategory"
+    },
+    {
+      "name": "ClusterIdentity"
+    },
+    {
+      "name": "ClusterUsageStatistics"
+    },
+    {
+      "name": "SlotFeatureCategory"
+    }
+  ]
 }

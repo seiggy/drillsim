@@ -26,7 +26,7 @@ Supporting assets include Docker workflows under `.github/workflows`, solution m
 
 ## Local development workflow
 1. **Restore & build**: `dotnet build DrillString.sln` (requires .NET SDK 8.0 or later).  
-2. **Run the service**: `dotnet run --project Service/Service.csproj`. The API listens under `/DrillString/api`; Swagger UI is available at `/DrillString/api/swagger`.  
+2. **Run the service**: `dotnet run --project Service/Service.csproj`. The API listens under `/DrillString/api`; Scalar API reference is available at `/DrillString/api/swagger`.
 3. **Generate shared model** (when the API contract changes):  
    ```powershell
    dotnet run --project ModelSharedOut/ModelSharedOut.csproj

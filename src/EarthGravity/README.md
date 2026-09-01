@@ -52,7 +52,7 @@ curl -X POST http://localhost:58944/EarthGravity/api/EarthGravity/Evaluate \
 - `GET /EarthGravity/api/metrics`: Prometheus text metrics.
 - `GET /EarthGravity/api/health/live`: liveness probe.
 - `GET /EarthGravity/api/health/ready`: readiness probe, including the loaded model ID.
-- `/EarthGravity/api/swagger`: Swagger UI backed by the merged public OpenAPI document.
+- `/EarthGravity/api/swagger`: Scalar API reference backed by the merged public OpenAPI document.
 
 Usage counters are process-replica scoped and reset when a replica restarts. Prometheus should scrape and aggregate all service pods.
 
@@ -71,9 +71,7 @@ Every tool publishes strict JSON input and output schemas through MCP `tools/lis
 The generated NSwag client and DTOs are committed so `WebPages`, tests, and downstream consumers build reproducibly. Regenerate them whenever a public controller or `Model` contract changes:
 
 ```powershell
-dotnet tool restore
-dotnet build Service/Service.csproj -c Release
-dotnet swagger tofile --output ModelSharedOut/json-schemas/EarthGravityFullName.json Service/bin/Release/net8.0/Service.dll v1
+dotnet build Service/Service.csproj -c Debug
 dotnet run --project ModelSharedOut/ModelSharedOut.csproj -c Release
 ```
 
@@ -116,7 +114,6 @@ Both values are host roots with trailing slashes. `WebPages.APIUtils` appends `E
 Requires the .NET 8 SDK.
 
 ```powershell
-dotnet tool restore
 dotnet restore EarthGravity.sln
 dotnet build EarthGravity.sln -c Release
 dotnet test EarthGravity.sln -c Release

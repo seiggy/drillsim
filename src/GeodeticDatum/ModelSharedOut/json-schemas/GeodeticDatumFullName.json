@@ -1,9 +1,14 @@
 {
   "openapi": "3.0.4",
   "info": {
-    "title": "Service, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
-    "version": "1.0"
+    "title": "Service | v1",
+    "version": "1.0.0"
   },
+  "servers": [
+    {
+      "url": "/geodeticdatum/api"
+    }
+  ],
   "paths": {
     "/GeodeticConversionSet": {
       "get": {
@@ -17,11 +22,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uuid"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -37,24 +38,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSet"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSet"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSet"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSet"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSet"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSet"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -71,10 +93,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -94,8 +113,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -123,8 +141,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -132,24 +149,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSet"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSet"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSet"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSet"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSet"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSet"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       },
@@ -164,14 +202,16 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -188,10 +228,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSetLight"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSetLight, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -211,10 +248,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSet"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSet, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -234,11 +268,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uuid"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -254,24 +284,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticDatum"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticDatum"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticDatum"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticDatum"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticDatum"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticDatum"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -288,10 +339,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -311,8 +359,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -340,8 +387,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -349,24 +395,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticDatum"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticDatum"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticDatum"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticDatum"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticDatum"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticDatum"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       },
@@ -381,14 +448,16 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -405,10 +474,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticDatumLight"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.GeodeticDatum.Model.GeodeticDatumLight, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -428,10 +494,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticDatum"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.GeodeticDatum.Model.GeodeticDatum, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -471,11 +534,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uuid"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -491,24 +550,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.Spheroid"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.Spheroid"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.Spheroid"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.Spheroid"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.Spheroid"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.Spheroid"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -525,10 +605,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -548,8 +625,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -577,8 +653,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -586,24 +661,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.Spheroid"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.Spheroid"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.Spheroid"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.Spheroid"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.Spheroid"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.Spheroid"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       },
@@ -618,14 +714,16 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -642,10 +740,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.Spheroid"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.GeodeticDatum.Model.Spheroid, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -659,545 +754,894 @@
       "Model.CountPerDay": {
         "type": "object",
         "properties": {
-          "Date": {
-            "type": "string",
-            "format": "date-time"
+          "date": {
+            "$ref": "#/components/schemas/System.DateTime"
           },
-          "Count": {
-            "type": "integer",
-            "format": "int64"
+          "count": {
+            "$ref": "#/components/schemas/System.UInt64"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "Model.History": {
         "type": "object",
         "properties": {
-          "Data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Model.CountPerDay"
-            },
-            "nullable": true
+          "data": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[Model.CountPerDay, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "Model.UsageStatisticsGeodeticDatum": {
         "type": "object",
         "properties": {
-          "LastSaved": {
-            "type": "string",
-            "format": "date-time"
+          "lastSaved": {
+            "$ref": "#/components/schemas/System.DateTime"
           },
-          "BackUpInterval": {
-            "type": "string",
-            "format": "date-span"
+          "backUpInterval": {
+            "$ref": "#/components/schemas/System.TimeSpan"
           },
-          "GetAllSpheroidIdPerDay": {
+          "getAllSpheroidIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetAllSpheroidMetaInfoPerDay": {
+          "getAllSpheroidMetaInfoPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetSpheroidByIdPerDay": {
+          "getSpheroidByIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetAllSpheroidPerDay": {
+          "getAllSpheroidPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "PostSpheroidPerDay": {
+          "postSpheroidPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "PutSpheroidByIdPerDay": {
+          "putSpheroidByIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "DeleteSpheroidByIdPerDay": {
+          "deleteSpheroidByIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetAllGeodeticDatumIdPerDay": {
+          "getAllGeodeticDatumIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetAllGeodeticDatumMetaInfoPerDay": {
+          "getAllGeodeticDatumMetaInfoPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetGeodeticDatumByIdPerDay": {
+          "getGeodeticDatumByIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetAllGeodeticDatumLightPerDay": {
+          "getAllGeodeticDatumLightPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetAllGeodeticDatumPerDay": {
+          "getAllGeodeticDatumPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "PostGeodeticDatumPerDay": {
+          "postGeodeticDatumPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "PutGeodeticDatumByIdPerDay": {
+          "putGeodeticDatumByIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "DeleteGeodeticDatumByIdPerDay": {
+          "deleteGeodeticDatumByIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetAllGeodeticConversionSetIdPerDay": {
+          "getAllGeodeticConversionSetIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetAllGeodeticConversionSetMetaInfoPerDay": {
+          "getAllGeodeticConversionSetMetaInfoPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetGeodeticConversionSetByIdPerDay": {
+          "getGeodeticConversionSetByIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetAllGeodeticConversionSetLightPerDay": {
+          "getAllGeodeticConversionSetLightPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetAllGeodeticConversionSetPerDay": {
+          "getAllGeodeticConversionSetPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "PostGeodeticConversionSetPerDay": {
+          "postGeodeticConversionSetPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "PutGeodeticConversionSetByIdPerDay": {
+          "putGeodeticConversionSetByIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "DeleteGeodeticConversionSetByIdPerDay": {
+          "deleteGeodeticConversionSetByIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSet": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
+            "nullable": true
           },
-          "Name": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "description": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "lastModificationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "GeodeticDatum": {
-            "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticDatum"
-          },
-          "OctreeBounds": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.Octree.Bounds"
-          },
-          "GeodeticCoordinates": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticCoordinate"
-            },
+          "geodeticDatum": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticDatum"
+              }
+            ],
             "nullable": true
+          },
+          "octreeBounds": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.Octree.Bounds"
+              }
+            ],
+            "nullable": true
+          },
+          "geodeticCoordinates": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.GeodeticDatum.Model.GeodeticCoordinate, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSetLight": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "description": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "GeodeticDatumName": {
+          "lastModificationDate": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "GeodeticDatumDescription": {
+          "geodeticDatumName": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "geodeticDatumDescription": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.GeodeticDatum.Model.GeodeticCoordinate": {
         "type": "object",
         "properties": {
-          "LatitudeWGS84": {
-            "type": "number",
-            "format": "double",
+          "latitudeWGS84": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "LongitudeWGS84": {
-            "type": "number",
-            "format": "double",
+          "longitudeWGS84": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "VerticalDepthWGS84": {
-            "type": "number",
-            "format": "double",
+          "verticalDepthWGS84": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "LatitudeDatum": {
-            "type": "number",
-            "format": "double",
+          "latitudeDatum": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "LongitudeDatum": {
-            "type": "number",
-            "format": "double",
+          "longitudeDatum": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "VerticalDepthDatum": {
-            "type": "number",
-            "format": "double",
+          "verticalDepthDatum": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "OctreeDepth": {
-            "type": "integer",
-            "format": "int32"
+          "octreeDepth": {
+            "$ref": "#/components/schemas/System.Byte"
           },
-          "OctreeCode": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.Octree.OctreeCodeLong"
+          "octreeCode": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[OSDC.DotnetLibraries.General.Octree.OctreeCodeLong, OSDC.DotnetLibraries.General.Octree, Version=1.1.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.GeodeticDatum.Model.GeodeticDatum": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "description": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "IsDefault": {
-            "type": "boolean"
+          "lastModificationDate": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
           },
-          "Spheroid": {
-            "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.Spheroid"
+          "isDefault": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "DeltaX": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+          "spheroid": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.Spheroid"
+              }
+            ],
+            "nullable": true
           },
-          "DeltaY": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+          "deltaX": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "DeltaZ": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+          "deltaY": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "RotationX": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+          "deltaZ": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "RotationY": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+          "rotationX": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "RotationZ": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+          "rotationY": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "ScaleFactor": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+          "rotationZ": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "scaleFactor": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
+            "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.GeodeticDatum.Model.GeodeticDatumLight": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "description": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "IsDefault": {
-            "type": "boolean"
+          "lastModificationDate": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "isDefault": {
+            "$ref": "#/components/schemas/System.Boolean"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.GeodeticDatum.Model.Spheroid": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "description": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "IsDefault": {
-            "type": "boolean"
+          "lastModificationDate": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
           },
-          "SemiMajorAxis": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+          "isDefault": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "IsSemiMajorAxisSet": {
-            "type": "boolean"
+          "semiMajorAxis": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "SemiMinorAxis": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+          "isSemiMajorAxisSet": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "IsSemiMinorAxisSet": {
-            "type": "boolean"
+          "semiMinorAxis": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "Eccentricity": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+          "isSemiMinorAxisSet": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "IsEccentricitySet": {
-            "type": "boolean"
+          "eccentricity": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "SquaredEccentricity": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+          "isEccentricitySet": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "IsSquaredEccentricitySet": {
-            "type": "boolean"
+          "squaredEccentricity": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "Flattening": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+          "isSquaredEccentricitySet": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "IsFlatteningSet": {
-            "type": "boolean"
+          "flattening": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "InverseFlattening": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+          "isFlatteningSet": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "IsInverseFlatteningSet": {
-            "type": "boolean"
+          "inverseFlattening": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "isInverseFlatteningSet": {
+            "$ref": "#/components/schemas/System.Boolean"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.DotnetLibraries.Drilling.DrillingProperties.ScalarDrillingProperty": {
         "type": "object",
         "properties": {
-          "DiracDistributionValue": {
+          "diracDistributionValue": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.Statistics.DiracDistribution"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.DotnetLibraries.General.DataManagement.MetaInfo": {
         "type": "object",
         "properties": {
-          "ID": {
-            "type": "string",
-            "format": "uuid"
+          "id": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "HttpHostName": {
+          "httpHostName": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "HttpHostBasePath": {
+          "httpHostBasePath": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "HttpEndPoint": {
+          "httpEndPoint": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.DotnetLibraries.General.Math.Point3D": {
         "type": "object",
         "properties": {
-          "X": {
-            "type": "number",
-            "format": "double",
+          "z": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Y": {
-            "type": "number",
-            "format": "double",
+          "x": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Z": {
-            "type": "number",
-            "format": "double",
+          "y": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.DotnetLibraries.General.Octree.Bounds": {
         "type": "object",
         "properties": {
-          "MinX": {
-            "type": "number",
-            "format": "double",
+          "minX": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "MaxX": {
-            "type": "number",
-            "format": "double",
+          "maxX": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "MinY": {
-            "type": "number",
-            "format": "double",
+          "minY": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "MaxY": {
-            "type": "number",
-            "format": "double",
+          "maxY": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "MinZ": {
-            "type": "number",
-            "format": "double",
+          "minZ": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "MaxZ": {
-            "type": "number",
-            "format": "double",
+          "maxZ": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "MiddleX": {
-            "type": "number",
-            "format": "double",
-            "nullable": true,
-            "readOnly": true
+          "middleX": {
+            "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "MiddleY": {
-            "type": "number",
-            "format": "double",
-            "nullable": true,
-            "readOnly": true
+          "middleY": {
+            "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "MiddleZ": {
-            "type": "number",
-            "format": "double",
-            "nullable": true,
-            "readOnly": true
+          "middleZ": {
+            "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "IntervalX": {
-            "type": "number",
-            "format": "double",
-            "nullable": true,
-            "readOnly": true
+          "intervalX": {
+            "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "IntervalY": {
-            "type": "number",
-            "format": "double",
-            "nullable": true,
-            "readOnly": true
+          "intervalY": {
+            "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "IntervalZ": {
-            "type": "number",
-            "format": "double",
-            "nullable": true,
-            "readOnly": true
+          "intervalZ": {
+            "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "Center": {
+          "center": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.Math.Point3D"
           }
-        },
-        "additionalProperties": false
-      },
-      "OSDC.DotnetLibraries.General.Octree.OctreeCodeLong": {
-        "type": "object",
-        "properties": {
-          "Depth": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "CodeHigh": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "CodeLow": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.DotnetLibraries.General.Statistics.DiracDistribution": {
         "type": "object",
         "properties": {
-          "MinValue": {
-            "type": "number",
-            "format": "double"
-          },
-          "MaxValue": {
-            "type": "number",
-            "format": "double"
-          },
-          "Value": {
-            "type": "number",
-            "format": "double",
+          "value": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
+          },
+          "minValue": {
+            "$ref": "#/components/schemas/System.Double"
+          },
+          "maxValue": {
+            "$ref": "#/components/schemas/System.Double"
           }
-        },
-        "additionalProperties": false
+        }
+      },
+      "System.Boolean": {
+        "type": "boolean"
+      },
+      "System.Byte": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "uint8"
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSet, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSet"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSetLight, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticConversionSetLight"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.GeodeticDatum.Model.GeodeticDatum, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticDatum"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.GeodeticDatum.Model.GeodeticDatumLight, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticDatumLight"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.GeodeticDatum.Model.Spheroid, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.Spheroid"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.Guid"
+        }
+      },
+      "System.Collections.Generic.List`1[[Model.CountPerDay, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Model.CountPerDay"
+        }
+      },
+      "System.Collections.Generic.List`1[[NORCE.Drilling.GeodeticDatum.Model.GeodeticCoordinate, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.GeodeticDatum.Model.GeodeticCoordinate"
+        }
+      },
+      "System.DateTime": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Double": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
+      },
+      "System.Guid": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "System.Nullable`1[[OSDC.DotnetLibraries.General.Octree.OctreeCodeLong, OSDC.DotnetLibraries.General.Octree, Version=1.1.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "object",
+        "properties": {
+          "depth": {
+            "$ref": "#/components/schemas/System.Byte"
+          },
+          "codeHigh": {
+            "$ref": "#/components/schemas/System.UInt64"
+          },
+          "codeLow": {
+            "$ref": "#/components/schemas/System.UInt64"
+          }
+        }
+      },
+      "System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
+      },
+      "System.String": {
+        "type": "string"
+      },
+      "System.TimeSpan": {
+        "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+        "type": "string"
+      },
+      "System.UInt64": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "uint64"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "GeodeticConversionSet"
+    },
+    {
+      "name": "GeodeticDatum"
+    },
+    {
+      "name": "GeodeticDatumUsageStatistics"
+    },
+    {
+      "name": "Spheroid"
+    }
+  ]
 }

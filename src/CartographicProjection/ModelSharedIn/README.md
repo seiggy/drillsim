@@ -21,7 +21,7 @@ ModelSharedIn manages the OpenAPI‑driven dependencies of the Model project. It
 ## Dependencies
 
 Defined in `ModelSharedIn/ModelSharedIn.csproj:1`:
-- `Microsoft.OpenApi.Readers`: Parses OpenAPI documents.
+- `Microsoft.OpenApi`: Parses OpenAPI documents.
 - `NSwag.CodeGeneration.CSharp`: Generates C# DTOs and clients (System.Text.Json).
 
 ## Generate The Shared Model

@@ -1,7 +1,4 @@
 ﻿using Microsoft.OpenApi;
-using Microsoft.OpenApi.Extensions;
-using Microsoft.OpenApi.Models;
-using Microsoft.OpenApi.Readers;
 using NJsonSchema;
 using NSwag.CodeGeneration.CSharp;
 using OSDC.UnitConversion.ModelShared;
@@ -98,8 +95,9 @@ class Program
                         //    PrettyPrint(msi, "Processing Open Api doc into bundle...");
                         //    HttpClient httpClient = new HttpClient { BaseAddress = new Uri(HOST + msi + "/api/") };
                         //    using var stream = await httpClient.GetStreamAsync(ENDPOINT);
-                        //    var doc = new OpenApiStreamReader().Read(stream, out var diagnostic);
-                        //    var oString = doc.Serialize(OpenApiSpecVersion.OpenApi3_0, OpenApiFormat.Json);
+                        //    var readResult = await OpenApiDocument.LoadAsync(stream, "json");
+                        //    OpenApiDocument doc = readResult.Document ?? throw new InvalidOperationException("Unable to parse the OpenAPI document.");
+                        //    var oString = await doc.SerializeAsJsonAsync(OpenApiSpecVersion.OpenApi3_0);
                         //    // forcing backup of swagger.json in json-schemas/VERSION/
                         //    PrettyPrint(msi, "Backup OpenApi doc (" + jsonDirectory + ")");
                         //    using (StreamWriter outputFile = new StreamWriter(jsonDirectory + "\\" + msi + ".json"))
@@ -108,7 +106,7 @@ class Program
                         //    }
                         //}
                         //Thread.Sleep(1000); // make sure files are written
-                        // a bundle OpenApi schema (json format) is created to combine OpenApi schema dependencies (Microsoft.OpenApi.Models.OpenApiDocument is used)                       
+                        // a bundle OpenApi schema (json format) is created to combine OpenApi schema dependencies (Microsoft.OpenApi.OpenApiDocument is used)
                         OpenApiDocument document = new OpenApiDocument
                         {
                             Info = new OpenApiInfo
@@ -119,7 +117,7 @@ class Program
                             },
                             Components = new OpenApiComponents
                             {
-                                Schemas = new Dictionary<string, OpenApiSchema> { }
+                                Schemas = new Dictionary<string, IOpenApiSchema>()
                             },
                             Paths = new OpenApiPaths()
                         };
@@ -130,7 +128,8 @@ class Program
                         {
                             PrettyPrint(file, "Processing Open Api doc into API client...");
                             var stream = File.OpenRead(file);
-                            var doc = new OpenApiStreamReader().Read(stream, out var diagnostic);
+                            var readResult = await OpenApiDocument.LoadAsync(stream, "json");
+                            OpenApiDocument doc = readResult.Document ?? throw new InvalidOperationException($"Unable to parse OpenAPI document '{file}'.");
                             foreach (var p in doc.Paths)
                             {
                                 document.Paths.TryAdd(p.Key, p.Value);
@@ -140,7 +139,7 @@ class Program
                                 document.Components.Schemas.TryAdd(s.Key, s.Value);
                             }
                         }
-                        var outputString = document.Serialize(OpenApiSpecVersion.OpenApi3_0, OpenApiFormat.Json);
+                        var outputString = await document.SerializeAsJsonAsync(OpenApiSpecVersion.OpenApi3_0);
 
                         // storing json schema bundle (just for verification)
                         using (StreamWriter writer = new StreamWriter(modelSharedDir + "\\" + JSON_BUNDLE))
@@ -239,7 +238,7 @@ class Program
 
     /// <summary>
     /// This custom type generator is designed to format type names: getting rid of namespaces; and getting rid of '+' signs (associated with enums type names)
-    /// Note that '+' signs associated with enums should have been filtered out at this stage (Startup.cs::AddSwaggerGen() service settings are tuned to achieve this at the swagger.json stage)
+    /// Note that '+' signs associated with enums should have been filtered out by the service's OpenAPI schema ID configuration.
     /// </summary>
     public class CustomTypeNameGenerator : ITypeNameGenerator
     {

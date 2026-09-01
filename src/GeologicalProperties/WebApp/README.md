@@ -36,7 +36,7 @@ dotnet run --project WebApp/WebApp.csproj
 - The `Service` project publishes the OpenAPI document consumed by `ModelSharedOut`, which this web app uses indirectly through the generated client.
 
 ## Deployment Endpoints
-- Swagger UI for the backing API: `https://dev.digiwells.no/GeologicalProperties/api/swagger` (development), `https://app.digiwells.no/GeologicalProperties/api/swagger` (production).
+- Scalar API reference for the backing API: `https://dev.digiwells.no/GeologicalProperties/api/swagger` (development), `https://app.digiwells.no/GeologicalProperties/api/swagger` (production).
 - Web application: `https://dev.digiwells.no/GeologicalProperties/webapp/GeologicalProperties`, `https://app.digiwells.no/GeologicalProperties/webapp/GeologicalProperties`.
 - Docker Hub organisation: `https://hub.docker.com/?namespace=digiwells`.
 

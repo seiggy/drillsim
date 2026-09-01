@@ -2,7 +2,7 @@
 
 ## Overview
 - ASP.NET Core 8 microservice that exposes CRUD-style REST endpoints for geological property datasets and interpolation cases.
-- Hosts Swagger UI under `/GeologicalProperties/api/swagger/` and serves the bundled OpenAPI schema generated from the domain model.
+- Hosts Scalar API reference under `/GeologicalProperties/api/swagger/` and serves the bundled OpenAPI schema generated from the domain model.
 - Persists data in an on-disk SQLite database stored in `../home/GeologicalProperties.db`, including light/heavy projections of the model objects.
 
 ## Runtime Architecture
@@ -15,13 +15,13 @@
 
 ## Dependencies
 - References `Model/Model.csproj` for the core domain classes that the API serializes.
-- Depends on Swashbuckle packages for OpenAPI generation and on `Microsoft.Data.Sqlite` for persistence (`Service/Service.csproj`).
+- Depends on built-in OpenAPI and Scalar packages for OpenAPI generation and on `Microsoft.Data.Sqlite` for persistence (`Service/Service.csproj`).
 - Consumes the merged OpenAPI bundle placed in `wwwroot/json-schema/GeologicalPropertiesMergedModel.json`; the document is regenerated during `dotnet build` of the Service project and later reused by downstream tooling.
 
 ## Endpoints (Highlights)
 - `/GeologicalProperties` → list and retrieve heavy data sets, plus light-weight metadata projections (`.../LightData`, `.../HeavyData`, `.../{id}`).
 - `/GeologicalPropertiesInterpolationCase` → manage interpolation case metadata and heavy definitions, calculate interpolated/extrapolated property tables.
-- Swagger UI available at `/GeologicalProperties/api/swagger/index.html` with the merged schema served from `/GeologicalProperties/api/swagger/merged/swagger.json`.
+- Scalar API reference available at `/GeologicalProperties/api/swagger/index.html` with the merged schema served from `/GeologicalProperties/api/swagger/merged/swagger.json`.
 
 ## Build & Run
 ```bash

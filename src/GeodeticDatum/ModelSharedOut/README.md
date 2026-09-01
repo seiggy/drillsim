@@ -2,7 +2,7 @@
 
 Generates a shared C# client/model and a merged OpenAPI document for the GeodeticDatum solution. It reads OpenAPI JSON inputs from `ModelSharedOut/json-schemas`, normalizes schema IDs to short names, merges paths and schemas, then:
 
-- Writes a merged OpenAPI bundle to `Service/wwwroot/json-schema/GeodeticDatumMergedModel.json` (served by Swagger UI).
+- Writes a merged OpenAPI bundle to `Service/wwwroot/json-schema/GeodeticDatumMergedModel.json` (served by Scalar API reference).
 - Generates a C# client/model file at `ModelSharedOut/GeodeticDatumMergedModel.cs` (namespace `NORCE.Drilling.GeodeticDatum.ModelShared`).
 
 ## Purpose in the Solution
@@ -40,7 +40,7 @@ dotnet run --project ModelSharedOut/ModelSharedOut.csproj
 ```
 
 3) Outputs
-- `Service/wwwroot/json-schema/GeodeticDatumMergedModel.json` — merged OpenAPI (served by Swagger UI in Service).
+- `Service/wwwroot/json-schema/GeodeticDatumMergedModel.json` — merged OpenAPI (served by Scalar API reference in Service).
 - `ModelSharedOut/GeodeticDatumMergedModel.cs` — generated C# client and DTOs (namespace `NORCE.Drilling.GeodeticDatum.ModelShared`).
 
 4) Use the generated client (example)
@@ -69,23 +69,23 @@ await client.PostGeodeticConversionSetAsync(set);
 
 ## How It Works
 
-- Reads all `*.json` under `json-schemas/` and parses them using `Microsoft.OpenApi.Readers`.
+- Reads all `*.json` under `json-schemas/` and parses them using `Microsoft.OpenApi`.
 - Merges Paths and normalizes/merges Schemas via `OpenApiSchemaReferenceUpdater`:
   - Strips namespaces from schema IDs (short type names) and updates `$ref` accordingly.
   - Deduplicates and resolves references across inputs.
-- Serializes to JSON (`OpenAPI 3.0.3` forced from `3.0.4` for Swagger UI compatibility).
+- Serializes to JSON (`OpenAPI 3.0.3` forced from `3.0.4` for Scalar API reference compatibility).
 - Generates C# client and DTOs using `NSwag` + `NJsonSchema` with `System.Text.Json`.
 
 ## Dependencies
 
 NuGet (selected):
-- `Microsoft.OpenApi` / `Microsoft.OpenApi.Readers` — parse and compose OpenAPI docs.
+- `Microsoft.OpenApi` / `Microsoft.OpenApi` — parse and compose OpenAPI docs.
 - `NSwag.CodeGeneration.CSharp` / `NJsonSchema.*` — C# client/DTO generation.
 - `Namotion.Reflection` — reflection helpers used by generators.
 
 Internal:
 - Outputs are consumed by:
-  - Service: serves the merged JSON via Swagger UI (see `Service/Program.cs` and `SwaggerMiddlewareExtensions`).
+  - Service: serves the merged JSON via Scalar API reference (see `Service/Program.cs` and `SwaggerMiddlewareExtensions`).
   - WebApp: references this project and uses the generated `Client` in `Shared/APIUtils.cs`.
 
 ## Integration With the Solution

@@ -8,13 +8,13 @@ Microservice + Web UI for managing Well data. The solution includes a shared mod
 - Offer a Blazor Server UI to browse, create, edit, and delete wells and view usage statistics.
 
 ## Live Examples
-- Service (Swagger UI): https://dev.digiwells.no/Well/api/swagger
+- Service (Scalar API reference): https://dev.digiwells.no/Well/api/swagger
 - Service (API base): https://dev.digiwells.no/Well/api/Well
 - WebApp (UI): https://dev.digiwells.no/Well/webapp/Well
 
 ## Projects
 - Model: Well DTOs and usage statistics helpers. See `Model/README.md`.
-- Service: ASP.NET Core Web API + SQLite persistence + Swagger UI. See `Service/README.md`.
+- Service: ASP.NET Core Web API + SQLite persistence + Scalar API reference. See `Service/README.md`.
 - WebApp: Blazor Server UI using MudBlazor and generated API client. See `WebApp/README.md`.
 - ModelSharedOut: Generates the OpenAPI client and merged schema consumed by WebApp/ServiceTest.
 - ModelTest, ServiceTest: Unit and API tests for model and service.
@@ -32,7 +32,7 @@ Build
 
 Run the Service
 - `dotnet run --project Service`
-- Open Swagger UI: `http://localhost:5000/Well/api/swagger`
+- Open Scalar API reference: `http://localhost:5000/Well/api/swagger`
 - API base: `http://localhost:5000/Well/api/Well`
 
 Run the WebApp
@@ -64,7 +64,7 @@ WebApp
 ## Dependencies (selected)
 - Service
   - `Microsoft.Data.Sqlite`: SQLite provider
-  - `Swashbuckle.AspNetCore.*`, `Microsoft.OpenApi.*`: OpenAPI docs and UI
+  - `Microsoft.AspNetCore.OpenApi` and `Scalar.AspNetCore`, `Microsoft.OpenApi.*`: OpenAPI docs and UI
   - Project ref: `Model`
 - Model
   - `OSDC.DotnetLibraries.General.*`, `OSDC.DotnetLibraries.Drilling.DrillingProperties`
@@ -72,7 +72,7 @@ WebApp
   - `MudBlazor`, `Plotly.Blazor`, `OSDC.UnitConversion.DrillingRazorMudComponents`
   - Project ref: `ModelSharedOut`
 - ModelSharedOut
-  - `NSwag.CodeGeneration.CSharp`, `Microsoft.OpenApi.Readers`
+  - `NSwag.CodeGeneration.CSharp`, `Microsoft.OpenApi`
 
 See each project’s `.csproj` for exact versions.
 

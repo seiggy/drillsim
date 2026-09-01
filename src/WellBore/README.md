@@ -29,7 +29,7 @@ dotnet build WellBore.sln -c Debug
 Run the Service (API)
 ```
 dotnet run --project Service/Service.csproj
-# Swagger UI:   https://localhost:5001/WellBore/api/swagger
+# Scalar API reference:   https://localhost:5001/WellBore/api/swagger
 # API base:     https://localhost:5001/WellBore/api
 # Main route:   https://localhost:5001/WellBore/api/WellBore
 ```
@@ -104,7 +104,7 @@ Public registry (digiwells org)
 
 ## Dependencies
 Solution-wide
-- .NET 8; ASP.NET Core; SQLite via `Microsoft.Data.Sqlite`; OpenAPI tooling via `Swashbuckle.AspNetCore` and `Microsoft.OpenApi`.
+- .NET 8; ASP.NET Core; SQLite via `Microsoft.Data.Sqlite`; OpenAPI tooling via `Microsoft.AspNetCore.OpenApi` and `Microsoft.OpenApi`.
 - Domain/utility libraries from OSDC (DrillingProperties, General.*) used in the Model and Service.
 - MudBlazor UI toolkit and OSDC UnitConversion components used by the WebApp.
 

@@ -44,8 +44,8 @@ The app serves the UI on the standard ASP.NET Core ports. Configure `WellBoreArc
 - `charts/norcedrillingwellborearchitecturewebappclient` contains Helm manifests; adjust `values.yaml` (ingress path, URLs, secrets) before deploying.
 
 ## Hosted environments
-- Dev Swagger UI: https://dev.digiwells.no/WellBoreArchitecture/api/swagger
-- Prod Swagger UI: https://app.digiwells.no/WellBoreArchitecture/api/swagger
+- Dev Scalar API reference: https://dev.digiwells.no/WellBoreArchitecture/api/swagger
+- Prod Scalar API reference: https://app.digiwells.no/WellBoreArchitecture/api/swagger
 - Dev WebApp: https://dev.digiwells.no/WellBoreArchitecture/webapp/WellBoreArchitectureCase
 - Prod WebApp: https://app.digiwells.no/WellBoreArchitecture/webapp/WellBoreArchitectureCase
 

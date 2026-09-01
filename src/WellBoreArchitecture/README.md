@@ -58,7 +58,7 @@ Public environments:
 
 ## Documentation
 - Domain model API docs can be generated with DocFX (`Model/docfx.json`).
-- The merged OpenAPI document served by the microservice powers the generated client and Swagger UI.
+- The merged OpenAPI document served by the microservice powers the generated client and Scalar API reference.
 - For background on related microservices and deployment scripts, see https://github.com/NORCE-DrillingAndWells/DrillingAndWells/wiki.
 
 ## Contributing

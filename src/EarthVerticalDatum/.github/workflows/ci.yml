@@ -17,15 +17,12 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 8.0.x
-      - name: Restore local tools
-        run: dotnet tool restore
       - name: Restore solution
         run: dotnet restore EarthVerticalDatum.sln
       - name: Build service for OpenAPI generation
-        run: dotnet build Service/Service.csproj --configuration Release --no-restore
+        run: dotnet build Service/Service.csproj --configuration Debug --no-restore
       - name: Regenerate distributed shared model
         run: |
-          dotnet swagger tofile --output ModelSharedOut/json-schemas/EarthVerticalDatumFullName.json Service/bin/Release/net8.0/Service.dll v1
           dotnet run --project ModelSharedOut/ModelSharedOut.csproj --configuration Release
       - name: Verify generated contracts are committed
         run: git diff --exit-code -- ModelSharedOut/EarthVerticalDatumMergedModel.cs ModelSharedOut/json-schemas/EarthVerticalDatumFullName.json Service/wwwroot/json-schema/EarthVerticalDatumMergedModel.json

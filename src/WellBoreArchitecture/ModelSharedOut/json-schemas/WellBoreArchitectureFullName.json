@@ -1,9 +1,14 @@
 {
   "openapi": "3.0.4",
   "info": {
-    "title": "Service, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
-    "version": "1.0"
+    "title": "Service | v1",
+    "version": "1.0.0"
   },
+  "servers": [
+    {
+      "url": "/wellborearchitecture/api"
+    }
+  ],
   "paths": {
     "/WellBoreArchitecture": {
       "get": {
@@ -17,11 +22,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uuid"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -37,24 +38,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitecture"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitecture"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitecture"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitecture"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitecture"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitecture"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -71,10 +93,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -94,8 +113,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -123,8 +141,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -132,24 +149,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitecture"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitecture"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitecture"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitecture"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitecture"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitecture"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       },
@@ -164,14 +202,16 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -188,10 +228,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitectureLight"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitectureLight, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -211,10 +248,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitecture"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitecture, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -248,531 +282,839 @@
       "NORCE.Drilling.WellBoreArchitecture.Model.BoreHoleSize": {
         "type": "object",
         "properties": {
-          "HoleSize": {
+          "holeSize": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
           },
-          "Length": {
+          "length": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.WellBoreArchitecture.Model.CasingSection": {
         "type": "object",
         "properties": {
-          "TopDepth": {
+          "topDepth": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
           },
-          "Length": {
+          "length": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
           },
-          "TopCementDepth": {
+          "topCementDepth": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
           },
-          "CasingSectionElements": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.CasingSectionElement"
-            },
+          "casingSectionElements": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.WellBoreArchitecture.Model.CasingSectionElement, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+          },
+          "casingSectionSizeTable": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.WellBoreArchitecture.Model.BoreHoleSize, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+          },
+          "openHoleSection": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.OpenHoleSection"
+              }
+            ],
             "nullable": true
-          },
-          "CasingSectionSizeTable": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.BoreHoleSize"
-            },
-            "nullable": true
-          },
-          "OpenHoleSection": {
-            "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.OpenHoleSection"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.WellBoreArchitecture.Model.CasingSectionElement": {
         "type": "object",
         "properties": {
-          "BodyOD": {
+          "bodyOD": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
           },
-          "BodyID": {
+          "bodyID": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
           },
-          "CollarOD": {
+          "collarOD": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
           },
-          "JointLength": {
+          "jointLength": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
           },
-          "SectionLength": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
-          },
-          "MaxDLS": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.ScalarDrillingProperty"
-          },
-          "ConnectionType": {
-            "type": "string",
+          "sectionLength": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
             "nullable": true
           },
-          "Grade": {
-            "type": "string",
+          "maxDLS": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
             "nullable": true
           },
-          "MaterialDensity": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+          "connectionType": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
           },
-          "YoungModulus": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+          "grade": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
           },
-          "LinearWeight": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+          "materialDensity": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "TensileStrength": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+          "youngModulus": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "TorsionalStrength": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+          "linearWeight": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "BurstPressure": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+          "tensileStrength": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "CollapsePressure": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+          "torsionalStrength": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "YieldStress": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+          "burstPressure": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "MakeUpTorqueRecommended": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.ScalarDrillingProperty"
+          "collapsePressure": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "yieldStress": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "makeUpTorqueRecommended": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
+            "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.WellBoreArchitecture.Model.CountPerDay": {
         "type": "object",
         "properties": {
-          "Date": {
-            "type": "string",
-            "format": "date-time"
+          "date": {
+            "$ref": "#/components/schemas/System.DateTime"
           },
-          "Count": {
-            "type": "integer",
-            "format": "int64"
+          "count": {
+            "$ref": "#/components/schemas/System.UInt64"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.WellBoreArchitecture.Model.ElementConnectivity": {
         "type": "object",
         "properties": {
-          "UpstreamElement": {
-            "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.SideElement"
+          "upstreamElement": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.SideElement"
+              }
+            ],
+            "nullable": true
           },
-          "DownstreamElement": {
-            "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.SideElement"
+          "downstreamElement": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.SideElement"
+              }
+            ],
+            "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.WellBoreArchitecture.Model.FluidType": {
-        "enum": [
-          "Air",
-          "Water"
-        ],
-        "type": "string"
+        "type": "integer"
       },
       "NORCE.Drilling.WellBoreArchitecture.Model.History": {
         "type": "object",
         "properties": {
-          "Data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.CountPerDay"
-            },
-            "nullable": true
+          "data": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.WellBoreArchitecture.Model.CountPerDay, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.WellBoreArchitecture.Model.OpenHoleSection": {
         "type": "object",
         "properties": {
-          "HoleSizes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.BoreHoleSize"
-            },
-            "nullable": true
+          "holeSizes": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.WellBoreArchitecture.Model.BoreHoleSize, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.WellBoreArchitecture.Model.SideConnector": {
         "type": "object",
         "properties": {
-          "Position": {
+          "position": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
           },
-          "VerticalDepth": {
+          "verticalDepth": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
           },
-          "FirstSideElement": {
-            "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.SideElement"
+          "firstSideElement": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.SideElement"
+              }
+            ],
+            "nullable": true
           },
-          "ElementConnectivities": {
+          "elementConnectivities": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.ElementConnectivity"
-            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.WellBoreArchitecture.Model.ElementConnectivity, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.WellBoreArchitecture.Model.SideElement": {
         "type": "object",
         "properties": {
-          "Name": {
-            "type": "string",
-            "nullable": true
+          "name": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Type": {
+          "type": {
             "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.SideElementType"
           },
-          "Length": {
+          "length": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
           },
-          "TopVerticalDepth": {
+          "topVerticalDepth": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
           },
-          "OD": {
+          "od": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
           },
-          "ID": {
+          "id": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.WellBoreArchitecture.Model.SideElementType": {
-        "enum": [
-          "Unknown",
-          "Pipe",
-          "Hose",
-          "GateValve",
-          "Choke",
-          "Pump"
-        ],
-        "type": "string"
+        "type": "integer"
       },
       "NORCE.Drilling.WellBoreArchitecture.Model.SurfaceSection": {
         "type": "object",
         "properties": {
-          "Type": {
+          "type": {
             "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.SurfaceSectionType"
           },
-          "SectionLength": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+          "sectionLength": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "BodyOD": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+          "bodyOD": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "BodyID": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+          "bodyID": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "ConnectionType": {
+          "connectionType": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "Grade": {
+          "grade": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "MaterialDensity": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
-          },
-          "YoungModulus": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
-          },
-          "LinearWeight": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
-          },
-          "TensileStrength": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
-          },
-          "BurstPressure": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
-          },
-          "CollapsePressure": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
-          },
-          "YieldStress": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
-          },
-          "MakeUpTorqueRecommended": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.ScalarDrillingProperty"
-          },
-          "SideConnectors": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.SideConnector"
-            },
+          "materialDensity": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
             "nullable": true
+          },
+          "youngModulus": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "linearWeight": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "tensileStrength": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "burstPressure": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "collapsePressure": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "yieldStress": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "makeUpTorqueRecommended": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "sideConnectors": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.WellBoreArchitecture.Model.SideConnector, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.WellBoreArchitecture.Model.SurfaceSectionType": {
-        "enum": [
-          "Unknown",
-          "BOP",
-          "HighPressureRiser",
-          "LowPressureRiser",
-          "MarineRiser",
-          "ExpansionJoint",
-          "BellNipple",
-          "Diverter",
-          "RotatingControlDevice"
-        ],
-        "type": "string"
+        "type": "integer"
       },
       "NORCE.Drilling.WellBoreArchitecture.Model.UsageStatisticsWellBoreArchitecture": {
         "type": "object",
         "properties": {
-          "LastSaved": {
-            "type": "string",
-            "format": "date-time"
+          "lastSaved": {
+            "$ref": "#/components/schemas/System.DateTime"
           },
-          "BackUpInterval": {
-            "type": "string",
-            "format": "date-span"
+          "backUpInterval": {
+            "$ref": "#/components/schemas/System.TimeSpan"
           },
-          "GetAllWellBoreArchitectureIdPerDay": {
+          "getAllWellBoreArchitectureIdPerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.History"
           },
-          "GetAllWellBoreArchitectureMetaInfoPerDay": {
+          "getAllWellBoreArchitectureMetaInfoPerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.History"
           },
-          "GetWellBoreArchitectureByIdPerDay": {
+          "getWellBoreArchitectureByIdPerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.History"
           },
-          "GetAllWellBoreArchitectureLightPerDay": {
+          "getAllWellBoreArchitectureLightPerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.History"
           },
-          "GetAllWellBoreArchitecturePerDay": {
+          "getAllWellBoreArchitecturePerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.History"
           },
-          "PostWellBoreArchitecturePerDay": {
+          "postWellBoreArchitecturePerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.History"
           },
-          "PutWellBoreArchitectureByIdPerDay": {
+          "putWellBoreArchitectureByIdPerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.History"
           },
-          "DeleteWellBoreArchitectureByIdPerDay": {
+          "deleteWellBoreArchitectureByIdPerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.History"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitecture": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
+          "metaInfo": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
           },
-          "Name": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "description": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "lastModificationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "WellBoreID": {
+          "wellBoreID": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "WellHead": {
+          "wellHead": {
             "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.WellHead"
           },
-          "FluidsAboveGroundLevel": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitectureFluid"
-            },
-            "nullable": true
+          "fluidsAboveGroundLevel": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitectureFluid, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           },
-          "SurfaceSections": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.SurfaceSection"
-            },
-            "nullable": true
+          "surfaceSections": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.WellBoreArchitecture.Model.SurfaceSection, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           },
-          "CasingSections": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.CasingSection"
-            },
-            "nullable": true
+          "casingSections": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.WellBoreArchitecture.Model.CasingSection, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitectureFluid": {
         "type": "object",
         "properties": {
-          "Fluid": {
+          "fluid": {
             "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.FluidType"
           },
-          "Depth": {
+          "depth": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitectureLight": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "description": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "lastModificationDate": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.WellBoreArchitecture.Model.WellHead": {
         "type": "object",
         "properties": {
-          "MaxOD": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.ScalarDrillingProperty"
+          "maxOD": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "MinOD": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.ScalarDrillingProperty"
+          "minOD": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "Depth": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+          "depth": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "CasingHangerDepth": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.ScalarDrillingProperty"
+          "casingHangerDepth": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
+            "nullable": true
           },
-          "TubingHangerDepth": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.ScalarDrillingProperty"
+          "tubingHangerDepth": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DrillingProperties.ScalarDrillingProperty"
+              }
+            ],
+            "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.DotnetLibraries.General.DataManagement.MetaInfo": {
         "type": "object",
         "properties": {
-          "ID": {
-            "type": "string",
-            "format": "uuid"
+          "id": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "HttpHostName": {
+          "httpHostName": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "HttpHostBasePath": {
+          "httpHostBasePath": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "HttpEndPoint": {
+          "httpEndPoint": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.DotnetLibraries.General.DrillingProperties.GaussianDrillingProperty": {
         "type": "object",
         "properties": {
-          "GaussianValue": {
+          "gaussianValue": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.Statistics.GaussianDistribution"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.DotnetLibraries.General.DrillingProperties.ScalarDrillingProperty": {
         "type": "object",
         "properties": {
-          "DiracDistributionValue": {
+          "diracDistributionValue": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.Statistics.DiracDistribution"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.DotnetLibraries.General.Statistics.DiracDistribution": {
         "type": "object",
         "properties": {
-          "MinValue": {
-            "type": "number",
-            "format": "double"
-          },
-          "MaxValue": {
-            "type": "number",
-            "format": "double"
-          },
-          "Value": {
-            "type": "number",
-            "format": "double",
+          "value": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
+          },
+          "minValue": {
+            "$ref": "#/components/schemas/System.Double"
+          },
+          "maxValue": {
+            "$ref": "#/components/schemas/System.Double"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.DotnetLibraries.General.Statistics.GaussianDistribution": {
         "type": "object",
         "properties": {
-          "MinValue": {
-            "type": "number",
-            "format": "double"
-          },
-          "MaxValue": {
-            "type": "number",
-            "format": "double"
-          },
-          "Mean": {
-            "type": "number",
-            "format": "double",
+          "mean": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "StandardDeviation": {
-            "type": "number",
-            "format": "double",
+          "standardDeviation": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
+          },
+          "minValue": {
+            "$ref": "#/components/schemas/System.Double"
+          },
+          "maxValue": {
+            "$ref": "#/components/schemas/System.Double"
           }
-        },
-        "additionalProperties": false
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitecture, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitecture"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitectureLight, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitectureLight"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.Guid"
+        }
+      },
+      "System.Collections.Generic.List`1[[NORCE.Drilling.WellBoreArchitecture.Model.BoreHoleSize, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.BoreHoleSize"
+        }
+      },
+      "System.Collections.Generic.List`1[[NORCE.Drilling.WellBoreArchitecture.Model.CasingSection, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.CasingSection"
+        }
+      },
+      "System.Collections.Generic.List`1[[NORCE.Drilling.WellBoreArchitecture.Model.CasingSectionElement, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.CasingSectionElement"
+        }
+      },
+      "System.Collections.Generic.List`1[[NORCE.Drilling.WellBoreArchitecture.Model.CountPerDay, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.CountPerDay"
+        }
+      },
+      "System.Collections.Generic.List`1[[NORCE.Drilling.WellBoreArchitecture.Model.ElementConnectivity, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.ElementConnectivity"
+        }
+      },
+      "System.Collections.Generic.List`1[[NORCE.Drilling.WellBoreArchitecture.Model.SideConnector, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.SideConnector"
+        }
+      },
+      "System.Collections.Generic.List`1[[NORCE.Drilling.WellBoreArchitecture.Model.SurfaceSection, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.SurfaceSection"
+        }
+      },
+      "System.Collections.Generic.List`1[[NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitectureFluid, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.WellBoreArchitecture.Model.WellBoreArchitectureFluid"
+        }
+      },
+      "System.DateTime": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Double": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
+      },
+      "System.Guid": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
+      },
+      "System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "System.String": {
+        "type": "string"
+      },
+      "System.TimeSpan": {
+        "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+        "type": "string"
+      },
+      "System.UInt64": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "uint64"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "WellBoreArchitecture"
+    },
+    {
+      "name": "WellBoreArchitectureUsageStatistics"
+    }
+  ]
 }

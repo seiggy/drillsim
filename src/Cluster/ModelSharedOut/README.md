@@ -57,13 +57,13 @@ ModelSharedOut is a .NET 8 console tool that builds a distributed shared model f
 ## Generated Swagger In Service
 
 - The merged OpenAPI JSON is placed at `Service/wwwroot/json-schema/ClusterMergedModel.json`.
-- `Service/Program.cs` wires Swagger UI to expose it at `/Cluster/api/swagger/merged/swagger.json`.
+- `Service/Program.cs` wires Scalar API reference to expose it at `/Cluster/api/swagger/merged/swagger.json`.
 - A temporary normalization step forces the OpenAPI version string to `3.0.3` for UI compatibility.
 
 ## Dependencies
 
 - NuGet packages:
-  - `Microsoft.OpenApi.Readers`
+  - `Microsoft.OpenApi`
   - `NSwag.CodeGeneration.CSharp`
 - Upstream project dependency:
   - `Service` exports `ClusterFullName.json` via the Debug build target.
@@ -82,7 +82,7 @@ ModelSharedOut is a .NET 8 console tool that builds a distributed shared model f
 
 - No output JSON or C# file:
   - Ensure `json-schemas/` contains at least the service JSON (`ClusterFullName.json`).
-- Swagger UI shows `3.0.4` but UI expects `3.0.3`:
+- Scalar API reference shows `3.0.4` but UI expects `3.0.3`:
   - The generator already replaces `3.0.4` with `3.0.3`; confirm the output file is being copied to `Service/wwwroot/json-schema`.
 - Build fails on missing schema files:
   - Re-run `dotnet build Service -c Debug` to refresh `ClusterFullName.json`.

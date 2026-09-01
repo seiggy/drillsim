@@ -1,7 +1,4 @@
 using Microsoft.OpenApi;
-using Microsoft.OpenApi.Extensions;
-using Microsoft.OpenApi.Models;
-using Microsoft.OpenApi.Readers;
 using NJsonSchema;
 using NJsonSchema.CodeGeneration.CSharp;
 using NSwag.CodeGeneration.CSharp;
@@ -24,26 +21,28 @@ var merged = new OpenApiDocument
         Description = "Generated API client and DTO contract consumed by WebPages and ServiceTest.",
         Version = "1.0"
     },
-    Components = new OpenApiComponents { Schemas = new Dictionary<string, OpenApiSchema>() },
+    Components = new OpenApiComponents { Schemas = new Dictionary<string, IOpenApiSchema>() },
     Paths = new OpenApiPaths()
 };
 
 string[] sources = Directory.GetFiles(inputDirectory, "*.json");
 if (sources.Length == 0)
-    throw new InvalidOperationException($"No OpenAPI documents were found in '{inputDirectory}'. Build Service in Debug or run dotnet swagger first.");
+    throw new InvalidOperationException($"No OpenAPI documents were found in '{inputDirectory}'. Build Service in Debug first.");
 
 foreach (string sourcePath in sources)
 {
     await using FileStream stream = File.OpenRead(sourcePath);
-    OpenApiDocument source = new OpenApiStreamReader().Read(stream, out var diagnostic);
+    var readResult = await OpenApiDocument.LoadAsync(stream, "json");
+    var diagnostic = readResult.Diagnostic;
+    OpenApiDocument source = readResult.Document ?? throw new InvalidOperationException($"Unable to parse OpenAPI document '{sourcePath}'.");
     if (diagnostic.Errors.Count != 0)
         throw new InvalidOperationException($"'{sourcePath}' contains invalid OpenAPI: {string.Join("; ", diagnostic.Errors.Select(error => error.Message))}");
 
-    foreach ((string path, OpenApiPathItem item) in source.Paths) merged.Paths[path] = item;
+    foreach ((string path, IOpenApiPathItem item) in source.Paths) merged.Paths[path] = item;
     new OpenApiSchemaReferenceUpdater().MergeSchemasAndUpdateRefs(merged, source, key => key.Split('.', '+').Last());
 }
 
-string mergedJson = merged.Serialize(OpenApiSpecVersion.OpenApi3_0, OpenApiFormat.Json)
+string mergedJson = (await merged.SerializeAsJsonAsync(OpenApiSpecVersion.OpenApi3_0))
     .Replace("\"openapi\": \"3.0.4\"", "\"openapi\": \"3.0.3\"");
 await File.WriteAllTextAsync(Path.Combine(serviceSchemaDirectory, "EarthVerticalDatumMergedModel.json"), mergedJson);
 

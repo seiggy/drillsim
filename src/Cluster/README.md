@@ -5,7 +5,7 @@ A complete, domain-focused solution for managing Cluster data, composed of an AS
 The repository uses the root namespace `OSDC.Drilling.Cluster`. Its reusable Razor package is `OSDC.Drilling.Cluster.WebPages`; Docker and Helm artifacts use the `osdcdrillingcluster...` identity. Existing `/Cluster` routes, database files, and domain UUIDs are unchanged. Follow [deployment/identity-cutover.md](deployment/identity-cutover.md) before replacing an existing `NORCE.Drilling.Cluster` deployment.
 
 ## Projects
-- Service: ASP.NET Core Web API at base path `/Cluster/api`; persists data in SQLite, serves Swagger UI, exposes MCP tools, and can register its MCP endpoint on an MCP hub. See `Service/README.md`.
+- Service: ASP.NET Core Web API at base path `/Cluster/api`; persists data in SQLite, serves Scalar API reference, exposes MCP tools, and can register its MCP endpoint on an MCP hub. See `Service/README.md`.
 - WebApp: Blazor Server UI at base path `/Cluster/webapp`; consumes the Service via generated clients. See `WebApp/README.md`.
 - Model: Domain models and statistics used by Service and clients. See `Model/README.md`.
 - ModelSharedOut: Generates merged OpenAPI and C# client/DTOs for consumers; outputs JSON to Service and code to itself. See `ModelSharedOut/README.md`.
@@ -27,7 +27,7 @@ The repository uses the root namespace `OSDC.Drilling.Cluster`. Its reusable Raz
 3. Run the Service:
    - `dotnet run --project Service`
    - Base API: `https://localhost:5001/Cluster/api`
-   - Swagger UI: `https://localhost:5001/Cluster/api/swagger`
+   - Scalar API reference: `https://localhost:5001/Cluster/api/swagger`
 4. Run the WebApp:
    - `dotnet run --project WebApp`
    - UI: `https://localhost:5011/Cluster/webapp/Cluster`
@@ -81,10 +81,10 @@ The Docker image reads optional service configuration from `/home/Cluster.Servic
 
 ## Dependencies
 - Runtime packages (high level):
-  - Service: `Microsoft.Data.Sqlite`, `Swashbuckle.AspNetCore.*`, `Microsoft.OpenApi*`.
+  - Service: `Microsoft.Data.Sqlite`, `Microsoft.AspNetCore.OpenApi` and `Scalar.AspNetCore`, `Microsoft.OpenApi*`.
   - Model: `OSDC.DotnetLibraries.*` (Common, DataManagement, Statistics, DrillingProperties).
   - WebApp: `MudBlazor`, `OSDC.DotnetLibraries.General.DataManagement`, and local reusable WebPages projects from Field, Rig, CartographicProjection, GeodeticDatum, EarthVerticalDatum, EarthGravity, and EarthMagneticField.
-  - ModelSharedOut: `Microsoft.OpenApi.Readers`, `NSwag.CodeGeneration.CSharp`.
+  - ModelSharedOut: `Microsoft.OpenApi`, `NSwag.CodeGeneration.CSharp`.
 - Project references:
   - Service → Model
   - WebApp → ModelSharedOut
@@ -103,7 +103,7 @@ The Docker image reads optional service configuration from `/home/Cluster.Servic
 - Templates and docs: https://github.com/NORCE-DrillingAndWells/DrillingAndWells/wiki
 
 ## Demo Environment
-- Example Service (dev): `https://dev.DigiWells.no/Cluster/api/swagger` (Swagger UI) and `https://dev.DigiWells.no/Cluster/api/Cluster` (API)
+- Example Service (dev): `https://dev.DigiWells.no/Cluster/api/swagger` (Scalar API reference) and `https://dev.DigiWells.no/Cluster/api/Cluster` (API)
 - Example WebApp (dev): `https://dev.DigiWells.no/Cluster/webapp/Cluster`
 
 ## WebApp project dependencies

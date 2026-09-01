@@ -21,7 +21,7 @@ WebApp: https://dev.digiwells.no/CartographicProjection/webapp
   - Core domain and projection logic (DotSpatial), conversion methods, and data types.
   - References `ModelSharedIn` for geodetic datums and related types.
 - Service
-  - ASP.NET Core API that exposes CRUD and compute endpoints; serves Swagger UI and a merged OpenAPI document.
+  - ASP.NET Core API that exposes CRUD and compute endpoints; serves Scalar API reference and a merged OpenAPI document.
   - Persists data to SQLite at `home/CartographicProjection.db`.
   - Hosts an MCP endpoint at `/CartographicProjection/api/mcp` and can optionally register that endpoint on an MCP hub using configuration from the shared `home/` volume.
 - ModelSharedOut
@@ -167,7 +167,7 @@ When enabled, the service registers a fixed CartographicProjection service type 
 - DotSpatial.Projections.NetStandard — projection math (Model)
 - OSDC.DotnetLibraries.* — shared utilities and domain types (Model/WebApp)
 - NSwag + Microsoft.OpenApi — OpenAPI parsing and C# generation (ModelSharedIn/Out)
-- Swashbuckle.AspNetCore — Swagger generation/hosting (Service)
+- Microsoft.AspNetCore.OpenApi — Swagger generation/hosting (Service)
 - SQLite (Microsoft.Data.Sqlite) — persistence (Service)
 - MudBlazor + OSDC UnitConversion Razor components — UI components (WebApp)
 

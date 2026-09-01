@@ -3,8 +3,8 @@
 The `Service` project exposes the WellBoreArchitecture domain as a REST API backed by a SQLite database. It is an ASP.NET Core web service targeting `net8.0` and reuses the domain types from the `Model` project.
 
 ## Structure
-- `Service.csproj` – web SDK project referencing `Model`. NuGet dependencies cover SQLite (`Microsoft.Data.Sqlite`) and Swagger tooling (`Swashbuckle.AspNetCore.*`, `Microsoft.OpenApi`).
-- `Program.cs` – bootstraps the web host, sets the base path (`/WellBoreArchitecture/api`), wires dependency injection, configures Swagger UI, and maps controllers.
+- `Service.csproj` – web SDK project referencing `Model`. NuGet dependencies cover SQLite (`Microsoft.Data.Sqlite`) and Swagger tooling (`Microsoft.AspNetCore.OpenApi` and `Scalar.AspNetCore`, `Microsoft.OpenApi`).
+- `Program.cs` – bootstraps the web host, sets the base path (`/WellBoreArchitecture/api`), wires dependency injection, configures Scalar API reference, and maps controllers.
 - `Controllers/WellBoreArchitectureController.cs` – the public API surface; each action delegates to the manager layer and returns domain models (`Model.WellBoreArchitecture`, `WellBoreArchitectureLight`, etc.).
 - `Managers/SqlConnectionManager.cs` – singleton managing the SQLite database lifecycle (table creation, schema checks, backup of incompatible databases).
 - `Managers/WellBoreArchitectureManager.cs` – singleton handling CRUD operations and serialization/deserialization of the domain objects.
@@ -17,7 +17,7 @@ By default the service stores data in `..\home\WellBoreArchitecture.db` (relativ
 
 ## Interaction with other solution projects
 - Depends on `Model` (domain types) and uses their `Realize()` logic before persistence when needed.
-- `ModelSharedOut` consumes this service's Swagger output. A post-build target (`CreateSwaggerJson`) runs `dotnet swagger tofile` to export the API descriptor into `../ModelSharedOut/json-schemas/WellBoreArchitectureFullName.json`, which eventually feeds NSwag code generation.
+- `ModelSharedOut` consumes this service's OpenAPI output. A Debug build uses `Microsoft.Extensions.ApiDescription.Server` to export the API descriptor into `../ModelSharedOut/json-schemas/WellBoreArchitectureFullName.json`, which eventually feeds NSwag code generation.
 - `ServiceTest` references `ModelSharedOut` to validate the externally generated contract against service behavior.
 - `WebApp` (Blazor frontend) uses the `ModelSharedOut` client to call this API and therefore relies on the service being available at `/WellBoreArchitecture/api`.
 
@@ -31,7 +31,7 @@ All endpoints are relative to `/WellBoreArchitecture/api/WellBoreArchitecture` a
 - `PUT /{id}` – update an existing architecture with recalculated fields.
 - `DELETE /{id}` – remove an architecture.
 
-Swagger UI is served at `/WellBoreArchitecture/api/swagger` with a merged schema defined in `wwwroot/json-schema/WellBoreArchitectureMergedModel.json`.
+Scalar API reference is served at `/WellBoreArchitecture/api/swagger` with a merged schema defined in `wwwroot/json-schema/WellBoreArchitectureMergedModel.json`.
 
 ## Build and run
 ```powershell

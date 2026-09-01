@@ -1,9 +1,14 @@
 {
   "openapi": "3.0.4",
   "info": {
-    "title": "Service, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
-    "version": "1.0"
+    "title": "Service | v1",
+    "version": "1.0.0"
   },
+  "servers": [
+    {
+      "url": "/well/api"
+    }
+  ],
   "paths": {
     "/Well": {
       "get": {
@@ -17,11 +22,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uuid"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -37,24 +38,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.Well"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.Well"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.Well"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.Well"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.Well"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.Well"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -71,10 +93,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -94,8 +113,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -123,8 +141,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -132,24 +149,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.Well"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.Well"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.Well"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.Well"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.Well"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.Well"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       },
@@ -164,14 +202,16 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -188,10 +228,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.Well"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.Drilling.Well.Model.Well, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -210,8 +247,7 @@
             "name": "slotId",
             "in": "query",
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -221,10 +257,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.Well"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.Drilling.Well.Model.Well, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -243,8 +276,7 @@
             "name": "clusterId",
             "in": "query",
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -254,10 +286,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.Well"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.Drilling.Well.Model.Well, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -277,8 +306,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -288,10 +316,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -325,133 +350,228 @@
       "OSDC.DotnetLibraries.General.DataManagement.MetaInfo": {
         "type": "object",
         "properties": {
-          "ID": {
-            "type": "string",
-            "format": "uuid"
+          "id": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "HttpHostName": {
+          "httpHostName": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "HttpHostBasePath": {
+          "httpHostBasePath": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "HttpEndPoint": {
+          "httpEndPoint": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Well.Model.CountPerDay": {
         "type": "object",
         "properties": {
-          "Date": {
-            "type": "string",
-            "format": "date-time"
+          "date": {
+            "$ref": "#/components/schemas/System.DateTime"
           },
-          "Count": {
-            "type": "integer",
-            "format": "int64"
+          "count": {
+            "$ref": "#/components/schemas/System.UInt64"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Well.Model.History": {
         "type": "object",
         "properties": {
-          "Data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.CountPerDay"
-            },
-            "nullable": true
+          "data": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Well.Model.CountPerDay, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Well.Model.UsageStatisticsWell": {
         "type": "object",
         "properties": {
-          "LastSaved": {
-            "type": "string",
-            "format": "date-time"
+          "lastSaved": {
+            "$ref": "#/components/schemas/System.DateTime"
           },
-          "BackUpInterval": {
-            "type": "string",
-            "format": "date-span"
+          "backUpInterval": {
+            "$ref": "#/components/schemas/System.TimeSpan"
           },
-          "GetAllWellIdPerDay": {
+          "getAllWellIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.History"
           },
-          "GetAllWellMetaInfoPerDay": {
+          "getAllWellMetaInfoPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.History"
           },
-          "GetWellByIdPerDay": {
+          "getWellByIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.History"
           },
-          "GetAllWellPerDay": {
+          "getAllWellPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.History"
           },
-          "GetAllWellBySlotIdPerDay": {
+          "getAllWellBySlotIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.History"
           },
-          "GetAllWellByClusterIdPerDay": {
+          "getAllWellByClusterIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.History"
           },
-          "PostWellPerDay": {
+          "postWellPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.History"
           },
-          "PutWellByIdPerDay": {
+          "putWellByIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.History"
           },
-          "DeleteWellByIdPerDay": {
+          "deleteWellByIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.History"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.Well.Model.Well": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "description": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "SlotID": {
+          "lastModificationDate": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "ClusterID": {
+          "slotID": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "IsSingleWell": {
-            "type": "boolean"
+          "clusterID": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "isSingleWell": {
+            "$ref": "#/components/schemas/System.Boolean"
           }
-        },
-        "additionalProperties": false
+        }
+      },
+      "System.Boolean": {
+        "type": "boolean"
+      },
+      "System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[OSDC.Drilling.Well.Model.Well, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.Well"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.Guid"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.Well.Model.CountPerDay, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.CountPerDay"
+        }
+      },
+      "System.DateTime": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Guid": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "System.String": {
+        "type": "string"
+      },
+      "System.TimeSpan": {
+        "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+        "type": "string"
+      },
+      "System.UInt64": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "uint64"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "Well"
+    },
+    {
+      "name": "WellUsageStatistics"
+    }
+  ]
 }

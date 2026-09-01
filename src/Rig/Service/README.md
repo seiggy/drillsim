@@ -9,7 +9,7 @@ The service exposes a JSON-based HTTP API under the path base:
 
 `/Rig/api`
 
-It also exposes an OpenAPI/Swagger UI backed by the merged rig schema.
+It also exposes an OpenAPI/Scalar API reference backed by the merged rig schema.
 
 ## Purpose
 
@@ -194,12 +194,12 @@ rebuilt. Unrelated tables are preserved.
 
 ## Swagger and OpenAPI
 
-Swagger UI is configured from the merged OpenAPI document generated from the rig
+Scalar API reference is configured from the merged OpenAPI document generated from the rig
 schema.
 
 Relevant endpoints:
 
-- Swagger UI: `/Rig/api/swagger`
+- Scalar API reference: `/Rig/api/swagger`
 - merged JSON document: `/Rig/api/swagger/merged/swagger.json`
 
 In debug builds, the project also includes a post-build target that regenerates

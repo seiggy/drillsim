@@ -15,7 +15,7 @@ Input:
 Outputs:
 
 - `EarthGravityMergedModel.cs`: generated NSwag client and DTO classes in `OSDC.Drilling.EarthGravity.ModelShared`.
-- `../Service/wwwroot/json-schema/EarthGravityMergedModel.json`: merged OpenAPI exposed by the Service Swagger UI.
+- `../Service/wwwroot/json-schema/EarthGravityMergedModel.json`: merged OpenAPI exposed by the Service Scalar API reference.
 
 `PseudoConstructors.cs` contains hand-maintained convenience constructors for generated request DTOs. The generated client file and JSON documents must not be edited manually.
 
@@ -24,9 +24,7 @@ Outputs:
 Run from the repository root after any public controller or `Model` change:
 
 ```powershell
-dotnet tool restore
-dotnet build Service/Service.csproj -c Release
-dotnet swagger tofile --output ModelSharedOut/json-schemas/EarthGravityFullName.json Service/bin/Release/net8.0/Service.dll v1
+dotnet build Service/Service.csproj -c Debug
 dotnet run --project ModelSharedOut/ModelSharedOut.csproj -c Release
 ```
 

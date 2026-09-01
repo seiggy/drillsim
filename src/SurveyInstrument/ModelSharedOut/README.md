@@ -61,7 +61,7 @@ This file is what the service exposes through its custom Swagger middleware.
 
 ## Dependencies
 
-- `Microsoft.OpenApi.Readers`
+- `Microsoft.OpenApi`
   - Parses and serializes OpenAPI documents.
 - `NSwag.CodeGeneration.CSharp`
   - Generates the client and DTO code.
@@ -92,4 +92,4 @@ dotnet run --project .\ModelSharedOut\ModelSharedOut.csproj
 
 - Add more schema inputs to `json-schemas/` when this service depends on additional microservice models.
 - Adjust `CustomTypeNameGenerator` if naming collisions appear.
-- Keep the OpenAPI compatibility workaround aligned with the Swagger UI/tooling actually used by the service.
+- Keep the OpenAPI compatibility workaround aligned with the Scalar API reference/tooling actually used by the service.

@@ -25,7 +25,7 @@ A .NET 8 solution providing geodetic datum computations and management via a RES
 - Run WebApp: `dotnet run --project WebApp/WebApp.csproj`
 
 Notes
-- Service base path: `/GeodeticDatum/api`; Swagger UI served at `/GeodeticDatum/api/swagger`.
+- Service base path: `/GeodeticDatum/api`; Scalar API reference served at `/GeodeticDatum/api/swagger`.
 - WebApp base path: `/GeodeticDatum/webapp`.
 - Service writes SQLite DB, stats, optional external configuration, and generated MCP hub instance id under `home/` at repo root. Mount this folder as `/home` when containerizing.
 
@@ -103,8 +103,8 @@ Registered tools mirror the REST endpoints (CRUD for spheroids, datums, conversi
 ## Dependencies
 
 - Runtime: .NET 8, ASP.NET Core, SQLite (`Microsoft.Data.Sqlite`).
-- API & Docs: `Microsoft.OpenApi.*`, `Swashbuckle.AspNetCore.*` (Swagger UI).
-- Client generation: `NSwag.CodeGeneration.CSharp`, `NJsonSchema.*`, `Microsoft.OpenApi.Readers`.
+- API & Docs: `Microsoft.OpenApi.*`, `Microsoft.AspNetCore.OpenApi` and `Scalar.AspNetCore` (Scalar API reference).
+- Client generation: `NSwag.CodeGeneration.CSharp`, `NJsonSchema.*`, `Microsoft.OpenApi`.
 - UI: `MudBlazor`, `OSDC.UnitConversion.DrillingRazorMudComponents`.
 - Domain libs: `OSDC.DotnetLibraries.*`.
 

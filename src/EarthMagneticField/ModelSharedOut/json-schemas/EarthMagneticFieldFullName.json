@@ -5,6 +5,11 @@
     "description": "Stateless WMM2025 and IGRF14 evaluation using UTC, WGS84 SI coordinates, and north-east-down magnetic flux density in teslas.",
     "version": "v1"
   },
+  "servers": [
+    {
+      "url": "/EarthMagneticField/api"
+    }
+  ],
   "paths": {
     "/EarthMagneticField": {
       "get": {
@@ -52,7 +57,8 @@
                 "$ref": "#/components/schemas/OSDC.Drilling.EarthMagneticField.Model.EvaluateEarthMagneticFieldRequest"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -66,7 +72,7 @@
             }
           },
           "422": {
-            "description": "Unprocessable Content",
+            "description": "Unprocessable Entity",
             "content": {
               "application/json": {
                 "schema": {
@@ -125,346 +131,334 @@
     "schemas": {
       "OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldEvaluationPoint": {
         "required": [
-          "DateTimeUtc"
+          "dateTimeUtc"
         ],
         "type": "object",
         "properties": {
-          "Latitude": {
-            "maximum": 1.5707963267948966,
-            "minimum": -1.5707963267948966,
-            "type": "number",
-            "description": "WGS84 geodetic latitude in SI radians, between -π/2 and π/2.",
-            "format": "double"
+          "latitude": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Longitude": {
-            "maximum": 3.141592653589793,
-            "minimum": -3.141592653589793,
-            "type": "number",
-            "description": "WGS84 geodetic longitude in SI radians, between -π and π.",
-            "format": "double"
+          "longitude": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Depth": {
-            "type": "number",
-            "description": "Depth in SI metres, positive downward from the WGS84 reference ellipsoid.",
-            "format": "double"
+          "depth": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "DateTimeUtc": {
-            "type": "string",
-            "description": "UTC evaluation instant. JSON input must contain Z or the equivalent +00:00 offset.",
-            "format": "date-time"
+          "dateTimeUtc": {
+            "$ref": "#/components/schemas/System.DateTimeOffset"
           }
         },
-        "additionalProperties": false,
         "description": "A WGS84 position and UTC instant at which to evaluate the magnetic field."
       },
       "OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldModel": {
-        "enum": [
-          "WMM2025",
-          "IGRF14"
-        ],
-        "type": "string",
+        "type": "integer",
         "description": "Geomagnetic reference model used for an evaluation batch."
       },
       "OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldSample": {
         "type": "object",
         "properties": {
-          "Input": {
+          "input": {
             "$ref": "#/components/schemas/OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldEvaluationPoint"
           },
-          "North": {
-            "type": "number",
-            "description": "Northerly magnetic-flux-density component in SI teslas.",
-            "format": "double"
+          "north": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "East": {
-            "type": "number",
-            "description": "Easterly magnetic-flux-density component in SI teslas.",
-            "format": "double"
+          "east": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Down": {
-            "type": "number",
-            "description": "Downward magnetic-flux-density component in SI teslas.",
-            "format": "double"
+          "down": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "HorizontalIntensity": {
-            "type": "number",
-            "description": "Horizontal magnetic-flux-density magnitude in SI teslas.",
-            "format": "double"
+          "horizontalIntensity": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "TotalIntensity": {
-            "type": "number",
-            "description": "Total magnetic-flux-density magnitude in SI teslas.",
-            "format": "double"
+          "totalIntensity": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Declination": {
-            "type": "number",
-            "description": "Declination in SI radians, positive east of geodetic north; null when horizontal intensity is zero.",
-            "format": "double",
+          "declination": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Inclination": {
-            "type": "number",
-            "description": "Inclination in SI radians, positive downward from horizontal; null when total intensity is zero.",
-            "format": "double",
+          "inclination": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           }
         },
-        "additionalProperties": false,
         "description": "A geomagnetic-field result in the public north-east-down frame."
       },
       "OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldServiceInfo": {
         "type": "object",
         "properties": {
-          "Name": {
-            "type": "string",
-            "nullable": true
+          "name": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Description": {
-            "type": "string",
-            "nullable": true
+          "description": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "CoordinateFrame": {
-            "type": "string",
-            "nullable": true
+          "coordinateFrame": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "TimeConvention": {
-            "type": "string",
-            "nullable": true
+          "timeConvention": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "DepthReference": {
-            "type": "string",
-            "nullable": true
+          "depthReference": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "DepthPositiveDirection": {
-            "type": "string",
-            "nullable": true
+          "depthPositiveDirection": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Models": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.EarthMagneticField.Model.EarthMagneticModelInfo"
-            },
-            "nullable": true
+          "models": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.EarthMagneticField.Model.EarthMagneticModelInfo, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
         },
-        "additionalProperties": false,
         "description": "Installed models and public conventions of the stateless service."
       },
       "OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldValidationError": {
+        "required": [
+          "sampleIndex",
+          "property",
+          "code",
+          "message"
+        ],
         "type": "object",
         "properties": {
-          "SampleIndex": {
-            "type": "integer",
-            "format": "int32",
+          "sampleIndex": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Property": {
-            "type": "string",
-            "nullable": true
+          "property": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Code": {
-            "type": "string",
-            "nullable": true
+          "code": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Message": {
-            "type": "string",
-            "nullable": true
+          "message": {
+            "$ref": "#/components/schemas/System.String"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldValidationProblem": {
         "type": "object",
         "properties": {
-          "Error": {
-            "type": "string",
-            "nullable": true
+          "error": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Message": {
-            "type": "string",
-            "nullable": true
+          "message": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Errors": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldValidationError"
-            },
-            "nullable": true
+          "errors": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldValidationError, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
         },
-        "additionalProperties": false,
         "description": "Details returned when an evaluation request is rejected atomically."
       },
       "OSDC.Drilling.EarthMagneticField.Model.EarthMagneticModelInfo": {
         "type": "object",
         "properties": {
-          "Model": {
+          "model": {
             "$ref": "#/components/schemas/OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldModel"
           },
-          "Name": {
+          "name": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "id": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "description": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "releaseDate": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "ID": {
-            "type": "string",
-            "nullable": true
+          "minimumUtc": {
+            "$ref": "#/components/schemas/System.DateTimeOffset"
           },
-          "Description": {
-            "type": "string",
-            "nullable": true
+          "maximumUtc": {
+            "$ref": "#/components/schemas/System.DateTimeOffset"
           },
-          "ReleaseDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
+          "minimumDepth": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "MinimumUtc": {
-            "type": "string",
-            "format": "date-time"
+          "maximumDepth": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "MaximumUtc": {
-            "type": "string",
-            "format": "date-time"
+          "degree": {
+            "$ref": "#/components/schemas/System.Int32"
           },
-          "MinimumDepth": {
-            "type": "number",
-            "format": "double"
+          "order": {
+            "$ref": "#/components/schemas/System.Int32"
           },
-          "MaximumDepth": {
-            "type": "number",
-            "format": "double"
+          "geographicLibVersion": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Degree": {
-            "type": "integer",
-            "format": "int32"
+          "referenceEllipsoid": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Order": {
-            "type": "integer",
-            "format": "int32"
+          "coordinateFrame": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "GeographicLibVersion": {
-            "type": "string",
-            "nullable": true
+          "magneticFluxDensityUnit": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "ReferenceEllipsoid": {
-            "type": "string",
-            "nullable": true
+          "angleUnit": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "CoordinateFrame": {
-            "type": "string",
-            "nullable": true
+          "depthPositiveDirection": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "MagneticFluxDensityUnit": {
-            "type": "string",
-            "nullable": true
+          "concurrentEvaluationEnabled": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "AngleUnit": {
-            "type": "string",
-            "nullable": true
+          "metadataSHA256": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "DepthPositiveDirection": {
-            "type": "string",
-            "nullable": true
-          },
-          "ConcurrentEvaluationEnabled": {
-            "type": "boolean"
-          },
-          "MetadataSHA256": {
-            "type": "string",
-            "nullable": true
-          },
-          "CoefficientSHA256": {
-            "type": "string",
-            "nullable": true
+          "coefficientSHA256": {
+            "$ref": "#/components/schemas/System.String"
           }
         },
-        "additionalProperties": false,
         "description": "Identity, validity, and provenance of one installed geomagnetic reference model."
       },
       "OSDC.Drilling.EarthMagneticField.Model.EvaluateEarthMagneticFieldRequest": {
         "required": [
-          "Samples"
+          "samples"
         ],
         "type": "object",
         "properties": {
-          "Model": {
+          "model": {
             "$ref": "#/components/schemas/OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldModel"
           },
-          "Samples": {
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldEvaluationPoint"
-            },
-            "description": "Evaluation points. Any invalid sample rejects the complete request."
+          "samples": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldEvaluationPoint, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
         },
-        "additionalProperties": false,
         "description": "A stateless synchronous geomagnetic-field evaluation request."
       },
       "OSDC.Drilling.EarthMagneticField.Model.EvaluateEarthMagneticFieldResponse": {
         "type": "object",
         "properties": {
-          "Model": {
+          "model": {
             "$ref": "#/components/schemas/OSDC.Drilling.EarthMagneticField.Model.EarthMagneticModelInfo"
           },
-          "Samples": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldSample"
-            },
-            "nullable": true
+          "samples": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldSample, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
         },
-        "additionalProperties": false,
         "description": "Geomagnetic results in the same order as the request samples."
       },
       "OSDC.Drilling.EarthMagneticField.Model.UsageStatisticsEarthMagneticField": {
         "type": "object",
         "properties": {
-          "StartedAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
+          "startedAt": {
+            "$ref": "#/components/schemas/System.DateTimeOffset"
           },
-          "Scope": {
-            "type": "string",
-            "nullable": true,
-            "readOnly": true
+          "scope": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "RestEvaluations": {
-            "type": "integer",
-            "format": "int64",
-            "readOnly": true
+          "restEvaluations": {
+            "$ref": "#/components/schemas/System.Int64"
           },
-          "MCPEvaluations": {
-            "type": "integer",
-            "format": "int64",
-            "readOnly": true
+          "mcpEvaluations": {
+            "$ref": "#/components/schemas/System.Int64"
           },
-          "FailedEvaluations": {
-            "type": "integer",
-            "format": "int64",
-            "readOnly": true
+          "failedEvaluations": {
+            "$ref": "#/components/schemas/System.Int64"
           },
-          "SamplesEvaluated": {
-            "type": "integer",
-            "format": "int64",
-            "readOnly": true
+          "samplesEvaluated": {
+            "$ref": "#/components/schemas/System.Int64"
           },
-          "ModelInfoRequests": {
-            "type": "integer",
-            "format": "int64",
-            "readOnly": true
+          "modelInfoRequests": {
+            "$ref": "#/components/schemas/System.Int64"
           },
-          "StatisticsRequests": {
-            "type": "integer",
-            "format": "int64",
-            "readOnly": true
+          "statisticsRequests": {
+            "$ref": "#/components/schemas/System.Int64"
           }
-        },
-        "additionalProperties": false
+        }
+      },
+      "System.Boolean": {
+        "type": "boolean"
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldEvaluationPoint, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "minItems": 1,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldEvaluationPoint"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldSample, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldSample"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldValidationError, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.EarthMagneticField.Model.EarthMagneticFieldValidationError"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.EarthMagneticField.Model.EarthMagneticModelInfo, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.EarthMagneticField.Model.EarthMagneticModelInfo"
+        }
+      },
+      "System.DateTimeOffset": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Double": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
+      },
+      "System.Int32": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int32"
+      },
+      "System.Int64": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int64"
+      },
+      "System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
+      },
+      "System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int32"
+      },
+      "System.String": {
+        "type": "string"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "EarthMagneticField"
+    },
+    {
+      "name": "EarthMagneticFieldUsageStatistics"
+    }
+  ]
 }

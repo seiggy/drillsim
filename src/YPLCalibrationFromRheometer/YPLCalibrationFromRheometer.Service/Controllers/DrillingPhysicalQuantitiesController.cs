@@ -5,6 +5,7 @@ using OSDC.UnitConversion.Conversion.DrillingEngineering;
 using OSDC.UnitConversion.Conversion;
 using System.Collections.Generic;
 using System;
+using PhysicalQuantity = OSDC.UnitConversion.Conversion.BasePhysicalQuantity;
 
 namespace YPLCalibrationFromRheometer.Service.Controllers
 {
@@ -28,9 +29,9 @@ namespace YPLCalibrationFromRheometer.Service.Controllers
             {
                 List<PhysicalQuantity> quantities = new List<PhysicalQuantity>();
                 // Adding base Conversion quantities
-                quantities.AddRange(PhysicalQuantity.AvailableQuantities);
+                quantities.AddRange(PhysicalQuantity.AvailableBasePhysicalQuantities);
                 // and quantities specific to Conversion.DrillingEngineering
-                quantities.AddRange(DrillingPhysicalQuantity.AvailableQuantities);
+                quantities.AddRange(DrillingPhysicalQuantity.AvailablePhysicalQuantities);
                 List<MetaInfo> ids = new List<MetaInfo>();
                 if (quantities != null)
                 {
@@ -38,8 +39,7 @@ namespace YPLCalibrationFromRheometer.Service.Controllers
                     {
                         MetaInfo metaInfo = new MetaInfo
                         {
-                            ID = quantity.ID,
-                            Name = quantity.Name
+                            ID = quantity.ID
                         };
                         ids.Add(metaInfo);
                     }

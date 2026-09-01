@@ -1,9 +1,14 @@
 {
   "openapi": "3.0.4",
   "info": {
-    "title": "Service, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
-    "version": "1.0"
+    "title": "Service | v1",
+    "version": "1.0.0"
   },
+  "servers": [
+    {
+      "url": "/simulator4ndof/api"
+    }
+  ],
   "paths": {
     "/Simulation": {
       "get": {
@@ -17,11 +22,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uuid"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -37,24 +38,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -71,10 +93,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -94,8 +113,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -125,8 +143,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -156,8 +173,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           },
           {
@@ -165,8 +181,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "$ref": "#/components/schemas/System.UInt32"
             }
           }
         ],
@@ -196,10 +211,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.SimulationLight"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.Simulator4nDOF.Model.SimulationLight, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -219,10 +231,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.Simulator4nDOF.Model.Simulation, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -242,8 +251,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -251,24 +259,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       },
@@ -283,14 +312,16 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -301,649 +332,627 @@
       "NORCE.Drilling.Simulator4nDOF.Model.Config": {
         "type": "object",
         "properties": {
-          "VirtualSensorPositionFromBit": {
-            "type": "number",
-            "format": "double"
+          "virtualSensorPositionFromBit": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "LoggingIntervalScalarValues": {
-            "type": "number",
-            "format": "double"
+          "loggingIntervalScalarValues": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "LoggingIntervalProfiles": {
-            "type": "number",
-            "format": "double"
+          "loggingIntervalProfiles": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "CoulombStaticFriction": {
-            "type": "number",
-            "format": "double"
+          "coulombStaticFriction": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "CoulombKineticFriction": {
-            "type": "number",
-            "format": "double"
+          "coulombKineticFriction": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "UseHeave": {
-            "type": "boolean"
+          "useHeave": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "HeaveAmplitude": {
-            "type": "number",
-            "format": "double"
+          "heaveAmplitude": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "HeavePeriod": {
-            "type": "number",
-            "format": "double"
+          "heavePeriod": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "TopDriveStartupTime": {
-            "type": "number",
-            "format": "double"
+          "topDriveStartupTime": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "LengthBetweenLumpedElements": {
-            "type": "number",
-            "format": "double"
+          "lengthBetweenLumpedElements": {
+            "$ref": "#/components/schemas/System.Double"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.Simulator4nDOF.Model.ContextualData": {
         "type": "object",
         "properties": {
-          "DrillStringID": {
+          "drillStringID": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "DrillingFluidDescriptionID": {
+          "drillingFluidDescriptionID": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "WellBoreArchitectureID": {
+          "wellBoreArchitectureID": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "TrajectoryID": {
+          "trajectoryID": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "RigID": {
+          "rigID": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "GeothermalPropertiesID": {
+          "geothermalPropertiesID": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "CasingID": {
-            "type": "integer",
-            "format": "int32",
+          "casingID": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Temperature": {
-            "type": "number",
-            "format": "double"
+          "temperature": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "WellheadPressure": {
-            "type": "number",
-            "format": "double"
+          "wellheadPressure": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "SurfacePipePressure": {
-            "type": "number",
-            "format": "double"
+          "surfacePipePressure": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "SolverType": {
+          "solverType": {
             "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.SolverType"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.Simulator4nDOF.Model.InitialValues": {
         "type": "object",
         "properties": {
-          "BitDepth": {
-            "type": "number",
-            "format": "double"
+          "bitDepth": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "HoleDepth": {
-            "type": "number",
-            "format": "double"
+          "holeDepth": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "TopOfStringPosition": {
-            "type": "number",
-            "format": "double"
+          "topOfStringPosition": {
+            "$ref": "#/components/schemas/System.Double"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.Simulator4nDOF.Model.Profiles": {
         "type": "object",
         "properties": {
-          "Time": {
-            "type": "number",
-            "format": "double"
+          "time": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Depth": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "depth": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "DepthAll": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "depthAll": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "SleevesDepth": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "sleevesDepth": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "SideForce": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "sideForce": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "SideForceSoftString": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "sideForceSoftString": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "PipeAngularVelocity": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "pipeAngularVelocity": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "SleevesAngularVelocity": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "sleevesAngularVelocity": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "RadialClearance": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "radialClearance": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "LateralDisplacement": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "lateralDisplacement": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "LateralDisplacementAngle": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "lateralDisplacementAngle": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "BendingMoment": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "bendingMoment": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "Torque": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "torque": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "Tension": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "tension": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "AxialVelocityD": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "axialVelocityD": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "Inclination": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "inclination": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "Azimuth": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "azimuth": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "Curvature": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "curvature": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "BuildUpRate": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "buildUpRate": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.Simulator4nDOF.Model.Results": {
         "type": "object",
         "properties": {
-          "AvgCumulativeSSI": {
-            "type": "number",
-            "format": "double"
+          "avgCumulativeSSI": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Scalars": {
+          "scalars": {
             "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Scalars"
           },
-          "Profiles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Profiles"
-            },
-            "nullable": true
+          "profiles": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.Simulator4nDOF.Model.Profiles, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.Simulator4nDOF.Model.Scalars": {
         "type": "object",
         "properties": {
-          "AvgCumulativeSSI": {
-            "type": "number",
-            "format": "double"
+          "avgCumulativeSSI": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "BitAxialVelocity": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "bitAxialVelocity": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "TopOfStringAxialVelocity": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "topOfStringAxialVelocity": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "WOB": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "wob": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "BitRPM": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "bitRPM": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "SurfaceRPM": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "surfaceRPM": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "BitDepth": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "bitDepth": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "HoleDepth": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "holeDepth": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "SurfaceTorque": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "surfaceTorque": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "BitTorque": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "bitTorque": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "SensorAngularVelocity": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "sensorAngularVelocity": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "SensorWhirlVelocity": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "sensorWhirlVelocity": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "SensorAxialVelocity": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "sensorAxialVelocity": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "SensorRadialVelocity": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "sensorRadialVelocity": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "SensorRadialAcc": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "sensorRadialAcc": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "SensorTangentialAcc": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "sensorTangentialAcc": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "SensorAxialAcc": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "sensorAxialAcc": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "SensorBendingMomentX": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "sensorBendingMomentX": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "SensorBendingMomentY": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "sensorBendingMomentY": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "SensorTension": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "sensorTension": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "SensorTorque": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "sensorTorque": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "Time": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "time": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "SSI": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+          "ssi": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.Simulator4nDOF.Model.SetPoints": {
         "type": "object",
         "properties": {
-          "TimeDuration": {
-            "type": "number",
-            "format": "double"
+          "timeDuration": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "SurfaceRPM": {
-            "type": "number",
-            "format": "double"
+          "surfaceRPM": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "TopOfStringVelocity": {
-            "type": "number",
-            "format": "double"
+          "topOfStringVelocity": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "BottomExtraSideForce": {
-            "type": "number",
-            "format": "double"
+          "bottomExtraSideForce": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "StribeckCriticalVelocity": {
-            "type": "number",
-            "format": "double"
+          "stribeckCriticalVelocity": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "DifferenceStaticKineticFriction": {
-            "type": "number",
-            "format": "double"
+          "differenceStaticKineticFriction": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Sticking": {
-            "type": "boolean"
+          "sticking": {
+            "$ref": "#/components/schemas/System.Boolean"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.Simulator4nDOF.Model.Simulation": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "description": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "ContextualData": {
-            "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.ContextualData"
-          },
-          "WellBoreID": {
+          "lastModificationDate": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Config": {
-            "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Config"
+          "contextualData": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.ContextualData"
+              }
+            ],
+            "nullable": true
           },
-          "InitialValues": {
-            "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.InitialValues"
+          "wellBoreID": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
           },
-          "SetPointsList": {
+          "config": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Config"
+              }
+            ],
+            "nullable": true
+          },
+          "initialValues": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.InitialValues"
+              }
+            ],
+            "nullable": true
+          },
+          "setPointsList": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.SetPoints"
-            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.Simulator4nDOF.Model.SetPoints, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
             "nullable": true
           },
-          "CurrentTime": {
-            "type": "number",
-            "format": "double"
+          "currentTime": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Progress": {
-            "type": "number",
-            "format": "double",
+          "progress": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "TerminationState": {
-            "type": "integer",
-            "format": "int32",
+          "terminationState": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Results": {
-            "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Results"
+          "results": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Results"
+              }
+            ],
+            "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.Simulator4nDOF.Model.SimulationLight": {
+        "required": [
+          "metaInfo",
+          "name",
+          "description",
+          "creationDate",
+          "lastModificationDate",
+          "progress",
+          "terminationState"
+        ],
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "description": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "WellBoreID": {
+          "lastModificationDate": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Progress": {
-            "type": "number",
-            "format": "double"
+          "wellBoreID": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
           },
-          "TerminationState": {
-            "type": "integer",
-            "format": "int32"
+          "progress": {
+            "$ref": "#/components/schemas/System.Double"
+          },
+          "terminationState": {
+            "$ref": "#/components/schemas/System.Int32"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.Simulator4nDOF.Model.SolverType": {
-        "enum": [
-          "EulerMethod",
-          "VerletMethod"
-        ],
-        "type": "string"
+        "type": "integer"
       },
       "OSDC.DotnetLibraries.General.DataManagement.MetaInfo": {
         "type": "object",
         "properties": {
-          "ID": {
-            "type": "string",
-            "format": "uuid"
+          "id": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "HttpHostName": {
+          "httpHostName": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "HttpHostBasePath": {
+          "httpHostBasePath": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "HttpEndPoint": {
+          "httpEndPoint": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
+      },
+      "System.Boolean": {
+        "type": "boolean"
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.Simulator4nDOF.Model.Simulation, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.Simulator4nDOF.Model.SimulationLight, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.SimulationLight"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.Guid"
+        }
+      },
+      "System.Collections.Generic.List`1[[NORCE.Drilling.Simulator4nDOF.Model.Profiles, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Profiles"
+        }
+      },
+      "System.Collections.Generic.List`1[[NORCE.Drilling.Simulator4nDOF.Model.SetPoints, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.SetPoints"
+        }
+      },
+      "System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.Double"
+        }
+      },
+      "System.Double": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
+      },
+      "System.Guid": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "System.Int32": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int32"
+      },
+      "System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
+      },
+      "System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int32"
+      },
+      "System.String": {
+        "type": "string"
+      },
+      "System.UInt32": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "uint32"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "Simulation"
+    }
+  ]
 }

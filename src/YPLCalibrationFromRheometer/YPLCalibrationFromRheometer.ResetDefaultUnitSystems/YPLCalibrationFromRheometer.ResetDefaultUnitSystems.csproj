@@ -9,10 +9,11 @@
 
   <ItemGroup>
     <PackageReference Include="OSDC.DotnetLibraries.General.DataManagement" Version="2.2.0" />
-    <PackageReference Include="OSDC.UnitConversion.Conversion.DrillingEngineering" Version="1.0.15" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\UnitConversion\Conversion.DrillingEngineering\Conversion.DrillingEngineering.csproj" />
+    <ProjectReference Include="..\..\UnitConversion\ConversionUnitSystem.DrillingEngineering\ConversionUnitSystem.DrillingEngineering.csproj" />
     <ProjectReference Include="..\YPLCalibrationFromRheometer.ModelClientShared\YPLCalibrationFromRheometer.ModelClientShared.csproj" />
   </ItemGroup>
 

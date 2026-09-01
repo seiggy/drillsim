@@ -60,7 +60,7 @@ internal sealed class LegacyMcpServerToolAdapter : McpServerTool
 
             return new CallToolResult
             {
-                StructuredContent = result
+                StructuredContent = result is null ? null : JsonSerializer.SerializeToElement(result, SerializerOptions)
             };
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -85,7 +85,7 @@ internal sealed class LegacyMcpServerToolAdapter : McpServerTool
         }
     }
 
-    private JsonObject? ConvertArguments(IReadOnlyDictionary<string, JsonElement>? arguments)
+    private JsonObject? ConvertArguments(IDictionary<string, JsonElement>? arguments)
     {
         if (arguments is null || arguments.Count == 0)
         {

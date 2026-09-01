@@ -1,7 +1,4 @@
 using Microsoft.OpenApi;
-using Microsoft.OpenApi.Extensions;
-using Microsoft.OpenApi.Models;
-using Microsoft.OpenApi.Readers;
 
 public static class SwaggerMiddlewareExtensions
 {
@@ -9,13 +6,9 @@ public static class SwaggerMiddlewareExtensions
     {
         app.Map(relativePath, branch => branch.Run(async context =>
         {
-            string scheme = context.Request.Headers.ContainsKey("X-Forwarded-Host") ? "https" : context.Request.Scheme;
-            string host = context.Request.Headers.ContainsKey("X-Forwarded-Host")
-                ? context.Request.Headers["X-Forwarded-Host"].ToString()
-                : context.Request.Host.Value;
-            document.Servers = [new OpenApiServer { Url = $"{scheme}://{host}{context.Request.PathBase}" }];
+            document.Servers = [new OpenApiServer { Url = context.Request.PathBase.HasValue ? context.Request.PathBase.Value : "/" }];
             context.Response.ContentType = "application/json";
-            string json = document.Serialize(OpenApiSpecVersion.OpenApi3_0, OpenApiFormat.Json)
+            string json = (await document.SerializeAsJsonAsync(OpenApiSpecVersion.OpenApi3_0))
                 .Replace("\"openapi\": \"3.0.4\"", "\"openapi\": \"3.0.3\"");
             await context.Response.WriteAsync(json);
         }));
@@ -23,7 +16,7 @@ public static class SwaggerMiddlewareExtensions
 
     public static OpenApiDocument ReadOpenApiDocument(string path)
     {
-        using FileStream stream = File.OpenRead(path);
-        return new OpenApiStreamReader().Read(stream, out _);
+        var readResult = OpenApiDocument.Parse(File.ReadAllText(path), "json");
+        return readResult.Document ?? throw new InvalidOperationException($"Unable to parse OpenAPI document '{path}'.");
     }
 }

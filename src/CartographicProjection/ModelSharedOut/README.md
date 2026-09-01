@@ -2,7 +2,7 @@
 
 ModelSharedOut generates the shared client model for consumers of the CartographicProjection microservice. It merges OpenAPI JSON documents and produces:
 
-- `Service/wwwroot/json-schema/CartographicProjectionMergedModel.json` (merged OpenAPI served by SwaggerUI)
+- `Service/wwwroot/json-schema/CartographicProjectionMergedModel.json` (merged OpenAPI served by Scalar)
 - `ModelSharedOut/CartographicProjectionMergedModel.cs` (C# DTOs + API client used by external clients like WebApp and ServiceTest)
 
 Namespace: `NORCE.Drilling.CartographicProjection.ModelShared`.
@@ -15,14 +15,14 @@ Namespace: `NORCE.Drilling.CartographicProjection.ModelShared`.
 
 ## How It Fits In
 
-- Service: Hosts the merged OpenAPI document under `wwwroot/json-schema` so it’s visible in SwaggerUI.
+- Service: Hosts the merged OpenAPI document under `wwwroot/json-schema` so it’s visible in Scalar.
 - WebApp / ServiceTest: Reference the generated C# file to call the service using a typed client.
 - Model: Does not use ModelSharedOut directly; it depends on `ModelSharedIn` for inbound dependencies.
 
 ## Dependencies
 
 Defined in `ModelSharedOut/ModelSharedOut.csproj:1`:
-- `Microsoft.OpenApi.Readers` — Parses OpenAPI documents.
+- `Microsoft.OpenApi` — Parses OpenAPI documents.
 - `NSwag.CodeGeneration.CSharp` — Generates C# client and DTOs (System.Text.Json).
 
 ## Inputs & Outputs

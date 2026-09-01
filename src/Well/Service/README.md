@@ -1,11 +1,11 @@
 # Service (OSDC.Drilling.Well.Service)
 
-ASP.NET Core Web API that exposes CRUD endpoints for Well resources, persists data to SQLite, and serves an OpenAPI/Swagger UI. The service is the backend of the solution and the primary integration point for the Web client and external consumers.
+ASP.NET Core Web API that exposes CRUD endpoints for Well resources, persists data to SQLite, and serves an OpenAPI/Scalar API reference. The service is the backend of the solution and the primary integration point for the Web client and external consumers.
 
 ## Purpose
 - Host REST endpoints for Well operations under the base path `/Well/api`.
 - Persist Well data in a local SQLite database located under `../home/Well.db`.
-- Serve a merged OpenAPI document and Swagger UI for easy exploration/testing.
+- Serve a merged OpenAPI document and Scalar API reference for easy exploration/testing.
 - Act as the contract boundary for clients (e.g., WebApp) using the shared `Model` DTOs.
 
 ## Installation
@@ -21,7 +21,7 @@ Local Run
 2) Run the service:
    - `dotnet run --project Service`
 3) Browse the API:
-   - Swagger UI: `http://localhost:5000/Well/api/swagger`
+   - Scalar API reference: `http://localhost:5000/Well/api/swagger`
    - API base: `http://localhost:5000/Well/api/Well`
 
 Notes
@@ -36,7 +36,7 @@ Docker
 2) Run (persisting the `/home` volume for SQLite data):
    - `docker run --rm -p 5000:8080 -v wellsvc_home:/home digiwells/osdcdrillingwellservice:local`
 3) Open:
-   - Swagger UI: `http://localhost:5000/Well/api/swagger`
+   - Scalar API reference: `http://localhost:5000/Well/api/swagger`
 
 Helm (Kubernetes)
 - A chart is provided under `Service/charts/osdcdrillingwellservice`.
@@ -95,8 +95,8 @@ curl http://localhost:5000/Well/api/WellUsageStatistics
 ## Dependencies
 - Runtime
   - `Microsoft.Data.Sqlite` — SQLite database driver used by `SqlConnectionManager` and `WellManager`.
-  - `Swashbuckle.AspNetCore.SwaggerGen` and `Swashbuckle.AspNetCore.SwaggerUI` — OpenAPI generation and UI.
-  - `Microsoft.OpenApi` and `Microsoft.OpenApi.Readers` — read and serve a pre-merged OpenAPI document.
+  - `Microsoft.AspNetCore.OpenApi` and `Scalar.AspNetCore` — OpenAPI generation and interactive API reference.
+  - `Microsoft.OpenApi` — read and serve a pre-merged OpenAPI document.
 - Project reference
   - `Model` — provides the `OSDC.Drilling.Well.Model.Well` DTO and usage statistics types.
 

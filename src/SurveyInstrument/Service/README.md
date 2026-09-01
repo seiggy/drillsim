@@ -19,7 +19,7 @@ The service is configured in `Program.cs` as a conventional ASP.NET Core API app
 - JSON serialization customized through `JsonSettings`
 - forwarded-header support
 - path-base hosting
-- Swagger UI bound to the merged OpenAPI JSON
+- Scalar API reference bound to the merged OpenAPI JSON
 - CORS configured permissively for current clients
 
 The application path base is:
@@ -107,15 +107,9 @@ Important storage characteristics:
 
 This design favors simple deployment and debugging over advanced database normalization.
 
-## Build-Time Swagger Generation
+## Build-Time OpenAPI Generation
 
-`Service.csproj` contains a Debug build target:
-
-```xml
-<Target Name="CreateSwaggerJson" AfterTargets="Build" Condition="$(Configuration)=='Debug'">
-```
-
-That target runs `dotnet swagger tofile` and writes:
+In Debug builds, `Microsoft.Extensions.ApiDescription.Server` writes:
 
 - `..\ModelSharedOut\json-schemas\SurveyInstrumentFullName.json`
 
@@ -126,9 +120,9 @@ This is the input consumed by `ModelSharedOut` to regenerate the shared client/m
 - `Model`
 - `Microsoft.Data.Sqlite`
 - `Microsoft.OpenApi`
-- `Microsoft.OpenApi.Readers`
-- `Swashbuckle.AspNetCore.SwaggerGen`
-- `Swashbuckle.AspNetCore.SwaggerUI`
+- `Microsoft.OpenApi`
+- `Microsoft.AspNetCore.OpenApi`
+- `Scalar.AspNetCore`
 
 ## Running Locally
 
@@ -139,7 +133,7 @@ dotnet run --project .\Service\Service.csproj
 Useful URLs once running:
 
 - API base: `http://localhost:<port>/SurveyInstrument/api`
-- Swagger UI: `http://localhost:<port>/SurveyInstrument/api/swagger`
+- Scalar API reference: `http://localhost:<port>/SurveyInstrument/api/swagger`
 
 The exact port depends on `Properties/launchSettings.json` or your hosting environment.
 

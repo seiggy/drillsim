@@ -5,6 +5,11 @@
     "description": "Stateless bidirectional conversion between EGM84 mean-sea-level and WGS84 ellipsoidal depths using OSDC SI and positive-down conventions.",
     "version": "v1"
   },
+  "servers": [
+    {
+      "url": "/EarthVerticalDatum/api"
+    }
+  ],
   "paths": {
     "/EarthVerticalDatum": {
       "get": {
@@ -53,7 +58,8 @@
                 "$ref": "#/components/schemas/OSDC.Drilling.EarthVerticalDatum.Model.MeanSeaLevelToWgs84Request"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -67,7 +73,7 @@
             }
           },
           "422": {
-            "description": "Unprocessable Content",
+            "description": "Unprocessable Entity",
             "content": {
               "application/json": {
                 "schema": {
@@ -104,7 +110,8 @@
                 "$ref": "#/components/schemas/OSDC.Drilling.EarthVerticalDatum.Model.Wgs84ToMeanSeaLevelRequest"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -118,7 +125,7 @@
             }
           },
           "422": {
-            "description": "Unprocessable Content",
+            "description": "Unprocessable Entity",
             "content": {
               "application/json": {
                 "schema": {
@@ -178,329 +185,312 @@
       "OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumModelInfo": {
         "type": "object",
         "properties": {
-          "Name": {
+          "name": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "id": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "description": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "dataDateTime": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "ID": {
-            "type": "string",
-            "nullable": true
+          "gridResolutionMinutes": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Description": {
-            "type": "string",
-            "nullable": true
+          "interpolation": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "DataDateTime": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
+          "maximumInterpolationError": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "GridResolutionMinutes": {
-            "type": "number",
-            "format": "double"
+          "rmsInterpolationError": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Interpolation": {
-            "type": "string",
-            "nullable": true
+          "geographicLibVersion": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "MaximumInterpolationError": {
-            "type": "number",
-            "format": "double"
+          "referenceEllipsoid": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "RMSInterpolationError": {
-            "type": "number",
-            "format": "double"
+          "supportedVerticalDatums": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "GeographicLibVersion": {
-            "type": "string",
-            "nullable": true
+          "supportedConversionDirections": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           },
-          "ReferenceEllipsoid": {
-            "type": "string",
-            "nullable": true
+          "depthPositiveDirection": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "SupportedVerticalDatums": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true
+          "isThreadSafe": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "SupportedConversionDirections": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true
-          },
-          "DepthPositiveDirection": {
-            "type": "string",
-            "nullable": true
-          },
-          "IsThreadSafe": {
-            "type": "boolean"
-          },
-          "CoefficientSHA256": {
-            "type": "string",
-            "nullable": true
+          "coefficientSHA256": {
+            "$ref": "#/components/schemas/System.String"
           }
         },
-        "additionalProperties": false,
         "description": "Identity, accuracy, and provenance of the geoid model used for conversion."
       },
       "OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumPosition": {
         "type": "object",
         "properties": {
-          "Latitude": {
-            "maximum": 1.5707963267948966,
-            "minimum": -1.5707963267948966,
-            "type": "number",
-            "description": "WGS84 geodetic latitude in SI radians, between -π/2 and π/2.",
-            "format": "double"
+          "latitude": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Longitude": {
-            "maximum": 3.141592653589793,
-            "minimum": -3.141592653589793,
-            "type": "number",
-            "description": "WGS84 geodetic longitude in SI radians, between -π and π.",
-            "format": "double"
+          "longitude": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "MeanSeaLevelDepth": {
-            "type": "number",
-            "description": "Depth in SI metres, positive downward from the EGM84 mean-sea-level geoid. A negative value is above that surface.",
-            "format": "double"
+          "meanSeaLevelDepth": {
+            "$ref": "#/components/schemas/System.Double"
           }
         },
-        "additionalProperties": false,
         "description": "A WGS84 horizontal position and a mean-sea-level depth expressed using OSDC SI conventions."
       },
       "OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumSample": {
         "type": "object",
         "properties": {
-          "Position": {
+          "position": {
             "$ref": "#/components/schemas/OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumPosition"
           },
-          "Wgs84EllipsoidalDepth": {
-            "type": "number",
-            "description": "Depth in SI metres, positive downward from the WGS84 reference ellipsoid.",
-            "format": "double"
+          "wgs84EllipsoidalDepth": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "GeoidUndulation": {
-            "type": "number",
-            "description": "EGM84 geoid undulation in SI metres, positive upward from the WGS84 ellipsoid to the geoid.",
-            "format": "double"
+          "geoidUndulation": {
+            "$ref": "#/components/schemas/System.Double"
           }
         },
-        "additionalProperties": false,
         "description": "An input position and its corresponding WGS84 ellipsoidal-depth conversion."
       },
       "OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumValidationError": {
+        "required": [
+          "positionIndex",
+          "property",
+          "code",
+          "message"
+        ],
         "type": "object",
         "properties": {
-          "PositionIndex": {
-            "type": "integer",
-            "format": "int32",
+          "positionIndex": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Property": {
-            "type": "string",
-            "nullable": true
+          "property": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Code": {
-            "type": "string",
-            "nullable": true
+          "code": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Message": {
-            "type": "string",
-            "nullable": true
+          "message": {
+            "$ref": "#/components/schemas/System.String"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumValidationProblem": {
         "type": "object",
         "properties": {
-          "Error": {
-            "type": "string",
-            "nullable": true
+          "error": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Message": {
-            "type": "string",
-            "nullable": true
+          "message": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "Errors": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumValidationError"
-            },
-            "nullable": true
+          "errors": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumValidationError, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
         },
-        "additionalProperties": false,
         "description": "Details returned when a conversion request is rejected atomically."
       },
       "OSDC.Drilling.EarthVerticalDatum.Model.MeanSeaLevelToWgs84Request": {
         "required": [
-          "Positions"
+          "positions"
         ],
         "type": "object",
         "properties": {
-          "Positions": {
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumPosition"
-            },
-            "description": "Positions and mean-sea-level depths to convert. The entire request is rejected when any item is invalid."
+          "positions": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumPosition, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
         },
-        "additionalProperties": false,
         "description": "A stateless synchronous request to convert mean-sea-level depths to WGS84 ellipsoidal depths."
       },
       "OSDC.Drilling.EarthVerticalDatum.Model.MeanSeaLevelToWgs84Response": {
         "type": "object",
         "properties": {
-          "Model": {
+          "model": {
             "$ref": "#/components/schemas/OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumModelInfo"
           },
-          "Samples": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumSample"
-            },
-            "nullable": true
+          "samples": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumSample, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
         },
-        "additionalProperties": false,
         "description": "EGM84-30 conversion results in the same order as the request positions."
       },
       "OSDC.Drilling.EarthVerticalDatum.Model.UsageStatisticsEarthVerticalDatum": {
         "type": "object",
         "properties": {
-          "StartedAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
+          "startedAt": {
+            "$ref": "#/components/schemas/System.DateTimeOffset"
           },
-          "Scope": {
-            "type": "string",
-            "nullable": true,
-            "readOnly": true
+          "scope": {
+            "$ref": "#/components/schemas/System.String"
           },
-          "RestConversions": {
-            "type": "integer",
-            "format": "int64",
-            "readOnly": true
+          "restConversions": {
+            "$ref": "#/components/schemas/System.Int64"
           },
-          "MCPConversions": {
-            "type": "integer",
-            "format": "int64",
-            "readOnly": true
+          "mcpConversions": {
+            "$ref": "#/components/schemas/System.Int64"
           },
-          "FailedConversions": {
-            "type": "integer",
-            "format": "int64",
-            "readOnly": true
+          "failedConversions": {
+            "$ref": "#/components/schemas/System.Int64"
           },
-          "PositionsConverted": {
-            "type": "integer",
-            "format": "int64",
-            "readOnly": true
+          "positionsConverted": {
+            "$ref": "#/components/schemas/System.Int64"
           },
-          "ModelInfoRequests": {
-            "type": "integer",
-            "format": "int64",
-            "readOnly": true
+          "modelInfoRequests": {
+            "$ref": "#/components/schemas/System.Int64"
           },
-          "StatisticsRequests": {
-            "type": "integer",
-            "format": "int64",
-            "readOnly": true
+          "statisticsRequests": {
+            "$ref": "#/components/schemas/System.Int64"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.Drilling.EarthVerticalDatum.Model.Wgs84ToMeanSeaLevelPosition": {
         "type": "object",
         "properties": {
-          "Latitude": {
-            "maximum": 1.5707963267948966,
-            "minimum": -1.5707963267948966,
-            "type": "number",
-            "description": "WGS84 geodetic latitude in SI radians, between -π/2 and π/2.",
-            "format": "double"
+          "latitude": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Longitude": {
-            "maximum": 3.141592653589793,
-            "minimum": -3.141592653589793,
-            "type": "number",
-            "description": "WGS84 geodetic longitude in SI radians, between -π and π.",
-            "format": "double"
+          "longitude": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Wgs84EllipsoidalDepth": {
-            "type": "number",
-            "description": "Depth in SI metres, positive downward from the WGS84 reference ellipsoid. A negative value is above it.",
-            "format": "double"
+          "wgs84EllipsoidalDepth": {
+            "$ref": "#/components/schemas/System.Double"
           }
         },
-        "additionalProperties": false,
         "description": "A WGS84 horizontal position and ellipsoidal depth expressed using OSDC SI conventions."
       },
       "OSDC.Drilling.EarthVerticalDatum.Model.Wgs84ToMeanSeaLevelRequest": {
         "required": [
-          "Positions"
+          "positions"
         ],
         "type": "object",
         "properties": {
-          "Positions": {
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.EarthVerticalDatum.Model.Wgs84ToMeanSeaLevelPosition"
-            },
-            "description": "Positions and WGS84 ellipsoidal depths to convert. Any invalid item rejects the entire request."
+          "positions": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.EarthVerticalDatum.Model.Wgs84ToMeanSeaLevelPosition, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
         },
-        "additionalProperties": false,
         "description": "A stateless synchronous request to convert WGS84 ellipsoidal depths to mean-sea-level depths."
       },
       "OSDC.Drilling.EarthVerticalDatum.Model.Wgs84ToMeanSeaLevelResponse": {
         "type": "object",
         "properties": {
-          "Model": {
+          "model": {
             "$ref": "#/components/schemas/OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumModelInfo"
           },
-          "Samples": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.Drilling.EarthVerticalDatum.Model.Wgs84ToMeanSeaLevelSample"
-            },
-            "nullable": true
+          "samples": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.EarthVerticalDatum.Model.Wgs84ToMeanSeaLevelSample, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
         },
-        "additionalProperties": false,
         "description": "EGM84-30 inverse-conversion results in the same order as the request positions."
       },
       "OSDC.Drilling.EarthVerticalDatum.Model.Wgs84ToMeanSeaLevelSample": {
         "type": "object",
         "properties": {
-          "Position": {
+          "position": {
             "$ref": "#/components/schemas/OSDC.Drilling.EarthVerticalDatum.Model.Wgs84ToMeanSeaLevelPosition"
           },
-          "MeanSeaLevelDepth": {
-            "type": "number",
-            "description": "Depth in SI metres, positive downward from the EGM84 mean-sea-level geoid.",
-            "format": "double"
+          "meanSeaLevelDepth": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "GeoidUndulation": {
-            "type": "number",
-            "description": "EGM84 geoid undulation in SI metres, positive upward from the WGS84 ellipsoid to the geoid.",
-            "format": "double"
+          "geoidUndulation": {
+            "$ref": "#/components/schemas/System.Double"
           }
         },
-        "additionalProperties": false,
         "description": "An input WGS84 position and its corresponding EGM84 mean-sea-level depth."
+      },
+      "System.Boolean": {
+        "type": "boolean"
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumPosition, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "minItems": 1,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumPosition"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumSample, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumSample"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumValidationError, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.EarthVerticalDatum.Model.EarthVerticalDatumValidationError"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.EarthVerticalDatum.Model.Wgs84ToMeanSeaLevelPosition, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "minItems": 1,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.EarthVerticalDatum.Model.Wgs84ToMeanSeaLevelPosition"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.EarthVerticalDatum.Model.Wgs84ToMeanSeaLevelSample, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.EarthVerticalDatum.Model.Wgs84ToMeanSeaLevelSample"
+        }
+      },
+      "System.Collections.Generic.List`1[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.String"
+        }
+      },
+      "System.DateTimeOffset": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Double": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
+      },
+      "System.Int64": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int64"
+      },
+      "System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int32"
+      },
+      "System.String": {
+        "type": "string"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "EarthVerticalDatum"
+    },
+    {
+      "name": "EarthVerticalDatumUsageStatistics"
+    }
+  ]
 }

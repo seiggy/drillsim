@@ -4,11 +4,8 @@ updates:
     directory: /
     schedule: { interval: weekly }
     ignore:
-      # OpenAPI 2.x/3.x changes namespaces and contracts used by both the
-      # Service and ModelSharedOut generator. Migrate these together.
+      # Hold OpenAPI.NET 2.x until the .NET 11 migration.
       - dependency-name: Microsoft.OpenApi
-        update-types: [version-update:semver-major]
-      - dependency-name: Microsoft.OpenApi.Readers
         update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
     directory: /

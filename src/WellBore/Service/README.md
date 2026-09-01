@@ -4,13 +4,13 @@ ASP.NET Core microservice exposing a REST API for managing WellBore domain data.
 
 ## Purpose in the Solution
 - Provides the backend API for creating, reading, updating, and deleting `WellBore` resources.
-- Serves a merged OpenAPI document and Swagger UI for discovery/testing.
+- Serves a merged OpenAPI document and Scalar API reference for discovery/testing.
 - Persists data in a local SQLite DB at `home/WellBore.db` and tracks request usage in `home/history.json`.
 - Powers the generated client in `ModelSharedOut`, which is then used by the `WebApp`.
 
 ### Base Path and Swagger
 - Base path: `/WellBore/api` (set via `UsePathBase` in `Service/Program.cs:24`)
-- Swagger UI: `/WellBore/api/swagger`
+- Scalar API reference: `/WellBore/api/swagger`
 - Raw OpenAPI (merged): `/WellBore/api/swagger/merged/swagger.json`
 
 ## Installation
@@ -18,9 +18,9 @@ Prerequisites
 - .NET 8 SDK
 - Optional: Docker (for containerized deployment)
 
-Restore tools (for `dotnet swagger` CLI)
+Restore dependencies
 ```
-dotnet tool restore
+dotnet restore
 ```
 
 Build
@@ -36,7 +36,7 @@ dotnet run --project Service/Service.csproj
 Local URLs (see `Service/Properties/launchSettings.json`)
 - HTTP: `http://localhost:5002/WellBore/api`
 - HTTPS: `https://localhost:5001/WellBore/api`
-- Swagger UI: `https://localhost:5001/WellBore/api/swagger`
+- Scalar API reference: `https://localhost:5001/WellBore/api/swagger`
 
 SQLite storage
 - Database file: `home/WellBore.db`
@@ -123,12 +123,12 @@ curl -k "$BASE/WellBoreUsageStatistics"
 ## Dependencies
 From `Service/Service.csproj`:
 - `Microsoft.Data.Sqlite` — SQLite database provider.
-- `Microsoft.OpenApi` and `Microsoft.OpenApi.Readers` — OpenAPI model and reader.
-- `Swashbuckle.AspNetCore.SwaggerGen` and `Swashbuckle.AspNetCore.SwaggerUI` — Swagger generation and UI.
+- `Microsoft.OpenApi` — OpenAPI model and reader.
+- `Microsoft.AspNetCore.OpenApi` and `Scalar.AspNetCore` — OpenAPI generation and interactive API reference.
 - Project reference: `..\Model\Model.csproj` — shared domain types (`WellBore`, `MetaInfo`, etc.).
 
 Tooling
-- Local tool: `swashbuckle.aspnetcore.cli` (`dotnet swagger`) from `.config/dotnet-tools.json`.
+- Build-time generation: `Microsoft.Extensions.ApiDescription.Server`.
 
 Runtime behavior
 - Base path and forwarded headers configured in `Service/Program.cs` for reverse proxy compatibility.
@@ -139,7 +139,7 @@ Runtime behavior
 - Model (`Model/`): Defines `WellBore` and related types returned/accepted by this API.
 - Service (`Service/`): This project; references `Model` and persists to SQLite in `home/`.
 - ModelSharedOut (`ModelSharedOut/`): Consumes the service OpenAPI to generate a merged bundle and typed C# client for downstream consumers.
-  - Build target in `Service.csproj` produces `ModelSharedOut/json-schemas/WellBoreFullName.json` in Debug via `dotnet swagger`.
+  - The build-time OpenAPI target in `Service.csproj` produces `ModelSharedOut/json-schemas/WellBoreFullName.json` in Debug.
 - WebApp (`WebApp/`): Uses the generated client from `ModelSharedOut` to call this service.
 - Tests (`ServiceTest/`, `ModelTest/`): Validate behavior and contracts.
 

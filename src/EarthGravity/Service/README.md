@@ -27,7 +27,7 @@ dotnet run --project Service
 - `GET /EarthGravity/api/metrics`: Prometheus counters.
 - `GET /EarthGravity/api/health/live`: liveness.
 - `GET /EarthGravity/api/health/ready`: readiness and model ID.
-- `/EarthGravity/api/swagger`: Swagger UI using the merged `ModelSharedOut` OpenAPI document.
+- `/EarthGravity/api/swagger`: Scalar API reference using the merged `ModelSharedOut` OpenAPI document.
 
 The default maximum batch size is 10,000 positions. Override it with:
 

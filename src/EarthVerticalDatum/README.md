@@ -45,7 +45,7 @@ The local service endpoints are:
 - MCP Streamable HTTP: `http://localhost:58948/EarthVerticalDatum/api/mcp`
 - health: `http://localhost:58948/EarthVerticalDatum/api/health`
 - Prometheus metrics: `http://localhost:58948/EarthVerticalDatum/api/metrics`
-- Swagger UI: `http://localhost:58948/EarthVerticalDatum/api/swagger`
+- Scalar API reference: `http://localhost:58948/EarthVerticalDatum/api/swagger`
 
 Example conversion:
 
@@ -71,10 +71,8 @@ The MCP server publishes exactly four underscore-named tools:
 ## Generation, build, and tests
 
 ```powershell
-dotnet tool restore
 dotnet restore EarthVerticalDatum.sln
-dotnet build Service/Service.csproj -c Release --no-restore
-dotnet swagger tofile --output ModelSharedOut/json-schemas/EarthVerticalDatumFullName.json Service/bin/Release/net8.0/Service.dll v1
+dotnet build Service/Service.csproj -c Debug --no-restore
 dotnet run --project ModelSharedOut/ModelSharedOut.csproj -c Release
 dotnet build EarthVerticalDatum.sln -c Release --no-restore
 dotnet test EarthVerticalDatum.sln -c Release --no-build

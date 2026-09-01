@@ -8,13 +8,13 @@ The Service project is an ASP.NET Core Web API that exposes REST endpoints to cr
 - Provides versioned batch backup and atomic restore of clusters and their dependency closure.
 - Exposes an MCP endpoint with tools mirroring the REST API, plus optional MCP hub registration.
 - Persists Cluster data to SQLite in `home/Cluster.db` with automatic schema checks and backup on mismatch.
-- Serves a merged OpenAPI document and Swagger UI for client tooling and manual testing.
+- Serves a merged OpenAPI document and Scalar API reference for client tooling and manual testing.
 - References `Model` for shared data types and statistics models.
 
 ## Prerequisites
 - .NET SDK 8.0+
 - Optional: Docker (to build/run the container image)
-- Optional (for schema export in Debug): `Swashbuckle.AspNetCore.Cli` dotnet tool (`dotnet tool install -g Swashbuckle.AspNetCore.Cli`)
+- Optional (for schema export in Debug): `Microsoft.AspNetCore.OpenApi.Cli` dotnet tool (`dotnet tool install -g Microsoft.AspNetCore.OpenApi.Cli`)
 
 ## Installation
 1. Restore and build the solution:
@@ -48,7 +48,7 @@ External MCP hub configuration example:
 ```
 
 ## API & Swagger
-- Swagger UI: `https://localhost:5001/Cluster/api/swagger`
+- Scalar API reference: `https://localhost:5001/Cluster/api/swagger`
 - OpenAPI JSON (merged): `https://localhost:5001/Cluster/api/swagger/merged/swagger.json`
 - Base endpoints (controller `ClusterController`):
   - `GET /Cluster/api/Cluster` → list of Cluster IDs (GUID)
@@ -154,12 +154,12 @@ The published image is `digiwells/osdcdrillingclusterservice:stable`. The Helm c
 ## Dependencies
 - NuGet packages (Service):
   - `Microsoft.Data.Sqlite` (SQLite driver)
-  - `Microsoft.OpenApi`, `Microsoft.OpenApi.Readers` (OpenAPI document handling)
-  - `Swashbuckle.AspNetCore.SwaggerGen`, `Swashbuckle.AspNetCore.SwaggerUI` (Swagger generation/UI)
+  - `Microsoft.AspNetCore.OpenApi`, `Microsoft.OpenApi` (OpenAPI generation and document handling)
+  - `Scalar.AspNetCore` (interactive API reference)
 - Project reference:
   - `Model/Model.csproj` (domain models like `Cluster`, `MetaInfo`, and usage statistics)
 - Build-time (Debug):
-  - `dotnet swagger tofile` target emits a schema to `ModelSharedOut/json-schemas/ClusterFullName.json` (install CLI tool if needed).
+  - Built-in OpenAPI generation emits a schema to `ModelSharedOut/json-schemas/ClusterFullName.json`.
 
 ## Integration In The Solution
 - `Model`: Defines shared DTOs and domain objects used by this service.

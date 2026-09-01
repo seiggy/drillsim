@@ -1,9 +1,11 @@
+using Microsoft.OpenApi;
+using System.Threading.Tasks;
+using Scalar.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
 using ModelContextProtocol.Protocol;
 using NORCE.Drilling.WellBore.Service;
 using NORCE.Drilling.WellBore.Service.Managers;
@@ -30,10 +32,15 @@ builder.Services.AddControllers()
         JsonSettings.ApplyTo(options.JsonSerializerOptions);
     });
 
-// serialize using short name rather than full names
-builder.Services.AddSwaggerGen(config =>
+builder.Services.AddOpenApi("v1", options =>
 {
-    config.CustomSchemaIds(type => type.FullName);
+    options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
+    options.CreateSchemaReferenceId = jsonTypeInfo => jsonTypeInfo.Type.FullName;
+    options.AddDocumentTransformer((document, _, _) =>
+    {
+        document.Servers = [new OpenApiServer { Url = "/wellbore/api" }];
+        return Task.CompletedTask;
+    });
 });
 
 // MCP server registrations
@@ -84,15 +91,11 @@ app.UseRouting();
 
 string relativeSwaggerPath = "/swagger/merged/swagger.json";
 string fullSwaggerPath = $"{basePath}{relativeSwaggerPath}";
-string customVersion = "Merged API Version 1";
 
 var mergedDoc = SwaggerMiddlewareExtensions.ReadOpenApiDocument("wwwroot/json-schema/WellBoreMergedModel.json");
 app.UseCustomSwagger(mergedDoc, relativeSwaggerPath);
-app.UseSwaggerUI(c =>
-{
-    //c.SwaggerEndpoint("v1/swagger.json", "API Version 1");
-    c.SwaggerEndpoint(fullSwaggerPath, customVersion);
-});
+app.MapOpenApi("/swagger/{documentName}/swagger.json");
+app.MapScalarApiReference("/swagger", options => options.WithOpenApiRoutePattern(fullSwaggerPath));
 
 app.UseCors(cors => cors
                         .AllowAnyMethod()

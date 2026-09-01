@@ -21,7 +21,7 @@
 
   <ItemGroup Condition="'$(UseLocalUnitConversionProjects)' != 'true'">
     <PackageReference Include="MudBlazor" Version="8.11.0" />
-    <PackageReference Include="OSDC.DotnetLibraries.General.DataManagement" Version="2.1.0" />
+    <PackageReference Include="OSDC.DotnetLibraries.General.DataManagement" Version="2.2.0" />
     <PackageReference Include="OSDC.UnitConversion.Conversion.UnitSystem.DrillingEngineering" Version="3.4.1" />
   </ItemGroup>
 

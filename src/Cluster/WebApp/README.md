@@ -78,8 +78,8 @@ The published image is `digiwells/osdcdrillingclusterwebappclient:stable`. The H
   - MudBlazor services are added in `WebApp/Program.cs`.
 
 ## Integration With The Solution
-- Service: backend API provider; configure `ClusterHostURL` to point to it. The Service publishes Swagger UI at `/Cluster/api/swagger` and serves the merged schema consumed by clients.
-- ModelSharedOut: generates `ClusterMergedModel.cs` and merged OpenAPI used by WebApp for strongly-typed calls and by the Service for Swagger UI.
+- Service: backend API provider; configure `ClusterHostURL` to point to it. The Service publishes Scalar API reference at `/Cluster/api/swagger` and serves the merged schema consumed by clients.
+- ModelSharedOut: generates `ClusterMergedModel.cs` and merged OpenAPI used by WebApp for strongly-typed calls and by the Service for Scalar API reference.
 - ServiceTest: shares the same generated models for end-to-end and integration tests.
 - External Razor pages: `WebApp/ExternalRazorAssemblies.cs` registers the Field and Rig page assemblies. Local wrapper pages host the EarthCartographicProjection, EarthGeodesy, EarthVerticalDatum, EarthGravity, and EarthMagneticField components under the Cluster web app path base; service registration is centralized in `WebApp/ExternalWebPagesServiceCollectionExtensions.cs`.
 - Helm chart: `WebApp/charts/osdcdrillingclusterwebappclient/values.yaml` configures ingress at `/Cluster/webapp` for various hosts.

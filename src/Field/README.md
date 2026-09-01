@@ -46,7 +46,7 @@ Code generation:
 
 ## Usage Examples
 
-Swagger UI (Service):
+Scalar API reference (Service):
 - Local: `https://localhost:5001/Field/api/swagger` (merged schema served at `/Field/api/swagger/merged/swagger.json`)
 - Dev example: `https://dev.digiwells.no/Field/api/swagger`
 
@@ -152,7 +152,7 @@ The solution is composed of:
   - computes delineation boundary lines during Field create/update
   - *dependencies* = Model
 - **ModelSharedOut**
-  - generates the Field client/DTOs and merged OpenAPI document used by the WebApp, tests, and Swagger UI
+  - generates the Field client/DTOs and merged OpenAPI document used by the WebApp, tests, and Scalar API reference
   - *dependencies* = Field, Cluster, and selected dependency OpenAPI schemas + NSwag
 - **ModelTest**
   - performs unit tests on the Model (in particular for base computations)
@@ -181,10 +181,10 @@ The solution is composed of:
 ## Dependencies
 
 - Core runtime: .NET 8
-- Service: ASP.NET Core, `Microsoft.Data.Sqlite`, `Swashbuckle.AspNetCore`, `Microsoft.OpenApi`
+- Service: ASP.NET Core, `Microsoft.Data.Sqlite`, `Microsoft.AspNetCore.OpenApi`, `Microsoft.OpenApi`
 - WebApp: Blazor Server, MudBlazor, and reusable Cluster, EarthCartographicProjection, EarthGeodesy, EarthVerticalDatum, EarthGravity, and EarthMagneticField Razor page packages
 - WebPages: MudBlazor, `OSDC.DotnetLibraries.Drilling.WebAppUtils`, `OSDC.DotnetLibraries.General.Math`, Plotly.Blazor
-- Shared model/codegen: `NSwag.CodeGeneration.CSharp`, `Microsoft.OpenApi.Readers`
+- Shared model/codegen: `NSwag.CodeGeneration.CSharp`, `Microsoft.OpenApi`
 - Domain model: OSDC DotnetLibraries (`General.DataManagement` and `DrillingProperties`)
 
 # Security/Confidentiality

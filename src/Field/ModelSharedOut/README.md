@@ -28,7 +28,7 @@ contracts included in the merge.
 
 ## Regeneration
 
-In Debug builds, `Service/Service.csproj` uses `dotnet swagger tofile` to refresh
+In Debug builds, `Service/Service.csproj` uses built-in OpenAPI generation to refresh
 `ModelSharedOut/json-schemas/FieldFullName.json`. After changing Field models or
 controller contracts, run from the solution root:
 
@@ -66,7 +66,7 @@ var ids = await client.GetAllFieldIdAsync();
 
 ## Dependencies
 
-- `Microsoft.OpenApi.Readers`: parses OpenAPI inputs
+- `Microsoft.OpenApi`: parses OpenAPI inputs
 - `NSwag.CodeGeneration.CSharp`: generates the C# client and DTOs
 
 The generator normalizes schema names to short names and writes OpenAPI 3.0.3.

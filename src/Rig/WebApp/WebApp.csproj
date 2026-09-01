@@ -28,7 +28,7 @@
     <PackageReference Include="MudBlazor" Version="8.14.0" />
     <PackageReference Include="OSDC.DotnetLibraries.General.DataManagement" Version="2.2.0" />
     <PackageReference Include="OSDC.DotnetLibraries.General.Statistics" Version="3.3.4" />
-    <PackageReference Include="Plotly.Blazor" Version="6.0.2" />
+    <PackageReference Include="Plotly.Blazor" Version="7.2.0" />
   </ItemGroup>
 
   <ItemGroup>

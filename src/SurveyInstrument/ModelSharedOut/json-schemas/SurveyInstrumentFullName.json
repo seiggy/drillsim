@@ -1,9 +1,14 @@
 {
   "openapi": "3.0.4",
   "info": {
-    "title": "Service, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
-    "version": "1.0"
+    "title": "Service | v1",
+    "version": "1.0.0"
   },
+  "servers": [
+    {
+      "url": "/surveyinstrument/api"
+    }
+  ],
   "paths": {
     "/ErrorSource": {
       "get": {
@@ -17,11 +22,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uuid"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -37,24 +38,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -71,10 +93,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -94,8 +113,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -123,8 +141,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -132,24 +149,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       },
@@ -164,14 +202,16 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -188,10 +228,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource, OSDC.DotnetLibraries.Drilling.Surveying, Version=1.2.9.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -211,11 +248,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uuid"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -231,24 +264,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.SurveyInstrument"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.SurveyInstrument"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.SurveyInstrument"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.SurveyInstrument"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.SurveyInstrument"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.SurveyInstrument"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -265,10 +319,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -288,8 +339,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -317,8 +367,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -326,24 +375,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.SurveyInstrument"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.SurveyInstrument"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.SurveyInstrument"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.SurveyInstrument"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.SurveyInstrument"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.SurveyInstrument"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       },
@@ -358,14 +428,16 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -382,10 +454,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.SurveyInstrument.Model.SurveyInstrumentLight"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.SurveyInstrument.Model.SurveyInstrumentLight, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -405,10 +474,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.SurveyInstrument"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.Drilling.Surveying.SurveyInstrument, OSDC.DotnetLibraries.Drilling.Surveying, Version=1.2.9.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -442,443 +508,546 @@
       "NORCE.Drilling.SurveyInstrument.Model.CountPerDay": {
         "type": "object",
         "properties": {
-          "Date": {
-            "type": "string",
-            "format": "date-time"
+          "date": {
+            "$ref": "#/components/schemas/System.DateTime"
           },
-          "Count": {
-            "type": "integer",
-            "format": "int64"
+          "count": {
+            "$ref": "#/components/schemas/System.UInt64"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.SurveyInstrument.Model.History": {
         "type": "object",
         "properties": {
-          "Data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.SurveyInstrument.Model.CountPerDay"
-            },
-            "nullable": true
+          "data": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.SurveyInstrument.Model.CountPerDay, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.SurveyInstrument.Model.SurveyInstrumentLight": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "description": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "lastModificationDate": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.SurveyInstrument.Model.UsageStatisticsSurveyInstrument": {
         "type": "object",
         "properties": {
-          "LastSaved": {
-            "type": "string",
-            "format": "date-time"
+          "lastSaved": {
+            "$ref": "#/components/schemas/System.DateTime"
           },
-          "BackUpInterval": {
-            "type": "string",
-            "format": "date-span"
+          "backUpInterval": {
+            "$ref": "#/components/schemas/System.TimeSpan"
           },
-          "GetAllSurveyInstrumentIdPerDay": {
+          "getAllSurveyInstrumentIdPerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.SurveyInstrument.Model.History"
           },
-          "GetAllSurveyInstrumentMetaInfoPerDay": {
+          "getAllSurveyInstrumentMetaInfoPerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.SurveyInstrument.Model.History"
           },
-          "GetSurveyInstrumentByIdPerDay": {
+          "getSurveyInstrumentByIdPerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.SurveyInstrument.Model.History"
           },
-          "GetAllSurveyInstrumentLightPerDay": {
+          "getAllSurveyInstrumentLightPerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.SurveyInstrument.Model.History"
           },
-          "GetAllSurveyInstrumentPerDay": {
+          "getAllSurveyInstrumentPerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.SurveyInstrument.Model.History"
           },
-          "PostSurveyInstrumentPerDay": {
+          "postSurveyInstrumentPerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.SurveyInstrument.Model.History"
           },
-          "PutSurveyInstrumentByIdPerDay": {
+          "putSurveyInstrumentByIdPerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.SurveyInstrument.Model.History"
           },
-          "DeleteSurveyInstrumentByIdPerDay": {
+          "deleteSurveyInstrumentByIdPerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.SurveyInstrument.Model.History"
           },
-          "GetAllErrorSourceIdPerDay": {
+          "getAllErrorSourceIdPerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.SurveyInstrument.Model.History"
           },
-          "GetAllErrorSourceMetaInfoPerDay": {
+          "getAllErrorSourceMetaInfoPerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.SurveyInstrument.Model.History"
           },
-          "GetErrorSourceByIdPerDay": {
+          "getErrorSourceByIdPerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.SurveyInstrument.Model.History"
           },
-          "GetAllErrorSourcePerDay": {
+          "getAllErrorSourcePerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.SurveyInstrument.Model.History"
           },
-          "PostErrorSourcePerDay": {
+          "postErrorSourcePerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.SurveyInstrument.Model.History"
           },
-          "PutErrorSourceByIdPerDay": {
+          "putErrorSourceByIdPerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.SurveyInstrument.Model.History"
           },
-          "DeleteErrorSourceByIdPerDay": {
+          "deleteErrorSourceByIdPerDay": {
             "$ref": "#/components/schemas/NORCE.Drilling.SurveyInstrument.Model.History"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.DotnetLibraries.Drilling.Surveying.ErrorCode": {
-        "enum": [
-          "XYM1",
-          "XYM2",
-          "XYM3",
-          "XYM4",
-          "SAG",
-          "DRFR",
-          "DRFS",
-          "DSFS",
-          "DSTG",
-          "XYM3E",
-          "XYM4E",
-          "SAGE",
-          "XCLH",
-          "XCLL",
-          "XCLA",
-          "ABXY_TI1S",
-          "ABXY_TI2S",
-          "ABIXY_TI1S",
-          "ABIXY_TI2S",
-          "ABZ",
-          "ASXY_TI1S",
-          "ASXY_TI2S",
-          "ASXY_TI3S",
-          "ASZ",
-          "MBXY_TI1",
-          "MBXY_TI2",
-          "MBZ",
-          "MSXY_TI1",
-          "MSXY_TI2",
-          "MSXY_TI3",
-          "MSZ",
-          "AMID",
-          "DEC_U",
-          "DEC_OS",
-          "DEC_OH",
-          "DEC_OI",
-          "DECR",
-          "DBH_U",
-          "DBH_OS",
-          "DBH_OH",
-          "DBH_OI",
-          "DBHR",
-          "AXYZ_XYB",
-          "AXYZ_ZB",
-          "AXYZ_SF",
-          "AXYZ_MIS",
-          "AXY_B",
-          "AXY_SF",
-          "AXY_MS",
-          "AXY_GB",
-          "GXYZ_XYB1",
-          "GXYZ_XYB2",
-          "GXYZ_XYRN",
-          "GXYZ_XYG1",
-          "GXYZ_XYG2",
-          "GXYZ_XYG3",
-          "GXYZ_XYG4",
-          "GXYZ_ZB",
-          "GXYZ_ZRN",
-          "GXYZ_ZG1",
-          "GXYZ_ZG2",
-          "GXYZ_SF",
-          "GXYZ_MIS",
-          "GXY_B1",
-          "GXY_B2",
-          "GXY_RN",
-          "GXY_G1",
-          "GXY_G2",
-          "GXY_G3",
-          "GXY_G4",
-          "GXY_SF",
-          "GXY_MIS",
-          "EXT_REF",
-          "EXT_TIE",
-          "EXT_MIS",
-          "GXYZ_GD",
-          "GXYZ_RW",
-          "GXY_GD",
-          "GXY_RW",
-          "GZ_GD",
-          "GZ_RW"
-        ],
-        "type": "string"
+        "type": "integer"
       },
       "OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
+            "nullable": true
           },
-          "ErrorCode": {
+          "errorCode": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.ErrorCode"
           },
-          "Description": {
+          "description": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "Index": {
-            "type": "integer",
-            "format": "int32"
+          "index": {
+            "$ref": "#/components/schemas/System.Int32"
           },
-          "IsSystematic": {
-            "type": "boolean"
+          "isSystematic": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "IsRandom": {
-            "type": "boolean"
+          "isRandom": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "IsGlobal": {
-            "type": "boolean"
+          "isGlobal": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "SingularIssues": {
-            "type": "boolean"
+          "singularIssues": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "IsContinuous": {
-            "type": "boolean"
+          "isContinuous": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "IsStationary": {
-            "type": "boolean"
+          "isStationary": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "KOperatorImposed": {
-            "type": "boolean"
+          "kOperatorImposed": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "Magnitude": {
-            "type": "number",
-            "format": "double",
+          "magnitude": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "MagnitudeQuantity": {
+          "magnitudeQuantity": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "UseInclinationInterval": {
-            "type": "boolean"
+          "useInclinationInterval": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "StartInclination": {
-            "type": "number",
-            "format": "double",
+          "startInclination": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "EndInclination": {
-            "type": "number",
-            "format": "double",
+          "endInclination": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "InitInclination": {
-            "type": "number",
-            "format": "double",
+          "initInclination": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.DotnetLibraries.Drilling.Surveying.SurveyInstrument": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "description": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "ModelType": {
+          "lastModificationDate": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "modelType": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.SurveyInstrumentModelType"
           },
-          "ErrorSourceList": {
+          "errorSourceList": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource"
-            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource, OSDC.DotnetLibraries.Drilling.Surveying, Version=1.2.9.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
             "nullable": true
           },
-          "Dip": {
-            "type": "number",
-            "format": "double"
+          "dip": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Declination": {
-            "type": "number",
-            "format": "double"
+          "declination": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Gravity": {
-            "type": "number",
-            "format": "double"
+          "gravity": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "BField": {
-            "type": "number",
-            "format": "double"
+          "bField": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Convergence": {
-            "type": "number",
-            "format": "double"
+          "convergence": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Latitude": {
-            "type": "number",
-            "format": "double"
+          "latitude": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "EarthRotRate": {
-            "type": "number",
-            "format": "double"
+          "earthRotRate": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "CantAngle": {
-            "type": "number",
-            "format": "double"
+          "cantAngle": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "GyroRunningSpeed": {
-            "type": "number",
-            "format": "double",
+          "gyroRunningSpeed": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "ExtRefInitInc": {
-            "type": "number",
-            "format": "double",
+          "extRefInitInc": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "GyroSwitching": {
-            "type": "number",
-            "format": "double",
+          "gyroSwitching": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "GyroMinDist": {
-            "type": "number",
-            "format": "double",
+          "gyroMinDist": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "GyroNoiseRed": {
-            "type": "number",
-            "format": "double",
+          "gyroNoiseRed": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "UseRelDepthError": {
-            "type": "boolean"
+          "useRelDepthError": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "RelDepthError": {
-            "type": "number",
-            "format": "double",
+          "relDepthError": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "UseMisalignment": {
-            "type": "boolean"
+          "useMisalignment": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "Misalignment": {
-            "type": "number",
-            "format": "double",
+          "misalignment": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "UseTrueInclination": {
-            "type": "boolean"
+          "useTrueInclination": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "TrueInclination": {
-            "type": "number",
-            "format": "double",
+          "trueInclination": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "UseReferenceError": {
-            "type": "boolean"
+          "useReferenceError": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "ReferenceError": {
-            "type": "number",
-            "format": "double",
+          "referenceError": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "UseDrillStringMag": {
-            "type": "boolean"
+          "useDrillStringMag": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "DrillStringMag": {
-            "type": "number",
-            "format": "double",
+          "drillStringMag": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "UseGyroCompassError": {
-            "type": "boolean"
+          "useGyroCompassError": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "GyroCompassError": {
-            "type": "number",
-            "format": "double",
+          "gyroCompassError": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.DotnetLibraries.Drilling.Surveying.SurveyInstrumentModelType": {
-        "enum": [
-          "MWD_WolffDeWardt",
-          "Gyro_WolffDeWardt",
-          "MWD_ISCWSA",
-          "Gyro_ISCWSA"
-        ],
-        "type": "string"
+        "type": "integer"
       },
       "OSDC.DotnetLibraries.General.DataManagement.MetaInfo": {
         "type": "object",
         "properties": {
-          "ID": {
-            "type": "string",
-            "format": "uuid"
+          "id": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "HttpHostName": {
+          "httpHostName": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "HttpHostBasePath": {
+          "httpHostBasePath": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "HttpEndPoint": {
+          "httpEndPoint": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
+      },
+      "System.Boolean": {
+        "type": "boolean"
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.SurveyInstrument.Model.SurveyInstrumentLight, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.SurveyInstrument.Model.SurveyInstrumentLight"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource, OSDC.DotnetLibraries.Drilling.Surveying, Version=1.2.9.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.Drilling.Surveying.SurveyInstrument, OSDC.DotnetLibraries.Drilling.Surveying, Version=1.2.9.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.SurveyInstrument"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.Guid"
+        }
+      },
+      "System.Collections.Generic.List`1[[NORCE.Drilling.SurveyInstrument.Model.CountPerDay, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.SurveyInstrument.Model.CountPerDay"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource, OSDC.DotnetLibraries.Drilling.Surveying, Version=1.2.9.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.Surveying.ErrorSource"
+        }
+      },
+      "System.DateTime": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Double": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
+      },
+      "System.Guid": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "System.Int32": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int32"
+      },
+      "System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
+      },
+      "System.String": {
+        "type": "string"
+      },
+      "System.TimeSpan": {
+        "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+        "type": "string"
+      },
+      "System.UInt64": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "uint64"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "ErrorSource"
+    },
+    {
+      "name": "SurveyInstrument"
+    },
+    {
+      "name": "SurveyInstrumentUsageStatistics"
+    }
+  ]
 }

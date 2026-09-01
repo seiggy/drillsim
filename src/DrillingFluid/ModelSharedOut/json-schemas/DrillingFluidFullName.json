@@ -1,9 +1,14 @@
 {
   "openapi": "3.0.4",
   "info": {
-    "title": "Service, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
-    "version": "1.0"
+    "title": "Service | v1",
+    "version": "1.0.0"
   },
+  "servers": [
+    {
+      "url": "/drillingfluid/api"
+    }
+  ],
   "paths": {
     "/BaseOil": {
       "get": {
@@ -17,12 +22,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uuid",
-                    "nullable": true
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -38,24 +38,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.BaseOil"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.BaseOil"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.BaseOil"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.BaseOil"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.BaseOil"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.BaseOil"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -72,10 +93,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -95,8 +113,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -124,8 +141,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -146,11 +162,15 @@
                 "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.BaseOil"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       },
@@ -165,14 +185,16 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -189,10 +211,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.BaseOil"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.DrillingFluid.Model.BaseOil, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -212,12 +231,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uuid",
-                    "nullable": true
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -233,24 +247,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.Brine"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.Brine"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.Brine"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.Brine"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.Brine"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.Brine"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -267,10 +302,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -290,8 +322,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -319,8 +350,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -341,11 +371,15 @@
                 "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.Brine"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       },
@@ -360,14 +394,16 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -384,10 +420,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.Brine"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.DrillingFluid.Model.Brine, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -407,11 +440,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uuid"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -427,24 +456,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluid"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluid"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluid"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluid"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluid"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluid"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -461,10 +511,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -484,8 +531,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -513,8 +559,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -522,24 +567,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluid"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluid"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluid"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluid"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluid"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluid"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       },
@@ -554,14 +620,16 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -578,10 +646,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidLight"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.DrillingFluid.Model.DrillingFluidLight, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -601,10 +666,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluid"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.DrillingFluid.Model.DrillingFluid, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -624,12 +686,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uuid",
-                    "nullable": true
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -645,24 +702,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidDescription"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidDescription"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidDescription"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidDescription"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidDescription"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidDescription"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -679,10 +757,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -702,8 +777,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -731,8 +805,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -753,11 +826,15 @@
                 "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidDescription"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       },
@@ -772,14 +849,16 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -796,10 +875,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidDescription"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.DrillingFluid.Model.DrillingFluidDescription, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -819,11 +895,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uuid"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -839,24 +911,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidOrder"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidOrder"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidOrder"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidOrder"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidOrder"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidOrder"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -873,10 +966,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -896,8 +986,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -925,8 +1014,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -934,24 +1022,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidOrder"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidOrder"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidOrder"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidOrder"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidOrder"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidOrder"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       },
@@ -966,14 +1075,16 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -990,10 +1101,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidOrder"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.DrillingFluid.Model.DrillingFluidOrder, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -1007,883 +1115,1154 @@
       "NORCE.Drilling.DrillingFluid.Model.BaseCompositionProperties": {
         "type": "object",
         "properties": {
-          "MassDensity": {
+          "massDensity": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "MassFraction": {
+          "massFraction": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "SpecificHeatCapacity": {
+          "specificHeatCapacity": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.SpecificHeatCapacity"
           },
-          "ThermalConductivity": {
+          "thermalConductivity": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.ThermalConductivity"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.BaseOil": {
         "type": "object",
         "properties": {
-          "MassDensity": {
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "creationDate": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "lastModificationDate": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "pvtParameters": {
+            "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.BaseOilPVTParameters"
+          },
+          "massDensity": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "MassFraction": {
+          "massFraction": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "SpecificHeatCapacity": {
+          "specificHeatCapacity": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.SpecificHeatCapacity"
           },
-          "ThermalConductivity": {
+          "thermalConductivity": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.ThermalConductivity"
-          },
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
-            "nullable": true
-          },
-          "Description": {
-            "type": "string",
-            "nullable": true
-          },
-          "CreationDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "LastModificationDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "PVTParameters": {
-            "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.BaseOilPVTParameters"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.BaseOilPVTParameters": {
         "type": "object",
         "properties": {
-          "A0": {
+          "a0": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "B0": {
+          "b0": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "C0": {
+          "c0": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "D0": {
+          "d0": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "E0": {
+          "e0": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "F0": {
+          "f0": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.Brine": {
         "type": "object",
         "properties": {
-          "MassDensity": {
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "creationDate": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "lastModificationDate": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "pvtParameters": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.BrinePVTParameters"
+              }
+            ],
+            "nullable": true
+          },
+          "saltContent": {
+            "type": "array",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.DrillingFluid.Model.SaltContent, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          },
+          "massDensity": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "MassFraction": {
+          "massFraction": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "SpecificHeatCapacity": {
+          "specificHeatCapacity": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.SpecificHeatCapacity"
           },
-          "ThermalConductivity": {
+          "thermalConductivity": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.ThermalConductivity"
-          },
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
-            "nullable": true
-          },
-          "Description": {
-            "type": "string",
-            "nullable": true
-          },
-          "CreationDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "LastModificationDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "PVTParameters": {
-            "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.BrinePVTParameters"
-          },
-          "SaltContent": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.SaltContent"
-            },
-            "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.BrinePVTParameters": {
         "type": "object",
         "properties": {
-          "S0": {
+          "s0": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "S1": {
+          "s1": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "S2": {
+          "s2": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "S3": {
+          "s3": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "Bw": {
+          "bw": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "Cw": {
+          "cw": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "Dw": {
+          "dw": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "Ew": {
+          "ew": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "Fw": {
+          "fw": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.CompletedDrillingFluid": {
         "type": "object",
         "properties": {
-          "GellingProperties": {
+          "gellingProperties": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.GellingProperties"
           },
-          "SpecificHeatCapacity": {
+          "specificHeatCapacity": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.SpecificHeatCapacity"
           },
-          "ThermalConductivity": {
+          "thermalConductivity": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.ThermalConductivity"
           },
-          "MassDensity": {
+          "massDensity": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "PostProcessedFlowCurve": {
+          "postProcessedFlowCurve": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.FlowCurve"
           },
-          "FluidPVTParameters": {
+          "fluidPVTParameters": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.FluidPVTParameters"
           },
-          "RheologicalModelProperties": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.GenericRheologicalModel"
-            },
-            "nullable": true
+          "rheologicalModelProperties": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.DrillingFluid.Model.GenericRheologicalModel, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.DrillingFluid": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "description": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "DrillingFluidDescription": {
+          "lastModificationDate": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "drillingFluidDescription": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidDescription"
           },
-          "DrillStringID": {
-            "type": "string",
-            "format": "uuid"
+          "drillStringID": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "OutputParam": {
-            "type": "number",
-            "format": "double",
+          "outputParam": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.DrillingFluidComposition": {
         "type": "object",
         "properties": {
-          "BrineProperies": {
+          "brineProperies": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.Brine"
           },
-          "BaseOilProperies": {
+          "baseOilProperies": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.BaseOil"
           },
-          "WaterOilRatio": {
+          "waterOilRatio": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "HighGravitySolid": {
+          "highGravitySolid": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.BaseCompositionProperties"
           },
-          "LowGravitySolid": {
+          "lowGravitySolid": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.BaseCompositionProperties"
           },
-          "LostCirculationMaterials": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.LostCirculationMaterial"
-            },
-            "nullable": true
+          "lostCirculationMaterials": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.DrillingFluid.Model.LostCirculationMaterial, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.DrillingFluidDescription": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "description": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "DrillingFluidComposition": {
+          "lastModificationDate": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "drillingFluidComposition": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidComposition"
           },
-          "FluidPVTParameters": {
-            "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.FluidPVTParameters"
+          "fluidPVTParameters": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.FluidPVTParameters"
+              }
+            ],
+            "nullable": true
           },
-          "FluidMassDensity": {
+          "fluidMassDensity": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
+              }
+            ],
+            "nullable": true
+          },
+          "referenceTemperature": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "ReferenceTemperature": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
-          },
-          "GellingProperties": {
+          "gellingProperties": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.GellingProperties"
           },
-          "FlowCurve": {
+          "flowCurve": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.FlowCurve"
           },
-          "SpecificHeatCapacity": {
-            "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.SpecificHeatCapacity"
+          "specificHeatCapacity": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.SpecificHeatCapacity"
+              }
+            ],
+            "nullable": true
           },
-          "ThermalConductivity": {
-            "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.ThermalConductivity"
+          "thermalConductivity": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.ThermalConductivity"
+              }
+            ],
+            "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.DrillingFluidLight": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "description": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "lastModificationDate": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.DrillingFluidOrder": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "description": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "DrillingFluidDescriptionID": {
+          "lastModificationDate": {
             "type": "string",
-            "format": "uuid"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
           },
-          "DrillingFluidDescription": {
-            "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidDescription"
+          "drillingFluidDescriptionID": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "Temperature": {
-            "type": "number",
-            "format": "double"
+          "drillingFluidDescription": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidDescription"
+              }
+            ],
+            "nullable": true
           },
-          "PTModelExtrapolation": {
+          "temperature": {
+            "$ref": "#/components/schemas/System.Double"
+          },
+          "ptModelExtrapolation": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.PTModelExtrapolation"
           },
-          "RheologicalModelsEnum": {
+          "rheologicalModelsEnum": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.RheologicalModelsEnum"
           },
-          "Options": {
-            "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.ParticleSwarmOptimization.ParticleSwarmSolverOptions"
+          "options": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.ParticleSwarmOptimization.ParticleSwarmSolverOptions"
+              }
+            ],
+            "nullable": true
           },
-          "CompletedDrillingFluid": {
-            "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.CompletedDrillingFluid"
+          "completedDrillingFluid": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.CompletedDrillingFluid"
+              }
+            ],
+            "nullable": true
           },
-          "OutputParam": {
-            "type": "number",
-            "format": "double",
+          "outputParam": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.FlowCurve": {
         "type": "object",
         "properties": {
-          "CouetteRheometer": {
+          "couetteRheometer": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.ModelShared.CouetteRheometer"
           },
-          "TableValues": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.FlowCurveTable"
-            },
-            "nullable": true
+          "tableValues": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.DrillingFluid.Model.FlowCurveTable, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.FlowCurveTable": {
         "type": "object",
         "properties": {
-          "Temperature": {
+          "temperature": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "Pressure": {
+          "pressure": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "RheometerMeasurements": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.ModelShared.RheometerMeasurement"
-            },
-            "nullable": true
+          "rheometerMeasurements": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.DrillingFluid.ModelShared.RheometerMeasurement, ModelSharedIn, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           },
-          "ShearRateReference": {
+          "shearRateReference": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.MeasurementTypesShearRate"
           },
-          "ShearStressReference": {
+          "shearStressReference": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.MeasurementTypesShearStress"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.FluidPVTParameters": {
         "type": "object",
         "properties": {
-          "A0": {
+          "a0": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "B0": {
+          "b0": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "C0": {
+          "c0": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "D0": {
+          "d0": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "E0": {
+          "e0": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "F0": {
+          "f0": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.GelData": {
         "type": "object",
         "properties": {
-          "GelDuration": {
+          "gelDuration": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "GelStrength": {
+          "gelStrength": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "Temperature": {
+          "temperature": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.GellingProperties": {
         "type": "object",
         "properties": {
-          "GelPropertiesTable": {
+          "gelPropertiesTable": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.GelData"
-            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.DrillingFluid.Model.GelData, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.GenericRheologicalModel": {
         "type": "object",
         "properties": {
-          "RheologicalModelUsed": {
+          "rheologicalModelUsed": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.RheologicalModelsEnum"
           },
-          "Temperature": {
-            "type": "number",
-            "format": "double"
+          "temperature": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "Pressure": {
-            "type": "number",
-            "format": "double"
+          "pressure": {
+            "$ref": "#/components/schemas/System.Double"
           },
-          "PowerLawViscosityInfty": {
-            "type": "number",
-            "format": "double",
+          "powerLawViscosityInfty": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "PowerLawConsistencyIndex": {
-            "type": "number",
-            "format": "double",
+          "powerLawConsistencyIndex": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "BinghamViscosityInfty": {
-            "type": "number",
-            "format": "double",
+          "binghamViscosityInfty": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "BinghamYieldStress": {
-            "type": "number",
-            "format": "double",
+          "binghamYieldStress": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "HerschelBulkleyViscosityInfty": {
-            "type": "number",
-            "format": "double",
+          "herschelBulkleyViscosityInfty": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "HerschelBulkleyYieldStress": {
-            "type": "number",
-            "format": "double",
+          "herschelBulkleyYieldStress": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "HerschelBulkleyConsistencyIndex": {
-            "type": "number",
-            "format": "double",
+          "herschelBulkleyConsistencyIndex": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "QuemadaViscosityInfty": {
-            "type": "number",
-            "format": "double",
+          "quemadaViscosityInfty": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "QuemadaCharacteristicShearRate": {
-            "type": "number",
-            "format": "double",
+          "quemadaCharacteristicShearRate": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "QuemadaConsistencyIndex": {
-            "type": "number",
-            "format": "double",
+          "quemadaConsistencyIndex": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "QuemadaXi": {
-            "type": "number",
-            "format": "double",
+          "quemadaXi": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "RobertsonStiffYieldStress": {
-            "type": "number",
-            "format": "double",
+          "robertsonStiffYieldStress": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "RobertsonStiffCharacteristicShearRate": {
-            "type": "number",
-            "format": "double",
+          "robertsonStiffCharacteristicShearRate": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "RobertsonStiffConsistencyIndex": {
-            "type": "number",
-            "format": "double",
+          "robertsonStiffConsistencyIndex": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.LostCirculationMaterial": {
         "type": "object",
         "properties": {
-          "MassDensity": {
+          "grainSize": {
+            "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.LostCiruclationMaterialGrainType"
+          },
+          "massDensity": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "MassFraction": {
+          "massFraction": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "SpecificHeatCapacity": {
+          "specificHeatCapacity": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.SpecificHeatCapacity"
           },
-          "ThermalConductivity": {
+          "thermalConductivity": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.ThermalConductivity"
-          },
-          "GrainSize": {
-            "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.LostCiruclationMaterialGrainType"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.LostCiruclationMaterialGrainType": {
-        "enum": [
-          "UltraFine",
-          "Fine",
-          "Medium",
-          "Coarse"
-        ],
-        "type": "string"
+        "type": "integer"
       },
       "NORCE.Drilling.DrillingFluid.Model.MeasurementTypesShearRate": {
-        "enum": [
-          "Rotation",
-          "IsoNewtonianShearRate",
-          "BobNewtonianShearRate"
-        ],
-        "type": "string"
+        "type": "integer"
       },
       "NORCE.Drilling.DrillingFluid.Model.MeasurementTypesShearStress": {
-        "enum": [
-          "Torque",
-          "IsoNewtonianShearStress",
-          "BobNewtonianShearStress"
-        ],
-        "type": "string"
+        "type": "integer"
       },
       "NORCE.Drilling.DrillingFluid.Model.PTModelExtrapolation": {
-        "enum": [
-          "Unkown",
-          "StandardWaterBasedMud",
-          "StandardOilBasedMud",
-          "MicronizedOilBasedMud"
-        ],
-        "type": "string"
+        "type": "integer"
       },
       "NORCE.Drilling.DrillingFluid.Model.RheologicalModelsEnum": {
-        "enum": [
-          "Unkown",
-          "Bingham",
-          "PowerLaw",
-          "HerschelBulkley",
-          "Quemada",
-          "RobertsonStiff"
-        ],
-        "type": "string"
+        "type": "integer"
       },
       "NORCE.Drilling.DrillingFluid.Model.SaltContent": {
         "type": "object",
         "properties": {
-          "Salt": {
+          "salt": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.SaltOptions"
           },
-          "WeightPerCubicMeter": {
+          "weightPerCubicMeter": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.SaltOptions": {
-        "enum": [
-          "NaCl",
-          "NaBr",
-          "KCl",
-          "KBr",
-          "CaCl2",
-          "CaBr2",
-          "ZnCl2",
-          "ZnBr2"
-        ],
-        "type": "string"
+        "type": "integer"
       },
       "NORCE.Drilling.DrillingFluid.Model.SpecificHeatCapacity": {
         "type": "object",
         "properties": {
-          "Slope": {
+          "slope": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "HeatCapacityAtZeroKelvin": {
+          "heatCapacityAtZeroKelvin": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "TemperatureRange": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double",
-              "nullable": true
-            },
-            "nullable": true
+          "temperatureRange": {
+            "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]][]"
           },
-          "CoefficientRange": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double",
-              "nullable": true
-            },
-            "nullable": true
+          "coefficientRange": {
+            "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]][]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.Model.ThermalConductivity": {
         "type": "object",
         "properties": {
-          "Slope": {
+          "slope": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "ThermalConductivityAtZeroKelvin": {
+          "thermalConductivityAtZeroKelvin": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty"
           },
-          "TemperatureRange": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double",
-              "nullable": true
-            },
-            "nullable": true
+          "temperatureRange": {
+            "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]][]"
           },
-          "CoefficientRange": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double",
-              "nullable": true
-            },
-            "nullable": true
+          "coefficientRange": {
+            "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]][]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.DrillingFluid.ModelShared.CouetteRheometer": {
         "type": "object",
         "properties": {
           "name": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/System.String"
           },
           "description": {
-            "type": "string",
-            "nullable": true
+            "$ref": "#/components/schemas/System.String"
           },
           "id": {
-            "type": "string",
-            "format": "uuid"
+            "$ref": "#/components/schemas/System.Guid"
           },
           "rheometerType": {
             "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.ModelShared.RheometerTypeEnum"
           },
           "bobRadius": {
-            "type": "number",
-            "format": "double"
+            "$ref": "#/components/schemas/System.Double"
           },
           "gap": {
-            "type": "number",
-            "format": "double"
+            "$ref": "#/components/schemas/System.Double"
           },
           "newtonianEndEffectCorrection": {
-            "type": "number",
-            "format": "double"
+            "$ref": "#/components/schemas/System.Double"
           },
           "bobLength": {
-            "type": "number",
-            "format": "double"
+            "$ref": "#/components/schemas/System.Double"
           },
           "conicalAngle": {
-            "type": "number",
-            "format": "double"
+            "$ref": "#/components/schemas/System.Double"
           },
           "measurementPrecision": {
-            "type": "number",
-            "format": "double"
+            "$ref": "#/components/schemas/System.Double"
           },
           "useISOConvention": {
-            "type": "boolean"
+            "$ref": "#/components/schemas/System.Boolean"
           },
           "fixedSpeedList": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
+            "$ref": "#/components/schemas/System.Collections.Generic.ICollection`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
           }
-        },
-        "additionalProperties": { }
+        }
       },
       "NORCE.Drilling.DrillingFluid.ModelShared.RheometerMeasurement": {
         "type": "object",
         "properties": {
           "rotationalSpeed": {
-            "type": "number",
-            "format": "double"
+            "$ref": "#/components/schemas/System.Double"
           },
           "torque": {
-            "type": "number",
-            "format": "double"
+            "$ref": "#/components/schemas/System.Double"
           },
           "isoNewtonianShearRate": {
-            "type": "number",
-            "format": "double"
+            "$ref": "#/components/schemas/System.Double"
           },
           "isoNewtonianShearStress": {
-            "type": "number",
-            "format": "double"
+            "$ref": "#/components/schemas/System.Double"
           },
           "bobNewtonianShearRate": {
-            "type": "number",
-            "format": "double"
+            "$ref": "#/components/schemas/System.Double"
           },
           "bobNewtonianShearStress": {
-            "type": "number",
-            "format": "double"
+            "$ref": "#/components/schemas/System.Double"
           }
-        },
-        "additionalProperties": { }
+        }
       },
       "NORCE.Drilling.DrillingFluid.ModelShared.RheometerTypeEnum": {
-        "enum": [
-          "_0",
-          "_1"
-        ],
-        "type": "string"
+        "type": "integer"
       },
       "NORCE.Drilling.DrillingFluid.ParticleSwarmOptimization.ParticleSwarmSolverOptions": {
-        "type": "object",
-        "additionalProperties": false
+        "type": "object"
       },
       "OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty": {
         "type": "object",
         "properties": {
-          "GaussianValue": {
+          "gaussianValue": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.Statistics.GaussianDistribution"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.DotnetLibraries.General.DataManagement.MetaInfo": {
         "type": "object",
         "properties": {
-          "ID": {
-            "type": "string",
-            "format": "uuid"
+          "id": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "HttpHostName": {
+          "httpHostName": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "HttpHostBasePath": {
+          "httpHostBasePath": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "HttpEndPoint": {
+          "httpEndPoint": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "OSDC.DotnetLibraries.General.Statistics.GaussianDistribution": {
         "type": "object",
         "properties": {
-          "MinValue": {
-            "type": "number",
-            "format": "double"
-          },
-          "MaxValue": {
-            "type": "number",
-            "format": "double"
-          },
-          "Mean": {
-            "type": "number",
-            "format": "double",
+          "mean": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "StandardDeviation": {
-            "type": "number",
-            "format": "double",
+          "standardDeviation": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
+          },
+          "minValue": {
+            "$ref": "#/components/schemas/System.Double"
+          },
+          "maxValue": {
+            "$ref": "#/components/schemas/System.Double"
           }
-        },
-        "additionalProperties": false
+        }
+      },
+      "System.Boolean": {
+        "type": "boolean"
+      },
+      "System.Collections.Generic.ICollection`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.Double"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.DrillingFluid.Model.BaseOil, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.BaseOil"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.DrillingFluid.Model.Brine, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.Brine"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.DrillingFluid.Model.DrillingFluid, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluid"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.DrillingFluid.Model.DrillingFluidDescription, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidDescription"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.DrillingFluid.Model.DrillingFluidLight, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidLight"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.DrillingFluid.Model.DrillingFluidOrder, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.DrillingFluidOrder"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.Guid"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+        }
+      },
+      "System.Collections.Generic.List`1[[NORCE.Drilling.DrillingFluid.Model.FlowCurveTable, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.FlowCurveTable"
+        }
+      },
+      "System.Collections.Generic.List`1[[NORCE.Drilling.DrillingFluid.Model.GelData, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.GelData"
+        }
+      },
+      "System.Collections.Generic.List`1[[NORCE.Drilling.DrillingFluid.Model.GenericRheologicalModel, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.GenericRheologicalModel"
+        }
+      },
+      "System.Collections.Generic.List`1[[NORCE.Drilling.DrillingFluid.Model.LostCirculationMaterial, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.LostCirculationMaterial"
+        }
+      },
+      "System.Collections.Generic.List`1[[NORCE.Drilling.DrillingFluid.Model.SaltContent, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.Model.SaltContent"
+        }
+      },
+      "System.Collections.Generic.List`1[[NORCE.Drilling.DrillingFluid.ModelShared.RheometerMeasurement, ModelSharedIn, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.DrillingFluid.ModelShared.RheometerMeasurement"
+        }
+      },
+      "System.Double": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
+      },
+      "System.Guid": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
+      },
+      "System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]][]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+        }
+      },
+      "System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "System.String": {
+        "type": "string"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "BaseOil"
+    },
+    {
+      "name": "Brine"
+    },
+    {
+      "name": "DrillingFluid"
+    },
+    {
+      "name": "DrillingFluidDescription"
+    },
+    {
+      "name": "DrillingFluidOrder"
+    }
+  ]
 }

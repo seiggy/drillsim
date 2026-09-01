@@ -56,7 +56,7 @@ the two pinned input documents. Do not edit `MergedModel.cs` manually.
 
 ## Dependencies
 
-- `Microsoft.OpenApi.Readers`: parses OpenAPI documents
+- `Microsoft.OpenApi`: parses OpenAPI documents
 - `NSwag.CodeGeneration.CSharp`: generates the C# clients and DTOs
 
 The generator normalizes schema names to short names. Review generation errors

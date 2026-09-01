@@ -1,11 +1,13 @@
+using Microsoft.OpenApi;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
 using ModelContextProtocol.Protocol;
 using OSDC.Drilling.EarthMagneticField.Model;
 using OSDC.Drilling.EarthMagneticField.Service;
 using OSDC.Drilling.EarthMagneticField.Service.Mcp;
 using OSDC.Drilling.EarthMagneticField.Service.Mcp.Tools;
+using System.Threading.Tasks;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,21 +28,21 @@ builder.Services.AddControllers().AddJsonOptions(options => JsonSettings.ApplyTo
 builder.Services.Configure<Microsoft.AspNetCore.Mvc.ApiBehaviorOptions>(options =>
     options.SuppressModelStateInvalidFilter = true);
 builder.Services.AddHealthChecks();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(configuration =>
+builder.Services.AddOpenApi("v1", options =>
 {
-    configuration.SwaggerDoc("v1", new OpenApiInfo
+    options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
+    options.CreateSchemaReferenceId = jsonTypeInfo => jsonTypeInfo.Type.FullName;
+    options.AddDocumentTransformer((document, _, _) =>
     {
-        Title = "OSDC Earth Magnetic Field API",
-        Version = "v1",
-        Description = "Stateless WMM2025 and IGRF14 evaluation using UTC, WGS84 SI coordinates, and north-east-down magnetic flux density in teslas."
+        document.Info = new OpenApiInfo
+        {
+            Title = "OSDC Earth Magnetic Field API",
+            Version = "v1",
+            Description = "Stateless WMM2025 and IGRF14 evaluation using UTC, WGS84 SI coordinates, and north-east-down magnetic flux density in teslas."
+        };
+        document.Servers = [new OpenApiServer { Url = "/EarthMagneticField/api" }];
+        return Task.CompletedTask;
     });
-    configuration.CustomSchemaIds(type => type.FullName);
-    foreach (string assemblyName in new[] { "Service", "Model" })
-    {
-        string xmlPath = Path.Combine(AppContext.BaseDirectory, assemblyName + ".xml");
-        if (File.Exists(xmlPath)) configuration.IncludeXmlComments(xmlPath);
-    }
 });
 
 string serverVersion = typeof(Program).Assembly.GetName().Version?.ToString() ?? "1.0.0";
@@ -71,12 +73,10 @@ if (File.Exists(mergedSwaggerFile))
 {
     app.UseCustomSwagger(SwaggerMiddlewareExtensions.ReadOpenApiDocument(mergedSwaggerFile), mergedSwaggerPath);
 }
-else
-{
-    app.UseSwagger();
-}
-app.UseSwaggerUI(configuration =>
-    configuration.SwaggerEndpoint(File.Exists(mergedSwaggerFile) ? $"/EarthMagneticField/api{mergedSwaggerPath}" : "/EarthMagneticField/api/swagger/v1/swagger.json", "OSDC Earth Magnetic Field API"));
+app.MapOpenApi("/swagger/{documentName}/swagger.json");
+app.MapScalarApiReference("/swagger", options => options
+    .WithTitle("OSDC Earth Magnetic Field API")
+    .WithOpenApiRoutePattern(File.Exists(mergedSwaggerFile) ? $"/EarthMagneticField/api{mergedSwaggerPath}" : "/EarthMagneticField/api/swagger/v1/swagger.json"));
 
 app.MapGet("/health/live", () => Results.Ok(new { Status = "Healthy" })).ExcludeFromDescription();
 app.MapGet("/health/ready", (EarthMagneticFieldEvaluator evaluator) => Results.Ok(new { Status = "Healthy", Models = evaluator.ServiceInfo.Models.Select(model => model.ID) })).ExcludeFromDescription();

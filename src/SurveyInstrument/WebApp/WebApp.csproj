@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Plotly.Blazor" Version="6.0.2" />
+    <PackageReference Include="Plotly.Blazor" Version="7.2.0" />
   </ItemGroup>
 
   <ItemGroup>

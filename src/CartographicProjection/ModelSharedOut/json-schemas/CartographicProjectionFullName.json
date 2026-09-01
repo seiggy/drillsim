@@ -1,9 +1,14 @@
 {
   "openapi": "3.0.4",
   "info": {
-    "title": "Service, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
-    "version": "1.0"
+    "title": "Service | v1",
+    "version": "1.0.0"
   },
+  "servers": [
+    {
+      "url": "/cartographicprojection/api"
+    }
+  ],
   "paths": {
     "/CartographicConversionSet": {
       "get": {
@@ -17,11 +22,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uuid"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -37,24 +38,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicConversionSet"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicConversionSet"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicConversionSet"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicConversionSet"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicConversionSet"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicConversionSet"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -71,10 +93,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -94,8 +113,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -123,8 +141,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -132,24 +149,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicConversionSet"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicConversionSet"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicConversionSet"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicConversionSet"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicConversionSet"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicConversionSet"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       },
@@ -164,14 +202,16 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -188,10 +228,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicConversionSetLight"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.CartographicProjection.Model.CartographicConversionSetLight, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -211,10 +248,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicConversionSet"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.CartographicProjection.Model.CartographicConversionSet, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -234,11 +268,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uuid"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -254,24 +284,45 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicProjection"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicProjection"
+                  }
+                ],
+                "nullable": true
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicProjection"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicProjection"
+                  }
+                ],
+                "nullable": true
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicProjection"
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicProjection"
+                  }
+                ],
+                "nullable": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -288,10 +339,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -311,8 +359,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -340,8 +387,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
@@ -362,11 +408,15 @@
                 "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicProjection"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       },
@@ -381,14 +431,16 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/System.Guid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
           }
         }
       }
@@ -405,10 +457,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicProjectionLight"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.CartographicProjection.Model.CartographicProjectionLight, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -428,10 +477,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicProjection"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.CartographicProjection.Model.CartographicProjection, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -451,10 +497,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                 }
               }
             }
@@ -474,7 +517,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "$ref": "#/components/schemas/System.String"
             }
           }
         ],
@@ -504,10 +547,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicProjectionType"
-                  }
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.CartographicProjection.Model.CartographicProjectionType, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
             }
@@ -541,691 +581,941 @@
       "Model.CountPerDay": {
         "type": "object",
         "properties": {
-          "Date": {
-            "type": "string",
-            "format": "date-time"
+          "date": {
+            "$ref": "#/components/schemas/System.DateTime"
           },
-          "Count": {
-            "type": "integer",
-            "format": "int64"
+          "count": {
+            "$ref": "#/components/schemas/System.UInt64"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "Model.History": {
         "type": "object",
         "properties": {
-          "Data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Model.CountPerDay"
-            },
-            "nullable": true
+          "data": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[Model.CountPerDay, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "Model.UsageStatisticsCartographicProjection": {
         "type": "object",
         "properties": {
-          "LastSaved": {
-            "type": "string",
-            "format": "date-time"
+          "lastSaved": {
+            "$ref": "#/components/schemas/System.DateTime"
           },
-          "BackUpInterval": {
-            "type": "string",
-            "format": "date-span"
+          "backUpInterval": {
+            "$ref": "#/components/schemas/System.TimeSpan"
           },
-          "GetAllCartographicProjectionTypeIdPerDay": {
+          "getAllCartographicProjectionTypeIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetCartographicProjectionTypeByIdPerDay": {
+          "getCartographicProjectionTypeByIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetAllCartographicProjectionTypePerDay": {
+          "getAllCartographicProjectionTypePerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetAllCartographicProjectionIdPerDay": {
+          "getAllCartographicProjectionIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetAllCartographicProjectionMetaInfoPerDay": {
+          "getAllCartographicProjectionMetaInfoPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetCartographicProjectionByIdPerDay": {
+          "getCartographicProjectionByIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetAllCartographicProjectionLightPerDay": {
+          "getAllCartographicProjectionLightPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetAllCartographicProjectionPerDay": {
+          "getAllCartographicProjectionPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "PostCartographicProjectionPerDay": {
+          "postCartographicProjectionPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "PutCartographicProjectionByIdPerDay": {
+          "putCartographicProjectionByIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "DeleteCartographicProjectionByIdPerDay": {
+          "deleteCartographicProjectionByIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetAllCartographicConversionSetIdPerDay": {
+          "getAllCartographicConversionSetIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetAllCartographicConversionSetMetaInfoPerDay": {
+          "getAllCartographicConversionSetMetaInfoPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetCartographicConversionSetByIdPerDay": {
+          "getCartographicConversionSetByIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetAllCartographicConversionSetLightPerDay": {
+          "getAllCartographicConversionSetLightPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "GetAllCartographicConversionSetPerDay": {
+          "getAllCartographicConversionSetPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "PostCartographicConversionSetPerDay": {
+          "postCartographicConversionSetPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "PutCartographicConversionSetByIdPerDay": {
+          "putCartographicConversionSetByIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           },
-          "DeleteCartographicConversionSetByIdPerDay": {
+          "deleteCartographicConversionSetByIdPerDay": {
             "$ref": "#/components/schemas/Model.History"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.CartographicProjection.Model.AreaNormalizationTransformType": {
-        "enum": [
-          "None",
-          "Linear",
-          "Quadratic",
-          "Tangent"
-        ],
-        "type": "string"
+        "type": "integer"
       },
       "NORCE.Drilling.CartographicProjection.Model.AxisType": {
-        "enum": [
-          "None",
-          "x",
-          "y"
-        ],
-        "type": "string"
+        "type": "integer"
       },
       "NORCE.Drilling.CartographicProjection.Model.CartographicConversionSet": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "description": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "CartographicProjectionID": {
+          "lastModificationDate": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "CartographicCoordinateList": {
+          "cartographicProjectionID": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "cartographicCoordinateList": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicCoordinate"
-            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[NORCE.Drilling.CartographicProjection.Model.CartographicCoordinate, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.CartographicProjection.Model.CartographicConversionSetLight": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "description": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "CartographicProjectionName": {
+          "lastModificationDate": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "CartographicProjectionDescription": {
+          "cartographicProjectionName": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "cartographicProjectionDescription": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.CartographicProjection.Model.CartographicCoordinate": {
         "type": "object",
         "properties": {
-          "Northing": {
-            "type": "number",
-            "format": "double",
+          "northing": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Easting": {
-            "type": "number",
-            "format": "double",
+          "easting": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "VerticalDepth": {
-            "type": "number",
-            "format": "double",
+          "verticalDepth": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "GeodeticCoordinate": {
-            "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.ModelShared.GeodeticCoordinate"
+          "geodeticCoordinate": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.ModelShared.GeodeticCoordinate"
+              }
+            ],
+            "nullable": true
           },
-          "GridConvergenceDatum": {
-            "type": "number",
-            "format": "double",
+          "gridConvergenceDatum": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.CartographicProjection.Model.CartographicProjection": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "description": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "ProjectionType": {
+          "lastModificationDate": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "projectionType": {
             "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.ProjectionType"
           },
-          "GeodeticDatumID": {
+          "geodeticDatumID": {
             "type": "string",
-            "format": "uuid",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "LatitudeOrigin": {
-            "type": "number",
-            "format": "double",
+          "latitudeOrigin": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Latitude1": {
-            "type": "number",
-            "format": "double",
+          "latitude1": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Latitude2": {
-            "type": "number",
-            "format": "double",
+          "latitude2": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "LatitudeTrueScale": {
-            "type": "number",
-            "format": "double",
+          "latitudeTrueScale": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "LongitudeOrigin": {
-            "type": "number",
-            "format": "double",
+          "longitudeOrigin": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Scaling": {
-            "type": "number",
-            "format": "double",
+          "scaling": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "FalseEasting": {
-            "type": "number",
-            "format": "double",
+          "falseEasting": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "FalseNorthing": {
-            "type": "number",
-            "format": "double",
+          "falseNorthing": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Zone": {
-            "type": "integer",
-            "format": "int32"
+          "zone": {
+            "$ref": "#/components/schemas/System.Int32"
           },
-          "IsSouth": {
-            "type": "boolean"
+          "isSouth": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "IsHyperbolic": {
-            "type": "boolean"
+          "isHyperbolic": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "ProjectionHeight": {
-            "type": "number",
-            "format": "double",
+          "projectionHeight": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "HeightViewPoint": {
-            "type": "number",
-            "format": "double",
+          "heightViewPoint": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Sweep": {
+          "sweep": {
             "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.AxisType"
           },
-          "AzimuthCentralLine": {
-            "type": "number",
-            "format": "double",
+          "azimuthCentralLine": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Weight": {
-            "type": "number",
-            "format": "double",
+          "weight": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Landsat": {
-            "type": "integer",
-            "format": "int32",
+          "landsat": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Path": {
-            "type": "integer",
-            "format": "int32",
+          "path": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Alpha": {
-            "type": "number",
-            "format": "double",
+          "alpha": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Gamma": {
-            "type": "number",
-            "format": "double",
+          "gamma": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Longitude1": {
-            "type": "number",
-            "format": "double",
+          "longitude1": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Longitude2": {
-            "type": "number",
-            "format": "double",
+          "longitude2": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "LongitudeCentralPoint": {
-            "type": "number",
-            "format": "double",
+          "longitudeCentralPoint": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "NoOffset": {
-            "type": "boolean"
+          "noOffset": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "NoRotation": {
-            "type": "boolean"
+          "noRotation": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "AreaNormalizationTransform": {
+          "areaNormalizationTransform": {
             "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.AreaNormalizationTransformType"
           },
-          "PegLatitude": {
-            "type": "number",
-            "format": "double",
+          "pegLatitude": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "PegLongitude": {
-            "type": "number",
-            "format": "double",
+          "pegLongitude": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "PegHeading": {
-            "type": "number",
-            "format": "double",
+          "pegHeading": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "N": {
-            "type": "number",
-            "format": "double",
+          "n": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "Q": {
-            "type": "number",
-            "format": "double",
+          "q": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.CartographicProjection.Model.CartographicProjectionLight": {
         "type": "object",
         "properties": {
-          "MetaInfo": {
-            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
-          },
-          "Name": {
-            "type": "string",
+          "metaInfo": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+              }
+            ],
             "nullable": true
           },
-          "Description": {
+          "name": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "CreationDate": {
+          "description": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "LastModificationDate": {
+          "creationDate": {
             "type": "string",
-            "format": "date-time",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
-          "IsDefault": {
-            "type": "boolean"
+          "lastModificationDate": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "isDefault": {
+            "$ref": "#/components/schemas/System.Boolean"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.CartographicProjection.Model.CartographicProjectionType": {
         "type": "object",
         "properties": {
-          "Projection": {
+          "projection": {
             "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.ProjectionType"
           },
-          "UseLatitudeOrigin": {
-            "type": "boolean",
-            "readOnly": true
+          "useLatitudeOrigin": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseLatitude1": {
-            "type": "boolean",
-            "readOnly": true
+          "useLatitude1": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseLatitude2": {
-            "type": "boolean",
-            "readOnly": true
+          "useLatitude2": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseLatitudeTrueScale": {
-            "type": "boolean",
-            "readOnly": true
+          "useLatitudeTrueScale": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseLongitudeOrigin": {
-            "type": "boolean",
-            "readOnly": true
+          "useLongitudeOrigin": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseScaling": {
-            "type": "boolean",
-            "readOnly": true
+          "useScaling": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseFalseEastingNorthing": {
-            "type": "boolean",
-            "readOnly": true
+          "useFalseEastingNorthing": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseZone": {
-            "type": "boolean",
-            "readOnly": true
+          "useZone": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseSouth": {
-            "type": "boolean",
-            "readOnly": true
+          "useSouth": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseHyperbolic": {
-            "type": "boolean",
-            "readOnly": true
+          "useHyperbolic": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseProjectionHeight": {
-            "type": "boolean",
-            "readOnly": true
+          "useProjectionHeight": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseHeightViewPoint": {
-            "type": "boolean",
-            "readOnly": true
+          "useHeightViewPoint": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseSweep": {
-            "type": "boolean",
-            "readOnly": true
+          "useSweep": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseAzimuthCentralLine": {
-            "type": "boolean",
-            "readOnly": true
+          "useAzimuthCentralLine": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseWeight": {
-            "type": "boolean",
-            "readOnly": true
+          "useWeight": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseLandsat": {
-            "type": "boolean",
-            "readOnly": true
+          "useLandsat": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UsePath": {
-            "type": "boolean",
-            "readOnly": true
+          "usePath": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseAlpha": {
-            "type": "boolean",
-            "readOnly": true
+          "useAlpha": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseGamma": {
-            "type": "boolean",
-            "readOnly": true
+          "useGamma": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseLongitude1": {
-            "type": "boolean",
-            "readOnly": true
+          "useLongitude1": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseLongitude2": {
-            "type": "boolean",
-            "readOnly": true
+          "useLongitude2": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseLongitudeCentralPoint": {
-            "type": "boolean",
-            "readOnly": true
+          "useLongitudeCentralPoint": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseNoOffset": {
-            "type": "boolean",
-            "readOnly": true
+          "useNoOffset": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseNoRotation": {
-            "type": "boolean",
-            "readOnly": true
+          "useNoRotation": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseAreaNormalizationTransform": {
-            "type": "boolean",
-            "readOnly": true
+          "useAreaNormalizationTransform": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UsePegLatitude": {
-            "type": "boolean",
-            "readOnly": true
+          "usePegLatitude": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UsePegLongitude": {
-            "type": "boolean",
-            "readOnly": true
+          "usePegLongitude": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UsePegHeading": {
-            "type": "boolean",
-            "readOnly": true
+          "usePegHeading": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseN": {
-            "type": "boolean",
-            "readOnly": true
+          "useN": {
+            "$ref": "#/components/schemas/System.Boolean"
           },
-          "UseQ": {
-            "type": "boolean",
-            "readOnly": true
+          "useQ": {
+            "$ref": "#/components/schemas/System.Boolean"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "NORCE.Drilling.CartographicProjection.Model.ProjectionType": {
-        "enum": [
-          "Unknown",
-          "UTM",
-          "LambertConformalConic",
-          "LambertConformalConicAlternative",
-          "LambertEqualAreaConic",
-          "TransverseMercator",
-          "Mercator",
-          "Polyconic",
-          "ModifiedStereographicAlaska",
-          "AlbersEqualArea",
-          "AzimuthalEquidistant",
-          "Aitoff",
-          "Bonne",
-          "CalCoopOceanFish",
-          "Cassini",
-          "CentralCylinder",
-          "EqualAreaCylindrical",
-          "EquidistantCylindrical",
-          "EquidistantConic",
-          "GeostationarySatelliteView",
-          "GeneralSinusoidalSeries",
-          "ModifiedStereographic48US",
-          "ModifiedStereographic50US",
-          "InternationalMapWorldPolyconic",
-          "Laborde",
-          "LambertAzimuthalEqualArea",
-          "Lagrange",
-          "LeeOblatedStereographic",
-          "SpaceObliqueLandsat",
-          "McBrydeThomasFlatPolarSinusoidal",
-          "MillerOblatedStereographic",
-          "SpaceObliqueMISR",
-          "NewZealandMapGrid",
-          "ObliqueMercator",
-          "Orthographic",
-          "QuadrilateralizedSphericalCube",
-          "RoussilheStereographic",
-          "S2",
-          "SphericalCrossTrackHeight",
-          "Sinusoidal",
-          "SwissObliqueMercator",
-          "Stereographic",
-          "ObliqueStereographicAlternative",
-          "UniversalPolarStereographic",
-          "UrmaevV",
-          "WebMercator"
-        ],
-        "type": "string"
+        "type": "integer"
       },
       "NORCE.Drilling.CartographicProjection.ModelShared.GeodeticCoordinate": {
         "type": "object",
         "properties": {
           "LatitudeWGS84": {
-            "type": "number",
-            "format": "double",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
           "LongitudeWGS84": {
-            "type": "number",
-            "format": "double",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
           "VerticalDepthWGS84": {
-            "type": "number",
-            "format": "double",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
           "LatitudeDatum": {
-            "type": "number",
-            "format": "double",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
           "LongitudeDatum": {
-            "type": "number",
-            "format": "double",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
           "VerticalDepthDatum": {
-            "type": "number",
-            "format": "double",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
             "nullable": true
           },
           "OctreeDepth": {
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/System.Int32"
           },
           "OctreeCode": {
             "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.ModelShared.OctreeCodeLong"
           }
-        },
-        "additionalProperties": { }
+        }
       },
       "NORCE.Drilling.CartographicProjection.ModelShared.OctreeCodeLong": {
         "type": "object",
         "properties": {
           "Depth": {
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/System.Int32"
           },
           "CodeHigh": {
-            "type": "integer",
-            "format": "int64"
+            "$ref": "#/components/schemas/System.Int64"
           },
           "CodeLow": {
-            "type": "integer",
-            "format": "int64"
+            "$ref": "#/components/schemas/System.Int64"
           }
-        },
-        "additionalProperties": { }
+        }
       },
       "OSDC.DotnetLibraries.General.DataManagement.MetaInfo": {
         "type": "object",
         "properties": {
-          "ID": {
-            "type": "string",
-            "format": "uuid"
+          "id": {
+            "$ref": "#/components/schemas/System.Guid"
           },
-          "HttpHostName": {
+          "httpHostName": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "HttpHostBasePath": {
+          "httpHostBasePath": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           },
-          "HttpEndPoint": {
+          "httpEndPoint": {
             "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
+      },
+      "System.Boolean": {
+        "type": "boolean"
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.CartographicProjection.Model.CartographicConversionSet, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicConversionSet"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.CartographicProjection.Model.CartographicConversionSetLight, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicConversionSetLight"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.CartographicProjection.Model.CartographicProjection, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicProjection"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.CartographicProjection.Model.CartographicProjectionLight, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicProjectionLight"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[NORCE.Drilling.CartographicProjection.Model.CartographicProjectionType, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicProjectionType"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[OSDC.DotnetLibraries.General.DataManagement.MetaInfo, OSDC.DotnetLibraries.General.DataManagement, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.Guid"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.String"
+        }
+      },
+      "System.Collections.Generic.List`1[[Model.CountPerDay, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Model.CountPerDay"
+        }
+      },
+      "System.Collections.Generic.List`1[[NORCE.Drilling.CartographicProjection.Model.CartographicCoordinate, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NORCE.Drilling.CartographicProjection.Model.CartographicCoordinate"
+        }
+      },
+      "System.DateTime": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Guid": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "System.Int32": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int32"
+      },
+      "System.Int64": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int64"
+      },
+      "System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
+      },
+      "System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int32"
+      },
+      "System.String": {
+        "type": "string"
+      },
+      "System.TimeSpan": {
+        "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+        "type": "string"
+      },
+      "System.UInt64": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "uint64"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "CartographicConversionSet"
+    },
+    {
+      "name": "CartographicProjection"
+    },
+    {
+      "name": "CartographicProjectionType"
+    },
+    {
+      "name": "CartographicProjectionUsageStatistics"
+    }
+  ]
 }

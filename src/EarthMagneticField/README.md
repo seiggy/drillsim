@@ -70,10 +70,8 @@ The server publishes exactly three underscore-named tools:
 ## Generation and validation
 
 ```powershell
-dotnet tool restore
 dotnet restore EarthMagneticField.sln
-dotnet build Service/Service.csproj -c Release --no-restore
-dotnet swagger tofile --output ModelSharedOut/json-schemas/EarthMagneticFieldFullName.json Service/bin/Release/net8.0/Service.dll v1
+dotnet build Service/Service.csproj -c Debug --no-restore
 dotnet run --project ModelSharedOut/ModelSharedOut.csproj -c Release
 dotnet build EarthMagneticField.sln -c Release --no-restore
 dotnet test EarthMagneticField.sln -c Release --no-build

@@ -3,6 +3,7 @@ using System.Text;
 using Newtonsoft.Json;
 using OSDC.DotnetLibraries.General.DataManagement;
 using OSDC.UnitConversion.Conversion.DrillingEngineering;
+using DrillingUnitChoiceSet = OSDC.UnitConversion.Conversion.UnitSystem.DrillingEngineering.DrillingUnitSystem;
 
 namespace YPLCalibrationFromRheometer.ResetDefaultUnitSystems
 {
@@ -48,7 +49,7 @@ namespace YPLCalibrationFromRheometer.ResetDefaultUnitSystems
                         }
                         Console.WriteLine();
                         #region find missing default unit system set
-                        DrillingUnitChoiceSet SI = DrillingUnitChoiceSet.DrillingSIUnitChoiceSet;
+                        DrillingUnitChoiceSet SI = DrillingUnitChoiceSet.SIUnitSystem;
                         MetaInfo? SIInfo = null;
                         foreach (var item in initialUnitSystemSetIDs)
                         {
@@ -63,7 +64,7 @@ namespace YPLCalibrationFromRheometer.ResetDefaultUnitSystems
                             Console.WriteLine("Missing SI Unit System.");
                             Add(httpClient, SI);
                         }
-                        DrillingUnitChoiceSet metric = DrillingUnitChoiceSet.DrillingMetricUnitChoiceSet;
+                        DrillingUnitChoiceSet metric = DrillingUnitChoiceSet.MetricUnitSystem;
                         MetaInfo? metricInfo = null;
                         foreach (var item in initialUnitSystemSetIDs)
                         {
@@ -78,7 +79,7 @@ namespace YPLCalibrationFromRheometer.ResetDefaultUnitSystems
                             Console.WriteLine("Missing metric Unit System.");
                             Add(httpClient, metric);
                         }
-                        DrillingUnitChoiceSet US = DrillingUnitChoiceSet.DrillingUSUnitChoiceSet;
+                        DrillingUnitChoiceSet US = DrillingUnitChoiceSet.USUnitSystem;
                         MetaInfo? USInfo = null;
                         foreach (var item in initialUnitSystemSetIDs)
                         {
@@ -93,7 +94,7 @@ namespace YPLCalibrationFromRheometer.ResetDefaultUnitSystems
                             Console.WriteLine("Missing US Unit System.");
                             Add(httpClient, US);
                         }
-                        DrillingUnitChoiceSet imperial = DrillingUnitChoiceSet.DrillingImperialUnitChoiceSet;
+                        DrillingUnitChoiceSet imperial = DrillingUnitChoiceSet.ImperialUnitSystem;
                         MetaInfo? imperialInfo = null;
                         foreach (var item in initialUnitSystemSetIDs)
                         {
