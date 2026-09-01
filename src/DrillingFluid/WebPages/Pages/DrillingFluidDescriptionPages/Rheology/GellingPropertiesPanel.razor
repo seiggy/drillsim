@@ -1,0 +1,242 @@
+<MudPaper Class="my-4 mx-4" Style="@($"background:{Colors.Gray.Lighten4};")">  
+    <MudToolBar>          
+        <MudText Class="mt-1 mx-2" Typo="Typo.body1"><b>Gelling Properties</b></MudText>                        
+        <MudSpacer/>
+        <MudButton Class="mx-2" StartIcon="@showGellingIcon" OnClick="OpenAndCloseTab " Size="Size.Medium"/>                                  
+    </MudToolBar>
+    <MudCollapse Expanded="@showPanel">
+        <MudDivider Class="pb-2"/>     
+        <MudToolBar>          
+            <MudText Class="mt-1 mx-2" Typo="Typo.body1"><b>Gel property table</b></MudText>                                    
+            <MudSpacer/>         
+            <MudButton StartIcon="@chartIcon" IconColor="@chartButtonColor" OnClick="@ShowChart">@chartText</MudButton>                  
+            <MudButton StartIcon="@Icons.Material.Outlined.Add" IconColor="@Color.Success" OnClick="@AddTableLine">Add property</MudButton>      
+            <MudButton StartIcon="@Icons.Material.Outlined.Remove" IconColor="@Color.Error" OnClick="@RemoveTableLine">Remove property</MudButton>              
+        </MudToolBar>          
+        <!-- First Instance -->
+        
+        <MudStack>       
+            <MudCollapse Expanded="@showChart">
+                <MudItem xs="12">
+                    <GellingCurve GelDataList="@gelDataList"/>
+                </MudItem>  
+            </MudCollapse>
+            <MudItem xs="12">   
+            <MudGrid Class="mx-3 pb-4">        
+                <MudItem xs="3" Class ="mx-2 my-2">
+                    <MudInputWithUnitAdornment VariantType="Variant.Text"
+                        QuantityLabel="Gel Strength" QuantityName="FluidShearStress"
+                        SIValueNullable="@gelStrengthList[0]"
+                        SIValueNullableChanged="val => {UpdateGelStrength(val, 0);}"/>
+                </MudItem>
+                <MudItem xs="3" Class ="mx-2 my-2">
+                    <MudInputWithUnitAdornment VariantType="Variant.Text"
+                        QuantityLabel="Gel Duration" QuantityName="DurationDrilling"
+                        SIValueNullable="@gelDurationList[0]"
+                        SIValueNullableChanged="val => {UpdateGelDuration(val, 0);}"/>
+                </MudItem>
+                <MudItem xs="3" Class ="mx-2 my-2">
+                    <MudInputWithUnitAdornment VariantType="Variant.Text"
+                        QuantityLabel="Temperature" QuantityName="TemperatureDrilling"
+                        SIValueNullable="@temperatureList[0]"
+                        SIValueNullableChanged="val => {UpdateTemperature(val, 0);}"/>
+                </MudItem>                                        
+            </MudGrid>
+
+            @for (int i = 1; i < gelDataList.Count; i++)
+            {
+                int index = i;       
+                <MudDivider/>
+                <MudGrid Class="mx-3 pb-4">        
+                    <MudItem xs="3" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Gel Strength" QuantityName="FluidShearStress"
+                            SIValueNullable="@gelStrengthList[index]"
+                            SIValueNullableChanged="val => {UpdateGelStrength(val, index);}"/>
+                    </MudItem>
+                    <MudItem xs="3" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Gel Duration" QuantityName="DurationDrilling"
+                            SIValueNullable="@gelDurationList[index]"
+                            SIValueNullableChanged="val => {UpdateGelDuration(val, index);}"/>
+                    </MudItem>
+                    <MudItem xs="3" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Temperature" QuantityName="TemperatureDrilling"
+                            SIValueNullable="@temperatureList[index]"
+                            SIValueNullableChanged="val => {UpdateTemperature(val, index);}"/>
+                    </MudItem>                                        
+                </MudGrid>
+            }
+            </MudItem>
+            
+        </MudStack>
+        @if (showAlert)
+        {
+            <MudAlert Severity="Severity.Error" 
+                ContentAlignment="HorizontalAlignment.Center" 
+                ShowCloseIcon="true" 
+                CloseIconClicked="CloseAlert">
+                    At least <b>two</b> itens are necessary!
+            </MudAlert>
+        }
+    </MudCollapse>
+</MudPaper>    
+
+@code{
+    [Parameter]
+    public GellingProperties GellingProperties {get; set;} = PseudoConstructors.ConstructGellingProperties();
+
+    //Collapse control
+    private bool showPanel = true;
+    private string showGellingIcon = Icons.Material.Filled.ExpandLess;  
+    //Chart flow control
+    private bool showChart = false;    
+    private string chartIcon = Icons.Material.Filled.InsertChart;
+    private string chartText = "View chart";
+    private MudBlazor.Color chartButtonColor = Color.Primary;
+    //Gel Data variables
+    private List<GelData> gelDataList = new List<GelData>
+    {
+        new GelData 
+        {
+            GelDuration = ConversionsFromOSDC.DoubleToGaussian(10),
+            GelStrength = ConversionsFromOSDC.DoubleToGaussian(null),
+            Temperature = ConversionsFromOSDC.DoubleToGaussian(323),
+        },
+        new GelData 
+        {
+            GelDuration = ConversionsFromOSDC.DoubleToGaussian(600),
+            GelStrength = ConversionsFromOSDC.DoubleToGaussian(null),
+            Temperature = ConversionsFromOSDC.DoubleToGaussian(323),
+        },
+    };
+    private List<double?> gelDurationList = new List<double?> {10, 600};
+    private List<double?> gelStrengthList = new List<double?> {null, null};
+    private List<double?> temperatureList = new List<double?> {323, 323};
+
+    // Message box
+    private bool showAlert = false;
+    protected override void OnInitialized()
+    {
+        gelDataList = GellingProperties.GelPropertiesTable.ToList();
+        // Populate auxiliary variables with the pre-existing values
+        for (int i = 0; i < gelDataList.Count; i++)
+        {
+            if (i > gelDurationList.Count - 1)
+            {
+                gelDurationList.Add(ConversionsFromOSDC.GaussianToDouble(gelDataList[i].GelDuration));
+                temperatureList.Add(ConversionsFromOSDC.GaussianToDouble(gelDataList[i].Temperature));
+                gelStrengthList.Add(ConversionsFromOSDC.GaussianToDouble(gelDataList[i].GelStrength));                   
+            }
+            else
+            {
+                gelDurationList[i] = ConversionsFromOSDC.GaussianToDouble(gelDataList[i].GelDuration);
+                temperatureList[i] = ConversionsFromOSDC.GaussianToDouble(gelDataList[i].Temperature);
+                gelStrengthList[i] = ConversionsFromOSDC.GaussianToDouble(gelDataList[i].GelStrength);                               
+            }
+        }
+    }
+    protected override void OnParametersSet()
+    {
+        gelDataList = GellingProperties.GelPropertiesTable.ToList();
+        // Populate auxiliary variables with the pre-existing values
+        for (int i = 0; i < gelDataList.Count; i++)
+        {
+            if (i > gelDurationList.Count - 1)
+            {
+                gelDurationList.Add(ConversionsFromOSDC.GaussianToDouble(gelDataList[i].GelDuration));
+                temperatureList.Add(ConversionsFromOSDC.GaussianToDouble(gelDataList[i].Temperature));
+                gelStrengthList.Add(ConversionsFromOSDC.GaussianToDouble(gelDataList[i].GelStrength));                   
+            }
+            else
+            {
+                gelDurationList[i] = ConversionsFromOSDC.GaussianToDouble(gelDataList[i].GelDuration);
+                temperatureList[i] = ConversionsFromOSDC.GaussianToDouble(gelDataList[i].Temperature);
+                gelStrengthList[i] = ConversionsFromOSDC.GaussianToDouble(gelDataList[i].GelStrength);                               
+            }
+        }
+    }
+    void OpenAndCloseTab()
+    {
+        //Control collapse of this property
+        if (showPanel)
+        {
+            showGellingIcon = Icons.Material.Filled.ExpandMore;     
+        }    
+        else
+        {
+            showGellingIcon = Icons.Material.Filled.ExpandLess;
+        }
+        showPanel = !showPanel;
+    }
+    void AddTableLine()
+    {
+        gelDataList.Add(
+            new GelData 
+            {
+                GelDuration = ConversionsFromOSDC.DoubleToGaussian(null),
+                GelStrength = ConversionsFromOSDC.DoubleToGaussian(null),
+                Temperature = ConversionsFromOSDC.DoubleToGaussian(323),
+            }
+        );
+        gelDurationList.Add(null);
+        temperatureList.Add(323);
+        gelStrengthList.Add(null);
+    }
+    void ShowChart()
+    {
+        showChart = !showChart;
+        if (showChart)
+        {
+            chartText = "Hide chart";  
+            chartIcon = Icons.Material.Filled.InsertChartOutlined;
+            chartButtonColor = Color.Error;  
+        }
+        else
+        {
+            chartText = "Show chart";
+            chartIcon = Icons.Material.Filled.InsertChart;
+            chartButtonColor = Color.Primary;  
+        }
+    }
+    void RemoveTableLine()
+    {
+        if (gelDataList.Count > 2)
+        {
+            gelDataList.RemoveAt(gelDataList.Count - 1);
+            gelDurationList.RemoveAt(gelDurationList.Count - 1);
+            temperatureList.RemoveAt(temperatureList.Count - 1);
+            gelStrengthList.RemoveAt(gelStrengthList.Count - 1);
+        }
+        else
+        {
+            showAlert = true;
+        }
+
+    }
+    void CloseAlert()
+    {
+        showAlert = false;
+    }
+    //Unit manangement
+    private void ManageUnits(){}
+    private void UpdateGelStrength(double? var, int index)
+    {
+        gelStrengthList[index] = var;
+        GellingProperties.GelPropertiesTable = gelDataList;
+        gelDataList[index].GelStrength = ConversionsFromOSDC.DoubleToGaussian(var);
+    }
+    private void UpdateGelDuration(double? var, int index)
+    {
+        gelDurationList[index] = var;
+        GellingProperties.GelPropertiesTable = gelDataList;
+        gelDataList[index].GelDuration = ConversionsFromOSDC.DoubleToGaussian(var);
+    }
+    private void UpdateTemperature(double? var, int index)
+    {
+        temperatureList[index] = var;
+        GellingProperties.GelPropertiesTable = gelDataList;
+        gelDataList[index].Temperature = ConversionsFromOSDC.DoubleToGaussian(var);
+    }
+}

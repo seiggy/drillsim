@@ -1,0 +1,106 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System.IO;
+using NORCE.Drilling.Trajectory.Service;
+using NORCE.Drilling.Trajectory.Service.Managers;
+using System;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration["ConnectionStrings:Sqlite"] ??= $"Data Source={Path.Combine("..", "home", "Trajectory.db")}";
+builder.AddServiceDefaults();
+
+// registering the managers of SQLite connections through dependency injection
+builder.Services.AddSingleton(sp => new SqlConnectionManagerTrajectory(
+    builder.Configuration["ConnectionStrings:Sqlite"]!,
+    sp.GetRequiredService<ILogger<SqlConnectionManagerTrajectory>>()));
+builder.Services.AddSingleton<SqlConnectionManager>(sp => sp.GetRequiredService<SqlConnectionManagerTrajectory>());
+builder.Services.AddSingleton<SqlConnectionManagerSeparationFactorResults>();
+builder.Services.AddSingleton<SqlConnectionManagerOctree>();
+
+// registering the database cleaner service through dependency injection
+builder.Services.AddHostedService(sp => new DatabaseCleanerService(
+    sp.GetRequiredService<ILogger<DatabaseCleanerService>>(),
+    sp.GetRequiredService<SqlConnectionManager>()));
+
+// serialization settings (using System.Json)
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        JsonSettings.ApplyTo(options.JsonSerializerOptions);
+    });
+
+// serialize using short name rather than full names
+builder.Services.AddSwaggerGen(config =>
+{
+    config.CustomSchemaIds(type => type.FullName);
+});
+
+var app = builder.Build();
+
+var basePath = "/trajectory/api";
+
+app.UsePathBase(basePath);
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto
+});
+
+if (!String.IsNullOrEmpty(builder.Configuration["FieldHostURL"]))
+    ServiceConfiguration.FieldHostURL = builder.Configuration["FieldHostURL"];
+if (!String.IsNullOrEmpty(builder.Configuration["ClusterHostURL"]))
+    ServiceConfiguration.ClusterHostURL = builder.Configuration["ClusterHostURL"];
+if (!String.IsNullOrEmpty(builder.Configuration["WellBoreHostURL"]))
+    ServiceConfiguration.WellBoreHostURL = builder.Configuration["WellBoreHostURL"];
+if (!String.IsNullOrEmpty(builder.Configuration["WellBoreArchitectureHostURL"]))
+    ServiceConfiguration.WellBoreArchitectureHostURL = builder.Configuration["WellBoreArchitectureHostURL"];
+if (!String.IsNullOrEmpty(builder.Configuration["WellHostURL"]))
+    ServiceConfiguration.WellHostURL = builder.Configuration["WellHostURL"];
+if (!String.IsNullOrEmpty(builder.Configuration["SurveyInstrumentHostURL"]))
+    ServiceConfiguration.SurveyInstrumentHostURL = builder.Configuration["SurveyInstrumentHostURL"];
+
+if (builder.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
+}
+
+//app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+string relativeSwaggerPath = "/swagger/merged/swagger.json";
+string fullSwaggerPath = $"{basePath}{relativeSwaggerPath}";
+string customVersion = "Merged API Version 1";
+string exposedModel = "wwwroot/json-schema/TrajectoryMergedModel.json";
+if (File.Exists(exposedModel))
+{
+    var mergedDoc = SwaggerMiddlewareExtensions.ReadOpenApiDocument(exposedModel);
+    app.UseCustomSwagger(mergedDoc, relativeSwaggerPath);
+    app.UseSwaggerUI(c =>
+    {
+        //c.SwaggerEndpoint("v1/swagger.json", "API Version 1");
+        c.SwaggerEndpoint(fullSwaggerPath, customVersion);
+    });
+}
+
+app.UseCors(cors => cors
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .SetIsOriginAllowed(origin => true)
+                        .AllowCredentials()
+           );
+
+app.MapControllers();
+app.MapFallbackToFile("index.html");
+app.MapDefaultEndpoints();
+
+app.Run();

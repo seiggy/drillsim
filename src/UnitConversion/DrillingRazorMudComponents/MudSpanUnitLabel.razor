@@ -1,0 +1,72 @@
+﻿@namespace OSDC.UnitConversion.DrillingRazorMudComponents
+@implements IUnitAwareComponent
+@inject ILogger<MudSpanUnitLabel> logger
+
+<MudTextField @bind-Value="@UnitLabel" ReadOnly="true" Variant="@VariantType" />
+
+@code {
+    [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? Parent { get; set; }
+
+    [Parameter]
+    public string? QuantityName { get; set; }
+
+    [Parameter]
+    public Variant VariantType { get; set; } = Variant.Text;
+
+    [Parameter]
+    public DrillingSignalReferenceType DrillingSignalReference { get; set; } = DrillingSignalReferenceType.Independent;
+
+    [Parameter]
+    public bool Hidden { get; set; }
+
+    private string? UnitLabel { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Parent == null)
+            throw new ArgumentNullException(nameof(Parent), "SpanUnitLabel must exist within a UnitAndReferenceChoiceTag");
+        base.OnInitialized();
+        Parent.Add(this);
+        ManageUnits();
+    }
+    public void ManageUnits()
+    {
+        try
+        {
+            if (Parent != null && !string.IsNullOrEmpty(Parent.UnitSystemName))
+            {
+                switch (DrillingSignalReference)
+                {
+                    case DrillingSignalReferenceType.Pressure:
+                        UnitLabel = Parent.GetPressureUnitLabel(QuantityName!);
+                        break;
+                    case DrillingSignalReferenceType.Azimuth:
+                        UnitLabel = Parent.GetAzimuthUnitLabel(QuantityName!);
+                        break;
+                    case DrillingSignalReferenceType.Depth:
+                        UnitLabel = Parent.GetDepthUnitLabel(QuantityName!);
+                        break;
+                    case DrillingSignalReferenceType.Position:
+                        UnitLabel = Parent.GetPositionUnitLabel(QuantityName!);
+                        break;
+                    case DrillingSignalReferenceType.Geodetic:
+                        UnitLabel = Parent.GetGeodeticUnitLabel(QuantityName!);
+                        break;
+                    default:
+                        UnitLabel = Parent.GetUnitLabel(QuantityName!);
+                        break;
+                }
+            }
+            else
+            {
+                UnitLabel = "";
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem while managing units in MudSpanUnitLabel");
+        }
+    }
+
+}

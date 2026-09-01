@@ -1,0 +1,480 @@
+@inject IDrillingFluidAPIUtils Api
+@inject ISnackbar Snackbar
+@inject ILogger<MudInputWithUnitAdornment> logger
+<MudPaper Elevation="2" Class="py-6" Style="@($"position: {DataUtils.FLOATING_POSITION}; background:{DataUtils.FLOATING_COLOUR_DEEP};")" >            
+    <MudPaper Class="mx-4 my-4">
+        <MudToolBar>
+            <MudText Class="mx-n1 mt-2 mb-1" Typo="Typo.body1"><b>NEW BASE OIL ELEMENT</b></MudText>
+        </MudToolBar>
+        <MudGrid Class="xm-2 ym-2">
+            <MudItem Class="ml-4 mr-2 my-2" xs="2">
+                <MudTextField @bind-Value="@baseOilInstance.Name" Label="Name" ShrinkLabel Variant="Variant.Text"/>
+            </MudItem>
+            <MudItem xs="2" Class ="my-2">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                    QuantityLabel="Mass Density" QuantityName="MassDensityDrilling"
+                    SIValueNullable="@massDensity"
+                    SIValueNullableChanged="@UpdateMassDensity"/>
+            </MudItem> 
+            <MudItem xs="2" Class ="my-2">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                    QuantityLabel="Mass Fraction" QuantityName="MassDrilling"
+                    SIValueNullable="@massFraction"
+                    SIValueNullableChanged="@UpdateMassFraction"/>
+            </MudItem> 
+            <MudSpacer/>    
+        </MudGrid>
+        <br/>
+        <MudGrid Class="xm-2 ym-2 yp-2">
+            <MudItem xs="6" >
+                <MudPaper Class="my-4 mx-4" Style="@($"background:{Colors.Gray.Lighten4};")">
+                    <MudText Class="my-1 mx-1" Typo="Typo.body2"><b>Heat Capacity</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Temperature 1" QuantityName="TemperatureDrilling"
+                                SIValueNullable="@temperatureHeatCapacity1"
+                                SIValueNullableChanged="@UpdateTemperatureHeatCapacity1"/>
+                        </MudItem>   
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Temperature 2" QuantityName="TemperatureDrilling"
+                                SIValueNullable="@temperatureHeatCapacity2"
+                                SIValueNullableChanged="@UpdateTemperatureHeatCapacity2"/>
+                        </MudItem>   
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Heat Capacity at T1" QuantityName="IsobaricSpecificHeatCapacityDrilling"
+                                SIValueNullable="@heatCapacity1"
+                                SIValueNullableChanged="@UpdateHeatCapacity1"/>
+                        </MudItem>   
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Heat Capacity at T2" QuantityName="IsobaricSpecificHeatCapacityDrilling"
+                                SIValueNullable="@heatCapacity2"
+                                SIValueNullableChanged="@UpdateHeatCapacity2"/>
+                        </MudItem>  
+                    </MudGrid>
+                </MudPaper> 
+            </MudItem>
+            <MudSpacer/>
+            <!-- #region -->
+            <MudItem xs="6">
+                <MudPaper Class="my-4 mx-4" Style="@($"background:{Colors.Gray.Lighten4};")">
+                    <MudText Class="my-1 mx-1" Typo="Typo.body2"><b>Thermal Conductivity</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Temperature 1" QuantityName="TemperatureDrilling"
+                                SIValueNullable="@temperatureThermalConductivity1"
+                                SIValueNullableChanged="@UpdateTemperatureThermalConductivity1"/>
+                        </MudItem>   
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Temperature 2" QuantityName="TemperatureDrilling"
+                                SIValueNullable="@temperatureThermalConductivity2"
+                                SIValueNullableChanged="@UpdateTemperatureThermalConductivity2"/>
+                        </MudItem> 
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Thermal Conductivity 1" QuantityName="ThermalConductivityDrilling"
+                                SIValueNullable="@thermalConductivity1"
+                                SIValueNullableChanged="@UpdateThermalConductivity1"/>
+                        </MudItem>   
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Thermal Conductivity 2" QuantityName="ThermalConductivityDrilling"
+                                SIValueNullable="@thermalConductivity2"
+                                SIValueNullableChanged="@UpdateThermalConductivity2"/>
+                        </MudItem> 
+                    </MudGrid>
+                </MudPaper> 
+            </MudItem>
+        </MudGrid>
+        <MudPaper Class="mx-4 my-2" Style="@($"background:{Colors.Gray.Lighten4};")">
+            <MudText Class="my-2 mx-4" Typo="Typo.body2"><b>Single salt PVT relation</b></MudText>
+            <MudText Align="Align.Center" Class="my-4 mx-4" Typo="Typo.body2">
+                ρ @(Parent.GetUnitLabel("MassDensityDrilling")) = @(RoundDoubleForTextWithUnits(a0, "MassDensityDrilling"))             
+                    + @(RoundDoubleForTextWithUnits(b0, "MassDensityGradientPerTemperatureDrilling")) × T 
+                    + (@(RoundDoubleForTextWithUnits(c0, "MassDensityGradientPerPressureDrilling")) 
+                    + @(RoundDoubleForTextWithUnits(d0, "MassDensityGradientPerPressureTemperatureDrilling")) × T) × P 
+                    + (@(RoundDoubleForTextWithUnits(e0, "MassDensityGradientPerPressureSquaredDrilling")) 
+                    + @(RoundDoubleForTextWithUnits(f0, "MassDensityGradientPerPressureSquaredTemperature")) × T) × P²
+            </MudText>
+            <MudGrid Class="my-2 mx-3">
+                <MudItem xs="2" Class ="mx-2 my-2">
+                    <MudInputWithUnitAdornment VariantType="Variant.Text"
+                        QuantityLabel="Pressure" QuantityName="PressureDrilling"
+                        SIValueNullable="@pressure"
+                        SIValueNullableChanged="@UpdatePressure"/>
+                </MudItem>   
+                <MudItem xs="2" Class ="mx-2 my-2">
+                    <MudInputWithUnitAdornment VariantType="Variant.Text"
+                        QuantityLabel="Temperature" QuantityName="TemperatureDrilling"
+                        SIValueNullable="@temperature"
+                        SIValueNullableChanged="@UpdateTemperature"/>
+                </MudItem>   
+            </MudGrid>
+            <MudGrid Class="my-2 mx-3">
+                    <MudItem xs="2" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="A0" QuantityName="MassDensityDrilling"
+                            SIValueNullable="@a0"
+                            SIValueNullableChanged="@UpdateA0"/>
+                    </MudItem>   
+                    <MudItem xs="2" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="B0" QuantityName="MassDensityGradientPerTemperatureDrilling"
+                            SIValueNullable="@b0"
+                            SIValueNullableChanged="@UpdateB0"/>
+                    </MudItem>                  
+                    <MudItem xs="2" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="C0" QuantityName="MassDensityGradientPerPressureDrilling"
+                            SIValueNullable="@c0"
+                            SIValueNullableChanged="@UpdateC0"/>
+                    </MudItem>   
+                    <MudItem xs="2" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="D0" QuantityName="MassDensityGradientPerPressureTemperatureDrilling"
+                            SIValueNullable="@d0"
+                            SIValueNullableChanged="@UpdateD0"/>
+                    </MudItem>   
+                    <MudItem xs="2" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="E0" QuantityName="MassDensityGradientPerPressureSquaredDrilling"
+                            SIValueNullable="@e0"
+                            SIValueNullableChanged="@UpdateE0"/>
+                    </MudItem>   
+                    <MudItem xs="2" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="F0" QuantityName="MassDensityGradientPerPressureSquaredTemperature"
+                            SIValueNullable="@f0"
+                            SIValueNullableChanged="@UpdateF0"/>
+                    </MudItem>       
+                </MudGrid>
+        </MudPaper>
+        <MudToolBar>
+            <MudButton StartIcon="@Icons.Material.Outlined.Save" IconColor="@Color.Primary" OnClick="@AddBaseOilComponent">Add BaseOil element</MudButton>        
+            @if (BaseOilId != null)
+            {
+                <MudButton StartIcon="@Icons.Material.Outlined.Save" IconColor="@Color.Primary" OnClick="@EditBaseOilComponent">Save changes</MudButton>        
+            }  
+            <MudSpacer/>
+            <MudButton StartIcon="@Icons.Material.Outlined.Close" IconColor="@Color.Error" OnClick="@CloseAddPanel">Close</MudButton>                    
+        </MudToolBar>
+    </MudPaper>
+</MudPaper>
+
+@code{
+    [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? Parent { get; set; }
+    [Parameter]
+    public EventCallback OnMessageSent {get; set;}
+    [Parameter]
+    public Guid? BaseOilId { get; set; } = null;
+    // Create a base BaseOil composition with properly initialized empty values
+    private BaseOil baseOilInstance = new BaseOil
+    {
+        MetaInfo = new MetaInfo{ID = Guid.NewGuid()},
+        Name = "BaseOil",
+        CreationDate = DateTimeOffset.UtcNow,
+        LastModificationDate = DateTimeOffset.UtcNow,
+        MassDensity = ConversionsFromOSDC.DoubleToGaussian(null),
+        ThermalConductivity = new ThermalConductivity
+        {
+            Slope = ConversionsFromOSDC.DoubleToGaussian(null),
+            ThermalConductivityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(null)
+        },
+        SpecificHeatCapacity = new SpecificHeatCapacity
+        {
+            Slope = ConversionsFromOSDC.DoubleToGaussian(null),
+            HeatCapacityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(null)
+        },
+        PVTParameters = null        
+    };
+    private double? massDensity;
+    private double? massFraction;
+    private double? heatCapacity1;
+    private double? temperatureHeatCapacity1;
+    private double? heatCapacity2;
+    private double? temperatureHeatCapacity2;
+    private double? thermalConductivity1;
+    private double? temperatureThermalConductivity1;
+    private double? thermalConductivity2;
+    private double? temperatureThermalConductivity2;
+
+    private double? pressure = 100_000;
+    private double? temperature = 323;
+    private double? a0;
+    private double? b0;
+    private double? c0;
+    private double? d0;
+    private double? e0;
+    private double? f0;
+    private BaseOilPVTParameters pvtParameters = PseudoConstructors.ConstructBaseOilPVTParameters();
+    private async Task SendMessage()
+    {
+        await OnMessageSent.InvokeAsync();
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        if (BaseOilId != null)
+        {
+            baseOilInstance = await Api.ClientDrillingFluid.GetBaseOilByIdAsync((Guid)BaseOilId);
+        }
+    }
+    private async Task AddBaseOilComponent()
+    {
+        try
+        {
+            baseOilInstance.MetaInfo = new MetaInfo{ID = Guid.NewGuid()};
+            baseOilInstance.PVTParameters = pvtParameters;
+            await Api.ClientDrillingFluid.PostBaseOilAsync(baseOilInstance);
+            logger.LogInformation("BaseOil component posted successfully");
+            Snackbar.Add("BaseOil component posted successfully", Severity.Success);            
+            await SendMessage();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to add a new baseOil component");
+            Snackbar.Add("Impossible to add a new baseOil component", Severity.Warning);
+        }
+    }
+     private async Task EditBaseOilComponent()
+    {
+        try
+        {
+            baseOilInstance.PVTParameters = pvtParameters;
+            await Api.ClientDrillingFluid.PutBaseOilByIdAsync(baseOilInstance.MetaInfo.ID, baseOilInstance);
+            logger.LogInformation("BaseOil component posted successfully");
+            Snackbar.Add("BaseOil component posted successfully", Severity.Success);            
+            await SendMessage();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to add a new baseOil component");
+            Snackbar.Add("Impossible to add a new baseOil component", Severity.Warning);
+        }
+    }
+    private async Task CloseAddPanel()
+    {        
+        await SendMessage();
+    }
+    protected override void OnInitialized()
+    {
+        
+    } 
+    private void ManageUnits(){}
+    private string RoundDoubleForText(double? val)
+    {
+        if (val == null)
+        {
+            return "0";
+        }
+        else 
+        {
+            int valRound = (int) val * 100;
+            return $"{(double)valRound/100}";
+        }
+    } 
+    private string RoundDoubleForTextWithUnits(double? val, string Units)
+    {
+        if (val == null)
+        {
+            return "0";
+        }
+        else 
+        {
+            int valRound = (int) val * 100;
+            return $"{ Parent.FromSI((double)valRound/100, Units)}";
+        }
+    }  
+    private void UpdateMassDensity(double? val)
+    {
+        massDensity = val;
+        baseOilInstance.MassDensity = ConversionsFromOSDC.DoubleToGaussian(val);
+    } 
+    private void UpdateMassFraction(double? val)
+    {
+        massFraction = val;
+        baseOilInstance.MassFraction = ConversionsFromOSDC.DoubleToGaussian(val);
+    } 
+
+    private void CalculateLinearHeatCapacity()
+    {
+        if( heatCapacity1 != null &&
+            heatCapacity2 != null &&
+            temperatureHeatCapacity1 != null &&
+            temperatureHeatCapacity2 != null        
+        )
+        {
+            baseOilInstance.SpecificHeatCapacity.TemperatureRange = new List<double?>
+            {  
+                temperatureHeatCapacity1, temperatureHeatCapacity2
+            };
+            baseOilInstance.SpecificHeatCapacity.CoefficientRange = new List<double?>
+            {  
+                heatCapacity1, heatCapacity2
+            };
+            double slope = (double)((heatCapacity2-heatCapacity1)/(temperatureHeatCapacity2-temperatureHeatCapacity1));
+            double atZeroKelvin = (double)(heatCapacity2 - slope * temperatureHeatCapacity2);
+            baseOilInstance.SpecificHeatCapacity.Slope = ConversionsFromOSDC.DoubleToGaussian(slope);
+            baseOilInstance.SpecificHeatCapacity.HeatCapacityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(atZeroKelvin);
+            if (atZeroKelvin < 0.0) 
+            {
+                Snackbar.Add("Heat capacity negative at zero Kelvin!.", Severity.Error);
+            }          
+        }
+        else
+        {
+            baseOilInstance.SpecificHeatCapacity.Slope = ConversionsFromOSDC.DoubleToGaussian(null);
+            baseOilInstance.SpecificHeatCapacity.HeatCapacityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(null);
+        }
+    }
+    private void CalculateLinearThermalConductivity()
+    {
+        if( thermalConductivity1 != null &&
+            thermalConductivity2 != null &&
+            temperatureThermalConductivity1 != null &&
+            temperatureThermalConductivity2 != null        
+        )
+        {
+            baseOilInstance.ThermalConductivity.TemperatureRange = new List<double?>
+            {  
+                temperatureThermalConductivity1, temperatureThermalConductivity2
+            };
+            baseOilInstance.ThermalConductivity.CoefficientRange = new List<double?>
+            {  
+                thermalConductivity1, thermalConductivity2
+            };
+            double slope = (double)((thermalConductivity2-thermalConductivity1)/(temperatureThermalConductivity2-temperatureThermalConductivity1));
+            double atZeroKelvin = (double)(thermalConductivity2 - slope * temperatureThermalConductivity2);
+            baseOilInstance.ThermalConductivity.Slope = ConversionsFromOSDC.DoubleToGaussian(slope);
+            baseOilInstance.ThermalConductivity.ThermalConductivityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(atZeroKelvin);
+            if (atZeroKelvin < 0.0) 
+            {
+                Snackbar.Add("Thermal conductivity negative at zero Kelvin!.", Severity.Error);
+            }          
+        }
+        else
+        {
+            baseOilInstance.ThermalConductivity.Slope = ConversionsFromOSDC.DoubleToGaussian(null);
+            baseOilInstance.ThermalConductivity.ThermalConductivityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(null);
+        }
+    }
+     private void CalculateMassDensityCalculation()
+    {    
+        if(temperature != null &&
+            pressure != null &&
+            pvtParameters.A0.GaussianValue.Mean != null &&
+            pvtParameters.B0.GaussianValue.Mean != null &&
+            pvtParameters.C0.GaussianValue.Mean != null &&
+            pvtParameters.D0.GaussianValue.Mean != null &&
+            pvtParameters.E0.GaussianValue.Mean != null &&
+            pvtParameters.F0.GaussianValue.Mean != null
+            )
+        {
+            massDensity = 
+                ConversionsFromOSDC.GaussianToDouble(pvtParameters.A0) + 
+                ConversionsFromOSDC.GaussianToDouble(pvtParameters.B0) * temperature +
+                (
+                    ConversionsFromOSDC.GaussianToDouble(pvtParameters.C0) + 
+                    ConversionsFromOSDC.GaussianToDouble(pvtParameters.D0) * temperature) * pressure +
+                (
+                    ConversionsFromOSDC.GaussianToDouble(pvtParameters.E0) + 
+                    ConversionsFromOSDC.GaussianToDouble(pvtParameters.F0) * temperature) * pressure * pressure;
+            baseOilInstance.MassDensity = ConversionsFromOSDC.DoubleToGaussian(massDensity); 
+        }        
+    }
+
+    private void UpdateTemperatureHeatCapacity1(double? val)
+    {
+        temperatureHeatCapacity1 = val;
+        CalculateLinearHeatCapacity();
+    }
+    private void UpdateTemperatureHeatCapacity2(double? val)
+    {
+        temperatureHeatCapacity2 = val;
+        CalculateLinearHeatCapacity();
+    } 
+    private void UpdateHeatCapacity1(double? val)
+    {
+        heatCapacity1 = val;
+        CalculateLinearHeatCapacity();
+    }
+    private void UpdateHeatCapacity2(double? val)
+    {
+        heatCapacity2 = val;
+        CalculateLinearHeatCapacity();
+    } 
+
+
+    private void UpdateTemperatureThermalConductivity1(double? val)
+    {
+        temperatureThermalConductivity1 = val;
+        CalculateLinearThermalConductivity();
+    }
+    private void UpdateTemperatureThermalConductivity2(double? val)
+    {
+        temperatureThermalConductivity2 = val;
+        CalculateLinearThermalConductivity();
+    } 
+    private void UpdateThermalConductivity1(double? val)
+    {
+        thermalConductivity1 = val;
+        CalculateLinearThermalConductivity();
+    }
+    private void UpdateThermalConductivity2(double? val)
+    {
+        thermalConductivity2 = val;
+        CalculateLinearThermalConductivity();
+    }
+
+    private void UpdateA0(double? val)
+    {
+        a0 = val;
+        pvtParameters.A0 = ConversionsFromOSDC.DoubleToGaussian(val);
+        CalculateMassDensityCalculation();
+    }
+    private void UpdateB0(double? val)
+    {
+        b0 = val;
+        pvtParameters.B0 = ConversionsFromOSDC.DoubleToGaussian(val);
+        CalculateMassDensityCalculation();
+    }
+    private void UpdateC0(double? val)
+    {
+        c0 = val;
+        pvtParameters.C0 = ConversionsFromOSDC.DoubleToGaussian(val);
+        CalculateMassDensityCalculation();
+    }
+    private void UpdateD0(double? val)
+    {
+        d0 = val;
+        pvtParameters.D0 = ConversionsFromOSDC.DoubleToGaussian(val);
+        CalculateMassDensityCalculation();
+    }
+    private void UpdateE0(double? val)
+    {
+        e0 = val;
+        pvtParameters.E0 = ConversionsFromOSDC.DoubleToGaussian(val);
+        CalculateMassDensityCalculation();
+    }
+    private void UpdateF0(double? val)
+    {
+        f0 = val;
+        pvtParameters.F0 = ConversionsFromOSDC.DoubleToGaussian(val);
+        CalculateMassDensityCalculation();
+    }   
+    private void UpdatePressure(double? val)
+    {
+        pressure = val;
+        CalculateMassDensityCalculation();
+    } 
+    private void UpdateTemperature(double? val)
+    {
+        temperature = val;
+        CalculateMassDensityCalculation();
+    } 
+}

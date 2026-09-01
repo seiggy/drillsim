@@ -1,0 +1,18 @@
+﻿@inject IJSRuntime jsRuntime;
+
+<MudNavMenu>
+    <MudNavLink Href="/UnitConversion/webapp/UnitConversion" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Autorenew"><strong>Unit Conversions</strong></MudNavLink>
+    <MudNavLink Href="/UnitConversion/webapp/SingleUnitConversion" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Calculate"><strong>Single Conversion</strong></MudNavLink>
+    <MudNavLink Href="/UnitConversion/webapp/PhysicalQuantity" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Balance"><strong>Physical Quantities</strong></MudNavLink>
+    <MudNavGroup Title="Other converters" Icon="@Icons.Material.Filled.MoreHoriz" Expanded="false">
+        <MudNavLink Href="https://www.rigzone.com/calculator/" Target="_blank" Icon="@Icons.Material.Filled.Star">Rigzone</MudNavLink>
+        <MudNavLink Href="https://converter-now.web.app/#/conversions/force" Target="_blank" Icon="@Icons.Material.Filled.Star">Converter-now</MudNavLink>
+        <MudNavLink Href="https://app.digiwells.no/DrillingUnitConversion/webapp/QuantityUnitConversion" Target="_blank" Icon="@Icons.Material.Filled.Star">NORCE v1</MudNavLink>
+        <MudNavLink Href="https://www.convertunits.com/" Target="_blank" Icon="@Icons.Material.Filled.StarHalf">ConvertUnits</MudNavLink>
+        <MudNavLink Href="https://www.unitconverters.net/" Target="_blank" Icon="@Icons.Material.Filled.StarBorder">UnitConverters</MudNavLink>
+        <MudNavLink Href="https://unitsplusconverter.com/" Target="_blank" Icon="@Icons.Material.Filled.StarBorder">UnitsPlusConverter</MudNavLink>
+    </MudNavGroup>
+    <MudNavGroup Title="Statistics" Icon="@Icons.Material.Filled.MoreHoriz" Expanded="false">
+        <MudNavLink Href="/UnitConversion/webapp/Statistics" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Balance"><strong>Statistics</strong></MudNavLink>
+    </MudNavGroup>
+</MudNavMenu>

@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Remove="docfx.json" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\ModelSharedIn\ModelSharedIn.csproj" />
+		<ProjectReference Include="..\ParticleSwarmOptimization\ParticleSwarmOptimization.csproj" />
+		
+	</ItemGroup>
+</Project>

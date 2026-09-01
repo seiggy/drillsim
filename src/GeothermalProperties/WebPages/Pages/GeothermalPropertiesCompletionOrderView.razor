@@ -1,0 +1,66 @@
+﻿@using MudBlazor.Internal
+@inject ILogger<MudInputWithUnitAdornment> logger
+@inject ISnackbar Snackbar
+
+
+<MudPaper Class="my-2 mx-2 py-2 my-2" Style="@($"background:{DataUtils.FLOATING_COLOUR};")">
+    <MudPaper Class="my-1 mx-1 py-1 my-1">
+        <MudToolBar>
+            <MudText Typo="Typo.h6" Class="mx-2 px-2">View Geothermal Properties Completion Order</MudText>
+            <MudSpacer />
+            <MudButton StartIcon="@Icons.Material.Filled.Close" Variant="Variant.Filled" IconColor="Color.Error" OnClick="SendMessage">Close</MudButton>                
+        </MudToolBar>
+        <MudDivider Class="py-1 my-1"/>
+        <MudGrid Class="mx-2 my-2">
+            <MudItem xs="3">
+                <MudTextField Value="currentGeothermalPropertiesCompletionOrder.Name" Label="Name" ReadOnly="true" />
+            </MudItem>
+            <MudItem xs="3">            
+                <MudTextField Value="currentGeothermalPropertiesCompletionOrder.Description" Label="Description" ReadOnly="true" />
+            </MudItem>
+            <MudItem xs="6">
+                <GeothermalDataScatterPlot Properties="currentGeothermalPropertiesCompletionOrder.ReferenceGeothermalProperties" />
+            </MudItem>
+            <MudItem xs="6">
+                <GeothermalDataScatterPlot Properties="currentGeothermalPropertiesCompletionOrder.CompletedGeothermalProperties" />            
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudPaper>
+
+@code{
+     [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? Parent { get; set; }
+    [Parameter]
+    public Guid? GeothermalPropertiesCompletionOrderId { get; set; }
+    [Parameter]
+    public List<GeothermalProperties>? GeothermalPropertiesList { get; set; }
+    [Parameter]
+    public EventCallback ValueChanged {get; set;}    
+
+    private GeothermalPropertiesCompletionOrder currentGeothermalPropertiesCompletionOrder = PseudoConstructors.ConstructGeothermalPropertiesCompletionOrder();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (GeothermalPropertiesCompletionOrderId != null)
+        {
+            currentGeothermalPropertiesCompletionOrder = await APIUtils.ClientGeothermalProperties.GetGeothermalPropertiesCompletionOrderByIdAsync(GeothermalPropertiesCompletionOrderId.Value);
+        }
+        if (GeothermalPropertiesList == null)
+        {
+            Snackbar.Add("No geothermal table available", Severity.Warning);
+            await SendMessage();
+        }
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    //Send message to parent component
+    private async Task SendMessage()
+    {
+        await ValueChanged.InvokeAsync();
+    }  
+    //Add/Edit panel controls
+
+    //Update unit system
+    private void ManageUnits(){}        
+}

@@ -1,0 +1,5 @@
+﻿**/bin/**
+**/obj/**
+**/home/**
+**/.vs/**
+deployment/backups/

@@ -1,0 +1,269 @@
+<div hidden="@(FluidDescription==null)">
+<MudPaper Class="my-4 mx-4" Style="@($"background:{Colors.Gray.Lighten4};")">
+    <MudToolBar>
+        <MudText Class="mx-n1 mt-2 mb-1" Typo="Typo.body1"><b>Fluid thermophysical properties</b></MudText>
+        <MudSpacer/>
+        <MudSwitch T="bool" Color="Color.Primary" UncheckedColor="Color.Secondary"
+            Value="@usesThermophysicalProperties" ValueChanged="@OnSwitchClick" Label="@switchString"/>
+    </MudToolBar>
+    <MudDivider/>
+    <div hidden="@(!usesThermophysicalProperties)">
+        <MudGrid Class="xm-2 ym-2 yp-2">
+            <MudItem xs="6" >
+                <MudPaper Class="my-4 mx-4" Style="@($"background:{Colors.Gray.Lighten3};")">
+                    <MudText Class="my-1 mx-2" Typo="Typo.body2"><b>Heat Capacity</b></MudText>
+                    <MudGrid Class="my-2 mx-3">
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Temperature 1" QuantityName="TemperatureDrilling"
+                                SIValueNullable="@temperatureHeatCapacity1"
+                                SIValueNullableChanged="@UpdateTemperatureHeatCapacity1"/>
+                        </MudItem>   
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Temperature 2" QuantityName="TemperatureDrilling"
+                                SIValueNullable="@temperatureHeatCapacity2"
+                                SIValueNullableChanged="@UpdateTemperatureHeatCapacity2"/>
+                        </MudItem>   
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Heat Capacity at T1" QuantityName="IsobaricSpecificHeatCapacityDrilling"
+                                SIValueNullable="@heatCapacity1"
+                                SIValueNullableChanged="@UpdateHeatCapacity1"/>
+                        </MudItem>   
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Heat Capacity at T2" QuantityName="IsobaricSpecificHeatCapacityDrilling"
+                                SIValueNullable="@heatCapacity2"
+                                SIValueNullableChanged="@UpdateHeatCapacity2"/>
+                        </MudItem>  
+                    </MudGrid>
+                </MudPaper> 
+            </MudItem>
+            <MudSpacer/>
+            <!-- #region -->
+            <MudItem xs="6">
+                <MudPaper Class="my-4 mx-4" Style="@($"background:{Colors.Gray.Lighten3};")">
+                    <MudText Class="my-1 mx-2" Typo="Typo.body2"><b>Thermal Conductivity</b></MudText>
+                    <MudGrid Class="my-2 mx-3">
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Temperature 1" QuantityName="TemperatureDrilling"
+                                SIValueNullable="@temperatureThermalConductivity1"
+                                SIValueNullableChanged="@UpdateTemperatureThermalConductivity1"/>
+                        </MudItem>   
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Temperature 2" QuantityName="TemperatureDrilling"
+                                SIValueNullable="@temperatureThermalConductivity2"
+                                SIValueNullableChanged="@UpdateTemperatureThermalConductivity2"/>
+                        </MudItem> 
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Thermal Conductivity 1" QuantityName="ThermalConductivityDrilling"
+                                SIValueNullable="@thermalConductivity1"
+                                SIValueNullableChanged="@UpdateThermalConductivity1"/>
+                        </MudItem>   
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Thermal Conductivity 2" QuantityName="ThermalConductivityDrilling"
+                                SIValueNullable="@thermalConductivity2"
+                                SIValueNullableChanged="@UpdateThermalConductivity2"/>
+                        </MudItem> 
+                    </MudGrid>
+                </MudPaper> 
+            </MudItem>
+        </MudGrid>
+    </div>
+</MudPaper>
+</div>
+
+@code{
+
+    [Parameter]
+    public DrillingFluidDescription FluidDescription {get; set;}
+
+    private bool usesThermophysicalProperties = false;
+    private string switchString = "Properties disabled";
+    private double? heatCapacity1;
+    private double? temperatureHeatCapacity1;
+    private double? heatCapacity2;
+    private double? temperatureHeatCapacity2;
+    private double? thermalConductivity1;
+    private double? temperatureThermalConductivity1;
+    private double? thermalConductivity2;
+    private double? temperatureThermalConductivity2;
+    protected override void OnInitialized()
+    {
+        PopulateVariables();
+    }
+    protected override void OnParametersSet()
+    {   
+        PopulateVariables();
+    }
+    private void PopulateVariables()
+    {
+        if (FluidDescription != null)
+        {
+            if (usesThermophysicalProperties)
+            {            
+                if (FluidDescription.SpecificHeatCapacity != null)
+                {
+                    temperatureHeatCapacity1 = 0.0;
+                    heatCapacity1 = ConversionsFromOSDC.GaussianToDouble(FluidDescription.SpecificHeatCapacity.HeatCapacityAtZeroKelvin);
+                    temperatureHeatCapacity2 = 373.0;
+                    heatCapacity2 = heatCapacity1 + temperatureHeatCapacity2 * ConversionsFromOSDC.GaussianToDouble(FluidDescription.SpecificHeatCapacity.Slope);
+                }
+                else
+                {
+                    FluidDescription.SpecificHeatCapacity = new SpecificHeatCapacity 
+                    {
+                        Slope = ConversionsFromOSDC.DoubleToGaussian(null),
+                        HeatCapacityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(null)
+                    }; 
+                }
+                if (FluidDescription.ThermalConductivity != null )
+                {
+                    temperatureThermalConductivity1 = 0.0;
+                    thermalConductivity1 = ConversionsFromOSDC.GaussianToDouble(FluidDescription.ThermalConductivity.ThermalConductivityAtZeroKelvin);
+                    temperatureThermalConductivity2 = 373.0;
+                    thermalConductivity2 = thermalConductivity1 + temperatureThermalConductivity2 * ConversionsFromOSDC.GaussianToDouble(FluidDescription.ThermalConductivity.Slope);
+                }
+                else 
+                {
+                    FluidDescription.ThermalConductivity = new ThermalConductivity 
+                    {
+                        Slope = ConversionsFromOSDC.DoubleToGaussian(null),
+                        ThermalConductivityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(null)
+                    }; 
+                }
+            }
+            else
+            {
+                switchString = "Properties disabled"; 
+                FluidDescription.ThermalConductivity = null;
+                FluidDescription.SpecificHeatCapacity = null;
+            }
+        }
+    }
+    void OnSwitchClick()
+    {
+        usesThermophysicalProperties = !usesThermophysicalProperties;
+        if (usesThermophysicalProperties)
+        {
+            switchString = "Properties enabled";
+            FluidDescription.ThermalConductivity = new ThermalConductivity 
+            {
+                Slope = ConversionsFromOSDC.DoubleToGaussian(null),
+                ThermalConductivityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(null)
+            }; 
+            FluidDescription.SpecificHeatCapacity = new SpecificHeatCapacity 
+            {
+                Slope = ConversionsFromOSDC.DoubleToGaussian(null),
+                HeatCapacityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(null)
+            };                     
+        }
+        else
+        {
+            switchString = "Properties disabled"; 
+            FluidDescription.ThermalConductivity = null;
+            FluidDescription.SpecificHeatCapacity = null;
+        }    
+    }
+    private void CalculateLinearHeatCapacity()
+    {
+        if( heatCapacity1 != null &&
+            heatCapacity2 != null &&
+            temperatureHeatCapacity1 != null &&
+            temperatureHeatCapacity2 != null        
+        )
+        {
+            double slope = (double)((heatCapacity2-heatCapacity1)/(temperatureHeatCapacity2-temperatureHeatCapacity1));
+            double atZeroKelvin = (double)(heatCapacity2 - slope * temperatureHeatCapacity2);
+            FluidDescription.ThermalConductivity.TemperatureRange =new List<double?>
+            {  
+                temperatureHeatCapacity1, temperatureHeatCapacity2
+            };
+            FluidDescription.ThermalConductivity.CoefficientRange =new List<double?>
+            {  
+                heatCapacity1, heatCapacity2
+            };
+            FluidDescription.SpecificHeatCapacity.Slope = ConversionsFromOSDC.DoubleToGaussian(slope);
+            FluidDescription.SpecificHeatCapacity.HeatCapacityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(atZeroKelvin);     
+        }
+        else
+        {
+            FluidDescription.SpecificHeatCapacity.Slope = ConversionsFromOSDC.DoubleToGaussian(null);
+            FluidDescription.SpecificHeatCapacity.HeatCapacityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(null);
+        }
+    }
+    private void CalculateLinearThermalConductivity()
+    {
+        if( thermalConductivity1 != null &&
+            thermalConductivity2 != null &&
+            temperatureThermalConductivity1 != null &&
+            temperatureThermalConductivity2 != null        
+        )
+        {
+            FluidDescription.ThermalConductivity.TemperatureRange =new List<double?>
+            {  
+                temperatureThermalConductivity1, temperatureThermalConductivity2
+            };
+            FluidDescription.ThermalConductivity.CoefficientRange =new List<double?>
+            {  
+                thermalConductivity1, thermalConductivity2
+            };
+            double slope = (double)((thermalConductivity2-thermalConductivity1)/(temperatureThermalConductivity2-temperatureThermalConductivity1));
+            double atZeroKelvin = (double)(thermalConductivity2 - slope * temperatureThermalConductivity2);
+            FluidDescription.ThermalConductivity.Slope = ConversionsFromOSDC.DoubleToGaussian(slope);
+            FluidDescription.ThermalConductivity.ThermalConductivityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(atZeroKelvin);     
+        }
+        else
+        {
+            FluidDescription.ThermalConductivity.Slope = ConversionsFromOSDC.DoubleToGaussian(null);
+            FluidDescription.ThermalConductivity.ThermalConductivityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(null);
+        }
+    }
+    private void UpdateTemperatureHeatCapacity1(double? val)
+    {
+        temperatureHeatCapacity1 = val;
+        CalculateLinearHeatCapacity();
+    }
+    private void UpdateTemperatureHeatCapacity2(double? val)
+    {
+        temperatureHeatCapacity2 = val;
+        CalculateLinearHeatCapacity();
+    } 
+    private void UpdateHeatCapacity1(double? val)
+    {
+        heatCapacity1 = val;
+        CalculateLinearHeatCapacity();
+    }
+    private void UpdateHeatCapacity2(double? val)
+    {
+        heatCapacity2 = val;
+        CalculateLinearHeatCapacity();
+    } 
+
+
+    private void UpdateTemperatureThermalConductivity1(double? val)
+    {
+        temperatureThermalConductivity1 = val;
+        CalculateLinearThermalConductivity();
+    }
+    private void UpdateTemperatureThermalConductivity2(double? val)
+    {
+        temperatureThermalConductivity2 = val;
+        CalculateLinearThermalConductivity();
+    } 
+    private void UpdateThermalConductivity1(double? val)
+    {
+        thermalConductivity1 = val;
+        CalculateLinearThermalConductivity();
+    }
+    private void UpdateThermalConductivity2(double? val)
+    {
+        thermalConductivity2 = val;
+        CalculateLinearThermalConductivity();
+    }
+}

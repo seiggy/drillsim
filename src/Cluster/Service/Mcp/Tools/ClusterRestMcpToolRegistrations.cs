@@ -1,0 +1,285 @@
+using System;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using OSDC.Drilling.Cluster.Service.Controllers;
+using OSDC.Drilling.Cluster.Service.Managers;
+using OSDC.Drilling.Cluster.Service;
+using ClusterModel = OSDC.Drilling.Cluster.Model.Cluster;
+using ClusterFeatureCategoryModel = OSDC.Drilling.Cluster.Model.ClusterFeatureCategory;
+using ClusterIdentityModel = OSDC.Drilling.Cluster.Model.ClusterIdentity;
+using SlotFeatureCategoryModel = OSDC.Drilling.Cluster.Model.SlotFeatureCategory;
+using ClusterBatchExportRequestModel = OSDC.Drilling.Cluster.Model.ClusterBatchExportRequest;
+using ClusterBatchRestoreRequestModel = OSDC.Drilling.Cluster.Model.ClusterBatchRestoreRequest;
+
+namespace OSDC.Drilling.Cluster.Service.Mcp.Tools;
+
+public static class ClusterRestMcpToolRegistrations
+{
+    public static IServiceCollection AddClusterRestMcpTools(this IServiceCollection services)
+    {
+        AddClusterTools(services);
+        AddClusterBatchTransferTools(services);
+        AddClusterFeatureCategoryTools(services);
+        AddClusterIdentityTools(services);
+        AddSlotFeatureCategoryTools(services);
+        return services;
+    }
+
+    private static void AddClusterBatchTransferTools(IServiceCollection services)
+    {
+        services.AddLegacyMcpTool(
+            "cluster_batch_export",
+            "Create a read-only, versioned JSON backup of all clusters or an explicitly ordered selection. The result includes complete Cluster records, only referenced Cluster Identity and cluster/slot feature definitions and options, plus source UUID/name manifests for external Field and Rig references. Field and Rig names are verified live; one invalid reference rejects the complete export.",
+            McpToolArgumentHelpers.CreateClusterBatchExportSchema(),
+            McpToolArgumentHelpers.CreateClusterBatchExportOutputSchema(),
+            new McpToolBehavior("Export Clusters with Dependencies", true, false, true, true),
+            (sp, args, ct) => InvokeWithBodyResultAsync<ClusterBatchExportRequestModel, OSDC.Drilling.Cluster.Model.ClusterBatchExportDocument>(
+                args, "request", ct, (request, token) => ClusterController(sp).BatchExportClusters(request, token)));
+
+        services.AddLegacyMcpTool(
+            "cluster_batch_restore",
+            "Validate and atomically restore a Cluster backup. Local identities and cluster/slot feature definitions are mapped by exact UUID or unique normalized name; MapOrCreateMissing creates absent local definitions/options with server-generated UUIDs. External Field and Rig references are checked live: an existing UUID is retained, while an absent UUID is remapped only by one unique normalized-name match. Ambiguity, missing dependencies, conflicts, or storage failures commit no local changes.",
+            McpToolArgumentHelpers.CreateClusterBatchRestoreSchema(),
+            McpToolArgumentHelpers.CreateClusterBatchRestoreOutputSchema(),
+            new McpToolBehavior("Restore Clusters and Reconnect References", false, true, false, true),
+            (sp, args, ct) => InvokeWithBodyResultAsync<ClusterBatchRestoreRequestModel, OSDC.Drilling.Cluster.Model.ClusterBatchRestoreResponse>(
+                args, "request", ct, (request, token) => ClusterController(sp).BatchRestoreClusters(request, token)));
+    }
+
+    private static void AddClusterTools(IServiceCollection services)
+    {
+        services.AddLegacyMcpTool("cluster_get_all_ids", "List the UUID of every stored cluster without transferring complete records. Use these identifiers with cluster_get_by_id or other services that reference a cluster.", McpToolArgumentHelpers.CreateEmptySchema(), McpToolArgumentHelpers.CreateIdsOutputSchema(), new("List Cluster UUIDs", true, false, true, false),
+            (sp, _, ct) => Invoke(ct, () => ClusterController(sp).GetAllClusterId()));
+        services.AddLegacyMcpTool("cluster_get_all_meta_info", "List identity and HTTP location metadata for every stored cluster without returning complete cluster data. Each result contains the cluster ID and may contain its host, base path, and endpoint.", McpToolArgumentHelpers.CreateEmptySchema(), McpToolArgumentHelpers.CreateMetaInfoListOutputSchema(), new("List Cluster Metadata", true, false, true, false),
+            (sp, _, ct) => Invoke(ct, () => ClusterController(sp).GetAllClusterMetaInfo()));
+        services.AddLegacyMcpTool("cluster_get_by_id", "Retrieve one complete cluster record by UUID, including field and rig associations, platform flags, identities, feature assignments, WGS84 reference data, depth uncertainty, and slots. Returns 404 when it does not exist and 400 for an empty UUID.", McpToolArgumentHelpers.CreateGuidSchema("id", "Unique identifier of the cluster to retrieve."), McpToolArgumentHelpers.CreateResourceOutputSchema(McpToolArgumentHelpers.CreateClusterResourceSchema()), new("Get Cluster", true, false, true, false),
+            (sp, args, ct) => InvokeByGuidArgument(args, "id", ct, id => ClusterController(sp).GetClusterById(id)));
+        services.AddLegacyMcpTool("cluster_get_all", "Retrieve every stored cluster as a complete record, including nested slots and assignments. Use cluster_get_all_light, cluster_get_all_ids, or cluster_get_all_meta_info when full nested data is unnecessary.", McpToolArgumentHelpers.CreateEmptySchema(), McpToolArgumentHelpers.CreateResourceListOutputSchema(McpToolArgumentHelpers.CreateClusterResourceSchema()), new("List Clusters", true, false, true, false),
+            (sp, _, ct) => Invoke(ct, () => ClusterController(sp).GetAllCluster()));
+        services.AddLegacyMcpTool("cluster_get_all_light", "Retrieve lightweight records for every cluster. Results retain identity, field and rig associations, platform flags, reference point, and WGS84 depths while omitting nested identities, feature assignments, and slots.", McpToolArgumentHelpers.CreateEmptySchema(), McpToolArgumentHelpers.CreateResourceListOutputSchema(McpToolArgumentHelpers.CreateClusterLightResourceSchema()), new("List Lightweight Clusters", true, false, true, false),
+            (sp, _, ct) => Invoke(ct, () => ClusterController(sp).GetAllClusterLight()));
+        services.AddLegacyMcpTool("cluster_get_all_by_field_id", "Retrieve complete records for all clusters whose FieldID equals the supplied field UUID. An empty result means no stored cluster currently references that field.", McpToolArgumentHelpers.CreateGuidSchema("fieldId", "Identifier of the Field resource whose clusters should be returned."), McpToolArgumentHelpers.CreateResourceListOutputSchema(McpToolArgumentHelpers.CreateClusterResourceSchema()), new("List Clusters by Field", true, false, true, false),
+            (sp, args, ct) => InvokeByGuidArgument(args, "fieldId", ct, id => ClusterController(sp).GetAllClusterByFieldId(id)));
+        services.AddLegacyMcpTool("cluster_get_all_by_rig_id", "Retrieve complete records for all clusters whose RigID equals the supplied rig UUID. An empty result means no stored cluster currently references that rig.", McpToolArgumentHelpers.CreateGuidSchema("rigId", "Identifier of the Rig resource whose associated clusters should be returned."), McpToolArgumentHelpers.CreateResourceListOutputSchema(McpToolArgumentHelpers.CreateClusterResourceSchema()), new("List Clusters by Rig", true, false, true, false),
+            (sp, args, ct) => InvokeByGuidArgument(args, "rigId", ct, id => ClusterController(sp).GetAllClusterByRigId(id)));
+        services.AddLegacyMcpTool("cluster_get_all_single_well", "Retrieve complete cluster records filtered by IsSingleWell. Pass true for records representing one well rather than a true multi-well cluster; pass false for multi-well clusters.", McpToolArgumentHelpers.CreateBooleanSchema("isSingleWell", "Required IsSingleWell value to match: true for single-well records, false for multi-well clusters."), McpToolArgumentHelpers.CreateResourceListOutputSchema(McpToolArgumentHelpers.CreateClusterResourceSchema()), new("List Clusters by Single-Well Flag", true, false, true, false),
+            (sp, args, ct) => InvokeByBoolArgument(args, "isSingleWell", ct, value => ClusterController(sp).GetAllSingleWellCluster(value)));
+        services.AddLegacyMcpTool("cluster_get_all_fixed_platform", "Retrieve complete cluster records filtered by IsFixedPlatform. Pass true for fixed installations and false for clusters associated with floating or movable installations.", McpToolArgumentHelpers.CreateBooleanSchema("isFixedPlatform", "Required IsFixedPlatform value to match: true for fixed platforms, false for floating or movable installations."), McpToolArgumentHelpers.CreateResourceListOutputSchema(McpToolArgumentHelpers.CreateClusterResourceSchema()), new("List Clusters by Fixed-Platform Flag", true, false, true, false),
+            (sp, args, ct) => InvokeByBoolArgument(args, "isFixedPlatform", ct, value => ClusterController(sp).GetAllFixedPlatformCluster(value)));
+        services.AddLegacyMcpTool("cluster_create", "Create and persist a complete cluster record. cluster.MetaInfo.ID must be a caller-generated, non-empty UUID that is not already stored. Cluster-owned catalog references and every Slots dictionary key/Slot.ID pair are validated atomically. The server assigns CreationDate and LastModificationDate.", McpToolArgumentHelpers.CreateClusterSchema(), McpToolArgumentHelpers.CreateResourceOutputSchema(McpToolArgumentHelpers.CreateClusterResourceSchema()), new("Create Cluster", false, false, false, false),
+            (sp, args, ct) => InvokeWithBody<ClusterModel>(args, "cluster", ct, data => ClusterController(sp).PostCluster(data)));
+        services.AddLegacyMcpTool("cluster_update_by_id", "Replace an existing cluster with the complete supplied record. The top-level id must equal cluster.MetaInfo.ID and expectedModifiedUtc must equal the latest server LastModificationDate. Cluster-owned references and Slot IDs are validated atomically. This is a full update, so include all data that should remain stored.", McpToolArgumentHelpers.CreateClusterSchema(includeId: true), McpToolArgumentHelpers.CreateResourceOutputSchema(McpToolArgumentHelpers.CreateClusterResourceSchema()), new("Update Cluster", false, true, true, false),
+            (sp, args, ct) => InvokeWithIdTimestampAndBody<ClusterModel>(args, "cluster", ct, (id, timestamp, data) => ClusterController(sp).PutClusterById(id, timestamp, data)));
+        services.AddLegacyMcpTool("cluster_delete_by_id", "Permanently delete one stored cluster by UUID. Confirm the target and consider services that reference the cluster before calling; the operation removes its persisted cluster record, including nested slots. Returns 200 on success and 404 when absent.", McpToolArgumentHelpers.CreateGuidSchema("id", "Unique identifier of the cluster to delete."), McpToolArgumentHelpers.CreateStatusOnlyOutputSchema(), new("Delete Cluster", false, true, true, false),
+            (sp, args, ct) => InvokeDelete(args, ct, id => ClusterController(sp).DeleteClusterById(id)));
+    }
+
+    private static void AddClusterFeatureCategoryTools(IServiceCollection services)
+    {
+        AddCrudTools<ClusterFeatureCategoryModel>(
+            services,
+            "cluster_feature_category",
+            "clusterFeatureCategory",
+            "cluster feature category",
+            "a definition of allowed feature options that can be assigned to clusters",
+            McpToolArgumentHelpers.CreateClusterFeatureCategorySchema,
+            McpToolArgumentHelpers.CreateClusterFeatureCategoryResourceSchema,
+            sp => ClusterFeatureCategoryController(sp).GetAllClusterFeatureCategoryId(),
+            sp => ClusterFeatureCategoryController(sp).GetAllClusterFeatureCategoryMetaInfo(),
+            (sp, id) => ClusterFeatureCategoryController(sp).GetClusterFeatureCategoryById(id),
+            sp => ClusterFeatureCategoryController(sp).GetAllClusterFeatureCategory(),
+            (sp, data) => ClusterFeatureCategoryController(sp).PostClusterFeatureCategory(data),
+            (sp, id, timestamp, data) => ClusterFeatureCategoryController(sp).PutClusterFeatureCategoryById(id, timestamp, data),
+            (sp, id) => ClusterFeatureCategoryController(sp).DeleteClusterFeatureCategoryById(id));
+    }
+
+    private static void AddClusterIdentityTools(IServiceCollection services)
+    {
+        AddCrudTools<ClusterIdentityModel>(
+            services,
+            "cluster_identity",
+            "clusterIdentity",
+            "cluster identity",
+            "a symbolic identity definition whose values can be assigned to individual clusters",
+            McpToolArgumentHelpers.CreateClusterIdentitySchema,
+            McpToolArgumentHelpers.CreateClusterIdentityResourceSchema,
+            sp => ClusterIdentityController(sp).GetAllClusterIdentityId(),
+            sp => ClusterIdentityController(sp).GetAllClusterIdentityMetaInfo(),
+            (sp, id) => ClusterIdentityController(sp).GetClusterIdentityById(id),
+            sp => ClusterIdentityController(sp).GetAllClusterIdentity(),
+            (sp, data) => ClusterIdentityController(sp).PostClusterIdentity(data),
+            (sp, id, timestamp, data) => ClusterIdentityController(sp).PutClusterIdentityById(id, timestamp, data),
+            (sp, id) => ClusterIdentityController(sp).DeleteClusterIdentityById(id));
+    }
+
+    private static void AddSlotFeatureCategoryTools(IServiceCollection services)
+    {
+        AddCrudTools<SlotFeatureCategoryModel>(
+            services,
+            "slot_feature_category",
+            "slotFeatureCategory",
+            "slot feature category",
+            "a definition of allowed feature options that can be assigned to slots within clusters",
+            McpToolArgumentHelpers.CreateSlotFeatureCategorySchema,
+            McpToolArgumentHelpers.CreateSlotFeatureCategoryResourceSchema,
+            sp => SlotFeatureCategoryController(sp).GetAllSlotFeatureCategoryId(),
+            sp => SlotFeatureCategoryController(sp).GetAllSlotFeatureCategoryMetaInfo(),
+            (sp, id) => SlotFeatureCategoryController(sp).GetSlotFeatureCategoryById(id),
+            sp => SlotFeatureCategoryController(sp).GetAllSlotFeatureCategory(),
+            (sp, data) => SlotFeatureCategoryController(sp).PostSlotFeatureCategory(data),
+            (sp, id, timestamp, data) => SlotFeatureCategoryController(sp).PutSlotFeatureCategoryById(id, timestamp, data),
+            (sp, id) => SlotFeatureCategoryController(sp).DeleteSlotFeatureCategoryById(id));
+    }
+
+    private static void AddCrudTools<TModel>(
+        IServiceCollection services,
+        string prefix,
+        string bodyName,
+        string entityName,
+        string entityPurpose,
+        Func<bool, JsonObject> schemaFactory,
+        Func<JsonObject> resourceSchemaFactory,
+        Func<IServiceProvider, ActionResult<System.Collections.Generic.IEnumerable<Guid>>> getAllIds,
+        Func<IServiceProvider, ActionResult<System.Collections.Generic.IEnumerable<OSDC.DotnetLibraries.General.DataManagement.MetaInfo?>>> getAllMetaInfo,
+        Func<IServiceProvider, Guid, ActionResult<TModel?>> getById,
+        Func<IServiceProvider, ActionResult<System.Collections.Generic.IEnumerable<TModel?>>> getAll,
+        Func<IServiceProvider, TModel?, ActionResult> create,
+        Func<IServiceProvider, Guid, DateTimeOffset, TModel?, ActionResult> update,
+        Func<IServiceProvider, Guid, ActionResult> delete)
+    {
+        services.AddLegacyMcpTool($"{prefix}_get_all_ids", $"List the UUID of every stored {entityName} without transferring complete records. These IDs identify {entityPurpose} and can be passed to {prefix}_get_by_id.", McpToolArgumentHelpers.CreateEmptySchema(), McpToolArgumentHelpers.CreateIdsOutputSchema(), new($"List {entityName} UUIDs", true, false, true, false),
+            (sp, _, ct) => Invoke(ct, () => getAllIds(sp)));
+        services.AddLegacyMcpTool($"{prefix}_get_all_meta_info", $"List identity and optional HTTP location metadata for every stored {entityName} without returning complete definitions. Use this for resource discovery when full content is unnecessary.", McpToolArgumentHelpers.CreateEmptySchema(), McpToolArgumentHelpers.CreateMetaInfoListOutputSchema(), new($"List {entityName} Metadata", true, false, true, false),
+            (sp, _, ct) => Invoke(ct, () => getAllMetaInfo(sp)));
+        services.AddLegacyMcpTool($"{prefix}_get_by_id", $"Retrieve one complete {entityName} by UUID. The record represents {entityPurpose}. Returns status 404 when no matching record exists and 400 for an empty UUID.", McpToolArgumentHelpers.CreateGuidSchema("id", $"Unique identifier of the {entityName} to retrieve."), McpToolArgumentHelpers.CreateResourceOutputSchema(resourceSchemaFactory()), new($"Get {entityName}", true, false, true, false),
+            (sp, args, ct) => InvokeByGuidArgument(args, "id", ct, id => getById(sp, id)));
+        services.AddLegacyMcpTool($"{prefix}_get_all", $"Retrieve every stored {entityName} as a complete definition. Each result represents {entityPurpose}; use the ID or metadata listing tools when complete content is unnecessary.", McpToolArgumentHelpers.CreateEmptySchema(), McpToolArgumentHelpers.CreateResourceListOutputSchema(resourceSchemaFactory()), new($"List {entityName}s", true, false, true, false),
+            (sp, _, ct) => Invoke(ct, () => getAll(sp)));
+        services.AddLegacyMcpTool($"{prefix}_create", $"Create and persist {entityPurpose}. Supply the complete {bodyName} object; {bodyName}.MetaInfo.ID must be a caller-generated, non-empty UUID that is not already stored. Returns 200 on success, 400 for malformed data, and 409 for a duplicate ID.", schemaFactory(false), McpToolArgumentHelpers.CreateStatusOnlyOutputSchema(), new($"Create {entityName}", false, false, false, false),
+            (sp, args, ct) => InvokeWithBody<TModel>(args, bodyName, ct, data => create(sp, data)));
+        services.AddLegacyMcpTool($"{prefix}_update_by_id", $"Replace an existing {entityName} with the complete supplied definition. The top-level id must equal {bodyName}.MetaInfo.ID and expectedModifiedUtc must equal the latest server LastModificationDate. This is a full update. Removing an option still referenced by a stored Cluster is rejected with conflict.", schemaFactory(true), McpToolArgumentHelpers.CreateResourceOutputSchema(resourceSchemaFactory()), new($"Update {entityName}", false, true, true, false),
+            (sp, args, ct) => InvokeWithIdTimestampAndBody<TModel>(args, bodyName, ct, (id, timestamp, data) => update(sp, id, timestamp, data)));
+        services.AddLegacyMcpTool($"{prefix}_delete_by_id", $"Permanently delete one stored {entityName} by UUID. Deletion is rejected with conflict while a stored Cluster references the definition; no cascade is performed.", McpToolArgumentHelpers.CreateGuidSchema("id", $"Unique identifier of the {entityName} to delete."), McpToolArgumentHelpers.CreateStatusOnlyOutputSchema(), new($"Delete {entityName}", false, true, true, false),
+            (sp, args, ct) => InvokeDelete(args, ct, id => delete(sp, id)));
+    }
+
+    private static Task<JsonNode?> Invoke<T>(CancellationToken cancellationToken, Func<ActionResult<T>> action)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult<JsonNode?>(McpActionResultConverter.FromActionResult(action()));
+    }
+
+    private static Task<JsonNode?> InvokeByGuidArgument<T>(JsonObject? arguments, string argumentName, CancellationToken cancellationToken, Func<Guid, ActionResult<T>> action)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!McpToolArgumentHelpers.TryParseGuid(arguments, argumentName, out Guid id, out JsonNode? error))
+        {
+            return Task.FromResult<JsonNode?>(error);
+        }
+        return Task.FromResult<JsonNode?>(McpActionResultConverter.FromActionResult(action(id)));
+    }
+
+    private static Task<JsonNode?> InvokeByBoolArgument<T>(JsonObject? arguments, string argumentName, CancellationToken cancellationToken, Func<bool, ActionResult<T>> action)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!McpToolArgumentHelpers.TryParseBool(arguments, argumentName, out bool value, out JsonNode? error))
+        {
+            return Task.FromResult<JsonNode?>(error);
+        }
+        return Task.FromResult<JsonNode?>(McpActionResultConverter.FromActionResult(action(value)));
+    }
+
+    private static Task<JsonNode?> InvokeDelete(JsonObject? arguments, CancellationToken cancellationToken, Func<Guid, ActionResult> action)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!McpToolArgumentHelpers.TryParseGuid(arguments, "id", out Guid id, out JsonNode? error))
+        {
+            return Task.FromResult<JsonNode?>(error);
+        }
+        return Task.FromResult<JsonNode?>(McpActionResultConverter.FromActionResult(action(id)));
+    }
+
+    private static Task<JsonNode?> InvokeWithBody<TModel>(JsonObject? arguments, string bodyName, CancellationToken cancellationToken, Func<TModel?, ActionResult> action)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!TryDeserialize(arguments, bodyName, out TModel? data, out JsonNode? error))
+        {
+            return Task.FromResult<JsonNode?>(error);
+        }
+        return Task.FromResult<JsonNode?>(McpActionResultConverter.FromActionResult(action(data)));
+    }
+
+    private static async Task<JsonNode?> InvokeWithBodyResultAsync<TModel, TResult>(JsonObject? arguments,
+        string bodyName, CancellationToken cancellationToken,
+        Func<TModel?, CancellationToken, Task<ActionResult<TResult>>> action)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!TryDeserialize(arguments, bodyName, out TModel? data, out JsonNode? error)) return error;
+        ActionResult<TResult> result = await action(data, cancellationToken).ConfigureAwait(false);
+        return McpActionResultConverter.FromActionResult(result);
+    }
+
+    private static Task<JsonNode?> InvokeWithIdTimestampAndBody<TModel>(JsonObject? arguments, string bodyName, CancellationToken cancellationToken, Func<Guid, DateTimeOffset, TModel?, ActionResult> action)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!McpToolArgumentHelpers.TryParseGuid(arguments, "id", out Guid id, out JsonNode? idError))
+        {
+            return Task.FromResult<JsonNode?>(idError);
+        }
+        if (!McpToolArgumentHelpers.TryParseDateTimeOffset(arguments, "expectedModifiedUtc", out DateTimeOffset timestamp, out JsonNode? timestampError))
+        {
+            return Task.FromResult<JsonNode?>(timestampError);
+        }
+        if (!TryDeserialize(arguments, bodyName, out TModel? data, out JsonNode? dataError))
+        {
+            return Task.FromResult<JsonNode?>(dataError);
+        }
+        return Task.FromResult<JsonNode?>(McpActionResultConverter.FromActionResult(action(id, timestamp, data)));
+    }
+
+    private static bool TryDeserialize<TModel>(JsonObject? arguments, string bodyName, out TModel? data, out JsonNode? error)
+    {
+        data = default;
+        error = null;
+
+        if (arguments?[bodyName] is not JsonNode node)
+        {
+            error = McpToolResponses.CreateValidationError($"Argument '{bodyName}' is required.");
+            return false;
+        }
+
+        try
+        {
+            data = node.Deserialize<TModel>(JsonSettings.Options);
+            if (data is null)
+            {
+                throw new InvalidOperationException();
+            }
+            return true;
+        }
+        catch (Exception ex) when (ex is JsonException or InvalidOperationException)
+        {
+            error = McpToolResponses.CreateValidationError($"Argument '{bodyName}' could not be deserialized.");
+            return false;
+        }
+    }
+
+    private static ClusterController ClusterController(IServiceProvider sp) =>
+        new(sp.GetRequiredService<ILogger<ClusterManager>>(), sp.GetRequiredService<SqlConnectionManager>(),
+            sp.GetRequiredService<IClusterExternalReferenceResolver>());
+
+    private static ClusterFeatureCategoryController ClusterFeatureCategoryController(IServiceProvider sp) =>
+        new(sp.GetRequiredService<ILogger<ClusterFeatureCategoryManager>>(), sp.GetRequiredService<SqlConnectionManager>());
+
+    private static ClusterIdentityController ClusterIdentityController(IServiceProvider sp) =>
+        new(sp.GetRequiredService<ILogger<ClusterIdentityManager>>(), sp.GetRequiredService<SqlConnectionManager>());
+
+    private static SlotFeatureCategoryController SlotFeatureCategoryController(IServiceProvider sp) =>
+        new(sp.GetRequiredService<ILogger<SlotFeatureCategoryManager>>(), sp.GetRequiredService<SqlConnectionManager>());
+
+}

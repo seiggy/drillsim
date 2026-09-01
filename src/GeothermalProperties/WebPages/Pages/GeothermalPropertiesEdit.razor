@@ -1,0 +1,316 @@
+﻿@inject ILogger<MudInputWithUnitAdornment> logger
+@inject ISnackbar Snackbar
+
+
+<MudPaper Class="my-2 mx-2 py-2 my-2" Style="@($"background:{DataUtils.FLOATING_COLOUR};")">
+    <MudPaper Class="my-1 mx-1 py-1 my-1">
+        <MudToolBar>
+            <MudText Typo="Typo.h5" Class="mx-2 px-2">Edit GeothermalProperties</MudText>
+            <MudButton StartIcon="@Icons.Material.Filled.SaveAs" Variant="Variant.Filled" IconColor="Color.Primary" OnClick="SaveAsGeothermalProperties">Save new</MudButton>
+            @if (GeothermalPropertiesId != null)
+            {
+                <MudButton StartIcon="@Icons.Material.Filled.Save" Variant="Variant.Filled" IconColor="Color.Primary" OnClick="SaveGeothermalProperties">Save</MudButton>
+            }
+            <MudSpacer />
+            <MudButton StartIcon="@Icons.Material.Filled.Close" Variant="Variant.Filled" IconColor="Color.Error" OnClick="SendMessage">Close</MudButton>                
+        </MudToolBar>
+        <MudDivider Class="py-1 my-1"/>
+        <MudGrid Class="mx-2 my-2">
+            <MudItem xs = "3">
+                <MudTextField @bind-Value="currentGeothermalProperties.Name" Label="Name" Required="true" For="@(() => currentGeothermalProperties.Name)" />
+            </MudItem>
+            <MudItem xs = "5">
+                <MudTextField @bind-Value="currentGeothermalProperties.Description" Label="Description" For="@(() => currentGeothermalProperties.Description)" />
+            </MudItem>
+            <MudItem xs = "3">
+                <MudSelect T="Guid" @bind-Value="trajectoryId" Label="Trajectory">
+                    @foreach (TrajectoryLight trajectory in trajectories)
+                    {
+                        <MudSelectItem Value="@trajectory.MetaInfo.ID">@trajectory.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs = "3">
+                <MudSelect T="Guid" @bind-Value="wellBoreId" Label="Well Bore">
+                    @foreach (WellBore wellBore in wellBores)
+                    {
+                        <MudSelectItem Value="@wellBore.MetaInfo.ID">@wellBore.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+    <MudPaper Class="my-1 mx-1 py-1 my-1">
+        <MudTable T="GeothermalData" Items="currentGeothermalProperties.GeothermalDataList" RowStyleFunc="GetRowStyle">
+            <HeaderContent>
+                <MudTh>Region</MudTh>
+                <MudTh>Vertical Depth [@(Parent!.GetUnitLabel("DepthDrilling"))]</MudTh>
+                <MudTh>Temperature [@(Parent!.GetUnitLabel("TemperatureDrilling"))]</MudTh>
+                <MudTh>Temperature Gradient [@(Parent!.GetUnitLabel("TemperatureGradientPerLengthDrilling"))]</MudTh>
+                <MudTh>
+                    <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" IconColor="Color.Tertiary" OnClick="AddTableRow">Add row</MudButton>                    
+                </MudTh>            
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>
+                    @if (currentGeothermalProperties.GeothermalDataList.IndexOf(context) == 0)
+                    {
+                        <MudText>@context.RegionType.ToString()</MudText>
+                    }
+                    else
+                    {
+                        <MudSelect T="GeothermalPropertiesType" 
+                                   Value="context.RegionType"
+                                   ValueChanged="val => UpdateRegionType(val, context)">
+                            @foreach (GeothermalPropertiesType regionType in Enum.GetValues(typeof(GeothermalPropertiesType)))
+                            {
+                                <MudSelectItem Value="@regionType">@geoTypeToString[regionType]</MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
+                </MudTd>
+                <MudTd>
+                    <MudInputWithUnit
+                        QuantityName = "DepthDrilling"
+                        SIValueNullable = "@context.VerticalDepth"                        
+                        SIValueNullableChanged="val => context.VerticalDepth = val"/>                        
+                </MudTd>
+                <MudTd>
+                    <MudInputWithUnit
+                        QuantityName = "TemperatureDrilling"
+                        SIValueNullable = "@context.Temperature"                        
+                        SIValueNullableChanged="val => context.Temperature = val"/>                        
+                </MudTd>
+                <MudTd>
+                    @if (currentGeothermalProperties.GeothermalDataList.IndexOf(context) == 0)
+                    {
+                        <MudText>Not used</MudText>
+                    }
+                    else
+                    {
+                        <MudInputWithUnit
+                            QuantityName = "TemperatureGradientPerLengthDrilling"
+                            SIValueNullable = "@context.TemperatureGradient"                        
+                            SIValueNullableChanged="val => context.TemperatureGradient = val"/> 
+                    }                       
+                </MudTd>   
+                <MudTd>
+                    <MudButton StartIcon="@Icons.Material.Filled.Delete" Variant="Variant.Filled" IconColor="Color.Secondary" OnClick="val => RemoveTableAtRow(context)"></MudButton>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    
+    </MudPaper>
+</MudPaper>
+
+@code{
+     [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? Parent { get; set; }
+    [Parameter]
+    public Guid? GeothermalPropertiesId { get; set; }
+    [Parameter]
+    public EventCallback ValueChanged {get; set;}    
+    private GeothermalProperties currentGeothermalProperties = 
+        new GeothermalProperties
+        {
+            MetaInfo = PseudoConstructors.ConstructMetaInfo(),
+            Name = "Default Geothermal Properties",
+            Description = "",
+            TrajectoryID = null,
+            WellBoreID = null,
+            GeothermalDataList = new List<GeothermalData>
+            {
+                new GeothermalData
+                {
+                    RegionType = GeothermalPropertiesType.Air
+                },
+                new GeothermalData
+                {
+                    RegionType = GeothermalPropertiesType.RockFormation
+                }
+            }
+        };
+    private List<TrajectoryLight> trajectories = new List<TrajectoryLight>();
+    private List<WellBore> wellBores = new List<WellBore>();
+    private Guid trajectoryId;
+    private Guid wellBoreId;
+    
+    private MudForm form = new(); 
+    private Dictionary<GeothermalPropertiesType, string> geoTypeToString = new Dictionary<GeothermalPropertiesType, string>
+        {
+            {GeothermalPropertiesType.Air, "Air"},
+            {GeothermalPropertiesType.Water, "Water"},
+            {GeothermalPropertiesType.RockFormation, "Rock formation"},            
+        };
+    int waterRegionOccurences;
+  
+    private async void UpdateRegionType(GeothermalPropertiesType choice, GeothermalData target)
+    {
+        //Get index of current instance
+        int index = currentGeothermalProperties.GeothermalDataList.IndexOf(target);   
+        // get the number of water-related instances    
+        waterRegionOccurences = ReturnInstancesWithWaterRegion();
+        // Update with choice
+        target.RegionType = choice;
+        // Water layer should always contain two rows. 
+        if (choice == GeothermalPropertiesType.Water && (waterRegionOccurences == 0 || waterRegionOccurences < 2))
+        {
+            currentGeothermalProperties.GeothermalDataList.Add(
+                new GeothermalData 
+                {
+                    RegionType = GeothermalPropertiesType.Water
+                }
+            );
+        } 
+    }
+    private async void AddTableRow()
+    {
+        currentGeothermalProperties.GeothermalDataList.Add(
+            new GeothermalData 
+                {
+                    RegionType = GeothermalPropertiesType.RockFormation
+                }
+        );
+    }
+    private int ReturnInstancesWithWaterRegion()
+    {
+        return currentGeothermalProperties.GeothermalDataList.
+            Where(t => t.RegionType == GeothermalPropertiesType.Water).ToList().Count;
+    }
+    private async void RemoveTableAtRow(GeothermalData currentData)    
+    {
+        if (currentGeothermalProperties.GeothermalDataList.Count > 1)
+        {
+            //Get the number of water-related data so far
+            waterRegionOccurences = ReturnInstancesWithWaterRegion();
+            //Check if there is are 2 water-related data. If there is, check if the user is trying to remove one of those
+            int numberWaterRegionModified = (currentData.RegionType == GeothermalPropertiesType.Water) ? 1 : 0;
+            if (waterRegionOccurences - numberWaterRegionModified == 1)
+            {
+                //Delete both dataset
+                int index = currentGeothermalProperties.GeothermalDataList.IndexOf(currentData);
+                currentGeothermalProperties.GeothermalDataList.RemoveAt(index);
+                index = currentGeothermalProperties.GeothermalDataList.FindIndex(t => t.RegionType == GeothermalPropertiesType.Water);   
+                currentGeothermalProperties.GeothermalDataList.RemoveAt(index);               
+            }                   
+            else
+            {
+                //Otherwise, proceed with deletion
+                int index = currentGeothermalProperties.GeothermalDataList.IndexOf(currentData);
+                currentGeothermalProperties.GeothermalDataList.RemoveAt(index);
+            }
+        }
+        else
+        {
+            Snackbar.Add("At least one input is required! ", Severity.Warning);
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        trajectories = await APIUtils.ClientTrajectory.GetAllTrajectoryLightAsync();
+        wellBores = await APIUtils.ClientWellBore.GetAllWellBoreAsync();
+        
+        if (GeothermalPropertiesId != null)
+        {
+            currentGeothermalProperties = await APIUtils.ClientGeothermalProperties.GetGeothermalPropertiesByIdAsync(GeothermalPropertiesId.Value);
+        }
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+    private string GetRowStyle(GeothermalData geoData, int rowNumber)
+    {
+        int hasDepth = geoData.VerticalDepth != null ? 1:0;
+        int hasTemperature = geoData.Temperature != null ? 1:0;
+        int hasGradient = geoData.TemperatureGradient != null ? 1:0;
+        if (hasDepth + hasTemperature + hasGradient < 2)
+            return "background-color: rgba(255, 99, 71, 0.1)";
+
+        return "background-color: white";
+    }
+
+    private bool CheckInputsValidity()
+    {
+        if (ReturnInstancesWithWaterRegion() == 1)
+        {
+            Snackbar.Add("More than one water-related data needed.", Severity.Warning);        
+            return false;
+        }
+        int hasDepth;
+        int hasTemperature;
+        int hasGradient;
+        int row =0;
+        foreach (GeothermalData geoData in currentGeothermalProperties.GeothermalDataList)
+        {
+            hasDepth = geoData.VerticalDepth != null ? 1:0;
+            hasTemperature = geoData.Temperature != null ? 1:0;
+            hasGradient = geoData.TemperatureGradient != null ? 1:0;
+            if (hasDepth + hasTemperature + hasGradient < 2)
+            {
+                Snackbar.Add("Each row needs at least .", Severity.Warning);    
+                return false;
+            }
+            row += 1;
+        }
+
+        return true;   
+    } 
+    //Send message to parent component
+    private async Task SendMessage()
+    {
+        await ValueChanged.InvokeAsync();
+    }  
+    //Add/Edit panel controls
+    private async Task SaveGeothermalProperties()
+    {
+        //if (!CheckInputsValidity())
+        //{
+        //    Snackbar.Add("Not all rows were properly filled. Check for empty datasets.", Severity.Success);
+        //    return;
+        //}
+        try
+        {
+            if (GeothermalPropertiesId != null)
+            {
+                currentGeothermalProperties.TrajectoryID = trajectoryId;
+                currentGeothermalProperties.WellBoreID = wellBoreId;
+                currentGeothermalProperties.LastModificationDate = DateTimeOffset.UtcNow;                            
+                await APIUtils.ClientGeothermalProperties.PutGeothermalPropertiesByIdAsync((Guid) GeothermalPropertiesId, currentGeothermalProperties);
+                Snackbar.Add("GeothermalProperties updated successfully", Severity.Success);
+                await SendMessage();
+            }
+            else
+            {
+                Snackbar.Add("GeothermalProperties not found for edition", Severity.Success);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error saving GeothermalProperties");
+            Snackbar.Add("Error saving GeothermalProperties: " + ex.Message, Severity.Warning);
+        }
+    }
+    private async Task SaveAsGeothermalProperties()
+    {        
+        try
+        {
+            currentGeothermalProperties.TrajectoryID = trajectoryId;
+            currentGeothermalProperties.WellBoreID = wellBoreId;
+            currentGeothermalProperties.MetaInfo.ID = Guid.NewGuid();
+            currentGeothermalProperties.CreationDate = DateTimeOffset.UtcNow;
+            currentGeothermalProperties.LastModificationDate = DateTimeOffset.UtcNow;         
+            await APIUtils.ClientGeothermalProperties.PostGeothermalPropertiesAsync(currentGeothermalProperties);
+            Snackbar.Add("GeothermalProperties updated successfully", Severity.Success);
+            await SendMessage();            
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error saving GeothermalProperties");
+            Snackbar.Add("Error saving GeothermalProperties: " + ex.Message, Severity.Warning);
+        }
+    }      
+
+    //Update unit system
+    private void ManageUnits(){}        
+}

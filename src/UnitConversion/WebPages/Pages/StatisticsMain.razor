@@ -1,0 +1,354 @@
+﻿@page "/Statistics"
+@inject ILogger<StatisticsMain> logger
+@inject ISnackbar Snackbar
+@namespace OSDC.UnitConversion.WebPages
+
+@if (statistics_ == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div hidden="@isHiddenMainPanel">
+        <MudText Class="mt-4 mb-4" Typo="Typo.h5"><strong>Usage Statistics</strong></MudText>
+        <div style="width: 90%; margin: auto">
+           <MudGrid>
+               <MudItem xs="6"> 
+                  <MudText Typo="Typo.h6">Total count:</MudText>
+               </MudItem>
+               <MudItem xs="6"> 
+                  <MudText Typo="Typo.body1">@totalCount_</MudText>
+               </MudItem>
+                <MudItem xs="6">
+                    <MudText Typo="Typo.h6">Physical quantity count:</MudText>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudText Typo="Typo.body1">@physicalQuantityCount_</MudText>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudText Typo="Typo.h6">Unit system conversion set count:</MudText>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudText Typo="Typo.body1">@unitConversionSetCount_</MudText>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudText Typo="Typo.h6">Unit system count:</MudText>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudText Typo="Typo.body1">@unitSystemCount_</MudText>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudText Typo="Typo.h6">Unit system conversion set count:</MudText>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudText Typo="Typo.body1">@unitSystemConversionSetCount_</MudText>
+                </MudItem>
+            </MudGrid>
+        </div>
+    </div>
+}
+
+@code {
+    private UsageStatistics statistics_ = null;
+    private long totalCount_ = 0;
+    private long physicalQuantityCount_ = 0;
+    private long unitConversionSetCount_ = 0;
+    private long unitSystemCount_ = 0;
+    private long unitSystemConversionSetCount_ = 0;
+
+    private bool isHiddenMainPanel = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            statistics_ = await APIUtils.ClientUnitConversion.GetUsageStatisticsAsync();
+            if (statistics_ != null)
+            {
+                totalCount_ = 0;
+                physicalQuantityCount_ = 0;
+                unitConversionSetCount_ = 0;
+                unitSystemCount_ = 0;
+                unitSystemConversionSetCount_ = 0;
+
+                if (statistics_.PhysicalQuantityControllerGetAllIDPerDay != null && statistics_.PhysicalQuantityControllerGetAllIDPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.PhysicalQuantityControllerGetAllIDPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            physicalQuantityCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.PhysicalQuantityControllerGetAllPerDay != null && statistics_.PhysicalQuantityControllerGetAllPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.PhysicalQuantityControllerGetAllPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            physicalQuantityCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.PhysicalQuantityControllerGetByIDPerDay != null && statistics_.PhysicalQuantityControllerGetByIDPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.PhysicalQuantityControllerGetByIDPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            physicalQuantityCount_ += count.Count;
+                        }
+                    }
+                }
+
+                if (statistics_.UnitConversionSetControllerGetAllIDPerDay != null && statistics_.UnitConversionSetControllerGetAllIDPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitConversionSetControllerGetAllIDPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.UnitConversionSetControllerGetAllMetaInfoPerDay != null && statistics_.UnitConversionSetControllerGetAllMetaInfoPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitConversionSetControllerGetAllMetaInfoPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.UnitConversionSetControllerGetAllPerDay != null && statistics_.UnitConversionSetControllerGetAllPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitConversionSetControllerGetAllPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.UnitConversionSetControllerGetByIDPerDay != null && statistics_.UnitConversionSetControllerGetByIDPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitConversionSetControllerGetByIDPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.UnitConversionSetControllerPostPerDay != null && statistics_.UnitConversionSetControllerPostPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitConversionSetControllerPostPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.UnitConversionSetControllerPutPerDay != null && statistics_.UnitConversionSetControllerPutPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitConversionSetControllerPutPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.UnitConversionSetControllerDeletePerDay != null && statistics_.UnitConversionSetControllerDeletePerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitConversionSetControllerDeletePerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+
+                if (statistics_.UnitSystemControllerGetAllIDPerDay != null && statistics_.UnitSystemControllerGetAllIDPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitSystemControllerGetAllIDPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitSystemCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.UnitSystemControllerGetAllLightPerDay != null && statistics_.UnitSystemControllerGetAllLightPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitSystemControllerGetAllLightPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitSystemCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.UnitSystemControllerGetAllPerDay != null && statistics_.UnitSystemControllerGetAllPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitSystemControllerGetAllPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitSystemCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.UnitSystemControllerGetByIDPerDay != null && statistics_.UnitSystemControllerGetByIDPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitSystemControllerGetByIDPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitSystemCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.UnitSystemControllerPostPerDay != null && statistics_.UnitSystemControllerPostPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitSystemControllerPostPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitSystemCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.UnitSystemControllerPutPerDay != null && statistics_.UnitSystemControllerPutPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitSystemControllerPutPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitSystemCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.UnitSystemControllerDeletePerDay != null && statistics_.UnitSystemControllerDeletePerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitSystemControllerDeletePerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitSystemCount_ += count.Count;
+                        }
+                    }
+                }
+
+                if (statistics_.UnitSystemConversionSetControllerGetAllIDPerDay != null && statistics_.UnitSystemConversionSetControllerGetAllIDPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitSystemConversionSetControllerGetAllIDPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitSystemConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.UnitSystemConversionSetControllerGetAllMetaInfoPerDay != null && statistics_.UnitSystemConversionSetControllerGetAllMetaInfoPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitSystemConversionSetControllerGetAllMetaInfoPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitSystemConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.UnitSystemConversionSetControllerGetAllPerDay != null && statistics_.UnitSystemConversionSetControllerGetAllPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitSystemConversionSetControllerGetAllPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitSystemConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.UnitSystemConversionSetControllerGetByIDPerDay != null && statistics_.UnitSystemConversionSetControllerGetByIDPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitSystemConversionSetControllerGetByIDPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitSystemConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.UnitSystemConversionSetControllerPostPerDay != null && statistics_.UnitSystemConversionSetControllerPostPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitSystemConversionSetControllerPostPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitSystemConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.UnitSystemConversionSetControllerPutPerDay != null && statistics_.UnitSystemConversionSetControllerPutPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitSystemConversionSetControllerPutPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitSystemConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.UnitSystemConversionSetControllerDeletePerDay != null && statistics_.UnitSystemConversionSetControllerDeletePerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.UnitSystemConversionSetControllerDeletePerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            unitSystemConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+            }
+            // Show main panel
+            isHiddenMainPanel = false;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem UsageStatistics initialization");
+        }
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+    
+
+ 
+}

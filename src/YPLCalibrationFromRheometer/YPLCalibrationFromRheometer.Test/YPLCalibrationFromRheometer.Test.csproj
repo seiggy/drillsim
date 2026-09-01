@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<RootNamespace>YPLCalibrationFromRheometer.Test</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\YPLCalibrationFromRheometer.ModelClientShared\YPLCalibrationFromRheometer.ModelClientShared.csproj" />
+	</ItemGroup>
+
+</Project>

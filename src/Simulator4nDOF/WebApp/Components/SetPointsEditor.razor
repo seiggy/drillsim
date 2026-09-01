@@ -1,0 +1,113 @@
+﻿
+<div style="width: 1000px;">
+    <MudDataGrid T="SetPoints"
+                 MultiSelection="false"
+                 Items="Simulation.SetPointsList"
+                 EditMode="DataGridEditMode.Cell"
+                 ReadOnly="false"
+                 ColumnResizeMode="ResizeMode.Column"
+                 Elevation="0">
+
+        <Columns>
+            <!-- Time Duration Column -->
+            <TemplateColumn Title="Time duration" CellStyle="width: 30%;" Sortable="false">
+                <HeaderTemplate>
+                    <div>
+                        Time duration @TimeUnit
+                    </div>
+                </HeaderTemplate>
+                <EditTemplate Context="context">
+                    <MudInputWithUnit VariantType="Variant.Text"
+                                      QuantityName="Time"
+                                      SIValue="context.Item.TimeDuration"
+                                      SIValueNullableChanged="val => {
+                                          if (val != null) context.Item.TimeDuration = (double)val;
+                                      }" />
+                </EditTemplate>
+            </TemplateColumn>
+
+            <!-- Surface Rotational Speed Column -->
+            <TemplateColumn Title="Surface Rotational Speed" CellStyle="width: 30%;" Sortable="false">
+                <HeaderTemplate>
+                    <div>
+                        Surface rotational speed @RotationalVelocityUnit
+                    </div>
+                </HeaderTemplate>
+                <EditTemplate Context="context">
+                    <MudInputWithUnit VariantType="Variant.Text"
+                                      QuantityName="AngularVelocityDrilling"
+                                      SIValue="context.Item.SurfaceRPM"
+                                      SIValueNullableChanged="val => {
+                                          if (val != null) context.Item.SurfaceRPM = (double)val;
+                                      }" />
+                </EditTemplate>
+            </TemplateColumn>
+
+            <!-- Top of String Velocity Column -->
+            <TemplateColumn Title="Top of string velocity" CellStyle="width: 30%;" Sortable="false">
+                <HeaderTemplate>
+                    <div>
+                        Top of string velocity @AxialVelocityUnit
+                    </div>
+                </HeaderTemplate>
+                <EditTemplate Context="context">
+                    <MudInputWithUnit VariantType="Variant.Text"
+                                      QuantityName="RateOfPenetrationDrilling"
+                                      SIValue="context.Item.TopOfStringVelocity"
+                                      SIValueChanged="val => {
+                                          context.Item.TopOfStringVelocity = (double)val;
+                                      }" />
+                </EditTemplate>
+            </TemplateColumn>
+
+            <!-- Delete Button Column -->
+            <TemplateColumn CellStyle="width: 5%;">
+                <EditTemplate Context="item">
+                    <MudIconButton Size="@Size.Small"
+                                   Icon="@Icons.Material.Outlined.Delete"
+                                   OnClick="async () => await DeleteSetPoints(item.Item)" />
+                </EditTemplate>
+            </TemplateColumn>
+        </Columns>
+
+        <PagerContent>
+            <MudDataGridPager T="SetPoints" />
+        </PagerContent>
+    </MudDataGrid>
+</div>
+
+
+@code {
+
+    [Parameter]
+    public Simulation Simulation { get; set; }
+
+    [CascadingParameter]
+    public MudUnitAndReferenceChoiceTag? Parent { get; set; }
+
+    private string TimeUnit { get; set; } = string.Empty;
+    private string RotationalVelocityUnit { get; set; } = string.Empty;
+    private string AxialVelocityUnit { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        if (Parent != null)
+        {
+            TimeUnit = "[" + Parent.GetUnitLabel(BasePhysicalQuantity.QuantityEnum.Time) + "]";
+            RotationalVelocityUnit = "[" + Parent.GetUnitLabel(DrillingPhysicalQuantity.QuantityEnum.AngularVelocityDrilling) + "]";
+            AxialVelocityUnit = "[" + Parent.GetUnitLabel(DrillingPhysicalQuantity.QuantityEnum.RateOfPenetrationDrilling) + "]";
+        }
+    }
+
+    private async Task DeleteSetPoints(SetPoints item)
+    {
+        if (item != null)
+        {
+            Simulation.SetPointsList.Remove(item);
+        }
+
+        // Optional UI refresh
+        await InvokeAsync(StateHasChanged);
+    }
+}

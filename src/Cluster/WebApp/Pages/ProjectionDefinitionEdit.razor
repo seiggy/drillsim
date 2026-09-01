@@ -1,0 +1,9 @@
+@page "/ProjectionDefinition/new"
+@page "/ProjectionDefinition/{Id:guid}/edit"
+
+<NORCE.Drilling.CartographicProjection.WebPages.CartographicProjection />
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+}

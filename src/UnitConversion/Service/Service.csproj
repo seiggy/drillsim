@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<DockerfileBuildArguments>--build-arg NORCE_NUGET_USER --build-arg NORCE_NUGET_APIKEY</DockerfileBuildArguments>
+		<UserSecretsId>d4693808-78e9-47c7-919b-bed83a86870d</UserSecretsId>
+		<RootNamespace>OSDC.UnitConversion.Service</RootNamespace>
+		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+		<IsPackable>true</IsPackable>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+		<PackageId>$(AssemblyName)</PackageId>
+		<Version>3.2.1</Version>
+		<Nullable>enable</Nullable>
+		<NoWarn>$(NoWarn);MCPEXP002</NoWarn>
+		<Authors>Gilles Pelfrene</Authors>
+		<Company>NORCE Norwegian Research Centre</Company>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
+		<PackageReference Include="ModelContextProtocol.AspNetCore" Version="2.2.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+		<PackageReference Include="NSwag.MSBuild" Version="14.7.1">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Model\Model.csproj" />
+	</ItemGroup>
+
+	<Target Name="CreateSwaggerJson" AfterTargets="Build" Condition="$(Configuration)=='Debug'">
+		<Exec Command="dotnet swagger tofile --output ../ModelShared/json-schemas/$(Version)/UnitConversion.json $(OutputPath)$(AssemblyName).dll v1" WorkingDirectory="$(ProjectDir)" />
+	</Target>
+
+</Project>

@@ -1,0 +1,384 @@
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Logging;
+using OSDC.DotnetLibraries.General.DataManagement;
+using OSDC.Drilling.Cluster.Service.Managers;
+using OSDC.Drilling.Cluster.Model;
+
+namespace OSDC.Drilling.Cluster.Service.Controllers
+{
+    [Produces("application/json")]
+    [Route("[controller]")]
+    [ApiController]
+    public class ClusterController : ControllerBase
+    {
+        private readonly ILogger<ClusterManager> _logger;
+        private readonly ClusterManager _clusterManager;
+        private readonly IClusterExternalReferenceResolver _externalReferenceResolver;
+
+        public ClusterController(ILogger<ClusterManager> logger, SqlConnectionManager connectionManager,
+            IClusterExternalReferenceResolver externalReferenceResolver)
+        {
+            _logger = logger;
+            _clusterManager = ClusterManager.GetInstance(_logger, connectionManager);
+            _externalReferenceResolver = externalReferenceResolver;
+        }
+
+        /// <summary>
+        /// Returns the list of Guid of all Cluster present in the microservice database at endpoint Cluster/api/Cluster
+        /// </summary>
+        /// <returns>the list of Guid of all Cluster present in the microservice database at endpoint Cluster/api/Cluster</returns>
+        [HttpGet(Name = "GetAllClusterId")]
+        public ActionResult<IEnumerable<Guid>> GetAllClusterId()
+        {
+            UsageStatisticsCluster.Instance.IncrementGetAllClusterIdPerDay();
+            var ids = _clusterManager.GetAllClusterId();
+            if (ids != null)
+            {
+                return Ok(ids);
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        /// <summary>
+        /// Returns the list of MetaInfo of all Cluster present in the microservice database, at endpoint Cluster/api/Cluster/MetaInfo
+        /// </summary>
+        /// <returns>the list of MetaInfo of all Cluster present in the microservice database, at endpoint Cluster/api/Cluster/MetaInfo</returns>
+        [HttpGet("MetaInfo", Name = "GetAllClusterMetaInfo")]
+        public ActionResult<IEnumerable<MetaInfo>> GetAllClusterMetaInfo()
+        {
+            UsageStatisticsCluster.Instance.IncrementGetAllClusterMetaInfoPerDay();
+            var vals = _clusterManager.GetAllClusterMetaInfo();
+            if (vals != null)
+            {
+                return Ok(vals);
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        /// <summary>
+        /// Returns the Cluster identified by its Guid from the microservice database, at endpoint Cluster/api/Cluster/MetaInfo/id
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <returns>the Cluster identified by its Guid from the microservice database, at endpoint Cluster/api/Cluster/MetaInfo/id</returns>
+        [HttpGet("{id:guid}", Name = "GetClusterById")]
+        public ActionResult<Model.Cluster?> GetClusterById(Guid id)
+        {
+            UsageStatisticsCluster.Instance.IncrementGetClusterByIdPerDay();
+            if (!id.Equals(Guid.Empty))
+            {
+                var val = _clusterManager.GetClusterById(id);
+                if (val != null)
+                {
+                    return Ok(val);
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
+
+        /// <summary>
+        /// Returns the list of all Cluster present in the microservice database, at endpoint Cluster/api/Cluster/HeavyData
+        /// </summary>
+        /// <returns>the list of all Cluster present in the microservice database, at endpoint Cluster/api/Cluster/HeavyData</returns>
+        [HttpGet("HeavyData", Name = "GetAllCluster")]
+        public ActionResult<IEnumerable<Model.Cluster?>> GetAllCluster()
+        {
+            UsageStatisticsCluster.Instance.IncrementGetAllClusterPerDay();
+            var vals = _clusterManager.GetAllCluster();
+            if (vals != null)
+            {
+                return Ok(vals);
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        /// <summary>Exports all clusters or an ordered selection with referenced local catalog definitions.</summary>
+        [HttpPost("BatchExport", Name = "BatchExportClusters")]
+        [ProducesResponseType<ClusterBatchExportDocument>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ClusterBatchErrorEnvelope>(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType<ClusterBatchErrorEnvelope>(StatusCodes.Status404NotFound)]
+        [ProducesResponseType<ClusterBatchErrorEnvelope>(StatusCodes.Status409Conflict)]
+        [ProducesResponseType<ClusterBatchErrorEnvelope>(StatusCodes.Status502BadGateway)]
+        [ProducesResponseType<ClusterBatchErrorEnvelope>(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ClusterBatchExportDocument>> BatchExportClusters(
+            [FromBody] ClusterBatchExportRequest? request, CancellationToken cancellationToken)
+        {
+            UsageStatisticsCluster.Instance.IncrementBatchExportClustersPerDay();
+            ClusterBatchExportOutcome outcome = _clusterManager.ExportBatch(request);
+            if (outcome.IsSuccess)
+            {
+                try
+                {
+                    List<ClusterBatchError> referenceErrors = await _externalReferenceResolver
+                        .PopulateExportManifestAsync(outcome.Document!, cancellationToken);
+                    if (referenceErrors.Count != 0)
+                        return Conflict(new ClusterBatchErrorEnvelope
+                        {
+                            Error = "external_reference_invalid",
+                            Message = "One or more Field or Rig references could not be represented in the portable backup.",
+                            Errors = referenceErrors
+                        });
+                    return Ok(outcome.Document);
+                }
+                catch (HttpRequestException ex)
+                {
+                    _logger.LogError(ex, "Unable to resolve Field or Rig names during cluster export");
+                    return StatusCode(StatusCodes.Status502BadGateway, ExternalServiceError(ex.Message));
+                }
+            }
+            return outcome.FailureKind switch
+            {
+                ClusterBatchExportFailureKind.InvalidRequest => BadRequest(outcome.Error),
+                ClusterBatchExportFailureKind.ClusterNotFound => NotFound(outcome.Error),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, outcome.Error)
+            };
+        }
+
+        /// <summary>Validates and atomically restores clusters and their local catalog dependencies.</summary>
+        [HttpPost("BatchRestore", Name = "BatchRestoreClusters")]
+        [ProducesResponseType<ClusterBatchRestoreResponse>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ClusterBatchErrorEnvelope>(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType<ClusterBatchErrorEnvelope>(StatusCodes.Status409Conflict)]
+        [ProducesResponseType<ClusterBatchErrorEnvelope>(StatusCodes.Status502BadGateway)]
+        [ProducesResponseType<ClusterBatchErrorEnvelope>(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ClusterBatchRestoreResponse>> BatchRestoreClusters(
+            [FromBody] ClusterBatchRestoreRequest? request, CancellationToken cancellationToken)
+        {
+            UsageStatisticsCluster.Instance.IncrementBatchRestoreClustersPerDay();
+            List<ClusterBatchError> requestErrors = ClusterBatchRestorer.ValidateRequest(request);
+            if (requestErrors.Count != 0)
+            {
+                return BadRequest(new ClusterBatchErrorEnvelope
+                {
+                    Error = "invalid_batch_restore_request",
+                    Message = "The cluster batch-restore request is invalid. No changes were made.",
+                    Errors = requestErrors
+                });
+            }
+
+            ClusterExternalReferenceResolutionOutcome external;
+            try
+            {
+                external = await _externalReferenceResolver.ResolveRestoreManifestAsync(request!.Document!, cancellationToken);
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "Unable to resolve destination Field or Rig references during cluster restore");
+                return StatusCode(StatusCodes.Status502BadGateway, ExternalServiceError(ex.Message));
+            }
+            if (!external.IsSuccess)
+                return Conflict(new ClusterBatchErrorEnvelope
+                {
+                    Error = "external_reference_mapping_failed",
+                    Message = "Field or Rig references could not be resolved uniquely on the destination. No changes were made.",
+                    Errors = external.Errors
+                });
+
+            ClusterBatchRestoreOutcome outcome = _clusterManager.RestoreBatch(request, external.Mappings);
+            if (outcome.IsSuccess) return Ok(outcome.Response);
+            return outcome.FailureKind switch
+            {
+                ClusterBatchRestoreFailureKind.InvalidRequest => BadRequest(outcome.Error),
+                ClusterBatchRestoreFailureKind.Conflict => Conflict(outcome.Error),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, outcome.Error)
+            };
+        }
+
+        private static ClusterBatchErrorEnvelope ExternalServiceError(string message) => new()
+        {
+            Error = "external_reference_service_unavailable",
+            Message = "Field or Rig reference validation could not be completed. No changes were made.",
+            Errors = [new ClusterBatchError { Property = "ExternalReferences", Code = "dependency_unavailable", Message = message }]
+        };
+
+        /// <summary>
+        /// Returns the list of all ClusterLight present in the microservice database, at endpoint Cluster/api/Cluster/LightData
+        /// </summary>
+        /// <returns>the list of all ClusterLight present in the microservice database, at endpoint Cluster/api/Cluster/LightData</returns>
+        [HttpGet("LightData", Name = "GetAllClusterLight")]
+        public ActionResult<IEnumerable<Model.ClusterLight>> GetAllClusterLight()
+        {
+            UsageStatisticsCluster.Instance.IncrementGetAllClusterLightPerDay();
+            var vals = _clusterManager.GetAllClusterLight();
+            if (vals != null)
+            {
+                return Ok(vals);
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        /// <summary>
+        /// Returns the list of all Cluster with given field id present in the microservice database, at endpoint Cluster/api/Cluster/HeavyData
+        /// </summary>
+        /// <returns>the list of all Cluster with given field id present in the microservice database, at endpoint Cluster/api/Cluster/HeavyData</returns>
+        [HttpGet("ByFieldId", Name = "GetAllClusterByFieldId")]
+        public ActionResult<IEnumerable<Model.Cluster?>> GetAllClusterByFieldId(Guid guid)
+        {
+            UsageStatisticsCluster.Instance.IncrementGetAllClusterByFieldIdPerDay();
+            var vals = _clusterManager.GetAllClusterByFieldId(guid);
+            if (vals != null)
+            {
+                return Ok(vals);
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+        /// <summary>
+        /// Returns the list of all Cluster with given rig id present in the microservice database, at endpoint Cluster/api/Cluster/HeavyData
+        /// </summary>
+        /// <returns>the list of all Cluster with given rig id present in the microservice database, at endpoint Cluster/api/Cluster/HeavyData</returns>
+        [HttpGet("ByRigId", Name = "GetAllClusterByRigId")]
+        public ActionResult<IEnumerable<Model.Cluster?>> GetAllClusterByRigId(Guid guid)
+        {
+            UsageStatisticsCluster.Instance.IncrementGetAllClusterByRigIdPerDay();
+            var vals = _clusterManager.GetAllClusterByRigId(guid);
+            if (vals != null)
+            {
+                return Ok(vals);
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+        /// <summary>
+        /// Returns the list of all single well Clusters present in the microservice database, at endpoint Cluster/api/Cluster/HeavyData
+        /// </summary>
+        /// <returns>the list of all single well Cluster present in the microservice database, at endpoint Cluster/api/Cluster/HeavyData</returns>
+        [HttpGet("SingleWell", Name = "GetAllSingleWellCluster")]
+        public ActionResult<IEnumerable<Model.Cluster?>> GetAllSingleWellCluster(bool? IsSingleWellNullable)
+        {
+            UsageStatisticsCluster.Instance.IncrementGetAllSingleWellClusterPerDay();
+            bool IsSingleWell = IsSingleWellNullable ?? true;
+            var vals = _clusterManager.GetAllSingleWellCluster(IsSingleWell);
+            if (vals != null)
+            {
+                return Ok(vals);
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+        /// <summary>
+        /// Returns the list of all fixed platform Clusters present in the microservice database, at endpoint Cluster/api/Cluster/HeavyData
+        /// </summary>
+        /// <returns>the list of all fixed platform Cluster present in the microservice database, at endpoint Cluster/api/Cluster/HeavyData</returns>
+        [HttpGet("FixedPlatform", Name = "GetAllFixedPlatformCluster")]
+        public ActionResult<IEnumerable<Model.Cluster?>> GetAllFixedPlatformCluster(bool fixedBool)
+        {
+            UsageStatisticsCluster.Instance.IncrementGetAllFixedPlatformClusterPerDay();
+            var vals = _clusterManager.GetAllFixedPlatformCluster(fixedBool);
+            if (vals != null)
+            {
+                return Ok(vals);
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+        /// <summary>
+        /// Performs calculation on the given Cluster and adds it to the microservice database, at the endpoint Cluster/api/Cluster
+        /// </summary>
+        /// <param name="cluster"></param>
+        /// <returns>true if the given Cluster has been added successfully to the microservice database, at the endpoint Cluster/api/Cluster</returns>
+        [HttpPost(Name = "PostCluster")]
+        [ProducesResponseType(typeof(Model.Cluster), StatusCodes.Status200OK)]
+        public ActionResult PostCluster([FromBody] Model.Cluster? data)
+        {
+            UsageStatisticsCluster.Instance.IncrementPostClusterPerDay();
+            // Check if cluster exists in the database through ID
+            if (data != null && data.MetaInfo != null && data.MetaInfo.ID != Guid.Empty)
+            {
+                var existingData = _clusterManager.GetClusterById(data.MetaInfo.ID);
+                if (existingData == null)
+                {   
+                    //  If cluster was not found, call AddCluster, where the cluster.Calculate()
+                    // method is called. 
+                    return this.ToActionResult(_clusterManager.AddCluster(data), data);
+                }
+                else
+                {
+                    _logger.LogWarning("The given Cluster already exists and will not be added");
+                    return StatusCode(StatusCodes.Status409Conflict);
+                }
+            }
+            else
+            {
+                _logger.LogWarning("The given Cluster is null, badly formed, or its ID is empty");
+                return BadRequest();
+            }
+        }
+
+        /// <summary>
+        /// Performs calculation on the given Cluster and updates it in the microservice database, at the endpoint Cluster/api/Cluster/id
+        /// </summary>
+        /// <param name="cluster"></param>
+        /// <returns>true if the given Cluster has been updated successfully to the microservice database, at the endpoint Cluster/api/Cluster/id</returns>
+        [HttpPut("{id:guid}", Name = "PutClusterById")]
+        [ProducesResponseType(typeof(Model.Cluster), StatusCodes.Status200OK)]
+        public ActionResult PutClusterById(Guid id, [FromQuery, BindRequired] DateTimeOffset expectedModifiedUtc, [FromBody] Model.Cluster? data)
+        {
+            UsageStatisticsCluster.Instance.IncrementPutClusterByIdPerDay();
+            if (expectedModifiedUtc == default) return BadRequest(new Model.ClusterMutationErrorEnvelope { Error = "invalid_request", Message = "expectedModifiedUtc is required." });
+            if (data == null) return BadRequest(new Model.ClusterMutationErrorEnvelope { Error = "invalid_request", Message = "cluster is required." });
+            return this.ToActionResult(_clusterManager.UpdateClusterById(id, expectedModifiedUtc, data), data);
+        }
+
+        /// <summary>
+        /// Deletes the Cluster of given ID from the microservice database, at the endpoint Cluster/api/Cluster/id
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <returns>true if the Cluster was deleted from the microservice database, at the endpoint Cluster/api/Cluster/id</returns>
+        [HttpDelete("{id:guid}", Name = "DeleteClusterById")]
+        public ActionResult DeleteClusterById(Guid id)
+        {
+            UsageStatisticsCluster.Instance.IncrementDeleteClusterByIdPerDay();
+            if (_clusterManager.GetClusterById(id) != null)
+            {
+                if (_clusterManager.DeleteClusterById(id))
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError);
+                }
+            }
+            else
+            {
+                _logger.LogWarning("The Cluster of given ID does not exist");
+                return NotFound();
+            }
+        }
+    }
+}

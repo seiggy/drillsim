@@ -1,0 +1,92 @@
+﻿@namespace OSDC.UnitConversion.DrillingRazorMudComponents
+@implements IUnitAwareComponent
+
+<MudTextField @bind-Value="@DisplayedValue" ReadOnly="true" Variant="@VariantType" />
+
+@code {
+    [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? Parent { get; set; }
+
+    [Parameter]
+    public double? SIValue
+    {
+        get
+        {
+            return SIValue_;
+        }
+        set
+        {
+            SIValue_ = value;
+            ManageUnits();
+        }
+    }
+
+    [Parameter]
+    public String? QuantityName { get; set; }
+
+    [Parameter]
+    public Variant VariantType { get; set; } = Variant.Text;
+
+    [Parameter]
+    public bool UseUnitLabel { get; set; } = false;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public DrillingSignalReferenceType DrillingSignalReference { get; set; } = DrillingSignalReferenceType.Independent;
+
+    [Parameter]
+    public PositionDirectionType PositionDirection { get; set; } = PositionDirectionType.Independent;
+
+    [Parameter]
+    public bool Hidden { get; set; }
+
+    private string? DisplayedValue { get; set; }
+
+    private double? SIValue_;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (Parent == null)
+        {
+            throw new ArgumentNullException(nameof(Parent), "SpanWithUnit must exist within a UnitAndReferenceChoiceTag");
+        }
+        Parent.Add(this);
+        ManageUnits();
+    }
+
+    public void ManageUnits()
+    {
+        if (Parent != null && !string.IsNullOrEmpty(Parent.UnitSystemName))
+        {
+            DisplayedValue = Parent.FromSI(SIValue, QuantityName!, UseUnitLabel);
+            switch (DrillingSignalReference)
+            {
+                case DrillingSignalReferenceType.Pressure:
+                    DisplayedValue = Parent.FromAbsolutePressureSI(SIValue, QuantityName!, UseUnitLabel);
+                    break;
+                case DrillingSignalReferenceType.Azimuth:
+                    DisplayedValue = Parent.FromTrueNorthAzimuthSI(SIValue, QuantityName!, UseUnitLabel);
+                    break;
+                case DrillingSignalReferenceType.Depth:
+                    DisplayedValue = Parent.FromWGS84DepthSI(SIValue, QuantityName!, UseUnitLabel);
+                    break;
+                case DrillingSignalReferenceType.Position:
+                    DisplayedValue = Parent.FromWGS84PositionSI(SIValue, QuantityName!, UseUnitLabel, PositionDirection);
+                    break;
+                case DrillingSignalReferenceType.Geodetic:
+                    DisplayedValue = Parent.FromWGS84GeodeticSI(SIValue, QuantityName!, UseUnitLabel, PositionDirection);
+                    break;
+                default:
+                    DisplayedValue = Parent.FromSI(SIValue, QuantityName!, UseUnitLabel);
+                    break;
+            }
+        }
+        else
+        {
+            DisplayedValue = "";
+        }
+    }
+}

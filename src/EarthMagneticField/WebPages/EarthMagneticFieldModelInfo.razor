@@ -1,0 +1,39 @@
+@page "/EarthMagneticFieldModel"
+@inject IEarthMagneticFieldAPIUtils Api
+
+<MudPaper Class="pa-6 mt-4" Elevation="2">
+    <MudText Typo="Typo.h4">Installed magnetic reference models</MudText>
+    @if (serviceInfo == null)
+    {
+        <MudProgressLinear Indeterminate="true" Class="mt-4" />
+    }
+    else
+    {
+        <MudText Typo="Typo.body2" Class="mt-3">
+            Frame: @serviceInfo.CoordinateFrame; time: @serviceInfo.TimeConvention; depth: @serviceInfo.DepthPositiveDirection from @serviceInfo.DepthReference.
+        </MudText>
+        @foreach (EarthMagneticModelInfo model in serviceInfo.Models)
+        {
+            <MudText Typo="Typo.h6" Class="mt-5">@model.Description (@model.ID)</MudText>
+            <MudSimpleTable Class="mt-2">
+                <tbody>
+                    <tr><th>Model</th><td>@model.Model / @model.Name</td></tr>
+                    <tr><th>Release date</th><td>@model.ReleaseDate</td></tr>
+                    <tr><th>UTC validity</th><td>@model.MinimumUtc.ToString("O") through @model.MaximumUtc.ToString("O")</td></tr>
+                    <tr><th>Depth validity</th><td>@model.MinimumDepth m through @model.MaximumDepth m</td></tr>
+                    <tr><th>Degree/order</th><td>@model.Degree / @model.Order</td></tr>
+                    <tr><th>GeographicLib</th><td>@model.GeographicLibVersion</td></tr>
+                    <tr><th>Concurrent evaluation</th><td>@model.ConcurrentEvaluationEnabled</td></tr>
+                    <tr><th>Metadata SHA-256</th><td class="hash">@model.MetadataSHA256</td></tr>
+                    <tr><th>Coefficient SHA-256</th><td class="hash">@model.CoefficientSHA256</td></tr>
+                </tbody>
+            </MudSimpleTable>
+        }
+    }
+</MudPaper>
+
+@code {
+    private EarthMagneticFieldServiceInfo? serviceInfo;
+    protected override async Task OnInitializedAsync() =>
+        serviceInfo = await Api.ClientEarthMagneticField.GetEarthMagneticFieldModelInfoAsync();
+}

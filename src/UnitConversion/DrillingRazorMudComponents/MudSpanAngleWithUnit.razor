@@ -1,0 +1,203 @@
+﻿@namespace OSDC.UnitConversion.DrillingRazorMudComponents
+@implements IUnitAwareComponent
+
+<MudTextField @bind-Value="@DisplayedValue" ReadOnly="true" Variant="@VariantType" />
+
+@code {
+    [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? Parent { get; set; }
+
+    [Parameter]
+    public double? SIValue
+    {
+        get
+        {
+            return SIValue_;
+        }
+        set
+        {
+            SIValue_ = value;
+            ManageUnits();
+        }
+    }
+
+    [Parameter]
+    public Variant VariantType { get; set; } = Variant.Text;
+
+    [Parameter]
+    public bool UseUnitLabel { get; set; } = false;
+
+    [Parameter]
+    public String? QuantityName { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public DrillingSignalReferenceType DrillingSignalReference { get; set; } = DrillingSignalReferenceType.Independent;
+
+    [Parameter]
+    public PositionDirectionType PositionDirection { get; set; } = PositionDirectionType.Independent;
+
+    [Parameter]
+    public bool Hidden { get; set; }
+
+    private string? DisplayedValue { get; set; }
+
+    private double? SIValue_;
+
+    private readonly UnitChoice degreeUnitChoice = PlaneAngleQuantity.Instance.GetUnitChoice(PlaneAngleQuantity.UnitChoicesEnum.Degree);
+    private readonly UnitChoice minuteUnitChoice = PlaneAngleQuantity.Instance.GetUnitChoice(PlaneAngleQuantity.UnitChoicesEnum.ArcMinute);
+    private readonly UnitChoice secondUnitChoice = PlaneAngleQuantity.Instance.GetUnitChoice(PlaneAngleQuantity.UnitChoicesEnum.ArcSecond);
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (Parent == null)
+        {
+            throw new ArgumentNullException(nameof(Parent), "SpanWithUnit must exist within a UnitAndReferenceChoiceTag");
+        }
+        Parent.Add(this);
+        ManageUnits();
+    }
+
+    public void ManageUnits()
+    {
+        if (Parent != null && !string.IsNullOrEmpty(Parent.UnitSystemName))
+        {
+            if (SIValue == null)
+            {
+                DisplayedValue = string.Empty;
+            }
+            else
+            {
+                double valueInDegreeUnit = degreeUnitChoice.FromSI(GetReferenceValueSI());
+                double degValue = Math.Floor(valueInDegreeUnit);
+                double minValue = Math.Floor((valueInDegreeUnit - degValue) * 60);
+                if (Math.Abs(minValue - 60.0) < 1e-6)
+                {
+                    degValue += 1;
+                    minValue = Math.Floor((valueInDegreeUnit - degValue) * 60);
+                }
+                double secValue = (valueInDegreeUnit - degValue - minValue / 60) * 3600;
+                if (Math.Abs(secValue - 60.0) < 1e-6)
+                {
+                    minValue += 1;
+                    if (Math.Abs(minValue - 60.0) < 1e-6)
+                    {
+                        degValue += 1;
+                        minValue = 0;
+                    }
+                    secValue = (valueInDegreeUnit - degValue - minValue / 60) * 3600;
+                }
+                string degreeRoundedValue = degValue.ToString();
+                string minuteRoundedValue = minValue.ToString();
+                string secondValue = secValue.ToString("F5");
+                DisplayedValue = degreeRoundedValue + "°" + minuteRoundedValue + "\'" + secondUnitChoice + "\"";
+            }
+        }
+        else
+        {
+            DisplayedValue = string.Empty;
+        }
+    }
+
+    private double GetReferenceValueSI()
+    {
+        if (Parent != null &&
+            DrillingSignalReference == DrillingSignalReferenceType.Geodetic &&
+            !string.IsNullOrEmpty(QuantityName) &&
+            SIValue != null)
+        {
+            double? valueInUserUnit = Parent.FromWGS84GeodeticSI(SIValue, QuantityName, PositionDirection);
+            if (valueInUserUnit != null)
+            {
+                return Parent.ToSI(valueInUserUnit.Value, QuantityName);
+            }
+        }
+        return SIValue!.Value;
+    }
+
+    private static bool TryParse(string value, out double result)
+    {
+        return double.TryParse(value, out result) ||
+               double.TryParse(value, NumberStyles.Float, US_NUMBER_FORMAT, out result) ||
+               double.TryParse(value, NumberStyles.Float, NO_NUMBER_FORMAT, out result) ||
+               double.TryParse(value, NumberStyles.Float, FR_NUMBER_FORMAT, out result) ||
+               double.TryParse(value, NumberStyles.Float, IT_NUMBER_FORMAT, out result) ||
+               double.TryParse(value, NumberStyles.Float, SP_NUMBER_FORMAT, out result) ||
+               double.TryParse(value, NumberStyles.Float, PT_NUMBER_FORMAT, out result) ||
+               double.TryParse(value, NumberStyles.Float, UK_NUMBER_FORMAT, out result);
+    }
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("en-US")
+    /// </summary>
+    private static CultureInfo US_CULTURE = new CultureInfo("en-US");
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("nb-NO")
+    /// </summary>
+    private static CultureInfo NO_CULTURE = new CultureInfo("nb-NO");
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("fr-FR")
+    /// </summary>
+    private static CultureInfo FR_CULTURE = new CultureInfo("fr-FR");
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("it-IT")
+    /// </summary>
+    private static CultureInfo IT_CULTURE = new CultureInfo("it-IT");
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("es-ES")
+    /// </summary>
+    private static CultureInfo SP_CULTURE = new CultureInfo("es-ES");
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("en-GB")
+    /// </summary>
+    private static CultureInfo UK_CULTURE = new CultureInfo("en-GB");
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("pt-PT")
+    /// </summary>
+    private static CultureInfo PT_CULTURE = new CultureInfo("pt-PT");
+
+    /// <summary>
+    /// Shorthand for US_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo US_NUMBER_FORMAT = US_CULTURE.NumberFormat;
+
+    /// <summary>
+    /// Shorthand for NO_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo NO_NUMBER_FORMAT = NO_CULTURE.NumberFormat;
+
+    /// <summary>
+    /// Shorthand for FR_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo FR_NUMBER_FORMAT = FR_CULTURE.NumberFormat;
+
+    /// <summary>
+    /// Shorthand for IT_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo IT_NUMBER_FORMAT = IT_CULTURE.NumberFormat;
+
+    /// <summary>
+    /// Shorthand for SP_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo SP_NUMBER_FORMAT = SP_CULTURE.NumberFormat;
+
+    /// <summary>
+    /// Shorthand for UK_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo UK_NUMBER_FORMAT = UK_CULTURE.NumberFormat;
+
+    /// <summary>
+    /// Shorthand for PT_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo PT_NUMBER_FORMAT = PT_CULTURE.NumberFormat;
+
+}

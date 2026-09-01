@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Authors>Eric Cayeux</Authors>
+		<Company>NORCE Norwegian Research Centre</Company>
+		<Description>A package for unit conversions without engineering concepts</Description>
+		<PackageProjectUrl>https://github.com/Open-Source-Drilling-Community/UnitConversion</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/Open-Source-Drilling-Community/UnitConversion</RepositoryUrl>
+		<Version>3.4.1</Version>
+		<Title>A unit management conversion package</Title>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageId>OSDC.UnitConversion.Conversion</PackageId>
+		<RootNamespace>OSDC.UnitConversion.Conversion</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.12.0-1.final" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="LICENSE">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Update="README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+</Project>

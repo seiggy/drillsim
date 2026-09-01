@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+	<AssemblyName>OSDC.Drilling.Well.WebPages</AssemblyName>
+	<RootNamespace>OSDC.Drilling.Well.WebPages</RootNamespace>
+    <PackageId>OSDC.Drilling.Well.WebPages</PackageId>
+    <Title>OSDC.Drilling.Well.WebPages</Title>
+    <Authors>Eric Cayeux</Authors>
+    <Company>NORCE Research</Company>
+    <Description>Reusable Razor class library containing the Well and statistics web pages. See the package README for setup, dependencies, and usage.</Description>
+    <PackageTags>well;drilling;blazor;razor;mudblazor</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/Open-Source-Drilling-Community/Well</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/Open-Source-Drilling-Community/Well</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Version>1.1.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+		<PackageReference Include="MudBlazor" Version="9.9.0" />
+		<PackageReference Include="OSDC.DotnetLibraries.Drilling.WebAppUtils" Version="1.1.4" />
+    <PackageReference Include="Plotly.Blazor" Version="6.0.2" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="..\ModelSharedOut\WellMergedModel.cs" Link="GeneratedDtos\%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+</Project>

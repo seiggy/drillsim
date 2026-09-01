@@ -1,0 +1,319 @@
+﻿@namespace OSDC.UnitConversion.DrillingRazorMudComponents
+@implements IUnitAwareComponent
+<MudGrid Spacing="0">
+    <MudItem xs="12" sm="3" md="3" lg="3">
+        <MudTextField @bind-Value="@DegreeRoundedValue"  Variant="@VariantType"
+                      Adornment="Adornment.End" AdornmentText="@degreeUnitChoice.UnitLabel" Disabled="@Disabled" ReadOnly="@ReadOnly"></MudTextField>
+    </MudItem>
+    <MudItem xs="12" sm="3" md="3" lg="3">
+        <MudTextField @bind-Value="@MinuteRoundedValue" Variant="@VariantType"
+                      Adornment="Adornment.End" AdornmentText="@minuteUnitChoice.UnitLabel" Disabled="@Disabled" ReadOnly="@ReadOnly"></MudTextField>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="6" lg="6">
+        <MudTextField @bind-Value="@SecondValue" Variant="@VariantType"
+                      Adornment="Adornment.End" AdornmentText="@secondUnitChoice.UnitLabel" Disabled="@Disabled" ReadOnly="@ReadOnly"></MudTextField>
+    </MudItem>
+</MudGrid>
+
+@code {
+    [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? Parent { get; set; }
+
+    [Parameter]
+    public String? QuantityName { get; set; }
+
+    [Parameter]
+    public Variant VariantType { get; set; } = Variant.Text;
+
+    [Parameter]
+    public bool Disabled { get; set; } = false;
+
+    [Parameter]
+    public bool ReadOnly { get; set; } = false;
+
+    [Parameter]
+    public double SIValue
+    {
+        get
+        {
+            if (SIValue_ == null)
+            {
+                return double.NaN;
+            }
+            else
+            {
+                return (double)SIValue_;
+            }
+        }
+        set
+        {
+            if (double.IsNaN(value))
+            {
+                SIValue_ = null;
+            }
+            else
+            {
+                SIValue_ = value;
+            }
+            ManageUnits();
+        }
+    }
+
+    [Parameter]
+    public double? SIValueNullable
+    {
+        get
+        {
+            return SIValue_;
+        }
+        set
+        {
+            SIValue_ = value;
+            ManageUnits();
+        }
+    }
+
+    private double? SIValue_;
+    private string? degreeRoundedValue_;
+    private string? minuteRoundedValue_;
+    private string? secondValue_;
+
+    [Parameter]
+    public EventCallback<double> SIValueChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<double?> SIValueNullableChanged { get; set; }
+
+    [Parameter]
+    public DrillingSignalReferenceType DrillingSignalReference { get; set; } = DrillingSignalReferenceType.Independent;
+
+    [Parameter]
+    public PositionDirectionType PositionDirection { get; set; } = PositionDirectionType.Independent;
+
+    private string? DegreeRoundedValue
+    {
+        get
+        {
+            return degreeRoundedValue_;
+        }
+        set
+        {
+            degreeRoundedValue_ = value;
+            ManageValues().Wait();
+        }
+    }
+
+    private string? MinuteRoundedValue
+    {
+        get
+        {
+            return minuteRoundedValue_;
+        }
+        set
+        {
+            minuteRoundedValue_ = value;
+            ManageValues().Wait();
+        }
+    }
+
+    private string? SecondValue
+    {
+        get
+        {
+            return secondValue_;
+        }
+        set
+        {
+            secondValue_ = value;
+            ManageValues().Wait();
+        }
+    }
+
+    private bool inhibited_ = false;
+
+    private readonly UnitChoice degreeUnitChoice = PlaneAngleQuantity.Instance.GetUnitChoice(PlaneAngleQuantity.UnitChoicesEnum.Degree);
+    private readonly UnitChoice minuteUnitChoice = PlaneAngleQuantity.Instance.GetUnitChoice(PlaneAngleQuantity.UnitChoicesEnum.ArcMinute);
+    private readonly UnitChoice secondUnitChoice = PlaneAngleQuantity.Instance.GetUnitChoice(PlaneAngleQuantity.UnitChoicesEnum.ArcSecond);
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Parent?.Add(this);
+        ManageUnits();
+    }
+
+    public void ManageUnits()
+    {
+        if (!inhibited_)
+        {
+            if (SIValueNullable == null)
+            {
+                degreeRoundedValue_ = null;
+                minuteRoundedValue_ = null;
+                secondValue_ = null;
+            }
+            else
+            {
+                double valueInDegreeUnit = degreeUnitChoice.FromSI(GetReferenceValueSI());
+                double degValue = Math.Floor(valueInDegreeUnit);
+                double minValue = Math.Floor((valueInDegreeUnit - degValue) * 60);
+                if (Math.Abs(minValue - 60.0) < 1e-6)
+                {
+                    degValue += 1;
+                    minValue = Math.Floor((valueInDegreeUnit - degValue) * 60);
+                }
+                double secValue = (valueInDegreeUnit - degValue - minValue / 60) * 3600;
+                if (Math.Abs(secValue - 60.0) < 1e-6)
+                {
+                    minValue += 1;
+                    if (Math.Abs(minValue - 60.0) < 1e-6)
+                    {
+                        degValue += 1;
+                        minValue = 0;
+                    }
+                    secValue = (valueInDegreeUnit - degValue - minValue / 60) * 3600;
+                }
+                degreeRoundedValue_ = degValue.ToString();
+                minuteRoundedValue_ = minValue.ToString();
+                secondValue_ = secValue.ToString("F5");
+            }
+        }
+    }
+
+    public async Task ManageValues()
+    {
+        if (!inhibited_)
+        {
+            double degValue;
+            double minValue;
+            double secValue;
+            if (TryParse(DegreeRoundedValue!, out degValue) && TryParse(MinuteRoundedValue!, out minValue) && TryParse(SecondValue!, out secValue))
+            {
+                double valueInDegreeUnit = degValue + minValue / 60 + secValue / 3600;
+                double valueInSI = degreeUnitChoice.ToSI(valueInDegreeUnit);
+                if (Parent != null &&
+                    DrillingSignalReference == DrillingSignalReferenceType.Geodetic &&
+                    !string.IsNullOrEmpty(QuantityName))
+                {
+                    double valueInUserUnit = Parent.FromSI(valueInSI, QuantityName);
+                    SIValue = Parent.ToWGS84GeodeticSI(valueInUserUnit, QuantityName, PositionDirection);
+                }
+                else
+                {
+                    SIValue = valueInSI;
+                }
+                degreeRoundedValue_ = degValue.ToString();
+                minuteRoundedValue_ = minValue.ToString();
+                secondValue_ = secValue.ToString();
+                await SIValueChanged.InvokeAsync(SIValue);
+                await SIValueNullableChanged.InvokeAsync(SIValueNullable);
+            }
+            else
+            {
+                inhibited_ = true;
+                SIValueNullable = null;
+                inhibited_ = false;
+            }
+        }
+    }
+
+    private double GetReferenceValueSI()
+    {
+        if (Parent != null &&
+            DrillingSignalReference == DrillingSignalReferenceType.Geodetic &&
+            !string.IsNullOrEmpty(QuantityName) &&
+            SIValueNullable != null)
+        {
+            double? valueInUserUnit = Parent.FromWGS84GeodeticSI(SIValueNullable, QuantityName, PositionDirection);
+            if (valueInUserUnit != null)
+            {
+                return Parent.ToSI(valueInUserUnit.Value, QuantityName);
+            }
+        }
+        return SIValue;
+    }
+
+
+    private static bool TryParse(string value, out double result)
+    {
+        return double.TryParse(value, out result) ||
+               double.TryParse(value, NumberStyles.Float, US_NUMBER_FORMAT, out result) ||
+               double.TryParse(value, NumberStyles.Float, NO_NUMBER_FORMAT, out result) ||
+               double.TryParse(value, NumberStyles.Float, FR_NUMBER_FORMAT, out result) ||
+               double.TryParse(value, NumberStyles.Float, IT_NUMBER_FORMAT, out result) ||
+               double.TryParse(value, NumberStyles.Float, SP_NUMBER_FORMAT, out result) ||
+               double.TryParse(value, NumberStyles.Float, PT_NUMBER_FORMAT, out result) ||
+               double.TryParse(value, NumberStyles.Float, UK_NUMBER_FORMAT, out result);
+    }
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("en-US")
+    /// </summary>
+    private static CultureInfo US_CULTURE = new CultureInfo("en-US");
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("nb-NO")
+    /// </summary>
+    private static CultureInfo NO_CULTURE = new CultureInfo("nb-NO");
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("fr-FR")
+    /// </summary>
+    private static CultureInfo FR_CULTURE = new CultureInfo("fr-FR");
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("it-IT")
+    /// </summary>
+    private static CultureInfo IT_CULTURE = new CultureInfo("it-IT");
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("es-ES")
+    /// </summary>
+    private static CultureInfo SP_CULTURE = new CultureInfo("es-ES");
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("en-GB")
+    /// </summary>
+    private static CultureInfo UK_CULTURE = new CultureInfo("en-GB");
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("pt-PT")
+    /// </summary>
+    private static CultureInfo PT_CULTURE = new CultureInfo("pt-PT");
+
+    /// <summary>
+    /// Shorthand for US_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo US_NUMBER_FORMAT = US_CULTURE.NumberFormat;
+
+    /// <summary>
+    /// Shorthand for NO_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo NO_NUMBER_FORMAT = NO_CULTURE.NumberFormat;
+
+    /// <summary>
+    /// Shorthand for FR_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo FR_NUMBER_FORMAT = FR_CULTURE.NumberFormat;
+
+    /// <summary>
+    /// Shorthand for IT_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo IT_NUMBER_FORMAT = IT_CULTURE.NumberFormat;
+
+    /// <summary>
+    /// Shorthand for SP_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo SP_NUMBER_FORMAT = SP_CULTURE.NumberFormat;
+
+    /// <summary>
+    /// Shorthand for UK_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo UK_NUMBER_FORMAT = UK_CULTURE.NumberFormat;
+
+    /// <summary>
+    /// Shorthand for PT_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo PT_NUMBER_FORMAT = PT_CULTURE.NumberFormat;
+
+}

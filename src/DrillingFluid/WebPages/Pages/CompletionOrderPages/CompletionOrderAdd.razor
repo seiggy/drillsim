@@ -1,0 +1,200 @@
+@inject IDrillingFluidAPIUtils Api
+@inject ISnackbar Snackbar
+@inject ILogger<MudInputWithUnitAdornment> logger
+@if(ShowAddPanel){
+<div hidden="@(!ShowAddPanel)">
+    <MudPaper Elevation="1" Class="py-6" Style="@($"position: {DataUtils.FLOATING_POSITION}; background:{DataUtils.FLOATING_COLOUR};")" >               
+        <MudPaper Class="mx-4 my-4">
+            <MudToolBar>
+                <MudText Typo="Typo.h6">Drilling Fluid</MudText>
+                <MudSpacer/>
+                 <MudButton StartIcon="@Icons.Material.Outlined.Add" 
+                    IconColor="@Color.Success" OnClick="@AddDrillingFluidDescription">
+                        New Drilling Fluid Description
+                </MudButton>
+            </MudToolBar> 
+            <br/>
+            <MudGrid Class="xm-2 ym-2 px-4">
+                <MudItem xs="3">
+                    <MudTextField @bind-Value="@drillingFluidOrderInstance.Name" Label="Name" ShrinkLabel/>
+                </MudItem>
+                <MudItem xs="7">
+                    <MudTextField @bind-Value="@drillingFluidOrderInstance.Description" Label="Description" ShrinkLabel/>
+                </MudItem>
+                <MudItem xs="3">
+                    <MudSelect T="DrillingFluidDescription" @bind-Value="@selectedDrillingFluidDescription" 
+                        Text="@selectedDrillingFluidDescription.Name"
+                        Label="Drilling Fluid Description" ShrinkLabel>
+                        @if(drillingFluidDescriptionList != null)
+                        {
+                            @foreach (DrillingFluidDescription fluidDescription in drillingFluidDescriptionList)
+                            {
+                                <MudSelectItem Value="@fluidDescription">
+                                    @fluidDescription.Name
+                                </MudSelectItem>
+                            }
+                        }
+                    </MudSelect>
+                </MudItem>           
+                
+                <MudItem xs="3">
+                    <MudSelect T="RheologicalModelsEnum" @bind-Value="@drillingFluidOrderInstance.RheologicalModelsEnum"
+                        Label="Rheological Models" Text="@rheoModelName[drillingFluidOrderInstance.RheologicalModelsEnum]" ShrinkLabel>
+                        @if(drillingFluidDescriptionList != null)
+                        {
+                            @foreach (RheologicalModelsEnum models in Enum.GetValues<RheologicalModelsEnum>())
+                            {
+                                <MudSelectItem Value="@models">
+                                    @rheoModelName[models]
+                                </MudSelectItem>
+                            }
+                        }
+                    </MudSelect>
+                </MudItem>           
+    
+            </MudGrid>
+            <MudToolBar>
+                <MudButton StartIcon="@Icons.Material.Outlined.Save" IconColor="@Color.Primary" 
+                    OnClick="@AddDrillingFluidOrder">Submit completion order</MudButton>          
+                <MudSpacer/>
+                <MudButton StartIcon="@Icons.Material.Outlined.Close" IconColor="@Color.Error" 
+                        OnClick="@ClosePanel">Close</MudButton>     
+            </MudToolBar>
+        </MudPaper>        
+    </MudPaper>
+    <DrillingFluidDescriptionAddSimplified ShowAddPanel="@showFluidDescriptionPanel" OnMessageSent="@HandleDrillingFluidDescriptionAddition"/>
+
+</div>
+}
+@code{
+    [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? Parent { get; set; }
+    [Parameter]
+    public bool ShowAddPanel {get; set;} = false;
+    [Parameter]
+    public EventCallback OnMessageSent {get; set;}
+    private DrillingFluidOrder drillingFluidOrderInstance = new DrillingFluidOrder
+    {
+        Name = "Completed fluid",
+        Description = "Drilling fluid completion order",
+        CompletedDrillingFluid = null,
+        DrillingFluidDescription = null,
+        DrillingFluidDescriptionID = new Guid(),
+        PTModelExtrapolation = PTModelExtrapolation.Unkown,
+        RheologicalModelsEnum = RheologicalModelsEnum.Unkown    
+    };
+    private Dictionary<RheologicalModelsEnum, string> rheoModelName = new Dictionary<RheologicalModelsEnum, string>
+    {
+        {RheologicalModelsEnum.Unkown, "Unkown"},
+        {RheologicalModelsEnum.Bingham, "Bingham plastic"},
+        {RheologicalModelsEnum.PowerLaw, "Power-law"},
+        {RheologicalModelsEnum.HerschelBulkley, "Herschel-Bulkley"},
+        {RheologicalModelsEnum.Quemada, "Quemada"},
+        {RheologicalModelsEnum.RobertsonStiff, "Robertson-Stiff"},        
+    };
+    private List<DrillingFluidDescription>? drillingFluidDescriptionList;
+    private bool showFluidDescriptionPanel = false;
+    private DrillingFluidDescription selectedDrillingFluidDescription = new();
+    private async Task SendMessage()
+    {
+        await OnMessageSent.InvokeAsync();
+    }
+    private async Task UpdateDrillingFluidDescriptionList()
+    {   
+        try
+        {
+            // Show main panel          
+            // Starting all loading tasks asynchronously
+            logger.LogInformation("Trying to load list of drilling fluid description from client: " + Api.HttpClientDrillingFluid);
+            var drillingFluidDescriptionTask = Api.ClientDrillingFluid.GetAllDrillingFluidDescriptionAsync();
+          
+            List<Task> loadingTaskList = new List<Task> { drillingFluidDescriptionTask };
+            // Awaiting tasks and retrieve results as they become available
+            while (loadingTaskList.Count > 0)
+            {
+                Task finishedTask = await Task.WhenAny(loadingTaskList);
+                if (finishedTask == drillingFluidDescriptionTask)
+                {
+                    try
+                    {
+                        drillingFluidDescriptionList = (List<DrillingFluidDescription>)await drillingFluidDescriptionTask; // awaiting the finished task allows to retrieve its result and throw exception if needed              
+                        if (drillingFluidDescriptionList.Count > 0)
+                            selectedDrillingFluidDescription = drillingFluidDescriptionList[0];
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load DrillingFluidDescription from client");
+                    }
+                }    
+                loadingTaskList.Remove(finishedTask);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem DrillingFluid initialization");
+        }
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        if (ShowAddPanel)
+        {
+            await UpdateDrillingFluidDescriptionList();               
+        }
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        if (ShowAddPanel)
+        {
+            await UpdateDrillingFluidDescriptionList();
+        }
+    }
+    private async Task AddDrillingFluidOrder()
+    {   
+        try
+        {
+            MetaInfo metaInfo = new() { ID = Guid.NewGuid(), HttpHostName = Api.HostNameDrillingFluid, HttpHostBasePath = Api.HostBasePathDrillingFluid, HttpEndPoint = "DrillingFluid/" };
+            DateTimeOffset creationDate = DateTimeOffset.UtcNow;
+            drillingFluidOrderInstance.MetaInfo = metaInfo;
+            drillingFluidOrderInstance.CreationDate = creationDate;
+            drillingFluidOrderInstance.LastModificationDate = creationDate;
+            drillingFluidOrderInstance.DrillingFluidDescription = selectedDrillingFluidDescription;
+            drillingFluidOrderInstance.DrillingFluidDescriptionID = selectedDrillingFluidDescription.MetaInfo.ID;
+                      
+            await Api.ClientDrillingFluid.PostDrillingFluidOrderAsync(drillingFluidOrderInstance);
+            logger.LogInformation("DrillingFluid posted successfully");
+            Snackbar.Add("DrillingFluid posted successfully", Severity.Success);
+            ShowAddPanel = false;
+            showFluidDescriptionPanel = false;
+            await SendMessage();
+            await OnInitializedAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to add a new DrillingFluid");
+            Snackbar.Add("Impossible to add a new DrillingFluid", Severity.Warning);
+        }
+    }
+    private async Task ClosePanel()
+    {
+        await SendMessage();
+        ShowAddPanel = false;
+        showFluidDescriptionPanel = false;
+    }
+    private void AddDrillingFluidDescription()
+    {
+        showFluidDescriptionPanel = true;
+    }
+    private async Task HandleDrillingFluidDescriptionAddition()
+    {
+        await UpdateDrillingFluidDescriptionList();
+    }
+    private void UpdateDescriptionSelection(DrillingFluidDescription dfDescription)
+    {
+        selectedDrillingFluidDescription = dfDescription;
+        drillingFluidOrderInstance.DrillingFluidDescription = dfDescription;
+        drillingFluidOrderInstance.DrillingFluidDescriptionID = dfDescription.MetaInfo.ID;
+    }
+
+}

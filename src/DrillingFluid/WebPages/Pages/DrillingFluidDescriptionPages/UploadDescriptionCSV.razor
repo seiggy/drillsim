@@ -1,0 +1,1545 @@
+@inject IDrillingFluidAPIUtils Api
+@inject ISnackbar Snackbar
+@inject ILogger<MudInputWithUnitAdornment> logger
+<div hidden="@(!ShowAddPanel)">
+<MudPaper Elevation="1" Class="py-6" Style="@($"position: {DataUtils.FLOATING_POSITION};")" >              
+    
+    <MudText Class="my-2 mx-1" Typo="Typo.h6"><b>Upload Fluid Description</b></MudText>  
+    @if(showChart)
+    {
+        <MudPaper Class="my-4 py-2 mx-4 px-2">
+            <MudText Class="my-2 mx-1" Typo="Typo.body1"><b>Column Positions & Units</b></MudText>
+            <MudGrid Class = "mx-2 px-4"> 
+                @* Brine Density *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Brine Density</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@brineDensityColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@brineDensityUnit" Label="Unit">             
+                                @foreach(string unit in densityDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+            
+                @* Brine Mass *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Brine Mass</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@brineMassColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@brineMassUnit" Label="Unit">             
+                                @foreach(string unit in massDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* Brine Heat Capacity *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Brine Heat Capacity</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@brineHeatCapacityColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@brineHeatCapacityUnit" Label="Unit">             
+                                @foreach(string unit in specificHeatDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* Brine Heat Capacity Temperature *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Brine Heat Capacity Temperature</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@brineHeatCapacityTemperatureColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@brineHeatCapacityTemperatureUnit" Label="Unit">             
+                                @foreach(string unit in temperatureDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>            
+                @* Brine Thermal Conductivity *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Brine Thermal Conductivity </b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@brineThermalConductivityColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@brineThermalConductivityUnit" Label="Unit">             
+                                @foreach(string unit in thermalConductivityDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* Brine Thermal Conductivity *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Brine Thermal Conductivity </b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@brineThermalConductivityTemperatureColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@brineThermalConductivityTemperatureUnit" Label="Unit">             
+                                @foreach(string unit in temperatureDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>                                                            
+
+                @* Base Oil Density *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Base Oil Density</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@baseOilDensityColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@baseOilDensityUnit" Label="Unit">             
+                                @foreach(string unit in densityDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* Base Oil Mass *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Base Oil Mass</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@baseOilMassColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@baseOilMassUnit" Label="Unit">             
+                                @foreach(string unit in massDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* Base Oil Heat Capacity *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Base Oil Heat Capacity</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@baseOilHeatCapacityColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@baseOilHeatCapacityUnit" Label="Unit">             
+                                @foreach(string unit in specificHeatDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* Base Oil Heat Capacity Temperature *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Base Oil Heat Capacity Temperature</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@baseOilHeatCapacityTemperatureColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@baseOilHeatCapacityTemperatureUnit" Label="Unit">             
+                                @foreach(string unit in temperatureDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>            
+                @* Base Oil Thermal Conductivity *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Base Oil Thermal Conductivity </b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@baseOilThermalConductivityColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@baseOilThermalConductivityUnit" Label="Unit">             
+                                @foreach(string unit in thermalConductivityDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* Base Oil Thermal Conductivity *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Base Oil Thermal Conductivity </b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@baseOilThermalConductivityTemperatureColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@baseOilThermalConductivityTemperatureUnit" Label="Unit">             
+                                @foreach(string unit in temperatureDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+
+                @* Low Gravity Solid Density *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Low Gravity Solid Density</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@lowGravitySolidDensityColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@lowGravitySolidDensityUnit" Label="Unit">             
+                                @foreach(string unit in densityDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* Low Gravity Solid Mass *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Low Gravity Solid Mass</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@lowGravitySolidMassColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@lowGravitySolidMassUnit" Label="Unit">             
+                                @foreach(string unit in massDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* Low Gravity Solid Heat Capacity *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Low Gravity Solid Heat Capacity</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@lowGravitySolidHeatCapacityColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@lowGravitySolidHeatCapacityUnit" Label="Unit">             
+                                @foreach(string unit in specificHeatDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* Low Gravity Solid Heat Capacity Temperature *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Low Gravity Solid Heat Capacity Temperature</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@lowGravitySolidHeatCapacityTemperatureColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@lowGravitySolidHeatCapacityTemperatureUnit" Label="Unit">             
+                                @foreach(string unit in temperatureDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>            
+                @* Low Gravity Solid Thermal Conductivity *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Low Gravity Solid Thermal Conductivity </b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@lowGravitySolidThermalConductivityColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@lowGravitySolidThermalConductivityUnit" Label="Unit">             
+                                @foreach(string unit in thermalConductivityDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* Low Gravity Solid Thermal Conductivity *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Low Gravity Solid Thermal Conductivity </b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@lowGravitySolidThermalConductivityTemperatureColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@lowGravitySolidThermalConductivityTemperatureUnit" Label="Unit">             
+                                @foreach(string unit in temperatureDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* High Gravity Solid Density *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> High Gravity Solid Density</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@highGravitySolidDensityColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@highGravitySolidDensityUnit" Label="Unit">             
+                                @foreach(string unit in densityDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* High Gravity Solid Mass *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> High Gravity Solid Mass</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@highGravitySolidMassColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@highGravitySolidMassUnit" Label="Unit">             
+                                @foreach(string unit in massDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* High Gravity Solid Heat Capacity *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> High Gravity Solid Heat Capacity</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@highGravitySolidHeatCapacityColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@highGravitySolidHeatCapacityUnit" Label="Unit">             
+                                @foreach(string unit in specificHeatDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* High Gravity Solid Heat Capacity Temperature *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> High Gravity Solid Heat Capacity Temperature</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@highGravitySolidHeatCapacityTemperatureColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@highGravitySolidHeatCapacityTemperatureUnit" Label="Unit">             
+                                @foreach(string unit in temperatureDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>            
+                @* High Gravity Solid Thermal Conductivity *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> High Gravity Solid Thermal Conductivity </b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@highGravitySolidThermalConductivityColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@highGravitySolidThermalConductivityUnit" Label="Unit">             
+                                @foreach(string unit in thermalConductivityDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* High Gravity Solid Thermal Conductivity *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> High Gravity Solid Thermal Conductivity </b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@highGravitySolidThermalConductivityTemperatureColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@highGravitySolidThermalConductivityTemperatureUnit" Label="Unit">             
+                                @foreach(string unit in temperatureDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>                    
+                @* Gel Duration *@            
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Gel Duration</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@gelDurationColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@gelDurationUnit" Label="Unit">             
+                                @foreach(string unit in timeDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* Gel Strength *@
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Gel Strength</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@gelStrenghColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@gelStrengthUnit" Label="Unit">             
+                                @foreach(string unit in stressDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* Rheometer Rotation *@
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b> Rheometer Rotation</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@rotationColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@rotationUnit" Label="Unit">             
+                                @foreach(string unit in rotationDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* Shear-Stress *@
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b>Shear-Stress</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@shearStressColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">                    
+                            <MudSelect T="string?"  @bind-Value="@shearStressUnit" Label="Unit">             
+                                @foreach(string unit in shearStressDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @* Shear-rate *@
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body2"><b>Shear-Rate</b></MudText>
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudNumericField T="int?" @bind-Value="@shearRateColumn" Label="Column" Variant="Variant.Text" Min="1" Max="@maxColumns" ShrinkLabel/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudSelect T="string?"  @bind-Value="@shearRateUnit" Label="Unit">             
+                                @foreach(string unit in stressDictUnits.Keys)
+                                {
+                                    <MudSelectItem Value="@unit">@unit</MudSelectItem>
+                                }                
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+        @* Create table *@
+        <MudTable Class="my-4 py-2 mx-4 px-2" Items="@valueData" Height="350px"  HorizontalScrollbar="true">
+            <ColGroup>
+                @for(int i = 0; i < maxColumns; i++)
+                {
+                    <col style="min-width: 150px;" />
+                }
+            </ColGroup>
+            <HeaderContent>
+                @for(int i = 0; i < maxColumns; i++)
+                {
+                    int index = i;
+                    <MudTh>@((index + 1) + " - " + headerData[index])</MudTh>
+                }
+            </HeaderContent>
+            <RowTemplate>
+                @for(int i = 0; i < maxColumns; i++)
+                {
+                    int index = i;
+                    <MudTd>@context[index]</MudTd>
+                }
+            </RowTemplate>
+        </MudTable>    
+    }
+    <MudGrid Class="mx-2">
+        <MudItem xs="2">
+            <MudText Typo="Typo.body2"><b>Upload file</b></MudText>
+            <InputFile OnChange="HandleFileSelected" accept=".csv" />
+        </MudItem>        
+    </MudGrid>     
+    <MudToolBar>
+         @if(showChart)
+        {
+            <MudButton StartIcon="@Icons.Material.Outlined.Save" IconColor="@Color.Primary" 
+                OnClick="@UploadDrillingFluidDescription">Upload</MudButton>        
+        }
+        <MudSpacer/>
+        <MudButton StartIcon="@Icons.Material.Outlined.Close" IconColor="@Color.Error" 
+            OnClick="@CloseAddPanel">Close</MudButton>                    
+    </MudToolBar>
+  
+</MudPaper>
+</div>
+@code{
+    [Parameter]
+    public bool ShowAddPanel {get; set;} = false;
+    [Parameter]
+    public EventCallback OnMessageSent {get; set;}   
+    private string fileName = "";
+
+    private int maxColumns = 10;
+    private int? gelDurationColumn;
+    private int? gelStrenghColumn;
+    private int? rotationColumn;
+    private int? shearStressColumn;
+    private int? shearRateColumn;
+
+    private int? brineDensityColumn;
+    private int? brineMassColumn;
+    private int? brineHeatCapacityColumn;
+    private int? brineHeatCapacityTemperatureColumn;
+    private int? brineThermalConductivityColumn;
+    private int? brineThermalConductivityTemperatureColumn;
+    
+    private int? baseOilDensityColumn;
+    private int? baseOilMassColumn;
+    private int? baseOilHeatCapacityColumn;
+    private int? baseOilHeatCapacityTemperatureColumn;
+    private int? baseOilThermalConductivityColumn;
+    private int? baseOilThermalConductivityTemperatureColumn;
+    
+    private int? lowGravitySolidDensityColumn;
+    private int? lowGravitySolidMassColumn;
+    private int? lowGravitySolidHeatCapacityColumn;
+    private int? lowGravitySolidHeatCapacityTemperatureColumn;
+    private int? lowGravitySolidThermalConductivityColumn;
+    private int? lowGravitySolidThermalConductivityTemperatureColumn;
+
+    private int? highGravitySolidDensityColumn;
+    private int? highGravitySolidMassColumn;
+    private int? highGravitySolidHeatCapacityColumn;
+    private int? highGravitySolidHeatCapacityTemperatureColumn;
+    private int? highGravitySolidThermalConductivityColumn;
+    private int? highGravitySolidThermalConductivityTemperatureColumn;
+    
+    private Dictionary<string, UnitChoice> stressDictUnits = new(); 
+    private Dictionary<string, UnitChoice> shearStressDictUnits = new();     
+    private Dictionary<string, UnitChoice> timeDictUnits = new(); 
+    private Dictionary<string, UnitChoice> torqueDictUnits = new(); 
+    private Dictionary<string, UnitChoice> rotationDictUnits = new(); 
+    private Dictionary<string, UnitChoice> shearRateDictUnits = new(); 
+    private Dictionary<string, UnitChoice> temperatureDictUnits = new(); 
+    private Dictionary<string, UnitChoice> specificHeatDictUnits = new(); 
+    private Dictionary<string, UnitChoice> thermalConductivityDictUnits = new(); 
+    private Dictionary<string, UnitChoice> massDictUnits = new(); 
+    private Dictionary<string, UnitChoice> densityDictUnits = new(); 
+
+    private string? gelDurationUnit;
+    private string? gelStrengthUnit;
+    private string? rotationUnit;
+    private string? shearStressUnit;
+    private string? shearRateUnit;  
+
+    private string? brineDensityUnit;
+    private string? brineMassUnit;
+    private string? brineHeatCapacityUnit;
+    private string? brineHeatCapacityTemperatureUnit;
+    private string? brineThermalConductivityUnit;
+    private string? brineThermalConductivityTemperatureUnit;
+    
+    private string? baseOilDensityUnit;
+    private string? baseOilMassUnit;
+    private string? baseOilHeatCapacityUnit;
+    private string? baseOilHeatCapacityTemperatureUnit;
+    private string? baseOilThermalConductivityUnit;
+    private string? baseOilThermalConductivityTemperatureUnit;
+    
+    private string? lowGravitySolidDensityUnit;
+    private string? lowGravitySolidMassUnit;
+    private string? lowGravitySolidHeatCapacityUnit;
+    private string? lowGravitySolidHeatCapacityTemperatureUnit;
+    private string? lowGravitySolidThermalConductivityUnit;
+    private string? lowGravitySolidThermalConductivityTemperatureUnit;
+
+    private string? highGravitySolidDensityUnit;
+    private string? highGravitySolidMassUnit;
+    private string? highGravitySolidHeatCapacityUnit;
+    private string? highGravitySolidHeatCapacityTemperatureUnit;
+    private string? highGravitySolidThermalConductivityUnit;
+    private string? highGravitySolidThermalConductivityTemperatureUnit;
+      
+    private MeasurementTypesShearRate measurementTypeShearRate = MeasurementTypesShearRate.Rotation;
+    private MeasurementTypesShearStress measurementTypeShearStress = MeasurementTypesShearStress.IsoNewtonianShearStress;
+     
+    //Start chart properties
+    private string[] headerData;           
+    private List<double?[]> valueData = new List<double?[]>();
+
+    private bool showChart = false;
+    private Dictionary<string, UnitChoice> GetAvailableUnits(string  quantityChoice)
+    {
+        Dictionary<string, UnitChoice> AvailableUnits = new();
+        List<UnitChoice> unitChoices = BaseUnitSystem.AvailableBasePhysicalQuantities!
+            .Where(p => p.GetType().Name == quantityChoice)
+            .ToList()[0].UnitChoices;
+
+        foreach (UnitChoice units in unitChoices)
+        {
+            AvailableUnits.Add(units.UnitLabel, units);
+        }
+        return AvailableUnits;
+    }
+    private async Task SendMessage()
+    {
+        await OnMessageSent.InvokeAsync();
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        stressDictUnits = GetAvailableUnits("StressQuantity");
+        shearStressDictUnits = GetAvailableUnits("FluidShearStressQuantity");        
+        timeDictUnits = GetAvailableUnits("TimeQuantity");
+        torqueDictUnits = GetAvailableUnits("TorqueQuantity");
+        rotationDictUnits = GetAvailableUnits("AngularVelocityQuantity");
+        shearRateDictUnits = GetAvailableUnits("FluidShearRateQuantity");    
+        temperatureDictUnits = GetAvailableUnits("TemperatureQuantity");
+        specificHeatDictUnits = GetAvailableUnits("IsobaricSpecificHeatCapacityQuantity");
+        thermalConductivityDictUnits = GetAvailableUnits("ThermalConductivityQuantity");
+        massDictUnits = GetAvailableUnits("MassQuantity");
+        densityDictUnits = GetAvailableUnits("MassDensityQuantity");
+    }
+    private void CloseAddPanel()
+    {
+        ShowAddPanel = false;
+    }
+    private async Task UploadDrillingFluidDescription()
+    {
+        DrillingFluidDescription drillingFluidDescriptionInstance = PseudoConstructors.ConstructDrillingFluidDescription();            
+        #region Brine variables
+        try
+        {
+            if (brineDensityColumn != null && brineDensityUnit != null)
+            {
+                //Extract current unit choice
+                UnitChoice densityUnit = densityDictUnits[brineDensityUnit];
+                // Populate temporary variables with the SI value
+                double val =  densityUnit.ToSI((double) valueData[0][(int) (brineDensityColumn-1)]);    
+                // Populate drillstring description instance with the table value        
+                drillingFluidDescriptionInstance.DrillingFluidComposition.BrineProperies.MassDensity =
+                    ConversionsFromOSDC.DoubleToGaussian(val);
+            }
+            else
+            {   
+                //If null, override the default value with null
+                drillingFluidDescriptionInstance.DrillingFluidComposition.BrineProperies.MassDensity =
+                    ConversionsFromOSDC.DoubleToGaussian(null);
+            }
+            if (brineMassColumn != null && brineMassUnit != null)
+            {
+                //Extract current unit choice
+                UnitChoice massUnit = massDictUnits[brineMassUnit];
+                // Populate temporary variables with the SI value
+                double val =  massUnit.ToSI((double) valueData[0][(int) (brineMassColumn-1)]);   
+                // Populate drillstring description instance with the table value         
+                drillingFluidDescriptionInstance.DrillingFluidComposition.BrineProperies.MassFraction =
+                    ConversionsFromOSDC.DoubleToGaussian(val);
+            }
+            else
+            {
+                //If null, override the default value with null
+                drillingFluidDescriptionInstance.DrillingFluidComposition.BrineProperies.MassFraction =
+                    ConversionsFromOSDC.DoubleToGaussian(null);
+            }
+            //Check if table inputs exists
+            if (
+                    brineHeatCapacityColumn != null && 
+                    brineHeatCapacityUnit != null &&
+                    brineHeatCapacityTemperatureColumn != null &&
+                    brineHeatCapacityTemperatureUnit != null            
+                )
+            {
+                //Extract current unit choice
+                UnitChoice specificHeatUnit = specificHeatDictUnits[brineHeatCapacityUnit];
+                UnitChoice temperatureUnit = temperatureDictUnits[brineHeatCapacityTemperatureUnit];
+                // Populate temporary variables with the SI value
+                double val1 =  specificHeatUnit.ToSI((double) valueData[0][(int) (brineHeatCapacityColumn-1)]);            
+                double val2 =  specificHeatUnit.ToSI((double) valueData[1][(int) (brineHeatCapacityColumn-1)]);            
+                
+                double valT1 =  temperatureUnit.ToSI((double) valueData[0][(int) (brineHeatCapacityTemperatureColumn-1)]);            
+                double valT2 =  temperatureUnit.ToSI((double) valueData[1][(int) (brineHeatCapacityTemperatureColumn-1)]);            
+                
+                double slope = (val2 - val1)/(valT2 - valT1);
+                double atZeroKelvin = val2 - slope * valT2;
+                // Populate drillstring description instance with the table value
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BrineProperies.
+                    SpecificHeatCapacity.CoefficientRange = new List<double?>{val1, val2};     
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BrineProperies.
+                    SpecificHeatCapacity.TemperatureRange = new List<double?>{valT1, valT2};                           
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BrineProperies.
+                    SpecificHeatCapacity.Slope = ConversionsFromOSDC.DoubleToGaussian((slope));
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BrineProperies.
+                    SpecificHeatCapacity.HeatCapacityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian((atZeroKelvin));            
+            }
+            else
+            {
+                //If null, override the default value with null
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BrineProperies.
+                    SpecificHeatCapacity.CoefficientRange = new List<double?>{null, null};     
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BrineProperies.
+                    SpecificHeatCapacity.TemperatureRange = new List<double?>{null, null};                           
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BrineProperies.
+                    SpecificHeatCapacity.Slope = ConversionsFromOSDC.DoubleToGaussian((null));
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BrineProperies.
+                    SpecificHeatCapacity.HeatCapacityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian((null));
+            }
+            //Check if table inputs exists
+            if (
+                    brineThermalConductivityColumn != null && 
+                    brineThermalConductivityUnit != null &&
+                    brineThermalConductivityTemperatureColumn != null &&
+                    brineThermalConductivityTemperatureUnit != null            
+                )
+            {
+                //Extract current unit choice
+                UnitChoice thermalConductivityUnits = thermalConductivityDictUnits[brineThermalConductivityUnit];
+                UnitChoice temperatureUnit = temperatureDictUnits[brineThermalConductivityTemperatureUnit];
+                // Populate temporary variables with the SI value
+                double val1 =  thermalConductivityUnits.ToSI((double) valueData[0][(int) (brineThermalConductivityColumn-1)]);            
+                double val2 =  thermalConductivityUnits.ToSI((double) valueData[1][(int) (brineThermalConductivityColumn-1)]);            
+                
+                double valT1 =  temperatureUnit.ToSI((double) valueData[0][(int) (brineThermalConductivityTemperatureColumn-1)]);            
+                double valT2 =  temperatureUnit.ToSI((double) valueData[1][(int) (brineThermalConductivityTemperatureColumn-1)]);            
+                
+                double slope = (val2 - val1)/(valT2 - valT1);
+                double atZeroKelvin = val2 - slope * valT2;
+                // Populate drillstring description instance with the table value
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BrineProperies.
+                    ThermalConductivity.CoefficientRange = new List<double?>{val1, val2};     
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BrineProperies.
+                    ThermalConductivity.TemperatureRange = new List<double?>{valT1, valT2};                           
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BrineProperies.
+                    ThermalConductivity.Slope = ConversionsFromOSDC.DoubleToGaussian((slope));
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BrineProperies.
+                    ThermalConductivity.ThermalConductivityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian((atZeroKelvin));            
+            }
+            else
+            {
+                //If null, override the default value with null
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BrineProperies.
+                    ThermalConductivity.CoefficientRange = new List<double?>{null, null};     
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BrineProperies.
+                    ThermalConductivity.TemperatureRange = new List<double?>{null, null};                           
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BrineProperies.
+                    ThermalConductivity.Slope = ConversionsFromOSDC.DoubleToGaussian((null));
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BrineProperies.
+                    ThermalConductivity.ThermalConductivityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian((null));
+            }    
+        }//End try
+        catch (Exception e)
+        {
+            logger.LogWarning("Brine data not loaded correctly");
+            Snackbar.Add("Brine data not loaded correctly", Severity.Warning);
+        }            
+        #endregion
+        #region BaseOil variables
+        try
+        {
+            if (baseOilDensityColumn != null && baseOilDensityUnit != null)
+            {
+                //Extract current unit choice
+                UnitChoice densityUnit = densityDictUnits[baseOilDensityUnit];
+                // Populate temporary variables with the SI value
+                double val =  densityUnit.ToSI((double) valueData[0][(int) (baseOilDensityColumn-1)]);    
+                // Populate drillstring description instance with the table value        
+                drillingFluidDescriptionInstance.DrillingFluidComposition.BaseOilProperies.MassDensity =
+                    ConversionsFromOSDC.DoubleToGaussian(val);
+            }
+            else
+            {   
+                //If null, override the default value with null
+                drillingFluidDescriptionInstance.DrillingFluidComposition.BaseOilProperies.MassDensity =
+                    ConversionsFromOSDC.DoubleToGaussian(null);
+            }
+            if (baseOilMassColumn != null && baseOilMassUnit != null)
+            {
+                //Extract current unit choice
+                UnitChoice massUnit = massDictUnits[baseOilMassUnit];
+                // Populate temporary variables with the SI value
+                double val =  massUnit.ToSI((double) valueData[0][(int) (baseOilMassColumn-1)]);   
+                // Populate drillstring description instance with the table value         
+                drillingFluidDescriptionInstance.DrillingFluidComposition.BaseOilProperies.MassFraction =
+                    ConversionsFromOSDC.DoubleToGaussian(val);
+            }
+            else
+            {
+                //If null, override the default value with null
+                drillingFluidDescriptionInstance.DrillingFluidComposition.BaseOilProperies.MassFraction =
+                    ConversionsFromOSDC.DoubleToGaussian(null);
+            }
+            //Check if table inputs exists
+            if (
+                    baseOilHeatCapacityColumn != null && 
+                    baseOilHeatCapacityUnit != null &&
+                    baseOilHeatCapacityTemperatureColumn != null &&
+                    baseOilHeatCapacityTemperatureUnit != null            
+                )
+            {
+                //Extract current unit choice
+                UnitChoice specificHeatUnit = specificHeatDictUnits[baseOilHeatCapacityUnit];
+                UnitChoice temperatureUnit = temperatureDictUnits[baseOilHeatCapacityTemperatureUnit];
+                // Populate temporary variables with the SI value
+                double val1 =  specificHeatUnit.ToSI((double) valueData[0][(int) (baseOilHeatCapacityColumn-1)]);            
+                double val2 =  specificHeatUnit.ToSI((double) valueData[1][(int) (baseOilHeatCapacityColumn-1)]);            
+                
+                double valT1 =  temperatureUnit.ToSI((double) valueData[0][(int) (baseOilHeatCapacityTemperatureColumn-1)]);            
+                double valT2 =  temperatureUnit.ToSI((double) valueData[1][(int) (baseOilHeatCapacityTemperatureColumn-1)]);            
+                
+                double slope = (val2 - val1)/(valT2 - valT1);
+                double atZeroKelvin = val2 - slope * valT2;
+                // Populate drillstring description instance with the table value
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BaseOilProperies.
+                    SpecificHeatCapacity.CoefficientRange = new List<double?>{val1, val2};     
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BaseOilProperies.
+                    SpecificHeatCapacity.TemperatureRange = new List<double?>{valT1, valT2};                           
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BaseOilProperies.
+                    SpecificHeatCapacity.Slope = ConversionsFromOSDC.DoubleToGaussian((slope));
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BaseOilProperies.
+                    SpecificHeatCapacity.HeatCapacityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian((atZeroKelvin));            
+            }
+            else
+            {
+                //If null, override the default value with null
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BaseOilProperies.
+                    SpecificHeatCapacity.CoefficientRange = new List<double?>{null, null};     
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BaseOilProperies.
+                    SpecificHeatCapacity.TemperatureRange = new List<double?>{null, null};                           
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BaseOilProperies.
+                    SpecificHeatCapacity.Slope = ConversionsFromOSDC.DoubleToGaussian((null));
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BaseOilProperies.
+                    SpecificHeatCapacity.HeatCapacityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian((null));
+            }
+            //Check if table inputs exists
+            if (
+                    baseOilThermalConductivityColumn != null && 
+                    baseOilThermalConductivityUnit != null &&
+                    baseOilThermalConductivityTemperatureColumn != null &&
+                    baseOilThermalConductivityTemperatureUnit != null            
+                )
+            {
+                //Extract current unit choice
+                UnitChoice thermalConductivityUnits = thermalConductivityDictUnits[baseOilThermalConductivityUnit];
+                UnitChoice temperatureUnit = temperatureDictUnits[baseOilThermalConductivityTemperatureUnit];
+                // Populate temporary variables with the SI value
+                double val1 =  thermalConductivityUnits.ToSI((double) valueData[0][(int) (baseOilThermalConductivityColumn-1)]);            
+                double val2 =  thermalConductivityUnits.ToSI((double) valueData[1][(int) (baseOilThermalConductivityColumn-1)]);            
+                
+                double valT1 =  temperatureUnit.ToSI((double) valueData[0][(int) (baseOilThermalConductivityTemperatureColumn-1)]);            
+                double valT2 =  temperatureUnit.ToSI((double) valueData[1][(int) (baseOilThermalConductivityTemperatureColumn-1)]);            
+                
+                double slope = (val2 - val1)/(valT2 - valT1);
+                double atZeroKelvin = val2 - slope * valT2;
+                // Populate drillstring description instance with the table value
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BaseOilProperies.
+                    ThermalConductivity.CoefficientRange = new List<double?>{val1, val2};     
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BaseOilProperies.
+                    ThermalConductivity.TemperatureRange = new List<double?>{valT1, valT2};                           
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BaseOilProperies.
+                    ThermalConductivity.Slope = ConversionsFromOSDC.DoubleToGaussian((slope));
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BaseOilProperies.
+                    ThermalConductivity.ThermalConductivityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian((atZeroKelvin));            
+            }
+            else
+            {
+                //If null, override the default value with null
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BaseOilProperies.
+                    ThermalConductivity.CoefficientRange = new List<double?>{null, null};     
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BaseOilProperies.
+                    ThermalConductivity.TemperatureRange = new List<double?>{null, null};                           
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BaseOilProperies.
+                    ThermalConductivity.Slope = ConversionsFromOSDC.DoubleToGaussian((null));
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.BaseOilProperies.
+                    ThermalConductivity.ThermalConductivityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian((null));
+            }    
+        }
+        catch (Exception e)
+        {
+            logger.LogWarning("Base Oil data not loaded correctly");
+            Snackbar.Add("Base Oil data not loaded correctly", Severity.Warning);   
+        }            
+        #endregion
+        #region LowGravitySolid variables
+        try
+        {
+            if (lowGravitySolidDensityColumn != null && lowGravitySolidDensityUnit != null)
+            {
+                //Extract current unit choice
+                UnitChoice densityUnit = densityDictUnits[lowGravitySolidDensityUnit];
+                // Populate temporary variables with the SI value
+                double val =  densityUnit.ToSI((double) valueData[0][(int) (lowGravitySolidDensityColumn-1)]);    
+                // Populate drillstring description instance with the table value        
+                drillingFluidDescriptionInstance.DrillingFluidComposition.LowGravitySolid.MassDensity =
+                    ConversionsFromOSDC.DoubleToGaussian(val);
+            }
+            else
+            {   
+                //If null, override the default value with null
+                drillingFluidDescriptionInstance.DrillingFluidComposition.LowGravitySolid.MassDensity =
+                    ConversionsFromOSDC.DoubleToGaussian(null);
+            }
+            if (lowGravitySolidMassColumn != null && lowGravitySolidMassUnit != null)
+            {
+                //Extract current unit choice
+                UnitChoice massUnit = massDictUnits[lowGravitySolidMassUnit];
+                // Populate temporary variables with the SI value
+                double val =  massUnit.ToSI((double) valueData[0][(int) (lowGravitySolidMassColumn-1)]);   
+                // Populate drillstring description instance with the table value         
+                drillingFluidDescriptionInstance.DrillingFluidComposition.LowGravitySolid.MassFraction =
+                    ConversionsFromOSDC.DoubleToGaussian(val);
+            }
+            else
+            {
+                //If null, override the default value with null
+                drillingFluidDescriptionInstance.DrillingFluidComposition.LowGravitySolid.MassFraction =
+                    ConversionsFromOSDC.DoubleToGaussian(null);
+            }
+            //Check if table inputs exists
+            if (
+                    lowGravitySolidHeatCapacityColumn != null && 
+                    lowGravitySolidHeatCapacityUnit != null &&
+                    lowGravitySolidHeatCapacityTemperatureColumn != null &&
+                    lowGravitySolidHeatCapacityTemperatureUnit != null            
+                )
+            {
+                //Extract current unit choice
+                UnitChoice specificHeatUnit = specificHeatDictUnits[lowGravitySolidHeatCapacityUnit];
+                UnitChoice temperatureUnit = temperatureDictUnits[lowGravitySolidHeatCapacityTemperatureUnit];
+                // Populate temporary variables with the SI value
+                double val1 =  specificHeatUnit.ToSI((double) valueData[0][(int) (lowGravitySolidHeatCapacityColumn-1)]);            
+                double val2 =  specificHeatUnit.ToSI((double) valueData[1][(int) (lowGravitySolidHeatCapacityColumn-1)]);            
+                
+                double valT1 =  temperatureUnit.ToSI((double) valueData[0][(int) (lowGravitySolidHeatCapacityTemperatureColumn-1)]);            
+                double valT2 =  temperatureUnit.ToSI((double) valueData[1][(int) (lowGravitySolidHeatCapacityTemperatureColumn-1)]);            
+                
+                double slope = (val2 - val1)/(valT2 - valT1);
+                double atZeroKelvin = val2 - slope * valT2;
+                // Populate drillstring description instance with the table value
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.LowGravitySolid.
+                    SpecificHeatCapacity.CoefficientRange = new List<double?>{val1, val2};     
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.LowGravitySolid.
+                    SpecificHeatCapacity.TemperatureRange = new List<double?>{valT1, valT2};                           
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.LowGravitySolid.
+                    SpecificHeatCapacity.Slope = ConversionsFromOSDC.DoubleToGaussian((slope));
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.LowGravitySolid.
+                    SpecificHeatCapacity.HeatCapacityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian((atZeroKelvin));            
+            }
+            else
+            {
+                //If null, override the default value with null
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.LowGravitySolid.
+                    SpecificHeatCapacity.CoefficientRange = new List<double?>{null, null};     
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.LowGravitySolid.
+                    SpecificHeatCapacity.TemperatureRange = new List<double?>{null, null};                           
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.LowGravitySolid.
+                    SpecificHeatCapacity.Slope = ConversionsFromOSDC.DoubleToGaussian((null));
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.LowGravitySolid.
+                    SpecificHeatCapacity.HeatCapacityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian((null));
+            }
+            //Check if table inputs exists
+            if (
+                    lowGravitySolidThermalConductivityColumn != null && 
+                    lowGravitySolidThermalConductivityUnit != null &&
+                    lowGravitySolidThermalConductivityTemperatureColumn != null &&
+                    lowGravitySolidThermalConductivityTemperatureUnit != null            
+                )
+            {
+                //Extract current unit choice
+                UnitChoice thermalConductivityUnits = thermalConductivityDictUnits[lowGravitySolidThermalConductivityUnit];
+                UnitChoice temperatureUnit = temperatureDictUnits[lowGravitySolidThermalConductivityTemperatureUnit];
+                // Populate temporary variables with the SI value
+                double val1 =  thermalConductivityUnits.ToSI((double) valueData[0][(int) (lowGravitySolidThermalConductivityColumn-1)]);            
+                double val2 =  thermalConductivityUnits.ToSI((double) valueData[1][(int) (lowGravitySolidThermalConductivityColumn-1)]);            
+                
+                double valT1 =  temperatureUnit.ToSI((double) valueData[0][(int) (lowGravitySolidThermalConductivityTemperatureColumn-1)]);            
+                double valT2 =  temperatureUnit.ToSI((double) valueData[1][(int) (lowGravitySolidThermalConductivityTemperatureColumn-1)]);            
+                
+                double slope = (val2 - val1)/(valT2 - valT1);
+                double atZeroKelvin = val2 - slope * valT2;
+                // Populate drillstring description instance with the table value
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.LowGravitySolid.
+                    ThermalConductivity.CoefficientRange = new List<double?>{val1, val2};     
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.LowGravitySolid.
+                    ThermalConductivity.TemperatureRange = new List<double?>{valT1, valT2};                           
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.LowGravitySolid.
+                    ThermalConductivity.Slope = ConversionsFromOSDC.DoubleToGaussian((slope));
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.LowGravitySolid.
+                    ThermalConductivity.ThermalConductivityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian((atZeroKelvin));            
+            }
+            else
+            {
+                //If null, override the default value with null
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.LowGravitySolid.
+                    ThermalConductivity.CoefficientRange = new List<double?>{null, null};     
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.LowGravitySolid.
+                    ThermalConductivity.TemperatureRange = new List<double?>{null, null};                           
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.LowGravitySolid.
+                    ThermalConductivity.Slope = ConversionsFromOSDC.DoubleToGaussian((null));
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.LowGravitySolid.
+                    ThermalConductivity.ThermalConductivityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian((null));
+            }    
+        }
+        catch (Exception e)
+        {
+            logger.LogWarning("Low gravity solid data not loaded correctly");
+            Snackbar.Add("Low gravity solid data not loaded correctly", Severity.Warning);            
+        }            
+        #endregion
+        #region HighGravitySolid variables
+        try
+        {
+            if (highGravitySolidDensityColumn != null && highGravitySolidDensityUnit != null)
+            {
+                //Extract current unit choice
+                UnitChoice densityUnit = densityDictUnits[highGravitySolidDensityUnit];
+                // Populate temporary variables with the SI value
+                double val =  densityUnit.ToSI((double) valueData[0][(int) (highGravitySolidDensityColumn-1)]);    
+                // Populate drillstring description instance with the table value        
+                drillingFluidDescriptionInstance.DrillingFluidComposition.HighGravitySolid.MassDensity =
+                    ConversionsFromOSDC.DoubleToGaussian(val);
+            }
+            else
+            {   
+                //If null, override the default value with null
+                drillingFluidDescriptionInstance.DrillingFluidComposition.HighGravitySolid.MassDensity =
+                    ConversionsFromOSDC.DoubleToGaussian(null);
+            }
+            if (highGravitySolidMassColumn != null && highGravitySolidMassUnit != null)
+            {
+                //Extract current unit choice
+                UnitChoice massUnit = massDictUnits[highGravitySolidMassUnit];
+                // Populate temporary variables with the SI value
+                double val =  massUnit.ToSI((double) valueData[0][(int) (highGravitySolidMassColumn-1)]);   
+                // Populate drillstring description instance with the table value         
+                drillingFluidDescriptionInstance.DrillingFluidComposition.HighGravitySolid.MassFraction =
+                    ConversionsFromOSDC.DoubleToGaussian(val);
+            }
+            else
+            {
+                //If null, override the default value with null
+                drillingFluidDescriptionInstance.DrillingFluidComposition.HighGravitySolid.MassFraction =
+                    ConversionsFromOSDC.DoubleToGaussian(null);
+            }
+            //Check if table inputs exists
+            if (
+                    highGravitySolidHeatCapacityColumn != null && 
+                    highGravitySolidHeatCapacityUnit != null &&
+                    highGravitySolidHeatCapacityTemperatureColumn != null &&
+                    highGravitySolidHeatCapacityTemperatureUnit != null            
+                )
+            {
+                //Extract current unit choice
+                UnitChoice specificHeatUnit = specificHeatDictUnits[highGravitySolidHeatCapacityUnit];
+                UnitChoice temperatureUnit = temperatureDictUnits[highGravitySolidHeatCapacityTemperatureUnit];
+                // Populate temporary variables with the SI value
+                double val1 =  specificHeatUnit.ToSI((double) valueData[0][(int) (highGravitySolidHeatCapacityColumn-1)]);            
+                double val2 =  specificHeatUnit.ToSI((double) valueData[1][(int) (highGravitySolidHeatCapacityColumn-1)]);            
+                
+                double valT1 =  temperatureUnit.ToSI((double) valueData[0][(int) (highGravitySolidHeatCapacityTemperatureColumn-1)]);            
+                double valT2 =  temperatureUnit.ToSI((double) valueData[1][(int) (highGravitySolidHeatCapacityTemperatureColumn-1)]);            
+                
+                double slope = (val2 - val1)/(valT2 - valT1);
+                double atZeroKelvin = val2 - slope * valT2;
+                // Populate drillstring description instance with the table value
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.HighGravitySolid.
+                    SpecificHeatCapacity.CoefficientRange = new List<double?>{val1, val2};     
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.HighGravitySolid.
+                    SpecificHeatCapacity.TemperatureRange = new List<double?>{valT1, valT2};                           
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.HighGravitySolid.
+                    SpecificHeatCapacity.Slope = ConversionsFromOSDC.DoubleToGaussian((slope));
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.HighGravitySolid.
+                    SpecificHeatCapacity.HeatCapacityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian((atZeroKelvin));            
+            }
+            else
+            {
+                //If null, override the default value with null
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.HighGravitySolid.
+                    SpecificHeatCapacity.CoefficientRange = new List<double?>{null, null};     
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.HighGravitySolid.
+                    SpecificHeatCapacity.TemperatureRange = new List<double?>{null, null};                           
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.HighGravitySolid.
+                    SpecificHeatCapacity.Slope = ConversionsFromOSDC.DoubleToGaussian((null));
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.HighGravitySolid.
+                    SpecificHeatCapacity.HeatCapacityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian((null));
+            }
+            //Check if table inputs exists
+            if (
+                    highGravitySolidThermalConductivityColumn != null && 
+                    highGravitySolidThermalConductivityUnit != null &&
+                    highGravitySolidThermalConductivityTemperatureColumn != null &&
+                    highGravitySolidThermalConductivityTemperatureUnit != null            
+                )
+            {
+                //Extract current unit choice
+                UnitChoice thermalConductivityUnits = thermalConductivityDictUnits[highGravitySolidThermalConductivityUnit];
+                UnitChoice temperatureUnit = temperatureDictUnits[highGravitySolidThermalConductivityTemperatureUnit];
+                // Populate temporary variables with the SI value
+                double val1 =  thermalConductivityUnits.ToSI((double) valueData[0][(int) (highGravitySolidThermalConductivityColumn-1)]);            
+                double val2 =  thermalConductivityUnits.ToSI((double) valueData[1][(int) (highGravitySolidThermalConductivityColumn-1)]);            
+                
+                double valT1 =  temperatureUnit.ToSI((double) valueData[0][(int) (highGravitySolidThermalConductivityTemperatureColumn-1)]);            
+                double valT2 =  temperatureUnit.ToSI((double) valueData[1][(int) (highGravitySolidThermalConductivityTemperatureColumn-1)]);            
+                
+                double slope = (val2 - val1)/(valT2 - valT1);
+                double atZeroKelvin = val2 - slope * valT2;
+                // Populate drillstring description instance with the table value
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.HighGravitySolid.
+                    ThermalConductivity.CoefficientRange = new List<double?>{val1, val2};     
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.HighGravitySolid.
+                    ThermalConductivity.TemperatureRange = new List<double?>{valT1, valT2};                           
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.HighGravitySolid.
+                    ThermalConductivity.Slope = ConversionsFromOSDC.DoubleToGaussian((slope));
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.HighGravitySolid.
+                    ThermalConductivity.ThermalConductivityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian((atZeroKelvin));            
+            }
+            else
+            {
+                //If null, override the default value with null
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.HighGravitySolid.
+                    ThermalConductivity.CoefficientRange = new List<double?>{null, null};     
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.HighGravitySolid.
+                    ThermalConductivity.TemperatureRange = new List<double?>{null, null};                           
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.HighGravitySolid.
+                    ThermalConductivity.Slope = ConversionsFromOSDC.DoubleToGaussian((null));
+                drillingFluidDescriptionInstance.
+                    DrillingFluidComposition.HighGravitySolid.
+                    ThermalConductivity.ThermalConductivityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian((null));
+            }    
+        }
+        catch (Exception e)
+        {
+            logger.LogWarning("High gravity solid data not loaded correctly");
+            Snackbar.Add("High gravity solid data not loaded correctly", Severity.Warning);         
+        }            
+        #endregion
+        
+        #region Gelling Properties        
+        List<GelData> gelData = new List<GelData>
+        {
+            new GelData 
+            {
+                GelDuration = ConversionsFromOSDC.DoubleToGaussian(null),
+                GelStrength = ConversionsFromOSDC.DoubleToGaussian(null),
+                Temperature = ConversionsFromOSDC.DoubleToGaussian(null)            
+            }
+        }; 
+        try
+        {
+            if (gelDurationColumn != null && 
+                gelDurationUnit != null &&
+                gelStrenghColumn != null &&
+                gelStrengthUnit != null)
+            {
+                UnitChoice timeUnit = timeDictUnits[gelDurationUnit];
+                UnitChoice strengthUnit = stressDictUnits[gelStrengthUnit];
+                int totalRowNumber = valueData.Count;
+                for (int i = 0; i < totalRowNumber; i ++)
+                {
+                    // Convert to SI unit for storage                
+                    double? valTime = timeUnit.ToSI((double) valueData[i][(int) (gelDurationColumn-1)]);
+                    double? valStrength = strengthUnit.ToSI((double) valueData[i][(int) (gelStrenghColumn-1)]);
+                    
+                    //Check if there is an actual input in the list
+                    if (valTime != null && valStrength != null) 
+                    {
+                        //Check if there are enough instances of measurements in the list
+                        if (i < gelData.Count)
+                        {
+                            gelData[i].GelDuration = ConversionsFromOSDC.DoubleToGaussian(valTime);
+                            gelData[i].GelStrength = ConversionsFromOSDC.DoubleToGaussian(valStrength);                            
+                        }
+                        else
+                        {
+                            // If not, add an empty element and populate
+                            gelData.Add(
+                                new GelData 
+                                {
+                                    GelDuration = ConversionsFromOSDC.DoubleToGaussian(valTime),
+                                    GelStrength = ConversionsFromOSDC.DoubleToGaussian(valStrength),
+                                    Temperature = ConversionsFromOSDC.DoubleToGaussian(null)            
+                                }
+                            );                          
+                        }//Close if check rows
+                    }//Close if check if there is a value
+                }//Close loop   
+            }            
+        }
+        catch
+        {
+            logger.LogWarning("Gelling properties data not loaded correctly");
+            Snackbar.Add("Gelling properties data not loaded correctly", Severity.Warning); 
+        }
+
+        #endregion        
+        #region Rhelogical Measurements
+        List<RheometerMeasurement> rheometerMeasurements = new List<RheometerMeasurement>
+        {
+            new RheometerMeasurement
+            {
+                RotationalSpeed = 0.0,
+                Torque = 0.0,
+                IsoNewtonianShearRate = 0.0,
+                IsoNewtonianShearStress = 0.0,
+                BobNewtonianShearRate = 0.0,
+                BobNewtonianShearStress = 0.0,
+            }
+        };            
+        try
+        {
+            if (shearStressColumn != null && shearStressUnit != null)
+            {
+                measurementTypeShearStress = MeasurementTypesShearStress.IsoNewtonianShearStress;
+                UnitChoice rheoShearStressUnit = shearStressDictUnits[shearStressUnit];
+                int totalRowNumber = valueData.Count;
+                //Loop through all rows
+                for (int i = 0; i < totalRowNumber; i ++)
+                {
+                    // Convert to SI unit for storage                
+                    double? val = rheoShearStressUnit.ToSI((double) valueData[i][(int) (shearStressColumn-1)]);
+                    //Check if there is an actual input in the list
+                    if (val != null) 
+                    {
+                        //Check if there are enough instances of measurements in the list
+                        if (i < rheometerMeasurements.Count)
+                        {
+                            rheometerMeasurements[i].IsoNewtonianShearStress = (double) val;
+                        }
+                        else
+                        {
+                            // If not, add an empty element and populate
+                            rheometerMeasurements.Add(
+                                new RheometerMeasurement
+                                {
+                                    RotationalSpeed = 0.0,
+                                    Torque = 0.0,
+                                    IsoNewtonianShearRate = 0.0,
+                                    IsoNewtonianShearStress = (double) val,
+                                    BobNewtonianShearRate = 0.0,
+                                    BobNewtonianShearStress = 0.0,
+                                }
+                            );                          
+                        }//Close if check rows
+                    }//Close if check if there is a value
+                }//Close loop   
+            }//Close check if there are row inputs       
+        }
+        catch (Exception e)
+        {
+            logger.LogWarning("Measured shear stress data not loaded correctly");
+            Snackbar.Add("Measured shear stress data not loaded correctly", Severity.Warning); 
+        }
+        try
+        {
+            if (shearRateColumn != null && shearRateUnit != null)
+            {
+                UnitChoice rheoShearRateUnit = shearRateDictUnits[shearRateUnit];
+                measurementTypeShearRate = MeasurementTypesShearRate.IsoNewtonianShearRate;
+                int totalRowNumber = valueData.Count;
+                //Loop through all rows
+                for (int i = 0; i < totalRowNumber; i ++)
+                {
+                    // Convert to SI unit for storage                
+                    double? val = rheoShearRateUnit.ToSI((double) valueData[i][(int) (shearRateColumn-1)]);
+                    //Check if there is an actual input in the list
+                    if (val != null) 
+                    {
+                        //Check if there are enough instances of measurements in the list
+                        if (i < rheometerMeasurements.Count)
+                        {
+                            rheometerMeasurements[i].IsoNewtonianShearRate = (double) val;
+                        }
+                        else
+                        {
+                            // If not, add an empty element and populate
+                            rheometerMeasurements.Add(
+                                new RheometerMeasurement
+                                {
+                                    RotationalSpeed = 0.0,
+                                    Torque = 0.0,
+                                    IsoNewtonianShearRate = (double) val,
+                                    IsoNewtonianShearStress = 0.0,
+                                    BobNewtonianShearRate = 0.0,
+                                    BobNewtonianShearStress = 0.0,
+                                }
+                            );                          
+                        }//Close if check rows
+                    }//Close if check if there is a value
+                }//Close loop   
+            }//Close check if there are row inputs       
+        }
+        catch (Exception e)
+        {
+            logger.LogWarning("Measured shear rate data not loaded correctly");
+            Snackbar.Add("Measured shear rate data not loaded correctly", Severity.Warning);
+        }
+        try
+        {
+            if (rotationColumn != null && rotationUnit != null)
+            {
+                UnitChoice rheoRotationUnit = rotationDictUnits[rotationUnit];
+                measurementTypeShearRate = MeasurementTypesShearRate.Rotation;
+                int totalRowNumber = valueData.Count;
+                //Loop through all rows
+                for (int i = 0; i < totalRowNumber; i ++)
+                {
+                    // Convert to SI unit for storage                
+                    double? val = rheoRotationUnit.ToSI((double) valueData[i][(int) (rotationColumn-1)]);
+                    //Check if there is an actual input in the list
+                    if (val != null) 
+                    {
+                        //Check if there are enough instances of measurements in the list
+                        if (i < rheometerMeasurements.Count)
+                        {
+                            rheometerMeasurements[i].RotationalSpeed = (double) val;
+                        }
+                        else
+                        {
+                            // If not, add an empty element and populate
+                            rheometerMeasurements.Add(
+                                new RheometerMeasurement
+                                {
+                                    RotationalSpeed = (double) val,
+                                    Torque = 0.0,
+                                    IsoNewtonianShearRate = 0.0,
+                                    IsoNewtonianShearStress = 0.0,
+                                    BobNewtonianShearRate = 0.0,
+                                    BobNewtonianShearStress = 0.0,
+                                }
+                            );                          
+                        }//Close if check rows
+                    }//Close if check if there is a value
+                }//Close loop   
+            }//Close check if there are row inputs       
+        }
+        catch (Exception e)
+        {
+            logger.LogWarning("Measured rotation data not loaded correctly");
+            Snackbar.Add("Measured rotation data not loaded correctly", Severity.Warning);
+        }
+        #endregion
+        try
+        {   
+            List<FlowCurveTable> tableValues = new List<FlowCurveTable>
+            {
+                new FlowCurveTable
+                {
+                    Temperature = ConversionsFromOSDC.DoubleToGaussian(null),
+                    Pressure = ConversionsFromOSDC.DoubleToGaussian(null),
+                    RheometerMeasurements = rheometerMeasurements,
+                    ShearRateReference = measurementTypeShearRate,
+                    ShearStressReference = measurementTypeShearStress
+                }
+            };
+            drillingFluidDescriptionInstance.Name = fileName + " Drilling Fluid";
+            drillingFluidDescriptionInstance.Description = "Drilling fluid exported from " + fileName+".csv";
+            drillingFluidDescriptionInstance.MetaInfo = new MetaInfo{ID = Guid.NewGuid()};
+            drillingFluidDescriptionInstance.FlowCurve.TableValues = tableValues;            
+            drillingFluidDescriptionInstance.GellingProperties.GelPropertiesTable = gelData;
+            await Api.ClientDrillingFluid.PostDrillingFluidDescriptionAsync(drillingFluidDescriptionInstance);
+            await SendMessage();
+            logger.LogInformation("Fluid description posted successfully");
+            Snackbar.Add("Fluid description posted successfully", Severity.Success);                 
+            await OnInitializedAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to add a new fluid description");
+            Snackbar.Add("Impossible to add a new fluid description", Severity.Warning);
+        }
+
+
+    }
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        fileName = file.Name;
+        int index = fileName.LastIndexOf('.');
+        fileName = index == -1 ? fileName : fileName.Substring(0, index);
+        if (file != null)
+        {
+            // Process the file stream
+            using var stream = file.OpenReadStream();
+            using var reader = new StreamReader(stream);
+            
+            string line;
+            bool headerLine = false;
+            while ((line = await reader.ReadLineAsync()) != null)
+            {
+                string[] values = line.Split(';'); // Adjust delimiter as needed
+                maxColumns = values.Length;
+                double?[] valuesDouble = new double?[maxColumns];
+                for (int i = 0; i < maxColumns; i++)
+                {
+                    double valDouble;
+                    if(values[i] == "")
+                    {
+                        valuesDouble[i] = null;
+                        headerLine = false;
+                    }
+                    else
+                    {
+                        if (Double.TryParse(values[i], out valDouble))
+                        {
+                            valuesDouble[i] = valDouble;
+                            headerLine = false;
+                        }
+                        else
+                        {
+                            headerLine = true;
+                        }         
+                    }           
+                }
+                if (headerLine)
+                {
+                    headerData = values;                
+                }
+                else
+                {
+                    valueData.Add(valuesDouble);            
+                }
+            }      
+            showChart = true;                       
+        }
+    }    
+}

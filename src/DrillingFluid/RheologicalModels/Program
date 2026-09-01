@@ -1,0 +1,75 @@
+using System;
+using System.Collections.Generic;
+using ParticleSwarmOptimization;
+using NORCE.Drilling.DrillingFluid.RheologicalModel;
+using NORCE.Drilling.DrillingFluid.ModelShared;
+using NORCE.Drilling.DrillingFluid.Model;
+
+
+ParticleSwarmSolverOptions Options = new ParticleSwarmSolverOptions { NumberOfIterations = 100000, NumberOfParticles = 100 };
+
+List<RheometerMeasurement> rheoMeasurements = new List<RheometerMeasurement> 
+{
+    new RheometerMeasurement
+    {
+        IsoNewtonianShearRate = 0.1,
+        IsoNewtonianShearStress = 0.2265
+    },
+    new RheometerMeasurement
+    {
+        IsoNewtonianShearRate = 20,
+        IsoNewtonianShearStress = 0.0131
+    },    
+    new RheometerMeasurement
+    {
+        IsoNewtonianShearRate = 50,
+        IsoNewtonianShearStress = 0.0086
+    },    
+    new RheometerMeasurement
+    {
+        IsoNewtonianShearRate = 100,
+        IsoNewtonianShearStress = 0.0065
+    },
+    new RheometerMeasurement
+    {
+        IsoNewtonianShearRate = 1000,
+        IsoNewtonianShearStress = 0.0033
+    }
+};
+ModelOptimizationOrder Order1 = new ModelOptimizationOrder(Options, rheoMeasurements, RheologicalModelsEnum.Quemada);
+
+/*
+PowerLawModel rheoModel0 = new PowerLawModel(rheoMeasurements);
+Console.WriteLine("\n======= Power Law =======\n");
+Console.WriteLine($"tau = {rheoModel0.ViscosityInfty} gamma^{rheoModel0.ConsistencyIndex}");
+Console.WriteLine("ViscosityInfty: " + rheoModel0.ViscosityInfty);
+Console.WriteLine("Consistency: " + rheoModel0.ConsistencyIndex);
+
+BinghamPlasticModel rheoModel1 = new BinghamPlasticModel(rheoMeasurements);
+Console.WriteLine("\n======= Bingham Plastic =======\n");
+Console.WriteLine($"tau = {rheoModel1.YieldStress} + {rheoModel0.ViscosityInfty} gamma ");
+Console.WriteLine("Yeild Stress: " + rheoModel1.YieldStress);
+Console.WriteLine("ViscosityInfty: " + rheoModel1.ViscosityInfty);
+
+HerschelBulkleyModel RheologicalModelToFit = new HerschelBulkleyModel(rheoMeasurements);
+Console.WriteLine("\n======= Herschel-Bulkley =======\n");
+Console.WriteLine($"tau = {RheologicalModelToFit.YieldStress} + {RheologicalModelToFit.ViscosityInfty} gamma ^ {RheologicalModelToFit.ConsistencyIndex} ");
+Console.WriteLine("Yeild Stress: " + RheologicalModelToFit.YieldStress);
+Console.WriteLine("ViscosityInfty: " + RheologicalModelToFit.ViscosityInfty);
+Console.WriteLine("Consistency: " + RheologicalModelToFit.ConsistencyIndex);
+
+QuemadaModel RheologicalModelToFit = new QuemadaModel(rheoMeasurements);
+Console.WriteLine("\n======= Quemada =======\n");
+Console.WriteLine($"tau = {RheologicalModelToFit.ViscosityInfty}((1 + (gamma/{RheologicalModelToFit.CharacteristicShearRate})^ {RheologicalModelToFit.ConsistencyIndex})/({RheologicalModelToFit.Xi} + (gamma/{RheologicalModelToFit.CharacteristicShearRate}))^2");
+Console.WriteLine("Characteristic shear rate: " + RheologicalModelToFit.CharacteristicShearRate);
+Console.WriteLine("ViscosityInfty: " + RheologicalModelToFit.ViscosityInfty);
+Console.WriteLine("Consistency: " + RheologicalModelToFit.ConsistencyIndex);
+Console.WriteLine("Xi: " + RheologicalModelToFit.Xi);
+
+RobertsonStiffModel RheologicalModelToFit = new RobertsonStiffModel(rheoMeasurements);
+Console.WriteLine("\n======= Robertson-Stiff =======\n");
+Console.WriteLine($"tau = {RheologicalModelToFit.YieldStress}(1 + gamma/{RheologicalModelToFit.CharacteristicShearRate})^ {RheologicalModelToFit.ConsistencyIndex}");
+Console.WriteLine("Characteristic shear rate: " + RheologicalModelToFit.CharacteristicShearRate);
+Console.WriteLine("ViscosityInfty: " + RheologicalModelToFit.YieldStress);
+Console.WriteLine("Consistency: " + RheologicalModelToFit.ConsistencyIndex);
+*/

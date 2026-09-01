@@ -1,0 +1,213 @@
+@inject IDrillingFluidAPIUtils Api
+@page "/DrillingFluidDescription"
+@inject ILogger<DrillingFluidMain> logger
+@inject ISnackbar Snackbar
+
+<MudUnitAndReferenceChoiceTag HttpHost=@Api.HostNameUnitConversion
+        HttpBasePath=@Api.HostBasePathUnitConversion
+        HttpController="UnitSystem/"
+        UnitSystemName="@DataUtils.UnitAndReferenceParameters.UnitSystemName"
+        UnitSystemNameChanged="@DataUtils.UpdateUnitSystemName">
+    @if (drillingFluidDescriptionList == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {     
+        <MudToolBar>
+            <MudText Typo="Typo.h5"> Drilling Fluid Description </MudText>
+            <MudSpacer/>
+            <MudButton StartIcon="@Icons.Material.Outlined.Delete" 
+                IconColor="@Color.Error" OnClick="@DeleteSelectedDrillingFluidDescription">
+                    Delete selection
+            </MudButton>   
+            <MudButton StartIcon="@Icons.Material.Outlined.Add" 
+                IconColor="@Color.Success" OnClick="@AddDrillingFluidDescription">
+                    New
+            </MudButton>
+            <MudButton StartIcon="@Icons.Material.Outlined.Add" 
+                IconColor="@Color.Success" OnClick="@AddDrillingFluidSimplifiedDescription">
+                    New (Simplified)
+            </MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.UploadFile" 
+                IconColor="@Color.Primary" OnClick="@UploadDrillingFluidDescription">
+                    Upload CSV
+            </MudButton>
+        </MudToolBar>
+        <MudDataGrid T="DrillingFluidDescription" MultiSelection="true" Items="@drillingFluidDescriptionList" SelectedItemsChanged="@SelectedItemsChanged"
+                Hover="true"
+                SortMode="SortMode.Multiple" QuickFilter="@_drillingFluidDescriptionFilter" Filterable="false">
+            <Columns>
+                <SelectColumn T="DrillingFluidDescription" />
+                <PropertyColumn Property="x => x.Name" Title="Name" CellStyle="width: 25%;" Sortable="true" Editable="false" />
+                <PropertyColumn Property="x => x.Description" Title="Description" CellStyle="width: 50%;" Sortable="true" Editable="false" />         
+                <TemplateColumn>
+                    <CellTemplate>
+                        <MudIconButton Size="@Size.Medium" Icon="@Icons.Material.Outlined.Edit" 
+                            OnClick="(() => EditDrillingFluidDescription(context.Item.MetaInfo.ID))"/>
+                        <MudIconButton Size="@Size.Medium" Icon="@Icons.Material.Outlined.Delete" 
+                            OnClick="(() => DeleteDrillingFluidDescription(context.Item.MetaInfo.ID))"/>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="DrillingFluidDescription" />
+            </PagerContent>
+        </MudDataGrid>
+        <DrillingFluidDescriptionAddSimplified ShowAddPanel="@showAddSimplifiedPanel" OnMessageSent="@HandleDrillingFluidDescriptionAddition"/>        
+        @if(showAddPanel)
+        {
+            <DrillingFluidDescriptionAddAndEdit FluidDescriptionId="@fluidDescriptionGuid" OnMessageSent="@HandleDrillingFluidDescriptionAddition"/>
+        }
+    }
+
+</MudUnitAndReferenceChoiceTag>
+<UploadDescriptionCSV ShowAddPanel="@showUploadPanel" OnMessageSent="@HandleDrillingFluidDescriptionUpload"/>
+
+@code{
+    private List<DrillingFluidDescription> drillingFluidDescriptionList = new();
+    private List<DrillingFluidDescription> selectedDrillingFluidDescriptionList = new();
+    [Inject] private IDialogService DialogService { get; set; }
+    private string? _searchString;
+    private bool showAddPanel = false;
+    private bool showAddSimplifiedPanel = false;
+    private bool showUploadPanel = false;
+    private Guid? fluidDescriptionGuid;
+    
+    protected override async Task OnInitializedAsync()
+    {
+
+        // Starting all loading tasks asynchronously
+        logger.LogInformation("Trying to load list of DrillingFluidDescription from client: " + Api.HttpClientDrillingFluid);
+        var drillingFluidDescriptionTask = Api.ClientDrillingFluid.GetAllDrillingFluidDescriptionAsync();
+        
+        List<Task> loadingTaskList = new List<Task> { drillingFluidDescriptionTask };
+        Task finishedTask = await Task.WhenAny(loadingTaskList);
+        if (finishedTask == drillingFluidDescriptionTask)
+        {
+            try
+            {
+                drillingFluidDescriptionList = (List<DrillingFluidDescription>)await drillingFluidDescriptionTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                if (drillingFluidDescriptionList != null)
+                {
+                    drillingFluidDescriptionList.Sort((f1, f2) => f1.Name.CompareTo(f2.Name));
+                }
+                else
+                {
+                    logger.LogWarning("Returned list of Drilling Fluid Description were null on initialization");
+                    Snackbar.Add("Returned list of Drilling Fluid Description were null on initialization", Severity.Warning);
+                }
+            }
+            catch (ApiException ex)
+            {
+                logger.LogError(ex, "Impossible to load Drilling Fluid Description from client");
+            }
+        }
+        
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    private async Task HandleDrillingFluidDescriptionAddition()
+    {
+        showAddPanel = false;
+        showAddSimplifiedPanel = false;
+        await OnInitializedAsync();
+    }
+    private async Task HandleDrillingFluidDescriptionUpload()
+    {
+        showAddPanel = false;
+        showAddSimplifiedPanel = false;
+        showUploadPanel = false;
+        await OnInitializedAsync();
+    }
+    private Func<DrillingFluidDescription, bool>
+    _drillingFluidDescriptionFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+        if ($"{x.Name} {x.Description}".Contains(_searchString))
+            return true;
+
+        return false;
+    };
+    void SelectedItemsChanged(HashSet<DrillingFluidDescription>items)
+    {
+        selectedDrillingFluidDescriptionList.Clear();
+        selectedDrillingFluidDescriptionList.InsertRange(0, items);
+    }
+    private void EditDrillingFluidDescription(Guid? id)
+    {
+        if (id != null)
+        {
+            fluidDescriptionGuid = id;
+            showAddPanel = true;
+        }
+    }
+    private async Task DeleteDrillingFluidDescription(Guid id)
+    {
+        try
+        {
+            if (await ConfirmDeletion())
+            {
+                await Api.ClientDrillingFluid.DeleteDrillingFluidDescriptionByIdAsync(id);
+                await OnInitializedAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to delete DrillingFluid");
+        }
+    }
+    private async Task DeleteSelectedDrillingFluidDescription()
+    {
+        if (await ConfirmDeletion())
+        {
+            foreach (DrillingFluidDescription fluidDescription in selectedDrillingFluidDescriptionList)
+            {
+                await Api.ClientDrillingFluid.DeleteDrillingFluidDescriptionByIdAsync(fluidDescription.MetaInfo.ID);
+                await OnInitializedAsync();
+            }
+            selectedDrillingFluidDescriptionList.Clear();
+        }        
+    }
+    private async Task<bool> ConfirmDeletion()
+    {
+        var options = new DialogOptions 
+        { 
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true    
+        };
+        var dialog = await DialogService.ShowAsync<DialogDeleteTemplate>("DELETE", options);
+        var result = await dialog.Result;
+        StateHasChanged();
+        if (result == null)
+        {
+            return false;
+        }
+        else
+        {
+            return (!result.Canceled);
+        }
+    }
+
+    private void AddDrillingFluidDescription()
+    {
+        showAddPanel = true;
+        showUploadPanel = false;
+        fluidDescriptionGuid = null;
+    }
+    private void AddDrillingFluidSimplifiedDescription()
+    {
+        showUploadPanel = false;
+        showAddSimplifiedPanel = true;
+    }    
+    private void UploadDrillingFluidDescription()
+    {
+        showUploadPanel = false;
+        showUploadPanel = true;
+    }
+    
+
+
+}

@@ -1,0 +1,151 @@
+# WebApp
+
+`WebApp` is the server-side Blazor user interface for the Rig microservice.
+
+It provides an interactive web client for listing, creating, editing, and deleting Rig entities, managing custom rig-feature catalogs, and viewing simple usage statistics exposed by the service. The application is designed to sit in front of the Rig API and related supporting services such as Field, Cluster, Vertical Datum, and Unit Conversion.
+
+## Purpose
+
+This project gives users a browser-based way to manage Rig data without working directly with raw API payloads or Swagger endpoints.
+
+Its main responsibilities are:
+
+- listing rigs stored by the Rig microservice
+- opening every selected rig directly in its editor; there is no separate display mode
+- editing the complete Rig model through specialized Razor components
+- managing custom rig-feature categories and options
+- creating and deleting rigs
+- loading related Field and Cluster data from external services
+- presenting basic usage statistics from the Rig API
+
+## Technology Stack
+
+`WebApp` is built as an ASP.NET Core `.NET 8` web application using:
+
+- Server-side Blazor
+- Razor Pages
+- MudBlazor for UI components
+- Plotly.Blazor for chart support
+- generated shared DTOs from `ModelSharedOut`
+- domain model types from `Model`
+
+The project file is [`WebApp.csproj`](C:\OSDC\Rig\WebApp\WebApp.csproj).
+
+## Application Structure
+
+The startup entry point is [`Program.cs`](C:\OSDC\Rig\WebApp\Program.cs).
+
+At startup the application:
+
+- reads optional service host URLs from configuration
+- registers Razor Pages and Server-Side Blazor
+- registers API client services for Rig, Field, and Cluster access
+- configures MudBlazor services and snackbar behavior
+- applies a path base of `/Rig/webapp`
+- maps the Blazor hub and the fallback host page
+
+The main user-facing pages are:
+
+- `RigMain`: searchable catalog whose rows open the rig editor directly.
+- `RigEdit`: create/update editor with tree-based navigation of the complete nested Rig object graph.
+- `RigFeatures`: catalog for viewing built-in feature definitions and managing custom categories and options.
+- [`Pages/StatisticsMain.razor`](C:\OSDC\Rig\WebApp\Pages\StatisticsMain.razor)
+  Summary view of usage statistics returned by the Rig service.
+
+The component library under [`Components`](C:\OSDC\Rig\WebApp\Components) contains reusable editors and viewers for the many nested rig-related model types.
+
+## API Integration
+
+The web app talks to several backend services:
+
+- Rig microservice
+- Field microservice
+- Cluster microservice
+- UnitConversion microservice
+
+The client helpers are defined in:
+
+- [`Shared/APIUtils.cs`](C:\OSDC\Rig\WebApp\Shared\APIUtils.cs)
+- [`Shared/RigApiClient.cs`](C:\OSDC\Rig\WebApp\Shared\RigApiClient.cs)
+- [`Shared/FieldClusterApiClient.cs`](C:\OSDC\Rig\WebApp\Shared\FieldClusterApiClient.cs)
+
+By default:
+
+- Rig points to `https://localhost:5001/` with base path `Rig/api/`
+- Field points to `https://dev.digiwells.no/` with base path `Field/api/`
+- Cluster points to `https://dev.digiwells.no/` with base path `Cluster/api/`
+- UnitConversion points to `https://dev.digiwells.no/` with base path `UnitConversion/api/`
+
+These values can be overridden through configuration.
+
+## Configuration
+
+The configurable host URLs are surfaced through [`Configuration.cs`](C:\OSDC\Rig\WebApp\Configuration.cs):
+
+- `RigHostURL`
+- `UnitConversionHostURL`
+- `FieldHostURL`
+- `ClusterHostURL`
+
+These can be supplied through `appsettings`, environment variables, or other standard ASP.NET Core configuration sources.
+
+Relevant configuration files include:
+
+- [`appsettings.json`](C:\OSDC\Rig\WebApp\appsettings.json)
+- [`appsettings.Development.json`](C:\OSDC\Rig\WebApp\appsettings.Development.json)
+- [`appsettings.Production.json`](C:\OSDC\Rig\WebApp\appsettings.Production.json)
+
+## Usage
+
+Run the app locally from the solution root with:
+
+```powershell
+dotnet run --project WebApp/WebApp.csproj
+```
+
+When running locally:
+
+- the app hosts a server-side Blazor UI
+- the Rig API is expected to be reachable at the configured host
+- Field, Cluster, and UnitConversion endpoints must also be reachable if those views are used
+
+Because the app applies `UsePathBase("/Rig/webapp")`, production-style hosting expects it to be served under that path base.
+
+## Main User Flows
+
+The current UI supports these primary flows:
+
+- browse the rig catalog
+- search rigs by name, description, or ID
+- open an existing rig directly in edit mode
+- create a rig through the same editor
+- edit complex nested rig structures with tree-driven navigation
+- assign fields and clusters when relevant
+- assign named rig features without entering catalog UUIDs
+- attach and manage rig photographs; existing photos are displayed automatically in the expanded photo panel of a stored rig
+- delete existing rigs
+- review aggregate usage statistics
+
+## Deployment Artifacts
+
+This project includes container and Helm deployment assets:
+
+- [`Dockerfile`](C:\OSDC\Rig\WebApp\Dockerfile)
+- [`charts/osdcdrillingrigwebappclient`](C:\OSDC\Rig\WebApp\charts\osdcdrillingrigwebappclient)
+
+The web app is packaged as the `osdcdrillingrigwebappclient` container in the broader deployment setup.
+
+## Notes For Contributors
+
+- `WebApp` currently references `Model.dll` and `ModelSharedOut.dll` from built outputs rather than project references. A local build of those dependencies may be required before this project compiles cleanly.
+- Many editing surfaces are implemented as specialized Razor components. Extend those components instead of pushing all editing logic into a single page.
+- API calls are performed through typed helper classes; new endpoints should normally be added there before being consumed by pages.
+- `APIUtils` currently disables TLS certificate validation in its `HttpClientHandler`. That may be convenient for development, but it is a security-sensitive behavior and should be reviewed carefully before broader deployment changes.
+
+## License
+
+This project is provided under the MIT License. See [`LICENSE`](C:\OSDC\Rig\WebApp\LICENSE).
+
+## Vertical Datum integration
+
+The host now supplies the Vertical Datum service and WebApp URLs used by the reusable Rig pages. Development and production settings should point these values to the matching deployment so mean-sea-level depth-reference selection and navigation work correctly.

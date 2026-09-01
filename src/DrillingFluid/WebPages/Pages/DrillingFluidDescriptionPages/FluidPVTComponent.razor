@@ -1,0 +1,133 @@
+<MudPaper Class="my-4 mx-4" Style="@($"background:{Colors.Gray.Lighten4};")">
+    <MudToolBar>
+        <MudText Class="mx-n1 mt-2 mb-1" Typo="Typo.body1"> <b> Fluid PVT Parameters </b></MudText>
+        <MudSpacer/>
+        <MudSwitch T="bool" Value="@useFluidPVTParameters"  Label="@(useFluidPVTParameters ? "Disable":"Enable")" 
+            ValueChanged="UseFluidPVTParametersChanged" Color="Color.Primary" UncheckedColor="Color.Secondary"/>
+    </MudToolBar>
+    @if(useFluidPVTParameters && currentFluidPVTParameters!= null)
+    {  
+        <MudGrid Class="d-flex justify-center flex-grow-1 gap-4"> 
+            <MudText Align="Align.Center" Class="my-4 mx-4" Typo="Typo.body2">
+                ρ [@(Parent.GetUnitLabel("MassDensityDrilling"))] = @(RoundDoubleForTextWithUnits(currentFluidPVTParameters.A0.GaussianValue.Mean, "MassDensityDrilling"))             
+                    + @(RoundDoubleForTextWithUnits(currentFluidPVTParameters.B0.GaussianValue.Mean, "MassDensityGradientPerTemperatureDrilling")) × T 
+                    + (@(RoundDoubleForTextWithUnits(currentFluidPVTParameters.C0.GaussianValue.Mean, "MassDensityGradientPerPressureDrilling")) 
+                    + @(RoundDoubleForTextWithUnits(currentFluidPVTParameters.D0.GaussianValue.Mean, "MassDensityGradientPerPressureTemperatureDrilling")) × T) × P 
+                    + (@(RoundDoubleForTextWithUnits(currentFluidPVTParameters.E0.GaussianValue.Mean, "MassDensityGradientPerPressureSquaredDrilling")) 
+                    + @(RoundDoubleForTextWithUnits(currentFluidPVTParameters.F0.GaussianValue.Mean, "MassDensityGradientPerPressureSquaredTemperature")) × T) × P²
+            </MudText>
+        </MudGrid>
+
+        <MudGrid Class = "mx-2 my-2">
+            <MudItem xs="2" Class ="mx-1 my-2">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                    QuantityLabel="A0" QuantityName="MassDensityDrilling"
+                    SIValueNullable="@currentFluidPVTParameters.A0.GaussianValue.Mean"
+                    SIValueNullableChanged="UpdateA0"/>
+            </MudItem>   
+            <MudItem xs="2" Class ="mx-1 my-2">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                    QuantityLabel="B0" QuantityName="MassDensityGradientPerTemperatureDrilling"
+                    SIValueNullable="@currentFluidPVTParameters.B0.GaussianValue.Mean"
+                    SIValueNullableChanged="UpdateB0"/>
+            </MudItem>                  
+            <MudItem xs="2" Class ="mx-1 my-2">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                    QuantityLabel="C0" QuantityName="MassDensityGradientPerPressureDrilling"
+                    SIValueNullable="@currentFluidPVTParameters.C0.GaussianValue.Mean"
+                    SIValueNullableChanged="UpdateC0"/>
+            </MudItem>   
+            <MudItem xs="2" Class ="mx-1 my-2">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                    QuantityLabel="D0" QuantityName="MassDensityGradientPerPressureTemperatureDrilling"
+                    SIValueNullable="@currentFluidPVTParameters.D0.GaussianValue.Mean"
+                    SIValueNullableChanged="UpdateD0"/>
+            </MudItem>   
+            <MudItem xs="2" Class ="mx-1 my-2">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                    QuantityLabel="E0" QuantityName="MassDensityGradientPerPressureSquaredDrilling"
+                    SIValueNullable="@currentFluidPVTParameters.E0.GaussianValue.Mean"
+                    SIValueNullableChanged="UpdateE0"/>
+            </MudItem>   
+            <MudItem xs="2" Class ="mx-1 my-2">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                    QuantityLabel="F0" QuantityName="MassDensityGradientPerPressureSquaredTemperature"
+                    SIValueNullable="@currentFluidPVTParameters.F0.GaussianValue.Mean"
+                    SIValueNullableChanged="UpdateF0"/>
+            </MudItem> 
+        </MudGrid>
+    }
+
+</MudPaper>
+
+@code{
+    [CascadingParameter]
+    public MudUnitAndReferenceChoiceTag? Parent { get; set; }
+    private FluidPVTParameters? currentFluidPVTParameters = null;
+    [Parameter]
+    public EventCallback<FluidPVTParameters?> ValueChanged {get; set;}   
+    private bool useFluidPVTParameters = false; 
+    private async Task SendMessage()
+    {
+        await ValueChanged.InvokeAsync(currentFluidPVTParameters);
+    }
+    private async Task UseFluidPVTParametersChanged(bool value)
+    {
+        useFluidPVTParameters = value;
+        if (!useFluidPVTParameters)
+        {
+            currentFluidPVTParameters = null; // Clear the parameters if not using them
+        }
+        else
+        {
+            currentFluidPVTParameters = PseudoConstructors.ConstructFluidPVTParameters(); // Initialize with default values if using them
+        }
+        await SendMessage();
+    }
+    private void ManageUnits(){}
+    private string RoundDoubleForTextWithUnits(double? val, string Units)
+    {
+        double? unitVal = Parent!.FromSI(val, Units);
+        if (unitVal == null)
+        {
+            return "0";
+        }
+        else 
+        {
+            int valRound = (int) unitVal * 100;
+            return $"{unitVal}";
+        }
+    }  
+    private async Task UpdateA0(double? val)
+    {
+        currentFluidPVTParameters.A0.GaussianValue.Mean = val;
+        await SendMessage(); 
+    }
+    private async Task UpdateB0(double? val)
+    {
+        currentFluidPVTParameters.B0.GaussianValue.Mean = val;
+        await SendMessage(); 
+    }
+    private async Task UpdateC0(double? val)
+    {
+        currentFluidPVTParameters.C0.GaussianValue.Mean = val;
+        await SendMessage(); 
+    }
+    private async Task UpdateD0(double? val)
+    {
+        currentFluidPVTParameters.D0.GaussianValue.Mean = val;
+        await SendMessage(); 
+    }
+    private async Task UpdateE0(double? val)
+    {
+        currentFluidPVTParameters.E0.GaussianValue.Mean = val;
+        await SendMessage(); 
+    }
+    private async Task UpdateF0(double? val)
+    {
+        currentFluidPVTParameters.F0.GaussianValue.Mean = val;
+        await SendMessage(); 
+    }
+
+
+}             

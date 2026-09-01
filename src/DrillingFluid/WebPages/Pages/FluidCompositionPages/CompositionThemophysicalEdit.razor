@@ -1,0 +1,209 @@
+<div hidden="@(SpecificHeatCapacity==null)">
+    <MudGrid Class="ym-2 yp-2">
+        <MudItem xs="6" >
+            <MudPaper Class="my-4 mx-2" Style="@($"background:{Colors.Gray.Lighten3};")">
+                <MudText Class="my-1 mx-2" Typo="Typo.body2"><b>Heat Capacity</b></MudText>
+                <MudGrid Class="my-2 mx-2">
+                    <MudItem xs="5" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Temperature 1" QuantityName="TemperatureDrilling"
+                            SIValueNullable="@temperatureHeatCapacity1"
+                            SIValueNullableChanged="@UpdateTemperatureHeatCapacity1"/>
+                    </MudItem>   
+                    <MudItem xs="5" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Temperature 2" QuantityName="TemperatureDrilling"
+                            SIValueNullable="@temperatureHeatCapacity2"
+                            SIValueNullableChanged="@UpdateTemperatureHeatCapacity2"/>
+                    </MudItem>   
+                    <MudItem xs="5" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Heat Capacity at T1" QuantityName="IsobaricSpecificHeatCapacityDrilling"
+                            SIValueNullable="@heatCapacity1"
+                            SIValueNullableChanged="@UpdateHeatCapacity1"/>
+                    </MudItem>   
+                    <MudItem xs="5" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Heat Capacity at T2" QuantityName="IsobaricSpecificHeatCapacityDrilling"
+                            SIValueNullable="@heatCapacity2"
+                            SIValueNullableChanged="@UpdateHeatCapacity2"/>
+                    </MudItem>  
+                </MudGrid>
+            </MudPaper> 
+        </MudItem>
+        <!-- #region -->
+        <MudItem xs="6">
+            <MudPaper Class="my-4 mx-2" Style="@($"background:{Colors.Gray.Lighten3};")">
+                <MudText Class="my-1 mx-2" Typo="Typo.body2"><b>Thermal Conductivity</b></MudText>
+                <MudGrid Class="my-2 mx-2">
+                    <MudItem xs="5" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Temperature 1" QuantityName="TemperatureDrilling"
+                            SIValueNullable="@temperatureThermalConductivity1"
+                            SIValueNullableChanged="@UpdateTemperatureThermalConductivity1"/>
+                    </MudItem>   
+                    <MudItem xs="5" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Temperature 2" QuantityName="TemperatureDrilling"
+                            SIValueNullable="@temperatureThermalConductivity2"
+                            SIValueNullableChanged="@UpdateTemperatureThermalConductivity2"/>
+                    </MudItem> 
+                    <MudItem xs="5" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Thermal Conductivity 1" QuantityName="ThermalConductivityDrilling"
+                            SIValueNullable="@thermalConductivity1"
+                            SIValueNullableChanged="@UpdateThermalConductivity1"/>
+                    </MudItem>   
+                    <MudItem xs="5" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Thermal Conductivity 2" QuantityName="ThermalConductivityDrilling"
+                            SIValueNullable="@thermalConductivity2"
+                            SIValueNullableChanged="@UpdateThermalConductivity2"/>
+                    </MudItem> 
+                </MudGrid>
+            </MudPaper> 
+        </MudItem>
+    </MudGrid>
+</div>
+
+@code{
+
+    [Parameter]
+    public SpecificHeatCapacity SpecificHeatCapacity {get; set;}
+    [Parameter]
+    public ThermalConductivity ThermalConductivity { get; set; }
+
+    private bool usesThermophysicalProperties = false;
+    private string switchString = "Properties disabled";
+    private double? heatCapacity1;
+    private double? temperatureHeatCapacity1;
+    private double? heatCapacity2;
+    private double? temperatureHeatCapacity2;
+    private double? thermalConductivity1;
+    private double? temperatureThermalConductivity1;
+    private double? thermalConductivity2;
+    private double? temperatureThermalConductivity2;
+    protected override void OnInitialized()
+    {
+        PopulateVariables();
+    }
+    protected override void OnParametersSet()
+    {   
+        PopulateVariables();
+    }
+    private void PopulateVariables()
+    { 
+        List<double?> temperaturesConductivity = ThermalConductivity.TemperatureRange;
+        List<double?> coefficientsConductivity = ThermalConductivity.CoefficientRange;
+        temperaturesConductivity.Add(null);
+        coefficientsConductivity.Add(null);
+
+        thermalConductivity1 = coefficientsConductivity[0];
+        thermalConductivity2 = coefficientsConductivity[1];            
+        //
+        List<double?> temperaturesHeatCapacity = SpecificHeatCapacity.TemperatureRange;
+        List<double?> coefficientsHeatCapacity = SpecificHeatCapacity.CoefficientRange;
+        temperaturesHeatCapacity.Add(null);
+        coefficientsHeatCapacity.Add(null); 
+        temperatureHeatCapacity1 = temperaturesHeatCapacity[0];
+        temperatureHeatCapacity2 = temperaturesHeatCapacity[1];
+        heatCapacity1 = coefficientsHeatCapacity[0];
+        heatCapacity2 = coefficientsHeatCapacity[1];        
+    }
+       private void CalculateLinearHeatCapacity()
+    {
+        if( heatCapacity1 != null &&
+            heatCapacity2 != null &&
+            temperatureHeatCapacity1 != null &&
+            temperatureHeatCapacity2 != null        
+        )
+        {
+            double slope = (double)((heatCapacity2-heatCapacity1)/(temperatureHeatCapacity2-temperatureHeatCapacity1));
+            double atZeroKelvin = (double)(heatCapacity2 - slope * temperatureHeatCapacity2);
+            ThermalConductivity.TemperatureRange =new List<double?>
+            {  
+                temperatureHeatCapacity1, temperatureHeatCapacity2
+            };
+            ThermalConductivity.CoefficientRange =new List<double?>
+            {  
+                heatCapacity1, heatCapacity2
+            };
+            SpecificHeatCapacity.Slope = ConversionsFromOSDC.DoubleToGaussian(slope);
+            SpecificHeatCapacity.HeatCapacityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(atZeroKelvin);     
+        }
+        else
+        {
+            SpecificHeatCapacity.Slope = ConversionsFromOSDC.DoubleToGaussian(null);
+            SpecificHeatCapacity.HeatCapacityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(null);
+        }
+    }
+    private void CalculateLinearThermalConductivity()
+    {
+        if( thermalConductivity1 != null &&
+            thermalConductivity2 != null &&
+            temperatureThermalConductivity1 != null &&
+            temperatureThermalConductivity2 != null        
+        )
+        {
+            ThermalConductivity.TemperatureRange =new List<double?>
+            {  
+                temperatureThermalConductivity1, temperatureThermalConductivity2
+            };
+            ThermalConductivity.CoefficientRange =new List<double?>
+            {  
+                thermalConductivity1, thermalConductivity2
+            };
+            double slope = (double)((thermalConductivity2-thermalConductivity1)/(temperatureThermalConductivity2-temperatureThermalConductivity1));
+            double atZeroKelvin = (double)(thermalConductivity2 - slope * temperatureThermalConductivity2);
+            ThermalConductivity.Slope = ConversionsFromOSDC.DoubleToGaussian(slope);
+            ThermalConductivity.ThermalConductivityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(atZeroKelvin);     
+        }
+        else
+        {
+            ThermalConductivity.Slope = ConversionsFromOSDC.DoubleToGaussian(null);
+            ThermalConductivity.ThermalConductivityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(null);
+        }
+    }
+    private void UpdateTemperatureHeatCapacity1(double? val)
+    {
+        temperatureHeatCapacity1 = val;
+        CalculateLinearHeatCapacity();
+    }
+    private void UpdateTemperatureHeatCapacity2(double? val)
+    {
+        temperatureHeatCapacity2 = val;
+        CalculateLinearHeatCapacity();
+    } 
+    private void UpdateHeatCapacity1(double? val)
+    {
+        heatCapacity1 = val;
+        CalculateLinearHeatCapacity();
+    }
+    private void UpdateHeatCapacity2(double? val)
+    {
+        heatCapacity2 = val;
+        CalculateLinearHeatCapacity();
+    } 
+
+
+    private void UpdateTemperatureThermalConductivity1(double? val)
+    {
+        temperatureThermalConductivity1 = val;
+        CalculateLinearThermalConductivity();
+    }
+    private void UpdateTemperatureThermalConductivity2(double? val)
+    {
+        temperatureThermalConductivity2 = val;
+        CalculateLinearThermalConductivity();
+    } 
+    private void UpdateThermalConductivity1(double? val)
+    {
+        thermalConductivity1 = val;
+        CalculateLinearThermalConductivity();
+    }
+    private void UpdateThermalConductivity2(double? val)
+    {
+        thermalConductivity2 = val;
+        CalculateLinearThermalConductivity();
+    }
+}

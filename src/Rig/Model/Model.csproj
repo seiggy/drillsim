@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<RootNamespace>OSDC.Drilling.Rig.Model</RootNamespace>
+		<Nullable>enable</Nullable>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Remove="docfx.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="docfx.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Content>
+		<None Include="LICENSE" Pack="true" PackagePath="" />
+		<None Include="README.md" Pack="true" PackagePath="" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="OSDC.DotnetLibraries.Drilling.DrillingProperties" Version="10.2.8" />
+		<PackageReference Include="OSDC.DotnetLibraries.General.Common" Version="1.1.1" />
+		<PackageReference Include="OSDC.DotnetLibraries.General.DataManagement" Version="2.2.0" />
+		<PackageReference Include="OSDC.DotnetLibraries.General.Statistics" Version="3.3.4" />
+	</ItemGroup>
+
+</Project>

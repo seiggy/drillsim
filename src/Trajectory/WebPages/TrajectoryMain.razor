@@ -1,0 +1,758 @@
+﻿@page "/Trajectory"
+@inject ILogger<TrajectoryMain> logger
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject ITrajectoryAPIUtils Api
+<MudUnitAndReferenceChoiceTag HttpHost=@Api.HostNameUnitConversion
+                              HttpBasePath=@Api.HostBasePathUnitConversion
+                              HttpController="UnitSystem/"
+                              UnitSystemName="@DataUtils.UnitAndReferenceParameters.UnitSystemName"
+                              UnitSystemNameChanged="@DataUtils.UpdateUnitSystemName" 
+                              DepthReferenceName="@DataUtils.UnitAndReferenceParameters.DepthReferenceName"
+                              DepthReferenceNameChanged="@DataUtils.UpdateDepthReferenceName"
+                              GroundMudLineDepthReferenceSource="@DataUtils.GroundMudLineDepthReferenceSource"
+                              MeanSeaLevelDepthReferenceSource="@DataUtils.MeanSeaLevelDepthReferenceSource"
+                              SeaWaterLevelDepthReferenceSource="@DataUtils.SeaWaterLevelDepthReferenceSource"
+                              RotaryTableDepthReferenceSource="@DataUtils.RotaryTableDepthReferenceSource"
+                              PositionReferenceName="@DataUtils.UnitAndReferenceParameters.PositionReferenceName"
+                              PositionReferenceNameChanged="@DataUtils.UpdatePositionReferenceName"
+                              WellHeadPositionReferenceSource="@DataUtils.WellHeadPositionReferenceSource"
+                              CartographicGridPositionReferenceSource="@DataUtils.CartographicGridPositionReferenceSource"
+                              FieldPositionReferenceSource="@DataUtils.FieldPositionReferenceSource"
+                              ClusterPositionReferenceSource="@DataUtils.ClusterPositionReferenceSource"
+                              AzimuthReferenceName="@DataUtils.UnitAndReferenceParameters.AzimuthReferenceName"
+                              AzimuthReferenceNameChanged="@DataUtils.UpdateAzimuthReferenceName"
+                              GridConvergenceSource="@DataUtils.GridConvergenceSource"
+                              MagneticDeclinationSource="@DataUtils.MagneticDeclinationSource">
+    @if (trajectoryList == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <div hidden="@isHiddenMainPanel">
+            <MudGrid Class="mb-4">
+                <MudItem xs="12" md="3">
+                    <MudSelect Label="Field" T="Guid?" Value="@selectedFieldId" ValueChanged="OnFieldChanged" ShrinkLabel Clearable="true">
+                        @foreach (Field field in AvailableFields)
+                        {
+                            <MudSelectItem T="Guid?" Value="@((Guid?)field.MetaInfo.ID)">@field.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" md="3">
+                    <MudSelect Label="Cluster" T="Guid?" Value="@selectedClusterId" ValueChanged="OnClusterChanged" ShrinkLabel Clearable="true" Disabled="@(selectedFieldId == null)">
+                        @foreach (Cluster cluster in AvailableClusters)
+                        {
+                            <MudSelectItem T="Guid?" Value="@((Guid?)cluster.MetaInfo.ID)">@cluster.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" md="3">
+                    <MudSelect Label="Well" T="Guid?" Value="@selectedWellId" ValueChanged="OnWellChanged" ShrinkLabel Clearable="true" Disabled="@(selectedFieldId == null)">
+                        @foreach (Well well in AvailableWells)
+                        {
+                            <MudSelectItem T="Guid?" Value="@((Guid?)well.MetaInfo.ID)">@well.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" md="3">
+                    <MudSelect Label="WellBore" T="Guid?" Value="@selectedWellBoreId" ValueChanged="OnWellBoreChanged" ShrinkLabel Clearable="true" Disabled="@(selectedWellId == null)">
+                        @foreach (WellBore wellBore in AvailableWellBores)
+                        {
+                            <MudSelectItem T="Guid?" Value="@((Guid?)wellBore.MetaInfo.ID)">@wellBore.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+            @* _gridKey forces a full remount of MudDataGrid on each reload,
+               clearing all stale selection state from the virtual DOM. *@
+            <MudDataGrid T="TrajectoryLight" @key="_gridKey"
+                         MultiSelection="true" Items="@trajectoryList" SelectedItemsChanged="@SelectedItemsChanged"
+                         EditMode="DataGridEditMode.Form"
+                         Hover="true" RowClick="@RowClicked"
+                         SortMode="SortMode.Multiple" QuickFilter="@_trajectoryFilter" Filterable="false"
+                         ReadOnly="false" ColumnResizeMode="ResizeMode.Column" Elevation="0">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Trajectory</MudText>
+                    <MudButton OnClick="@AddTrajectory" Color="@Color.Success" Class="add-item-btn">Add</MudButton>
+                    <MudButton OnClick="@DeleteSelectedTrajectory" Color="@Color.Error" Class="add-item-btn"
+                               Disabled="@(selectedTrajectoryList.Count == 0)">Delete</MudButton>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+                <Columns>
+                    <SelectColumn T="TrajectoryLight" />
+                    <PropertyColumn Property="x => x.Name" Title="Trajectory" CellStyle="width: 25%;" Sortable="true" Editable="false" />
+                    <PropertyColumn Property="x => x.Description" Title="Description" CellStyle="width: 35%;" Sortable="true" Editable="false" />
+                    <PropertyColumn Property="x => GetWellBoreNameFromID(x.WellBoreID)" Title="WellBore" Sortable="true" />
+                    <PropertyColumn Property="x => x.TrajectoryType" Title="Type" Sortable="true" Editable="false" />
+                    <TemplateColumn Title="Calculation" Sortable="true">
+                        <CellTemplate>
+                            @CalculationStatusContent(context.Item)
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <PropertyColumn Property="x => x.IsDefinitive" Title="Definitive" Sortable="true" Editable="false" />
+                    <TemplateColumn CellClass="d-flex justify-end">
+                        <CellTemplate>
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" OnClick="(() => DeleteTrajectory(context.Item))" />
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+                <PagerContent>
+                    <MudDataGridPager T="TrajectoryLight" />
+                </PagerContent>
+            </MudDataGrid>
+        </div>
+    }
+    @if (isHiddenMainPanel && (!isHiddenEditPanel))
+    {
+        <TrajectoryEdit TrajectoryId="@trajectoryIdBeingEdited"
+                        RigList="@rigList"
+                        WellBoreArchitectureList="@wellBoreArchitectureList"
+                        WellBoreList="@wellBoreList"
+                        WellList="@wellList"
+                        ClusterList="@clusterList"
+                        FieldList="@fieldList"
+                        TrajectoryList="@allTrajectoryList"
+                        ValueChanged="HandleEditPanelClosed" />
+    }
+</MudUnitAndReferenceChoiceTag>
+
+@code {
+    // Trajectory-related variables
+    private List<TrajectoryLight> allTrajectoryList = new();
+    private List<TrajectoryLight> trajectoryList = new();
+    private List<TrajectoryLight> selectedTrajectoryList = new();
+    private CancellationTokenSource? calculationPollingCancellation_;
+    // Other variables
+    private List<WellBore>? wellBoreList;
+    private List<Well>? wellList;
+    private List<Cluster>? clusterList;
+    private List<Field>? fieldList;
+    private List<Rig>? rigList;
+    private List<WellBoreArchitectureLight>? wellBoreArchitectureList;
+    // UI related variables
+    public bool isHiddenMainPanel;
+    public bool isHiddenEditPanel;
+    private Guid? trajectoryIdBeingEdited;
+    private string? _searchString;
+    private Guid? selectedFieldId;
+    private Guid? selectedClusterId;
+    private Guid? selectedWellId;
+    private Guid? selectedWellBoreId;
+
+    // Incremented on every reload to force MudDataGrid to fully remount,
+    // which clears stale checkbox/selection state in the virtual DOM.
+    private int _gridKey = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Don't call OnInitializedAsync() directly for refreshes, it is an anti-pattern.
+        // OnInitializedAsync is a page lifecycle hook, not a refresh method.
+        // The LoadDataAsync() is the single source of truth for reloading,
+        // and every refresh path (DeleteTrajectory, DeleteSelectedTrajectory, HandleEditPanelClosed) calls it.
+        await LoadDataAsync();
+    }
+
+    /// <summary>
+    /// Loads (or reloads) all data from the API and resets selection state.
+    /// Always call this instead of OnInitializedAsync() for refreshes.
+    /// </summary>
+    private async Task LoadDataAsync()
+    {
+        try
+        {
+            // Show main panel
+            isHiddenMainPanel = false;
+            isHiddenEditPanel = true;
+            trajectoryIdBeingEdited = null;
+
+            // Reset selection state before reloading so no ghost items remain!!!
+            selectedTrajectoryList = new List<TrajectoryLight>();
+
+            // Starting all loading tasks asynchronously
+            logger.LogInformation("Trying to load list of rigs from client: " + Api.HttpClientRig);
+            var rigTask = Api.ClientRig.GetAllRigAsync();
+            logger.LogInformation("Trying to load list of fields from client: " + Api.HttpClientField);
+            var fieldTask = Api.ClientField.GetAllFieldAsync();
+            logger.LogInformation("Trying to load list of clusters from client: " + Api.HttpClientCluster);
+            var clusterTask = Api.ClientCluster.GetAllClusterAsync();
+            logger.LogInformation("Trying to load list of wells from client: " + Api.HttpClientWell);
+            var wellTask = Api.ClientWell.GetAllWellAsync();
+            logger.LogInformation("Trying to load list of wellbores from client: " + Api.HttpClientWellBore);
+            var wellBoreTask = Api.ClientWellBore.GetAllWellBoreAsync();
+            logger.LogInformation("Trying to load list of wellborearchitectures from client: " + Api.HttpClientWellBoreArchitecture);
+            var wellBoreArchitectureTask = Api.ClientWellBoreArchitecture.GetAllWellBoreArchitectureLightAsync();
+            logger.LogInformation("Trying to load list of trajectories from client: " + Api.HostNameTrajectory);
+            var trajectoryTask = Api.ClientTrajectory.GetAllTrajectoryLightAsync();
+
+            List<Task> loadingTaskList = [trajectoryTask, wellBoreTask, wellTask, clusterTask, fieldTask, rigTask];
+
+            // Awaiting tasks and retrieve results as they become available
+            while (loadingTaskList.Count > 0)
+            {
+                Task finishedTask = await Task.WhenAny(loadingTaskList);
+                if (finishedTask == trajectoryTask)
+                {
+                    try
+                    {
+                        allTrajectoryList = (List<TrajectoryLight>)await trajectoryTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (allTrajectoryList != null)
+                        {
+                            allTrajectoryList.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+                            trajectoryList = ApplyTrajectoryFilters();
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of Trajectory were null on initialization");
+                            Snackbar.Add("Returned list of Trajectory were null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load Trajectory from client");
+                    }
+                }
+                else if (finishedTask == wellBoreTask)
+                {
+                    try
+                    {
+                        wellBoreList = (List<WellBore>)await wellBoreTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (wellBoreList != null)
+                        {
+                            wellBoreList.Sort((f1, f2) => f1.Name.CompareTo(f2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of WellBore were null on initialization");
+                            Snackbar.Add("Returned list of WellBore were null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load WellBore from client");
+                    }
+                }
+                else if (finishedTask == wellBoreArchitectureTask)
+                {
+                    try
+                    {
+                        wellBoreArchitectureList = (List<WellBoreArchitectureLight>)await wellBoreArchitectureTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (wellBoreArchitectureList != null)
+                        {
+                            wellBoreArchitectureList.Sort((f1, f2) => f1.Name.CompareTo(f2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of WellBoreArchitecture were null on initialization");
+                            Snackbar.Add("Returned list of WellBoreArchitecture were null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load WellBoreArchitecture from client");
+                    }
+                }
+                else if (finishedTask == wellTask)
+                {
+                    try
+                    {
+                        wellList = (List<Well>)await wellTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (wellList != null)
+                        {
+                            wellList.Sort((f1, f2) => f1.Name.CompareTo(f2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of Well were null on initialization");
+                            Snackbar.Add("Returned list of Well were null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load Well from client");
+                    }
+                }
+                else if (finishedTask == clusterTask)
+                {
+                    try
+                    {
+                        clusterList = (List<Cluster>)await clusterTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (clusterList != null)
+                        {
+                            clusterList.Sort((f1, f2) => f1.Name.CompareTo(f2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of Cluster were null on initialization");
+                            Snackbar.Add("Returned list of Cluster were null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load Cluster from client");
+                    }
+                }
+                else if (finishedTask == fieldTask)
+                {
+                    try
+                    {
+                        fieldList = (List<Field>)await fieldTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (fieldList != null)
+                        {
+                            fieldList.Sort((f1, f2) => f1.Name.CompareTo(f2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of Field were null on initialization");
+                            Snackbar.Add("Returned list of Field were null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load Field from client");
+                    }
+                }
+                else if (finishedTask == rigTask)
+                {
+                    try
+                    {
+                        rigList = (List<Rig>)await rigTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (rigList != null)
+                        {
+                            rigList.Sort((f1, f2) => f1.Name.CompareTo(f2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of Rig were null on initialization");
+                            Snackbar.Add("Returned list of Rig were null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load Rig from client");
+                    }
+                }
+                loadingTaskList.Remove(finishedTask);
+            }
+
+            StartCalculationPollingIfNeeded();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem Trajectory initialization");
+        }
+
+        // Increment key to force full MudDataGrid remount, wiping any stale
+        // selection checkboxes or row mappings from the previous render.
+        _gridKey++;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private List<Field> AvailableFields =>
+        fieldList?
+            .Where(field => field?.MetaInfo != null)
+            .OrderBy(field => field.Name)
+            .ToList() ?? [];
+
+    private List<Cluster> AvailableClusters =>
+        clusterList?
+            .Where(cluster =>
+                cluster?.MetaInfo != null &&
+                !cluster.IsSingleWell &&
+                selectedFieldId != null &&
+                cluster.FieldID == selectedFieldId)
+            .OrderBy(cluster => cluster.Name)
+            .ToList() ?? [];
+
+    private List<Well> AvailableWells =>
+        wellList?
+            .Where(well =>
+                well?.MetaInfo != null &&
+                selectedFieldId != null &&
+                MatchesSelectedField(well) &&
+                (selectedClusterId == null || well.IsSingleWell || well.ClusterID == selectedClusterId))
+            .OrderBy(well => well.Name)
+            .ToList() ?? [];
+
+    private List<WellBore> AvailableWellBores =>
+        wellBoreList?
+            .Where(wellBore =>
+                wellBore?.MetaInfo != null &&
+                selectedWellId != null &&
+                wellBore.WellID == selectedWellId)
+            .OrderBy(wellBore => wellBore.Name)
+            .ToList() ?? [];
+
+    private Task OnFieldChanged(Guid? fieldId)
+    {
+        selectedFieldId = fieldId;
+
+        if (selectedClusterId != null && !AvailableClusters.Any(cluster => cluster.MetaInfo.ID == selectedClusterId))
+        {
+            selectedClusterId = null;
+        }
+        if (selectedWellId != null && !AvailableWells.Any(well => well.MetaInfo.ID == selectedWellId))
+        {
+            selectedWellId = null;
+        }
+        if (selectedWellId == null)
+        {
+            selectedWellBoreId = null;
+        }
+        else if (selectedWellBoreId != null && !AvailableWellBores.Any(wellBore => wellBore.MetaInfo.ID == selectedWellBoreId))
+        {
+            selectedWellBoreId = null;
+        }
+
+        ApplyFiltersAndRefreshGrid();
+        return Task.CompletedTask;
+    }
+
+    private Task OnClusterChanged(Guid? clusterId)
+    {
+        selectedClusterId = clusterId;
+
+        if (selectedWellId is Guid wellId)
+        {
+            Well? selectedWell = FindWellById(wellId);
+            if (selectedWell == null || (!selectedWell.IsSingleWell && selectedWell.ClusterID != selectedClusterId))
+            {
+                selectedWellId = null;
+                selectedWellBoreId = null;
+            }
+        }
+
+        ApplyFiltersAndRefreshGrid();
+        return Task.CompletedTask;
+    }
+
+    private Task OnWellChanged(Guid? wellId)
+    {
+        selectedWellId = wellId;
+
+        if (selectedWellId is Guid selectedId)
+        {
+            Well? selectedWell = FindWellById(selectedId);
+            if (selectedWell != null)
+            {
+                selectedClusterId = selectedWell.IsSingleWell ? null : selectedWell.ClusterID;
+                selectedFieldId ??= FindFieldIdForWell(selectedWell);
+            }
+        }
+        else
+        {
+            selectedWellBoreId = null;
+        }
+
+        if (selectedWellBoreId != null && !AvailableWellBores.Any(wellBore => wellBore.MetaInfo.ID == selectedWellBoreId))
+        {
+            selectedWellBoreId = AvailableWellBores.FirstOrDefault()?.MetaInfo.ID;
+        }
+
+        ApplyFiltersAndRefreshGrid();
+        return Task.CompletedTask;
+    }
+
+    private Task OnWellBoreChanged(Guid? wellBoreId)
+    {
+        selectedWellBoreId = wellBoreId;
+        ApplyFiltersAndRefreshGrid();
+        return Task.CompletedTask;
+    }
+
+    private void ApplyFiltersAndRefreshGrid()
+    {
+        trajectoryList = ApplyTrajectoryFilters();
+        selectedTrajectoryList = [];
+        _gridKey++;
+    }
+
+    private List<TrajectoryLight> ApplyTrajectoryFilters()
+    {
+        IEnumerable<TrajectoryLight> query = allTrajectoryList ?? [];
+
+        if (selectedFieldId is Guid fieldId)
+        {
+            query = query.Where(trajectory => trajectory.FieldID == fieldId);
+        }
+        if (selectedClusterId is Guid clusterId)
+        {
+            query = query.Where(trajectory => trajectory.ClusterID == clusterId);
+        }
+        if (selectedWellId is Guid wellId)
+        {
+            query = query.Where(trajectory => trajectory.WellID == wellId);
+        }
+        if (selectedWellBoreId is Guid wellBoreId)
+        {
+            query = query.Where(trajectory => trajectory.WellBoreID == wellBoreId);
+        }
+
+        return query.OrderBy(trajectory => trajectory.Name).ToList();
+    }
+
+    private bool MatchesSelectedField(Well well)
+    {
+        if (selectedFieldId == null)
+        {
+            return true;
+        }
+
+        Guid? fieldId = FindFieldIdForWell(well);
+        return fieldId == selectedFieldId;
+    }
+
+    private Guid? FindFieldIdForWell(Well? well)
+    {
+        if (well?.ClusterID is Guid clusterId)
+        {
+            return FindClusterById(clusterId)?.FieldID;
+        }
+
+        return null;
+    }
+
+    private Well? FindWellById(Guid wellId) =>
+        wellList?.FirstOrDefault(well => well?.MetaInfo?.ID == wellId);
+
+    private Cluster? FindClusterById(Guid clusterId) =>
+        clusterList?.FirstOrDefault(cluster => cluster?.MetaInfo?.ID == clusterId);
+
+    private async Task AddTrajectory()
+    {
+        isHiddenMainPanel = true;
+        isHiddenEditPanel = false;
+        trajectoryIdBeingEdited = null;
+        await UpdateSelectedTrajectoryDepthReferenceSourceAsync();
+        await Task.Delay(1);
+    }
+
+    private async Task EditTrajectory(Guid id)
+    {
+        isHiddenMainPanel = true;
+        isHiddenEditPanel = false;
+        trajectoryIdBeingEdited = id;
+        await UpdateSelectedTrajectoryDepthReferenceSourceAsync();
+        await Task.Delay(1);
+    }
+    private async Task HandleEditPanelClosed()
+    {
+        isHiddenMainPanel = false;
+        isHiddenEditPanel = true;
+        trajectoryIdBeingEdited = null;
+        await UpdateSelectedTrajectoryDepthReferenceSourceAsync();
+        await LoadDataAsync();
+    }
+
+    private async Task DeleteTrajectory(TrajectoryLight trajectory)
+    {
+        if (trajectory?.MetaInfo?.ID is not Guid id || id == Guid.Empty)
+        {
+            return;
+        }
+
+        try
+        {
+            bool confirmed = await ConfirmTrajectoryDeletionAsync(
+                "Do you really want to delete this Trajectory?",
+                [GetTrajectoryDisplayName(trajectory)]);
+
+            if (confirmed)
+            {
+                await Api.ClientTrajectory.DeleteTrajectoryByIdAsync(id);
+                await LoadDataAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to delete Trajectory");
+            Snackbar.Add("Failed to delete trajectory.", Severity.Error);
+        }
+    }
+
+    private RenderFragment CalculationStatusContent(TrajectoryLight trajectory) => @<div style="min-width: 140px;">
+        @if (trajectory.CalculationState == CalculationState.Running || trajectory.CalculationState == CalculationState.Queued)
+        {
+            <MudText Typo="Typo.caption">@trajectory.CalculationState</MudText>
+            <MudProgressLinear Value="@(100.0 * trajectory.CalculationProgress)" Color="Color.Info" Size="Size.Small" />
+        }
+        else if (trajectory.CalculationState == CalculationState.Failed)
+        {
+            <MudText Typo="Typo.caption" Color="Color.Error">@trajectory.CalculationState</MudText>
+        }
+        else
+        {
+            <MudText Typo="Typo.caption">@trajectory.CalculationState</MudText>
+        }
+    </div>;
+
+    private void StartCalculationPollingIfNeeded()
+    {
+        if (trajectoryList?.Any(IsCalculationActive) != true || calculationPollingCancellation_ != null)
+        {
+            return;
+        }
+
+        calculationPollingCancellation_ = new CancellationTokenSource();
+        _ = PollCalculationProgressAsync(calculationPollingCancellation_.Token);
+    }
+
+    private async Task PollCalculationProgressAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
+                allTrajectoryList = ((IEnumerable<TrajectoryLight>)await Api.ClientTrajectory.GetAllTrajectoryLightAsync()).OrderBy(item => item.Name).ToList();
+                trajectoryList = ApplyTrajectoryFilters();
+                _gridKey++;
+                await InvokeAsync(StateHasChanged);
+                if (!trajectoryList.Any(IsCalculationActive))
+                {
+                    break;
+                }
+            }
+        }
+        catch (TaskCanceledException)
+        {
+        }
+        finally
+        {
+            calculationPollingCancellation_?.Dispose();
+            calculationPollingCancellation_ = null;
+        }
+    }
+
+    private static bool IsCalculationActive(TrajectoryLight trajectory) =>
+        trajectory.CalculationState == CalculationState.Running ||
+        trajectory.CalculationState == CalculationState.Queued;
+
+    private async Task DeleteSelectedTrajectory()
+    {
+        // Snapshot the list before async work so the selection can't shift mid-delete.
+        var toDelete = selectedTrajectoryList
+            .Where(trajectory => trajectory?.MetaInfo?.ID is Guid id && id != Guid.Empty)
+            .ToList();
+        if (toDelete.Count == 0)
+            return;
+        try
+        {
+            bool confirmed = await ConfirmTrajectoryDeletionAsync(
+                toDelete.Count == 1
+                    ? "Do you really want to delete this Trajectory?"
+                    : "Do you really want to delete these Trajectories?",
+                toDelete.Select(GetTrajectoryDisplayName).ToList());
+
+            if (confirmed)
+            {
+                foreach (TrajectoryLight trajectory in toDelete)
+                {
+                    await Api.ClientTrajectory.DeleteTrajectoryByIdAsync(trajectory.MetaInfo.ID);
+                }
+                // Reload data: this also clears selectedTrajectoryList and bumps _gridKey.
+                await LoadDataAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to delete all Trajectory");
+            Snackbar.Add("Failed to delete one or more trajectories.", Severity.Error);
+        }
+
+    }
+
+    private async Task<bool> ConfirmTrajectoryDeletionAsync(string message, List<string> trajectoryNames)
+    {
+        DialogParameters parameters = new()
+        {
+            { nameof(DialogDeleteTemplate.Message), message },
+            { nameof(DialogDeleteTemplate.Items), trajectoryNames }
+        };
+        IDialogReference dialog = await DialogService.ShowAsync<DialogDeleteTemplate>(
+            "DELETE",
+            parameters,
+            new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true });
+        DialogResult? result = await dialog.Result;
+        return result != null && !result.Canceled;
+    }
+
+    private static string GetTrajectoryDisplayName(TrajectoryLight trajectory)
+    {
+        if (!string.IsNullOrWhiteSpace(trajectory?.Name))
+        {
+            return trajectory.Name;
+        }
+
+        return trajectory?.MetaInfo?.ID is Guid id && id != Guid.Empty
+            ? id.ToString()
+            : "Unnamed Trajectory";
+    }
+
+    //Quick filter - filter gobally across multiple columns with the same input
+    private Func<TrajectoryLight, bool>
+    _trajectoryFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+        if ($"{x.Name} {x.Description} {x.TrajectoryType} {(x.IsDefinitive ? "Definitive" : string.Empty)}".Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    };
+
+    //Events
+    private void StartedEditingItem(TrajectoryLight item)
+    {
+        //Activating Edit event capture with parameter StartedEditingItem="@StartedEditingItem" in MudDataGrid; arguments are specified in OnClick="@context.Actions.StartedEditingItem(...)"
+    }
+
+    private void CancelledEditingItem(TrajectoryLight item)
+    {
+        //Activating Cancel event capture with parameter CancelledEditingItem = "@CancelledEditingItem" in MudDataGrid; arguments are specified in OnClick="@context.Actions.CancelledEditingItem(...)"
+    }
+
+    private void CommittedItemChanges(TrajectoryLight item)
+    {
+        //Activating Commit event capture with parameter CommittedItemChanges = "@CommittedItemChanges" in MudDataGrid; arguments are specified in OnClick="@context.Actions.CommittedEditingItem(...)"
+    }
+
+    void SelectedItemsChanged(HashSet<TrajectoryLight>
+        items)
+    {
+        // Assign a new list instance each time to ensure clean reference for Blazor.
+        selectedTrajectoryList = items.ToList();
+    }
+
+    private async Task RowClicked(DataGridRowClickEventArgs<TrajectoryLight> args)
+    {
+        await EditTrajectory(args.Item.MetaInfo.ID);
+    }
+
+    public string GetWellBoreNameFromID(Guid id)
+    {
+        if (id != Guid.Empty && wellBoreList != null && wellBoreList.Count > 0)
+        {
+            try
+            {
+                WellBore wb = wellBoreList.Find(x => x.MetaInfo.ID.Equals(id));
+                if (wb != null && wb.MetaInfo != null)
+                    return wb.Name;
+            }
+            catch (ArgumentNullException ex)
+            {
+                logger.LogWarning(ex, "Impossible to retrieve the WellBore of given ID");
+            }
+        }
+        return "NA";
+    }
+    private async Task UpdateSelectedTrajectoryDepthReferenceSourceAsync()
+    {
+        DataUtils.ApplyTrajectoryReferenceValues(trajectoryIdBeingEdited, allTrajectoryList, wellBoreList, wellList, clusterList, rigList);
+        TrajectoryReferenceDatumUtils.Apply(
+            await TrajectoryReferenceDatumUtils.ResolveForTrajectoryAsync(Api, trajectoryIdBeingEdited, allTrajectoryList, wellBoreList, wellList, clusterList));
+    }
+
+}

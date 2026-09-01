@@ -1,0 +1,230 @@
+﻿@page "/GeothermalProperties"
+@inject ILogger<GeothermalPropertiesMain> logger
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+<MudUnitAndReferenceChoiceTag HttpHost=@APIUtils.HostNameUnitConversion
+                              HttpBasePath=@APIUtils.HostBasePathUnitConversion
+                              HttpController="UnitSystem/"
+                              UnitSystemName="@DataUtils.UnitAndReferenceParameters.UnitSystemName"
+                              UnitSystemNameChanged="@DataUtils.UpdateUnitSystemName">
+    @if (geothermalPropertiesList == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <div hidden="@isHiddenMainPanel">
+            <MudDataGrid T="GeothermalProperties" MultiSelection="true" Items="@geothermalPropertiesList" SelectedItemsChanged="@SelectedItemsChanged"
+                         EditMode="DataGridEditMode.Cell"
+                         Hover="true" 
+                         SortMode="SortMode.Multiple" QuickFilter="@_geothermalPropertiesFilter" Filterable="false"
+                         ReadOnly="false" ColumnResizeMode="ResizeMode.Column" Elevation="0">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Geothermal Properties</MudText>
+                    <MudButton OnClick="@AddGeothermalProperties" Color="@Color.Success" Class="add-item-btn">Add</MudButton>
+                    <MudButton OnClick="@DeleteSelectedGeothermalProperties" Color="@Color.Error" Class="add-item-btn">Delete</MudButton>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+                <Columns>
+                    <SelectColumn T="GeothermalProperties" />
+                    <PropertyColumn Property="x => x.Name" Title="GeothermalProperties" CellStyle="width: 30%;" Sortable="true" Editable="false" />
+                    <PropertyColumn Property="x => x.Description" Title="Description" CellStyle="width: 40%;" Sortable="true" Editable="false" />
+                    <TemplateColumn CellStyle="width: 25%;">
+                        <EditTemplate>
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="(() => EditGeothermalProperties(context.Item.MetaInfo.ID))" />                                                
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" OnClick="(() => DeleteGeothermalProperties(context.Item.MetaInfo.ID))" />
+                        </EditTemplate>
+                    </TemplateColumn>
+                </Columns>
+                <PagerContent>
+                    <MudDataGridPager T="GeothermalProperties" />
+                </PagerContent>
+            </MudDataGrid>
+        </div>
+    }
+    @if (isHiddenMainPanel && (!isHiddenEditPanel))
+    {
+        <GeothermalPropertiesEdit GeothermalPropertiesId="@geothermalPropertiesIdBeingEdited"  ValueChanged="HandleEditPanelClosed" />
+    }
+</MudUnitAndReferenceChoiceTag>
+
+@code {
+    // GeothermalProperties related variables
+    private List<GeothermalProperties> geothermalPropertiesList = new();
+    private List<GeothermalProperties> selectedGeothermalPropertiesList = new();
+    private GeothermalProperties? currentGeothermalProperties;
+    private List<object?>? inputDataList = new(); // container used to pass input data to the GeothermalPropertiesEdit razor component without specifying content types (required by µservice Template)
+                                                  // GeothermalProperties related variables
+    // UI related variables
+    public bool isHiddenMainPanel;
+    public bool isHiddenEditPanel;
+    private Guid? geothermalPropertiesIdBeingEdited;
+    private string? _searchString;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Show main panel
+            isHiddenMainPanel = false;
+            isHiddenEditPanel = true;
+            currentGeothermalProperties = null;
+
+            // Starting all loading tasks asynchronously
+            logger.LogInformation("Trying to load list of GeothermalProperties from client: " + APIUtils.HttpClientGeothermalProperties);
+            var geothermalPropertiesTask = APIUtils.ClientGeothermalProperties.GetAllGeothermalPropertiesAsync();
+
+            List<Task> loadingTaskList = new List<Task> { geothermalPropertiesTask };
+            loadingTaskList.Add(geothermalPropertiesTask);
+
+            // Awaiting tasks and retrieve results as they become available
+            while (loadingTaskList.Count > 0)
+            {
+                Task finishedTask = await Task.WhenAny(loadingTaskList);
+                if (finishedTask == geothermalPropertiesTask)
+                {
+                    try
+                    {
+                        List<GeothermalProperties> geothermalPropertiesListTemporary = (List<GeothermalProperties>)await geothermalPropertiesTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        //Filter data with raw data 
+                        geothermalPropertiesList = geothermalPropertiesListTemporary.Where(t => t.TableType == TableType.RawData).ToList();                        
+                        if (geothermalPropertiesList != null)
+                        {
+                            geothermalPropertiesList.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of GeothermalProperties were null on initialization");
+                            Snackbar.Add("Returned list of GeothermalProperties were null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load GeothermalProperties from client");
+                    }
+                }             
+                loadingTaskList.Remove(finishedTask);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem GeothermalProperties initialization");
+        }
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    private async Task AddGeothermalProperties()
+    {
+        isHiddenMainPanel = true;
+        isHiddenEditPanel = false;
+        geothermalPropertiesIdBeingEdited = null;
+    }
+
+    private async Task EditGeothermalProperties(Guid id)
+    {
+        isHiddenMainPanel = true;
+        isHiddenEditPanel = false;
+        geothermalPropertiesIdBeingEdited = id;
+    }
+    private async Task HandleEditPanelClosed()
+    {
+        isHiddenMainPanel = false;
+        isHiddenEditPanel = true;
+        geothermalPropertiesIdBeingEdited = null;
+        await OnInitializedAsync();
+    }
+
+    private async Task<bool> ConfirmDeletion()
+    {
+        var options = new DialogOptions 
+        { 
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true    
+        };
+        var dialog = await DialogService.ShowAsync<DialogDeleteTemplate>("DELETE", options);
+        var result = await dialog.Result;
+        StateHasChanged();
+        if (result == null)
+        {
+            return false;
+        }
+        else
+        {
+            return (!result.Canceled);
+        }
+    }
+    private async Task DeleteGeothermalProperties(Guid id)
+    {
+        try
+        {
+            if (await ConfirmDeletion())
+            {
+                await APIUtils.ClientGeothermalProperties.DeleteGeothermalPropertiesByIdAsync(id);
+                await OnInitializedAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to delete GeothermalProperties");
+        }
+    }
+    
+
+    private async Task DeleteSelectedGeothermalProperties()
+    {
+        try
+        {
+            if (await ConfirmDeletion())
+            {
+                foreach (GeothermalProperties geothermalProperties in selectedGeothermalPropertiesList)
+                {
+                    await APIUtils.ClientGeothermalProperties.DeleteGeothermalPropertiesByIdAsync(geothermalProperties.MetaInfo.ID);
+                }
+                await OnInitializedAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to delete all GeothermalProperties");
+        }
+
+    }
+
+    //Quick filter - filter gobally across multiple columns with the same input
+    private Func<GeothermalProperties, bool>
+    _geothermalPropertiesFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+        if ($"{x.Name} {x.Description}".Contains(_searchString))
+            return true;
+
+        return false;
+    };
+    
+    //Events
+    private void StartedEditingItem(GeothermalProperties item)
+    {
+        //Activating Edit event capture with parameter StartedEditingItem="@StartedEditingItem" in MudDataGrid; arguments are specified in OnClick="@context.Actions.StartedEditingItem(...)"
+    }
+
+    private void CancelledEditingItem(GeothermalProperties item)
+    {
+        //Activating Cancel event capture with parameter CancelledEditingItem = "@CancelledEditingItem" in MudDataGrid; arguments are specified in OnClick="@context.Actions.CancelledEditingItem(...)"
+    }
+
+    private void CommittedItemChanges(GeothermalProperties item)
+    {
+        //Activating Commit event capture with parameter CommittedItemChanges = "@CommittedItemChanges" in MudDataGrid; arguments are specified in OnClick="@context.Actions.CommittedEditingItem(...)"
+    }
+
+    void SelectedItemsChanged(HashSet<GeothermalProperties>
+        items)
+    {
+        selectedGeothermalPropertiesList.Clear();
+        selectedGeothermalPropertiesList.InsertRange(0, items);
+    }
+}

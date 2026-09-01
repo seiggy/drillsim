@@ -1,0 +1,591 @@
+﻿@page "/Simulation"
+@using NORCE.Drilling.Simulator4nDOF.WebApp
+@inject ILogger<SimulationMain> logger
+@inject ISnackbar Snackbar
+
+<MudUnitAndReferenceChoiceTag HttpHost=@APIUtils.HostNameUnitConversion
+                              HttpBasePath=@APIUtils.HostBasePathUnitConversion
+                              HttpController="UnitSystem/"
+                              UnitSystemName="@DataUtils.UnitAndReferenceParameters.UnitSystemName"
+                              UnitSystemNameChanged="@DataUtils.UpdateUnitSystemName">
+    @if (SimulationList == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        @if (_mainPanelLogic != null && _mainPanelLogic.PanelState == PanelState.MainVisible)
+        {
+            <MudPaper Class="pa-4">
+                <MudButton OnClick="@AddSimulation" IconColor="Color.Success" StartIcon="@Icons.Material.Filled.Add">Add simulation </MudButton>
+                <br>
+                <MudDataGrid T="SimulationLight" MultiSelection="false" Items="@SimulationList" ReadOnly="true" ColumnResizeMode="ResizeMode.Column" Elevation="0" RowClick="@RowClicked">
+                    <Columns>
+                        <PropertyColumn Property="x => x.Name" Title="Name" CellStyle="width: 20%;" Sortable="true" Editable="false" />
+                        <PropertyColumn Property="x => x.Description" Title="Description" CellStyle="width: 35%;" Sortable="true" Editable="false" />
+                        <PropertyColumn Property="x => x.CreationDate.ToString()" Title="Creation date" CellStyle="width: 15%;" Sortable="true" Editable="false" />
+                        <PropertyColumn Property="x => x.LastModificationDate.ToString()" Title="Last modification date" CellStyle="width: 15%;" Sortable="true" Editable="false" />
+
+                        <TemplateColumn Title="Progress" CellStyle="width: 10%;">
+                            <CellTemplate Context="context">
+                                @($"{context.Item.Progress:P2}")
+                            </CellTemplate>
+                        </TemplateColumn>
+                        <TemplateColumn Title="Termination State" CellStyle="width: 10%;">
+                            <CellTemplate Context="context">
+                                <MudChip Color="@GetTerminationColor(context.Item.TerminationState)">
+                                    @GetTerminationStateLabel(context.Item.TerminationState)
+                                </MudChip>
+                            </CellTemplate>
+                        </TemplateColumn>
+
+                        <TemplateColumn Title="Actions" CellStyle="width: 5%;">
+                            <CellTemplate Context="context">
+                                <MudIconButton Icon="@Icons.Material.Outlined.Delete"
+                                               Size="Size.Small"
+                                               Color="Color.Error"
+                                               OnClick="() => DeleteSimulation(context.Item.MetaInfo.ID)" />
+                                <MudIconButton Icon="@Icons.Material.Outlined.Visibility"
+                                               Size="Size.Small"
+                                               Color="Color.Success"
+                                               OnClick="() => ViewSimulation(context.Item.MetaInfo.ID)" />
+                            </CellTemplate>
+
+                        </TemplateColumn>
+                    </Columns>
+                    <PagerContent>
+                        <MudDataGridPager T="SimulationLight" />
+                    </PagerContent>
+                </MudDataGrid>
+
+                <MudButton OnClick="@AddSimulation" IconColor="Color.Success" StartIcon="@Icons.Material.Filled.Add">Add simulation </MudButton>
+                <br>
+            </MudPaper>
+        }
+        else if (_mainPanelLogic != null && _mainPanelLogic.PanelState == PanelState.NewSimulationVisible)
+        {
+            <SimulationNew MainPanelLogic="@_mainPanelLogic" OnRefresh="ReloadAsync"
+                           Simulation="@newSimulation"
+                           Fields="@fieldList"
+                           Clusters="@clusterList"
+                           Wells="@wellList"
+                           WellBores="@wellBoreList"
+                           DrillStrings="@drillStringList"
+                           Rigs="@rigList"
+                           Trajectories="@trajectoryList"
+                           WellBoreArchitectures="@wellBoreArchitecureList"
+                           FluidDescriptions="@drillingFluidDescriptionList"
+                           GeothermalProperties="@geothermalPropertiesList" />
+        }
+        else if (_mainPanelLogic != null && _mainPanelLogic.PanelState == PanelState.EditSimulationVisible)
+        {
+            <SimulationEdit MainPanelLogic="@_mainPanelLogic" OnRefresh="ReloadAsync"
+                            Fields="@fieldList"
+                            Clusters="@clusterList"
+                            Wells="@wellList"
+                            WellBores="@wellBoreList"
+                            DrillStrings="@drillStringList"
+                            Rigs="@rigList"
+                            Trajectories="@trajectoryList"
+                            WellBoreArchitectures="@wellBoreArchitecureList"
+                            FluidDescriptions="@drillingFluidDescriptionList"
+                            GeothermalProperties="@geothermalPropertiesList" />
+        }
+    }
+</MudUnitAndReferenceChoiceTag>
+@code {
+
+    // Simulation related variables
+    private List<SimulationLight> SimulationList = new();
+    private List<SimulationLight> selectedSimulationList = new();
+    private SimulationLight? currentLightSimulation;
+    private Simulation? currentSimulation;
+    private List<object?>? inputDataList = new(); // container used to pass input data to the SimulationEdit razor component without specifying content types (required by µservice Template)
+    private Simulation Simulation = new();
+    private MainPanelLogic _mainPanelLogic = new();
+
+    private Simulation? newSimulation = null;
+
+    private List<Field>? fieldList { get; set; } = null;
+
+    private List<Cluster>? clusterList { get; set; } = null;
+
+    private List<Well>? wellList { get; set; } = null;
+
+    private List<WellBore>? wellBoreList { get; set; } = null;
+    private List<DrillStringLight>? drillStringList { get; set; } = null;
+    private List<RigLight>? rigList { get; set; } = null;
+    private List<Trajectory>? trajectoryList { get; set; } = null;
+    private List<GeothermalProperties>? geothermalPropertiesList { get; set; } = null;
+    private List<WellBoreArchitecture>? wellBoreArchitecureList { get; set; } = null;
+    private List<DrillingFluidDescription>? drillingFluidDescriptionList { get; set; } = null;
+
+
+
+    private Color GetProgressColor(double? progress)
+    {
+        if (progress == null) return Color.Default;
+
+        return progress switch
+        {
+            <= 0.25 => Color.Error,
+            <= 0.75 => Color.Warning,
+            < 1.0 => Color.Info,
+            _ => Color.Success
+        };
+    }
+
+    private string GetTerminationStateLabel(int state)
+    {
+        return state switch
+        {
+            0 => "Running",
+            1 => "Completed",
+            2 => "Failed",
+            3 => "Cancelled",
+            _ => "Unknown"
+        };
+    }
+    private Color GetTerminationColor(int state)
+    {
+        return state switch
+        {
+            0 => Color.Info,
+            1 => Color.Success,
+            2 => Color.Error,
+            3 => Color.Warning,
+            _ => Color.Default
+        };
+    }
+
+    private async Task DeleteSetPoints(SetPoints item)
+    {
+        if (item != null)
+        {
+            Simulation.SetPointsList.Remove(item);
+        }
+
+        // Optional UI refresh
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void UploadFile(InputFileChangeEventArgs e, Action<string> setFileName)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            setFileName(file.Name);
+        }
+    }
+
+    private void AddSimulation()
+    {
+        newSimulation = NewDefaultSimulation();
+        if (_mainPanelLogic != null)
+        {
+            _mainPanelLogic.PanelState = PanelState.NewSimulationVisible;
+            _mainPanelLogic.AutoUpdate = false;
+        }
+    }
+    private async Task ReloadAsync()
+    {
+        await OnInitializedAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (_mainPanelLogic != null)
+            {
+                _mainPanelLogic.PanelState = PanelState.MainVisible;
+                _mainPanelLogic.AutoUpdate = false;
+            }
+            currentLightSimulation = null;
+
+            // Starting all loading tasks asynchronously
+            logger.LogInformation("Trying to load list of Simulation from client: " + APIUtils.HostNameSimulator4nDOF);
+            var SimulationTask = APIUtils.ClientSimulator4nDOF.GetAllSimulationLightAsync();
+            logger.LogInformation("Trying to load list of WellBore from client: " + APIUtils.HostNameWellBore);
+            var wellBoreTask = APIUtils.ClientWellBore.GetAllWellBoreAsync();
+            logger.LogInformation("Trying to load list of Well from client: " + APIUtils.HostNameWell);
+            var wellTask = APIUtils.ClientWell.GetAllWellAsync();
+            logger.LogInformation("Trying to load list of Cluster from client: " + APIUtils.HostNameCluster);
+            var clusterTask = APIUtils.ClientCluster.GetAllClusterAsync();
+            logger.LogInformation("Trying to load list of Field from client: " + APIUtils.HostNameField);
+            var fieldTask = APIUtils.ClientField.GetAllFieldAsync();
+            logger.LogInformation("Trying to load list of DrillString from client: " + APIUtils.HostNameDrillString);
+            var drillStringTask = APIUtils.ClientDrillString.GetAllDrillStringLightAsync();
+            logger.LogInformation("Trying to load list of Rig from client: " + APIUtils.HostNameRig);
+            var rigTask = APIUtils.ClientRig.GetAllRigLightAsync();
+            logger.LogInformation("Trying to load list of Trajectory from client: " + APIUtils.HostNameTrajectory);
+            var trajectoryTask = APIUtils.ClientTrajectory.GetAllTrajectoryAsync();
+            logger.LogInformation("Trying to load list of Architectures from client: " + APIUtils.HostNameWellBoreArchitecture);
+            var architectureTask = APIUtils.ClientWellBoreArchitecture.GetAllWellBoreArchitectureAsync();
+            logger.LogInformation("Trying to load list of Drilling Fluids from client: " + APIUtils.HostNameDrillingFluid);
+            var drillingFluidTask = APIUtils.ClientDrillingFluid.GetAllDrillingFluidDescriptionAsync();
+            logger.LogInformation("Trying to load list of Geothermal Properties from client: " + APIUtils.HostBasePathGeothermalProperties);
+            var geothermalTask = APIUtils.ClientGeothermalProperties.GetAllGeothermalPropertiesAsync();
+
+
+            List<Task> loadingTaskList = new List<Task>
+            {
+                SimulationTask,
+                wellBoreTask,
+                wellTask,
+                clusterTask,
+                fieldTask,
+                drillStringTask,
+                rigTask,
+                trajectoryTask,
+                architectureTask,
+                drillingFluidTask,
+                geothermalTask
+            };
+
+            // Awaiting tasks and retrieve results as they become available
+            while (loadingTaskList.Count > 0)
+            {
+                Task finishedTask = await Task.WhenAny(loadingTaskList);
+                if (finishedTask == SimulationTask)
+                {
+                    try
+                    {
+                        SimulationList = (List<SimulationLight>)await SimulationTask;
+
+                        if (SimulationList != null)
+                        {
+                            SimulationList.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of Simulation were null on initialization");
+                            Snackbar.Add("Returned list of Simulation were null on initialization", Severity.Warning);
+                        }
+
+                        while (SimulationList != null && SimulationList.Any(s => s.TerminationState < 1))
+                        {
+                            SimulationTask = APIUtils.ClientSimulator4nDOF.GetAllSimulationLightAsync();
+                            SimulationList = (List<SimulationLight>)await SimulationTask;
+
+                            if (SimulationList != null)
+                            {
+                                if (_mainPanelLogic != null)
+                                {
+                                    _mainPanelLogic.AutoUpdate = true;
+                                }
+                                await InvokeAsync(() => { StateHasChanged(); });
+                            }
+                            else
+                            {
+                                logger.LogWarning("Impossible to load Simulations");
+                                Snackbar.Add("Impossible to load Simulations", Severity.Warning);
+                            }
+                            await Task.Delay(1000);
+                            if (_mainPanelLogic != null && !_mainPanelLogic.AutoUpdate)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load Simulation from client");
+                    }
+                }
+                else if (finishedTask == wellBoreTask)
+                {
+                    try
+                    {
+                        wellBoreList = (List<WellBore>)await wellBoreTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (wellBoreList != null)
+                        {
+                            wellBoreList.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of WellBores was null on initialization");
+                            Snackbar.Add("Returned list of WellBores was null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load WellBore from client");
+                    }
+                }
+                else if (finishedTask == wellTask)
+                {
+                    try
+                    {
+                        wellList = (List<Well>)await wellTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (wellList != null)
+                        {
+                            wellList.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of Wells was null on initialization");
+                            Snackbar.Add("Returned list of Wells was null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load Wells from client");
+                    }
+                }
+                else if (finishedTask == clusterTask)
+                {
+                    try
+                    {
+                        clusterList = (List<Cluster>)await clusterTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (clusterList != null)
+                        {
+                            clusterList.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of Clusters was null on initialization");
+                            Snackbar.Add("Returned list of Clusters was null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load Clusters from client");
+                    }
+                }
+                else if (finishedTask == fieldTask)
+                {
+                    try
+                    {
+                        fieldList = (List<Field>)await fieldTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (fieldList != null)
+                        {
+                            fieldList.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of Fields was null on initialization");
+                            Snackbar.Add("Returned list of Fields was null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load Fields from client");
+                    }
+                }
+                else if (finishedTask == drillStringTask)
+                {
+                    try
+                    {
+                        drillStringList = (List<DrillStringLight>)await drillStringTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (drillStringList != null)
+                        {
+                            drillStringList.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of DrillString was null on initialization");
+                            Snackbar.Add("Returned list of DrillString was null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load DrillString from client");
+                    }
+                }
+                else if (finishedTask == rigTask)
+                {
+                    try
+                    {
+                        rigList = ((List<RigLight>)await rigTask)
+                            .Where(rig => rig != null && !rig.IsFixedPlatform)
+                            .ToList();
+                        if (rigList != null)
+                        {
+                            rigList.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of Rigs was null on initialization");
+                            Snackbar.Add("Returned list of Rigs was null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load Rig from client");
+                    }
+                }
+                else if (finishedTask == trajectoryTask)
+                {
+                    try
+                    {
+                        trajectoryList = (List<Trajectory>)await trajectoryTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (trajectoryList != null)
+                        {
+                            trajectoryList.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of Trajectory was null on initialization");
+                            Snackbar.Add("Returned list of Trajectory was null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load Trajectory from client");
+                    }
+                }
+                else if (finishedTask == architectureTask)
+                {
+                    try
+                    {
+                        wellBoreArchitecureList = (List<WellBoreArchitecture>)await architectureTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (wellBoreArchitecureList != null)
+                        {
+                            wellBoreArchitecureList.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of Architectures was null on initialization");
+                            Snackbar.Add("Returned list of Architectures was null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load Architectures from client");
+                    }
+                }
+                else if (finishedTask == drillingFluidTask)
+                {
+                    try
+                    {
+                        drillingFluidDescriptionList = (List<DrillingFluidDescription>)await drillingFluidTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (drillingFluidDescriptionList != null)
+                        {
+                            drillingFluidDescriptionList.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of Fluid descriptions was null on initialization");
+                            Snackbar.Add("Returned list of Fluid descriptions was null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load Fluid descriptions from client");
+                    }
+                }
+                else if (finishedTask == geothermalTask)
+                {
+                    try
+                    {
+                        geothermalPropertiesList = (List<GeothermalProperties>)await geothermalTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (geothermalPropertiesList != null)
+                        {
+                            geothermalPropertiesList.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of Geothermal Properties was null on initialization");
+                            Snackbar.Add("Returned list of Geothermal Properties was null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load Geothermal Properties from client");
+                    }
+                }
+                loadingTaskList.Remove(finishedTask);
+            }
+            
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem Simulation initialization");
+        }
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    private Simulation NewDefaultSimulation()
+    {
+        MetaInfo metaInfo = new() { ID = Guid.NewGuid(), HttpHostName = APIUtils.HostNameSimulator4nDOF, HttpHostBasePath = APIUtils.HostBasePathSimulator4nDOF, HttpEndPoint = "Simulations/" };
+        DateTimeOffset creationDate = DateTimeOffset.UtcNow;
+        return new()
+        {
+            MetaInfo = metaInfo,
+            Name = DataUtils.DEFAULT_NAME_Simulation,
+            Description = DataUtils.DEFAULT_DESCR_Simulation,
+            CreationDate = creationDate,
+            LastModificationDate = creationDate,
+            Config = new NORCE.Drilling.Simulator4nDOF.ModelShared.Config()
+            {
+                VirtualSensorPositionFromBit = 110,
+                LoggingIntervalScalarValues = 0.1,
+                LoggingIntervalProfiles = 0.1,
+                CoulombStaticFriction = 0.25,
+                CoulombKineticFriction = 0.18,
+                UseHeave = false,
+                HeaveAmplitude = 0.00,
+                HeavePeriod = 11,
+                LengthBetweenLumpedElements = 10.0,
+                TopDriveStartupTime = 0,
+            },
+            ContextualData = new ContextualData()
+            {
+                WellheadPressure = 200_000_000,
+                SurfacePipePressure = 300_000_000
+            },
+            InitialValues = new InitialValues()
+            {
+                BitDepth = 200,
+                HoleDepth = 500,
+                TopOfStringPosition = 5
+            },
+            SetPointsList = new List<SetPoints>
+            {
+                new SetPoints
+                {
+                    TimeDuration = 10, // seconds
+                    SurfaceRPM = 0, // rpm
+                    TopOfStringVelocity = 0 // m/s
+                },
+                new SetPoints
+                {
+                    TimeDuration = 10, // seconds
+                    SurfaceRPM = 2.0*Math.PI*40.0/60.0, // rad/s
+                    TopOfStringVelocity = 0 // m/s
+                },
+            },
+        };
+    }
+
+    private async Task ViewSimulation(Guid id)
+    {
+        if (_mainPanelLogic != null)
+        {
+            _mainPanelLogic.AutoUpdate = false;
+            _mainPanelLogic.PanelState = PanelState.EditSimulationVisible;
+            _mainPanelLogic.SimulationID = id;
+            await InvokeAsync(() => { StateHasChanged(); });
+        }
+    }
+
+    private async Task RowClicked(DataGridRowClickEventArgs<SimulationLight> args)
+    {
+        var id = args.Item.MetaInfo.ID;
+        await ViewSimulation(id);
+    }
+
+    private async Task DeleteSimulation(Guid id)
+    {
+        try
+        {
+            await APIUtils.ClientSimulator4nDOF.DeleteSimulationByIdAsync(id);
+            await OnInitializedAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to delete Simulation");
+        }
+    }
+}

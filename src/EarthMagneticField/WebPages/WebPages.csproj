@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <AssemblyName>OSDC.Drilling.EarthMagneticField.WebPages</AssemblyName>
+    <RootNamespace>OSDC.Drilling.EarthMagneticField.WebPages</RootNamespace>
+    <PackageId>OSDC.Drilling.EarthMagneticField.WebPages</PackageId>
+    <Title>OSDC.Drilling.EarthMagneticField.WebPages</Title>
+    <Authors>Eric Cayeux</Authors>
+    <Company>NORCE Research</Company>
+    <Description>Reusable Blazor pages for stateless WMM2025 and IGRF14 evaluation with UTC, north-east-down, SI, and OSDC unit-system support.</Description>
+    <PackageTags>earthmagneticfield;drilling;blazor;razor;mudblazor;osdc</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/Open-Source-Drilling-Community/EarthMagneticField</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="MudBlazor" Version="8.14.0" />
+    <PackageReference Include="OSDC.DotnetLibraries.Drilling.WebAppUtils" Version="1.1.4" />
+    <PackageReference Include="OSDC.UnitConversion.DrillingRazorMudComponents" Version="3.3.51" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\ModelSharedOut\EarthMagneticFieldMergedModel.cs" Link="GeneratedDtos\EarthMagneticFieldMergedModel.cs" />
+    <Compile Include="..\ModelSharedOut\PseudoConstructors.cs" Link="GeneratedDtos\PseudoConstructors.cs" />
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

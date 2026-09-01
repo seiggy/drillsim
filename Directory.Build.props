@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <UseLocalUnitConversionProjects>true</UseLocalUnitConversionProjects>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'Service' Or '$(MSBuildProjectName)' == 'YPLCalibrationFromRheometer.Service'">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)aspire\DrillSim.ServiceDefaults\DrillSim.ServiceDefaults.csproj" />
+  </ItemGroup>
+</Project>

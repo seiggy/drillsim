@@ -1,0 +1,3236 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "OSDC Earth Geodesy distributed shared model",
+    "description": "Generated API client and DTO contract consumed by WebPages and ServiceTest.",
+    "version": "1.0"
+  },
+  "paths": {
+    "/EarthGeodesy": {
+      "get": {
+        "tags": [
+          "EarthGeodesy"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/EarthGeodesyServiceInfo"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EarthGeodesyServiceInfo"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EarthGeodesyServiceInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/EarthGeodesy/Transform": {
+      "post": {
+        "tags": [
+          "EarthGeodesy"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransformCoordinatesRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransformCoordinatesRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransformCoordinatesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransformCoordinatesResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransformCoordinatesResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransformCoordinatesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/EarthGeodesy/TransformationPaths": {
+      "post": {
+        "tags": [
+          "EarthGeodesy"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveTransformationPathsRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveTransformationPathsRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveTransformationPathsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolveTransformationPathsResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolveTransformationPathsResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolveTransformationPathsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/EarthGeodesy/ModelInfo": {
+      "get": {
+        "tags": [
+          "EarthGeodesy"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/EarthGeodesyServiceInfo"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EarthGeodesyServiceInfo"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EarthGeodesyServiceInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/EarthGeodesy/TransformationConnections": {
+      "get": {
+        "tags": [
+          "EarthGeodesy"
+        ],
+        "parameters": [
+          {
+            "name": "latitude",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "longitude",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DatumTransformationConnection"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DatumTransformationConnection"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DatumTransformationConnection"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/EarthGeodesyUsageStatistics": {
+      "get": {
+        "tags": [
+          "EarthGeodesyUsageStatistics"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageStatisticsEarthGeodesy"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageStatisticsEarthGeodesy"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageStatisticsEarthGeodesy"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GeodeticDatum": {
+      "get": {
+        "tags": [
+          "GeodeticDatum"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authority",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "builtIn",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GeodeticDatum"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GeodeticDatum"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GeodeticDatum"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "GeodeticDatum"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGeodeticDatumRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGeodeticDatumRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGeodeticDatumRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeodeticDatum"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeodeticDatum"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeodeticDatum"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GeodeticDatum/Search": {
+      "post": {
+        "tags": [
+          "GeodeticDatum"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogSearchRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogSearchRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogSearchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogSearchResult_GeodeticDatumSummary"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogSearchResult_GeodeticDatumSummary"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogSearchResult_GeodeticDatumSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GeodeticDatum/{id}": {
+      "get": {
+        "tags": [
+          "GeodeticDatum"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeodeticDatum"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeodeticDatum"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeodeticDatum"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "GeodeticDatum"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGeodeticDatumRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGeodeticDatumRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGeodeticDatumRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeodeticDatum"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeodeticDatum"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeodeticDatum"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "GeodeticDatum"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft_AspNetCore_Mvc_ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft_AspNetCore_Mvc_ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft_AspNetCore_Mvc_ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft_AspNetCore_Mvc_ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft_AspNetCore_Mvc_ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft_AspNetCore_Mvc_ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GeodeticTransformation": {
+      "get": {
+        "tags": [
+          "GeodeticTransformation"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authority",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "builtIn",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GeodeticTransformation"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GeodeticTransformation"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GeodeticTransformation"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "GeodeticTransformation"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGeodeticTransformationRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGeodeticTransformationRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGeodeticTransformationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeodeticTransformation"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeodeticTransformation"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeodeticTransformation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GeodeticTransformation/Search": {
+      "post": {
+        "tags": [
+          "GeodeticTransformation"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogSearchRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogSearchRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogSearchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogSearchResult_GeodeticTransformationSummary"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogSearchResult_GeodeticTransformationSummary"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogSearchResult_GeodeticTransformationSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GeodeticTransformation/{id}": {
+      "get": {
+        "tags": [
+          "GeodeticTransformation"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeodeticTransformation"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeodeticTransformation"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeodeticTransformation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "GeodeticTransformation"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGeodeticTransformationRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGeodeticTransformationRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGeodeticTransformationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeodeticTransformation"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeodeticTransformation"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeodeticTransformation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "GeodeticTransformation"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft_AspNetCore_Mvc_ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft_AspNetCore_Mvc_ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft_AspNetCore_Mvc_ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft_AspNetCore_Mvc_ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft_AspNetCore_Mvc_ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft_AspNetCore_Mvc_ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ReferenceEllipsoid": {
+      "get": {
+        "tags": [
+          "ReferenceEllipsoid"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authority",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "builtIn",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReferenceEllipsoid"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReferenceEllipsoid"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReferenceEllipsoid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ReferenceEllipsoid"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReferenceEllipsoidRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReferenceEllipsoidRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReferenceEllipsoidRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceEllipsoid"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceEllipsoid"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceEllipsoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ReferenceEllipsoid/Search": {
+      "post": {
+        "tags": [
+          "ReferenceEllipsoid"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogSearchRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogSearchRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogSearchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogSearchResult_ReferenceEllipsoidSummary"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogSearchResult_ReferenceEllipsoidSummary"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogSearchResult_ReferenceEllipsoidSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ReferenceEllipsoid/{id}": {
+      "get": {
+        "tags": [
+          "ReferenceEllipsoid"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceEllipsoid"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceEllipsoid"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceEllipsoid"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "ReferenceEllipsoid"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReferenceEllipsoidRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReferenceEllipsoidRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReferenceEllipsoidRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceEllipsoid"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceEllipsoid"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceEllipsoid"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ReferenceEllipsoid"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft_AspNetCore_Mvc_ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft_AspNetCore_Mvc_ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft_AspNetCore_Mvc_ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft_AspNetCore_Mvc_ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft_AspNetCore_Mvc_ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft_AspNetCore_Mvc_ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Microsoft_AspNetCore_Mvc_ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": { }
+      },
+      "ApplicabilityPolicy": {
+        "enum": [
+          "RequireApplicable",
+          "AllowUnknown"
+        ],
+        "type": "string"
+      },
+      "AuthorityIdentifier": {
+        "required": [
+          "Authority",
+          "Code"
+        ],
+        "type": "object",
+        "properties": {
+          "Authority": {
+            "type": "string",
+            "nullable": true
+          },
+          "Code": {
+            "type": "string",
+            "nullable": true
+          },
+          "Version": {
+            "type": "string",
+            "nullable": true
+          },
+          "Uri": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CatalogEntryStatus": {
+        "enum": [
+          "Authoritative",
+          "Legacy",
+          "Custom",
+          "Deprecated"
+        ],
+        "type": "string"
+      },
+      "CatalogMatchStatus": {
+        "enum": [
+          "VerifiedExact",
+          "VerifiedAlias",
+          "LegacyDefinition",
+          "ProbableMatch",
+          "Conflict"
+        ],
+        "type": "string"
+      },
+      "CatalogProvenance": {
+        "required": [
+          "Source"
+        ],
+        "type": "object",
+        "properties": {
+          "Source": {
+            "type": "string",
+            "nullable": true
+          },
+          "MatchStatus": {
+            "$ref": "#/components/schemas/CatalogMatchStatus"
+          },
+          "SourceVersion": {
+            "type": "string",
+            "nullable": true
+          },
+          "SourceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "LegacyId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "Notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "CanonicalId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "IsLegacyCombinedDefinition": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CatalogReference": {
+        "required": [
+          "Name"
+        ],
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Identifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          }
+        }
+      },
+      "CatalogSearchItem_GeodeticDatumSummary": {
+        "required": [
+          "MatchReason",
+          "Value"
+        ],
+        "type": "object",
+        "properties": {
+          "Value": {
+            "$ref": "#/components/schemas/GeodeticDatumSummary"
+          },
+          "MatchScore": {
+            "type": "number",
+            "format": "double"
+          },
+          "MatchReason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CatalogSearchItem_GeodeticTransformationSummary": {
+        "required": [
+          "MatchReason",
+          "Value"
+        ],
+        "type": "object",
+        "properties": {
+          "Value": {
+            "$ref": "#/components/schemas/GeodeticTransformationSummary"
+          },
+          "MatchScore": {
+            "type": "number",
+            "format": "double"
+          },
+          "MatchReason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CatalogSearchItem_ReferenceEllipsoidSummary": {
+        "required": [
+          "MatchReason",
+          "Value"
+        ],
+        "type": "object",
+        "properties": {
+          "Value": {
+            "$ref": "#/components/schemas/ReferenceEllipsoidSummary"
+          },
+          "MatchScore": {
+            "type": "number",
+            "format": "double"
+          },
+          "MatchReason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CatalogSearchRequest": {
+        "type": "object",
+        "properties": {
+          "Query": {
+            "type": "string",
+            "nullable": true
+          },
+          "Authority": {
+            "type": "string",
+            "nullable": true
+          },
+          "Code": {
+            "type": "string",
+            "nullable": true
+          },
+          "CatalogStatus": {
+            "$ref": "#/components/schemas/CatalogEntryStatus"
+          },
+          "IncludeLegacy": {
+            "type": "boolean"
+          },
+          "IncludeDeprecated": {
+            "type": "boolean"
+          },
+          "Offset": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Limit": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CatalogSearchResult_GeodeticDatumSummary": {
+        "type": "object",
+        "properties": {
+          "TotalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Offset": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ReturnedCount": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "Items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CatalogSearchItem_GeodeticDatumSummary"
+            },
+            "nullable": true
+          }
+        }
+      },
+      "CatalogSearchResult_GeodeticTransformationSummary": {
+        "type": "object",
+        "properties": {
+          "TotalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Offset": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ReturnedCount": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "Items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CatalogSearchItem_GeodeticTransformationSummary"
+            },
+            "nullable": true
+          }
+        }
+      },
+      "CatalogSearchResult_ReferenceEllipsoidSummary": {
+        "type": "object",
+        "properties": {
+          "TotalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Offset": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ReturnedCount": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "Items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CatalogSearchItem_ReferenceEllipsoidSummary"
+            },
+            "nullable": true
+          }
+        }
+      },
+      "CoordinateOperationDomain": {
+        "enum": [
+          "Geographic2D",
+          "Geographic3D",
+          "Geocentric3D",
+          "Other"
+        ],
+        "type": "string"
+      },
+      "CoordinateOperationParameterValue": {
+        "required": [
+          "Identifier",
+          "Name"
+        ],
+        "type": "object",
+        "properties": {
+          "Identifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Value": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "FileReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "Unit": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "UnitName": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CoordinateReferenceSystemReference": {
+        "required": [
+          "Identifier",
+          "Name"
+        ],
+        "type": "object",
+        "properties": {
+          "Identifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Domain": {
+            "$ref": "#/components/schemas/CoordinateOperationDomain"
+          }
+        }
+      },
+      "CreateGeodeticDatumRequest": {
+        "required": [
+          "Name"
+        ],
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "ReferenceEllipsoidId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Identifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "ReferenceObjectType": {
+            "$ref": "#/components/schemas/GeodeticReferenceObjectType"
+          },
+          "IsDeprecated": {
+            "type": "boolean"
+          },
+          "PrimeMeridianName": {
+            "type": "string",
+            "nullable": true
+          },
+          "PrimeMeridianIdentifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "PrimeMeridianLongitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "Origin": {
+            "type": "string",
+            "nullable": true
+          },
+          "PublicationDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "RealizationEpoch": {
+            "type": "string",
+            "nullable": true
+          },
+          "FrameReferenceEpoch": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "AnchorEpoch": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "ConventionalReferenceSystem": {
+            "type": "string",
+            "nullable": true
+          },
+          "RealizationMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "EnsembleAccuracy": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "MemberDatumIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "Usage": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GeodeticUsage"
+            },
+            "nullable": true
+          },
+          "Remarks": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CreateGeodeticTransformationRequest": {
+        "required": [
+          "Name"
+        ],
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "SourceDatumId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "TargetDatumId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Method": {
+            "$ref": "#/components/schemas/GeodeticTransformationMethod"
+          },
+          "TranslationX": {
+            "type": "number",
+            "format": "double"
+          },
+          "TranslationY": {
+            "type": "number",
+            "format": "double"
+          },
+          "TranslationZ": {
+            "type": "number",
+            "format": "double"
+          },
+          "RotationX": {
+            "type": "number",
+            "format": "double"
+          },
+          "RotationY": {
+            "type": "number",
+            "format": "double"
+          },
+          "RotationZ": {
+            "type": "number",
+            "format": "double"
+          },
+          "ScaleDifference": {
+            "type": "number",
+            "format": "double"
+          },
+          "Accuracy": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "AreaOfUse": {
+            "type": "string",
+            "nullable": true
+          },
+          "AreaOfUseBounds": {
+            "$ref": "#/components/schemas/GeographicBoundingBox"
+          },
+          "Identifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          }
+        }
+      },
+      "CreateReferenceEllipsoidRequest": {
+        "required": [
+          "Name"
+        ],
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "Identifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "SemiMajorAxis": {
+            "type": "number",
+            "format": "double"
+          },
+          "InverseFlattening": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "DatumReference": {
+        "required": [
+          "Name",
+          "ReferenceEllipsoid"
+        ],
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Identifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "ReferenceEllipsoid": {
+            "$ref": "#/components/schemas/EllipsoidReference"
+          },
+          "CatalogStatus": {
+            "$ref": "#/components/schemas/CatalogEntryStatus"
+          }
+        }
+      },
+      "DatumTransformationConnection": {
+        "required": [
+          "TransformationName"
+        ],
+        "type": "object",
+        "properties": {
+          "TransformationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "TransformationName": {
+            "type": "string",
+            "nullable": true
+          },
+          "Identifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "SourceDatumId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "TargetDatumId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "IsReversible": {
+            "type": "boolean"
+          },
+          "CanExecuteForward": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "CanExecuteReverse": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "AreaOfUse": {
+            "type": "string",
+            "nullable": true
+          },
+          "AreaOfUseBounds": {
+            "$ref": "#/components/schemas/GeographicBoundingBox"
+          }
+        }
+      },
+      "DepthTransformationPolicy": {
+        "enum": [
+          "Unspecified",
+          "PreservePhysicalPoint",
+          "AllowUntransformedDepthFor2D"
+        ],
+        "type": "string"
+      },
+      "EarthGeodesyServiceInfo": {
+        "type": "object",
+        "properties": {
+          "Service": {
+            "type": "string",
+            "nullable": true
+          },
+          "Version": {
+            "type": "string",
+            "nullable": true
+          },
+          "EpsgDatasetVersion": {
+            "type": "string",
+            "nullable": true
+          },
+          "CoordinateConvention": {
+            "type": "string",
+            "nullable": true
+          },
+          "CalculationBehavior": {
+            "type": "string",
+            "nullable": true
+          },
+          "InitializationBehavior": {
+            "type": "string",
+            "nullable": true
+          },
+          "PerformanceGuidance": {
+            "type": "string",
+            "nullable": true
+          },
+          "ExternalResourceBehavior": {
+            "type": "string",
+            "nullable": true
+          },
+          "McpErrorBehavior": {
+            "type": "string",
+            "nullable": true
+          },
+          "CatalogBehavior": {
+            "type": "string",
+            "nullable": true
+          },
+          "MaximumPositionsPerRequest": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "McpMaximumPositionsPerRequest": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "MaximumTransformationPathLength": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ReferenceEllipsoidCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "GeodeticDatumCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "TransformationCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "EllipsoidReference": {
+        "required": [
+          "Name"
+        ],
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Identifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "SemiMajorAxis": {
+            "type": "number",
+            "format": "double"
+          },
+          "InverseFlattening": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "GeodeticDatum": {
+        "required": [
+          "Name",
+          "Provenance"
+        ],
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "ReferenceEllipsoidId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Identifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "IsBuiltIn": {
+            "type": "boolean"
+          },
+          "IsDefault": {
+            "type": "boolean"
+          },
+          "Provenance": {
+            "$ref": "#/components/schemas/CatalogProvenance"
+          },
+          "CreatedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "ReferenceObjectType": {
+            "$ref": "#/components/schemas/GeodeticReferenceObjectType"
+          },
+          "IsDeprecated": {
+            "type": "boolean"
+          },
+          "IsSuperseded": {
+            "type": "boolean"
+          },
+          "PrimeMeridianName": {
+            "type": "string",
+            "nullable": true
+          },
+          "PrimeMeridianIdentifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "PrimeMeridianLongitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "Origin": {
+            "type": "string",
+            "nullable": true
+          },
+          "PublicationDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "RealizationEpoch": {
+            "type": "string",
+            "nullable": true
+          },
+          "FrameReferenceEpoch": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "AnchorEpoch": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "ConventionalReferenceSystem": {
+            "type": "string",
+            "nullable": true
+          },
+          "RealizationMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "EnsembleAccuracy": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "MemberDatumIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "Usage": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GeodeticUsage"
+            },
+            "nullable": true
+          },
+          "Remarks": {
+            "type": "string",
+            "nullable": true
+          },
+          "InformationSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "RevisionDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "CatalogStatus": {
+            "$ref": "#/components/schemas/CatalogEntryStatus"
+          }
+        }
+      },
+      "GeodeticDatumSummary": {
+        "required": [
+          "Name",
+          "Provenance",
+          "ReferenceEllipsoid"
+        ],
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "Identifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "ReferenceEllipsoid": {
+            "$ref": "#/components/schemas/EllipsoidReference"
+          },
+          "CatalogStatus": {
+            "$ref": "#/components/schemas/CatalogEntryStatus"
+          },
+          "IsDefault": {
+            "type": "boolean"
+          },
+          "ReferenceObjectType": {
+            "$ref": "#/components/schemas/GeodeticReferenceObjectType"
+          },
+          "IsDeprecated": {
+            "type": "boolean"
+          },
+          "IsSuperseded": {
+            "type": "boolean"
+          },
+          "PrimeMeridianName": {
+            "type": "string",
+            "nullable": true
+          },
+          "PrimeMeridianIdentifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "PrimeMeridianLongitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "Origin": {
+            "type": "string",
+            "nullable": true
+          },
+          "PublicationDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "RealizationEpoch": {
+            "type": "string",
+            "nullable": true
+          },
+          "FrameReferenceEpoch": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "AnchorEpoch": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "ConventionalReferenceSystem": {
+            "type": "string",
+            "nullable": true
+          },
+          "RealizationMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "EnsembleAccuracy": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "MemberDatumIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "Usage": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GeodeticUsage"
+            },
+            "nullable": true
+          },
+          "Remarks": {
+            "type": "string",
+            "nullable": true
+          },
+          "InformationSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "RevisionDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "Provenance": {
+            "$ref": "#/components/schemas/CatalogProvenance"
+          }
+        }
+      },
+      "GeodeticPosition": {
+        "type": "object",
+        "properties": {
+          "Latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "Longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "Depth": {
+            "type": "number",
+            "format": "double"
+          },
+          "CoordinateEpochUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "GeodeticReferenceObjectType": {
+        "enum": [
+          "StaticReferenceFrame",
+          "DynamicReferenceFrame",
+          "DatumEnsemble"
+        ],
+        "type": "string"
+      },
+      "GeodeticTransformation": {
+        "required": [
+          "Name",
+          "Provenance"
+        ],
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "SourceDatumId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "TargetDatumId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Method": {
+            "$ref": "#/components/schemas/GeodeticTransformationMethod"
+          },
+          "MethodName": {
+            "type": "string",
+            "nullable": true
+          },
+          "MethodIdentifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "SourceCrs": {
+            "$ref": "#/components/schemas/CoordinateReferenceSystemReference"
+          },
+          "TargetCrs": {
+            "$ref": "#/components/schemas/CoordinateReferenceSystemReference"
+          },
+          "IsReversible": {
+            "type": "boolean"
+          },
+          "ComponentOperationIdentifiers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuthorityIdentifier"
+            },
+            "nullable": true
+          },
+          "Parameters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoordinateOperationParameterValue"
+            },
+            "nullable": true
+          },
+          "RequiresExternalResource": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "RequiresCoordinateEpoch": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "TranslationX": {
+            "type": "number",
+            "format": "double"
+          },
+          "TranslationY": {
+            "type": "number",
+            "format": "double"
+          },
+          "TranslationZ": {
+            "type": "number",
+            "format": "double"
+          },
+          "RotationX": {
+            "type": "number",
+            "format": "double"
+          },
+          "RotationY": {
+            "type": "number",
+            "format": "double"
+          },
+          "RotationZ": {
+            "type": "number",
+            "format": "double"
+          },
+          "ScaleDifference": {
+            "type": "number",
+            "format": "double"
+          },
+          "Accuracy": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "AreaOfUse": {
+            "type": "string",
+            "nullable": true
+          },
+          "AreaOfUseBounds": {
+            "$ref": "#/components/schemas/GeographicBoundingBox"
+          },
+          "Identifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "IsBuiltIn": {
+            "type": "boolean"
+          },
+          "IsDeprecated": {
+            "type": "boolean"
+          },
+          "IsSuperseded": {
+            "type": "boolean"
+          },
+          "Provenance": {
+            "$ref": "#/components/schemas/CatalogProvenance"
+          },
+          "CreatedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "CatalogStatus": {
+            "$ref": "#/components/schemas/CatalogEntryStatus"
+          }
+        }
+      },
+      "GeodeticTransformationMethod": {
+        "enum": [
+          "GeocentricTranslations",
+          "PositionVectorSevenParameter",
+          "AuthoritativeEpsgOperation"
+        ],
+        "type": "string"
+      },
+      "GeodeticTransformationSummary": {
+        "required": [
+          "Name",
+          "Provenance",
+          "SourceDatum",
+          "TargetDatum"
+        ],
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "Identifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "SourceDatum": {
+            "$ref": "#/components/schemas/CatalogReference"
+          },
+          "TargetDatum": {
+            "$ref": "#/components/schemas/CatalogReference"
+          },
+          "Method": {
+            "$ref": "#/components/schemas/GeodeticTransformationMethod"
+          },
+          "MethodName": {
+            "type": "string",
+            "nullable": true
+          },
+          "MethodIdentifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "SourceCrs": {
+            "$ref": "#/components/schemas/CoordinateReferenceSystemReference"
+          },
+          "TargetCrs": {
+            "$ref": "#/components/schemas/CoordinateReferenceSystemReference"
+          },
+          "IsReversible": {
+            "type": "boolean"
+          },
+          "ComponentOperationIdentifiers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuthorityIdentifier"
+            },
+            "nullable": true
+          },
+          "Parameters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoordinateOperationParameterValue"
+            },
+            "nullable": true
+          },
+          "RequiresExternalResource": {
+            "type": "boolean"
+          },
+          "RequiresCoordinateEpoch": {
+            "type": "boolean"
+          },
+          "TranslationX": {
+            "type": "number",
+            "format": "double"
+          },
+          "TranslationY": {
+            "type": "number",
+            "format": "double"
+          },
+          "TranslationZ": {
+            "type": "number",
+            "format": "double"
+          },
+          "RotationX": {
+            "type": "number",
+            "format": "double"
+          },
+          "RotationY": {
+            "type": "number",
+            "format": "double"
+          },
+          "RotationZ": {
+            "type": "number",
+            "format": "double"
+          },
+          "ScaleDifference": {
+            "type": "number",
+            "format": "double"
+          },
+          "Accuracy": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "AccuracyMeaning": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "AreaOfUse": {
+            "type": "string",
+            "nullable": true
+          },
+          "AreaOfUseBounds": {
+            "$ref": "#/components/schemas/GeographicBoundingBox"
+          },
+          "CatalogStatus": {
+            "$ref": "#/components/schemas/CatalogEntryStatus"
+          },
+          "Provenance": {
+            "$ref": "#/components/schemas/CatalogProvenance"
+          }
+        }
+      },
+      "GeodeticUsage": {
+        "type": "object",
+        "properties": {
+          "Scope": {
+            "type": "string",
+            "nullable": true
+          },
+          "Extent": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "GeographicBoundingBox": {
+        "type": "object",
+        "properties": {
+          "SouthLatitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "NorthLatitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "WestLongitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "EastLongitude": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "ReferenceEllipsoid": {
+        "required": [
+          "Name",
+          "Provenance"
+        ],
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "Identifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "SemiMajorAxis": {
+            "type": "number",
+            "format": "double"
+          },
+          "InverseFlattening": {
+            "type": "number",
+            "format": "double"
+          },
+          "IsBuiltIn": {
+            "type": "boolean"
+          },
+          "IsDefault": {
+            "type": "boolean"
+          },
+          "Provenance": {
+            "$ref": "#/components/schemas/CatalogProvenance"
+          },
+          "CreatedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "IsDeprecated": {
+            "type": "boolean"
+          },
+          "IsSuperseded": {
+            "type": "boolean"
+          },
+          "Remarks": {
+            "type": "string",
+            "nullable": true
+          },
+          "InformationSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "RevisionDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "SourceUnit": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "CatalogStatus": {
+            "$ref": "#/components/schemas/CatalogEntryStatus"
+          },
+          "SemiMinorAxis": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          }
+        }
+      },
+      "ReferenceEllipsoidSummary": {
+        "required": [
+          "Name",
+          "Provenance"
+        ],
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "Identifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "SemiMajorAxis": {
+            "type": "number",
+            "format": "double"
+          },
+          "InverseFlattening": {
+            "type": "number",
+            "format": "double"
+          },
+          "SemiMinorAxis": {
+            "type": "number",
+            "format": "double"
+          },
+          "SourceUnit": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "CatalogStatus": {
+            "$ref": "#/components/schemas/CatalogEntryStatus"
+          },
+          "IsDefault": {
+            "type": "boolean"
+          },
+          "IsDeprecated": {
+            "type": "boolean"
+          },
+          "IsSuperseded": {
+            "type": "boolean"
+          },
+          "Remarks": {
+            "type": "string",
+            "nullable": true
+          },
+          "InformationSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "RevisionDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "Provenance": {
+            "$ref": "#/components/schemas/CatalogProvenance"
+          }
+        }
+      },
+      "ResolveTransformationPathsRequest": {
+        "type": "object",
+        "properties": {
+          "SourceDatumId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "TargetDatumId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Positions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GeodeticPosition"
+            },
+            "nullable": true
+          },
+          "MaximumCandidates": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ResolveTransformationPathsResponse": {
+        "required": [
+          "SelectionGuidance",
+          "SourceDatum",
+          "TargetDatum"
+        ],
+        "type": "object",
+        "properties": {
+          "SourceDatum": {
+            "$ref": "#/components/schemas/DatumReference"
+          },
+          "TargetDatum": {
+            "$ref": "#/components/schemas/DatumReference"
+          },
+          "IsAmbiguous": {
+            "type": "boolean"
+          },
+          "SelectionGuidance": {
+            "type": "string",
+            "nullable": true
+          },
+          "Candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransformationPathCandidate"
+            },
+            "nullable": true
+          }
+        }
+      },
+      "ServiceWarning": {
+        "required": [
+          "Code",
+          "Message"
+        ],
+        "type": "object",
+        "properties": {
+          "Code": {
+            "type": "string",
+            "nullable": true
+          },
+          "Message": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "TransformCoordinatesRequest": {
+        "type": "object",
+        "properties": {
+          "SourceDatumId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "TargetDatumId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Positions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GeodeticPosition"
+            },
+            "nullable": true
+          },
+          "SelectionPolicy": {
+            "$ref": "#/components/schemas/TransformationSelectionPolicy"
+          },
+          "TransformationPathIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "SelectionToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "ApplicabilityPolicy": {
+            "$ref": "#/components/schemas/ApplicabilityPolicy"
+          },
+          "DepthPolicy": {
+            "$ref": "#/components/schemas/DepthTransformationPolicy"
+          }
+        }
+      },
+      "TransformCoordinatesResponse": {
+        "required": [
+          "SourceDatum",
+          "TargetDatum"
+        ],
+        "type": "object",
+        "properties": {
+          "SourceDatum": {
+            "$ref": "#/components/schemas/CatalogReference"
+          },
+          "TargetDatum": {
+            "$ref": "#/components/schemas/CatalogReference"
+          },
+          "TransformationPath": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransformationReference"
+            },
+            "nullable": true
+          },
+          "Positions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GeodeticPosition"
+            },
+            "nullable": true
+          },
+          "Applicability": {
+            "$ref": "#/components/schemas/TransformationApplicability"
+          },
+          "DepthReferenceChanged": {
+            "type": "boolean"
+          },
+          "DepthChanges": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "MaximumAbsoluteDepthChange": {
+            "type": "number",
+            "format": "double"
+          },
+          "Warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceWarning"
+            },
+            "nullable": true
+          }
+        }
+      },
+      "TransformationApplicability": {
+        "enum": [
+          "NotEvaluated",
+          "Applicable",
+          "OutsideAreaOfUse",
+          "Unknown"
+        ],
+        "type": "string"
+      },
+      "TransformationPathCandidate": {
+        "required": [
+          "ApplicabilityMessage",
+          "RecommendationReason"
+        ],
+        "type": "object",
+        "properties": {
+          "Rank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "IsRecommended": {
+            "type": "boolean"
+          },
+          "RecommendationReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "Applicability": {
+            "$ref": "#/components/schemas/TransformationApplicability"
+          },
+          "ApplicabilityMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "IsExecutable": {
+            "type": "boolean"
+          },
+          "ExecutionIssues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceWarning"
+            },
+            "nullable": true
+          },
+          "SelectionToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "CombinedAccuracy": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "AccuracyMeaning": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "Operations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransformationReference"
+            },
+            "nullable": true
+          }
+        }
+      },
+      "TransformationReference": {
+        "required": [
+          "Name"
+        ],
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Identifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "Method": {
+            "$ref": "#/components/schemas/GeodeticTransformationMethod"
+          },
+          "MethodName": {
+            "type": "string",
+            "nullable": true
+          },
+          "MethodIdentifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "SourceCrs": {
+            "$ref": "#/components/schemas/CoordinateReferenceSystemReference"
+          },
+          "TargetCrs": {
+            "$ref": "#/components/schemas/CoordinateReferenceSystemReference"
+          },
+          "ComponentOperationIdentifiers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuthorityIdentifier"
+            },
+            "nullable": true
+          },
+          "RequiresExternalResource": {
+            "type": "boolean"
+          },
+          "RequiresCoordinateEpoch": {
+            "type": "boolean"
+          },
+          "Accuracy": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "AccuracyMeaning": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "AreaOfUse": {
+            "type": "string",
+            "nullable": true
+          },
+          "AreaOfUseBounds": {
+            "$ref": "#/components/schemas/GeographicBoundingBox"
+          },
+          "AppliedInReverse": {
+            "type": "boolean"
+          },
+          "CatalogStatus": {
+            "$ref": "#/components/schemas/CatalogEntryStatus"
+          }
+        }
+      },
+      "TransformationSelectionPolicy": {
+        "enum": [
+          "RequireUnambiguous",
+          "FirstAvailable",
+          "ExplicitPath"
+        ],
+        "type": "string"
+      },
+      "UpdateGeodeticDatumRequest": {
+        "required": [
+          "Name"
+        ],
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "ReferenceEllipsoidId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Identifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "ReferenceObjectType": {
+            "$ref": "#/components/schemas/GeodeticReferenceObjectType"
+          },
+          "IsDeprecated": {
+            "type": "boolean"
+          },
+          "PrimeMeridianName": {
+            "type": "string",
+            "nullable": true
+          },
+          "PrimeMeridianIdentifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "PrimeMeridianLongitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "Origin": {
+            "type": "string",
+            "nullable": true
+          },
+          "PublicationDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "RealizationEpoch": {
+            "type": "string",
+            "nullable": true
+          },
+          "FrameReferenceEpoch": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "AnchorEpoch": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "ConventionalReferenceSystem": {
+            "type": "string",
+            "nullable": true
+          },
+          "RealizationMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "EnsembleAccuracy": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "MemberDatumIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "Usage": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GeodeticUsage"
+            },
+            "nullable": true
+          },
+          "Remarks": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateGeodeticTransformationRequest": {
+        "required": [
+          "Name"
+        ],
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "SourceDatumId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "TargetDatumId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Method": {
+            "$ref": "#/components/schemas/GeodeticTransformationMethod"
+          },
+          "TranslationX": {
+            "type": "number",
+            "format": "double"
+          },
+          "TranslationY": {
+            "type": "number",
+            "format": "double"
+          },
+          "TranslationZ": {
+            "type": "number",
+            "format": "double"
+          },
+          "RotationX": {
+            "type": "number",
+            "format": "double"
+          },
+          "RotationY": {
+            "type": "number",
+            "format": "double"
+          },
+          "RotationZ": {
+            "type": "number",
+            "format": "double"
+          },
+          "ScaleDifference": {
+            "type": "number",
+            "format": "double"
+          },
+          "Accuracy": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "AreaOfUse": {
+            "type": "string",
+            "nullable": true
+          },
+          "AreaOfUseBounds": {
+            "$ref": "#/components/schemas/GeographicBoundingBox"
+          },
+          "Identifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          }
+        }
+      },
+      "UpdateReferenceEllipsoidRequest": {
+        "required": [
+          "Name"
+        ],
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "Identifier": {
+            "$ref": "#/components/schemas/AuthorityIdentifier"
+          },
+          "SemiMajorAxis": {
+            "type": "number",
+            "format": "double"
+          },
+          "InverseFlattening": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "UsageStatisticsEarthGeodesy": {
+        "type": "object",
+        "properties": {
+          "RestTransforms": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "MCPTransforms": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "FailedRequests": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "PositionsTransformed": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "CatalogReads": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "CatalogWrites": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          }
+        }
+      }
+    }
+  }
+}

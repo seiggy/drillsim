@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <RootNamespace>NORCE.Drilling.DrillingFluid.WebPages</RootNamespace>
+    <PackageId>NORCE.Drilling.DrillingFluid.WebPages</PackageId>
+    <Title>NORCE.Drilling.DrillingFluid.WebPages</Title>
+    <Description>Reusable Razor class library containing the DrillingFluid web pages and related components. See the package README for setup, dependencies, and usage.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Authors>Eric Cayeux</Authors>
+    <Company>NORCE</Company>
+    <PackageProjectUrl>https://github.com/Open-Source-Drilling-Community/DrillingFluid</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Open-Source-Drilling-Community/DrillingFluid</RepositoryUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MudBlazor" Version="8.14.0" />
+    <PackageReference Include="OSDC.DotnetLibraries.Drilling.WebAppUtils" Version="1.1.4" />
+    <PackageReference Include="OSDC.UnitConversion.Conversion" Version="3.3.25" />
+    <PackageReference Include="OSDC.UnitConversion.Conversion.UnitSystem" Version="3.3.27" />
+    <PackageReference Include="OSDC.DotnetLibraries.Drilling.DrillingProperties" Version="10.2.8" />
+    <PackageReference Include="OSDC.UnitConversion.DrillingRazorMudComponents" Version="3.3.51" />
+    <PackageReference Include="Plotly.Blazor" Version="6.0.2" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<!-- Include generated DTO source files directly from ModelSharedOut -->
+	<ItemGroup>
+		<Compile Include="..\ModelSharedOut\DrillingFluidMergedModel.cs;..\ModelSharedOut\ModPseudoConstructors.cs" Link="GeneratedDtos\%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>OSDC.UnitConversion.Conversion.UnitSystem.DrillingEngineering</RootNamespace>
+    <Version>3.4.1</Version>
+    <PackageId>OSDC.UnitConversion.Conversion.UnitSystem.DrillingEngineering</PackageId>
+    <Authors>Eric Cayeux</Authors>
+    <Company>NORCE Norwegian Research Centre</Company>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(UseLocalUnitConversionProjects)' != 'true'">
+    <PackageReference Include="OSDC.UnitConversion.Conversion.DrillingEngineering" Version="3.4.1" />
+    <PackageReference Include="OSDC.UnitConversion.Conversion.UnitSystem" Version="3.4.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseLocalUnitConversionProjects)' == 'true'">
+    <ProjectReference Include="..\Conversion.DrillingEngineering\Conversion.DrillingEngineering.csproj" />
+    <ProjectReference Include="..\ConversionUnitSystem\ConversionUnitSystem.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>

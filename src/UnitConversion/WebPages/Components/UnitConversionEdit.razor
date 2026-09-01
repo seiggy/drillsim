@@ -1,0 +1,314 @@
+﻿@inject ILogger<UnitConversionEdit> logger
+@inject ISnackbar Snackbar
+
+<MudText Class="mt-4 mb-4" Typo="Typo.h6">Edit Unit Conversions</MudText>
+
+<MudContainer Class="d-flex flex-row mt-3 mb-5">
+    <MudGrid>
+        <MudItem xs="3">
+            <MudTextField @bind-Value="@name" Label="Name" Variant="Variant.Outlined"></MudTextField>
+        </MudItem>
+        <MudItem xs="6">
+            <MudTextField @bind-Value="@descr" Label="Description" Variant="Variant.Outlined"></MudTextField>
+        </MudItem>
+        <MudItem xs="1" Class="mt-3 mb-5">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" OnClick="Close">Close</MudButton>
+        </MudItem>
+        <MudItem xs="2">
+            <MudGrid>
+                <MudItem xs="7" Class="mt-3 mb-5">
+                    <MudSwitch @bind-Value="noThousands" Color="Color.Primary" Style="text-align: center;"
+                               Label="@(noThousands ? "invariant culture" : "en-US culture" )" />
+                </MudItem>
+                <MudItem xs="5" Class="mt-3 mb-5">
+                    <MudSwitch @bind-Value="toDoublePrecision" Color="Color.Primary" Style="text-align: center;"
+                               Label="@(toDoublePrecision ? "double precision" : "meaningful precision")" />
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+<div style="width: 95%; margin: auto">
+    <MudDataGrid T="QuantityUnitConversion" Items="@quantityUnitConversionList"
+                 ReadOnly="false" EditMode="DataGridEditMode.Cell" EditTrigger="DataGridEditTrigger.OnRowClick"
+                 Dense="false" Bordered="true" SortMode="SortMode.Single" FixedHeader="true" Height="70vh" Elevation="0"
+                 StartedEditingItem="@StartedEditingItem" CanceledEditingItem="@CanceledEditingItem" CommittedItemChanges="@CommittedItemChanges">
+        <ColGroup>
+            <col style="width: 2%" />
+            <col style="width: 28%" />
+            <col style="width: 2%" />
+            <col style="width: 14%" />
+            <col style="width: 18%" />
+            <col style="width: 2%" />
+            <col style="width: 14%" />
+            <col style="width: 18%" />
+            <col style="width: 2%" />
+        </ColGroup>
+        <Columns>
+            @* Add value *@
+            <TemplateColumn Sortable="false" Title="insert quantity" HeaderStyle="color: #BEE2E2; font-size: 12px; text-align:center" CellStyle="text-align: center">
+                <EditTemplate>
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Add" OnClick="(() => AddValue(context.Item))" />
+                </EditTemplate>
+            </TemplateColumn>
+
+            @* QuantityID *@
+            <PropertyColumn Property="x => PhysicalQuantityList!.First(q => q.ID == x.QuantityID)!.Name"
+                            Title="Quantity" HeaderStyle="text-align: center; text-transform: uppercase; font-size: 20px; margin-start: 30px; background-color: #BEE2E2;">
+                <EditTemplate>
+                    <MudAutoCompleteForQuantity Context="@context" PhysicalQuantityList="@PhysicalQuantityList" />
+                </EditTemplate>
+            </PropertyColumn>
+
+            @* Reset value *@
+            <TemplateColumn Sortable="false" Title="reset value" HeaderStyle="color: #BEE2E2; font-size: 12px; text-align:center" CellStyle="text-align: center">
+                <EditTemplate>
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Clear" OnClick="(() => ClearValue(context.Item))" />
+                </EditTemplate>
+            </TemplateColumn>
+
+            @* DataIn *@
+            <PropertyColumn Property="x => x.ValueConversionList.ElementAt(0).DataIn" Sortable="false"
+                            Title="" HeaderStyle="background-color: #BEE2E2;">
+                <EditTemplate>
+                    <MudNumericFieldForValueIn Context="@context" Quantity="@(PhysicalQuantityList!.First(q => q.ID == context.Item.QuantityID))"
+                                               IsDoublePrecision="@toDoublePrecision" NoThousands="@noThousands" />
+                </EditTemplate>
+            </PropertyColumn>
+
+            @* UnitchoiceIDIn *@
+            <PropertyColumn Property="x => PhysicalQuantityList!.First(q => q.ID == x.QuantityID)!.UnitChoices!.First(u => u.ID == x.UnitChoiceIDIn)!.UnitName" Sortable="false"
+                            Title="From" HeaderStyle="text-align: left; text-transform: uppercase; font-size: 20px; background-color: #BEE2E2;">
+                <EditTemplate>
+                    <MudAutoCompleteForUnit Context="@context" UnitChoices="@(PhysicalQuantityList!.First(q => q.ID == context.Item.QuantityID)!.UnitChoices!)"
+                                            IsUnitChoiceIn="true" />
+                </EditTemplate>
+            </PropertyColumn>
+
+            @* Swap units *@
+            <TemplateColumn Sortable="false" Title="swap units" HeaderStyle="color: #BEE2E2; font-size: 12px; text-align:center" CellStyle="text-align: center">
+                <EditTemplate>
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.SwapHoriz" OnClick="(() => SwapUnit(context.Item))" />
+                </EditTemplate>
+            </TemplateColumn>
+
+            @* DataOut *@
+            <PropertyColumn Property="x => x.ValueConversionList.ElementAt(0).DataOut" Sortable="false"
+                            Title="" HeaderStyle="background-color: #BEE2E2;">
+                <EditTemplate>
+                    <MudNumericFieldForValueOut Context="@context" Quantity="@(PhysicalQuantityList!.First(q => q.ID == context.Item.QuantityID))"
+                                                IsDoublePrecision="@toDoublePrecision" NoThousands="@noThousands" />
+                </EditTemplate>
+            </PropertyColumn>
+
+            @* UnitchoiceIDOut *@
+            <PropertyColumn Property="x => PhysicalQuantityList!.First(q => q.ID == x.QuantityID)!.UnitChoices!.First(u => u.ID == x.UnitChoiceIDOut)!.UnitName" Sortable="false"
+                            Title="To" HeaderStyle="text-align: left; text-transform: uppercase; font-size: 20px; background-color: #BEE2E2;">
+                <EditTemplate>
+                    <MudAutoCompleteForUnit Context="@context" UnitChoices="@(PhysicalQuantityList!.First(q => q.ID == context.Item.QuantityID)!.UnitChoices!)"
+                                            IsUnitChoiceIn="false" />
+                </EditTemplate>
+            </PropertyColumn>
+
+            @* Delete quantity *@
+            <TemplateColumn Sortable="false" Title="delete quantity" HeaderStyle="color: #BEE2E2; font-size: 12px; text-align:center" CellStyle="text-align: center">
+                <EditTemplate>
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" OnClick="(() => DeleteQuantityUnitConversion(context.Item))" />
+                </EditTemplate>
+            </TemplateColumn>
+        </Columns>
+    </MudDataGrid>
+</div>
+
+@code {
+    [Parameter]
+    public Guid UnitConversionSetID { get; set; }
+
+    [Parameter]
+    public List<PhysicalQuantity>? PhysicalQuantityList { get; set; }
+
+    [Parameter]
+    public Action? OnUpdate { get; set; }
+
+    // Local variables used to retrieve user-defined parameters
+    private UnitConversionSet? unitConversionSet;
+    private string? name;
+    private string? descr;
+    private List<QuantityUnitConversion> quantityUnitConversionList = [];
+    private bool toDoublePrecision = false;
+    private bool noThousands = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        bool success = false;
+        try
+        {
+            unitConversionSet = await APIUtils.ClientUnitConversion.GetUnitConversionSetByIdAsync(UnitConversionSetID);
+            if (unitConversionSet != null && unitConversionSet.MetaInfo != null)
+            {
+                name = unitConversionSet.Name;
+                descr = unitConversionSet.Description;
+                if (unitConversionSet.QuantityUnitConversionList != null)
+                {
+                    List<QuantityUnitConversion> list = (List<QuantityUnitConversion>)unitConversionSet.QuantityUnitConversionList;
+                    List<QuantityUnitConversion> reducedList = new List<QuantityUnitConversion>();
+                    foreach (QuantityUnitConversion x in list)
+                    {
+                        try
+                        {
+                            if (x != null && PhysicalQuantityList != null)
+                            {
+                                PhysicalQuantity? quantity = PhysicalQuantityList!.First(q => q.ID == x.QuantityID);
+                                if (quantity != null)
+                                {
+                                    UnitChoice? unitChoiceIn = quantity.UnitChoices!.First(u => u.ID == x.UnitChoiceIDIn);
+                                    if (unitChoiceIn != null && !string.IsNullOrEmpty(unitChoiceIn.UnitName))
+                                    {
+                                        UnitChoice? unitChoiceOut = quantity.UnitChoices!.First(u => u.ID == x.UnitChoiceIDOut);
+                                        if (unitChoiceOut != null && !string.IsNullOrEmpty(unitChoiceOut.UnitName))
+                                        {
+                                            reducedList.Add(x);
+                                        }
+                                    }
+                                }
+                            }
+                        } 
+                        catch (Exception e1) 
+                        {
+                            logger.LogWarning("Problem in QuantityUnitConversion of a UnitConversionSet");
+                        }
+                    }
+                    if (reducedList.Count == 0 && PhysicalQuantityList != null && PhysicalQuantityList.Count > 0)
+                    {
+                        QuantityUnitConversion def = new QuantityUnitConversion();
+                        PhysicalQuantity? quantity = PhysicalQuantityList.First();
+                        if (quantity != null && quantity.UnitChoices != null && quantity.UnitChoices.Count > 0) 
+                        {
+                            def.QuantityID = quantity.ID;
+                            UnitChoice? unitChoice = quantity.UnitChoices.First();
+                            if (unitChoice != null)
+                            {
+                                def.UnitChoiceIDIn = unitChoice.ID;
+                                def.UnitChoiceIDOut = unitChoice.ID;
+                                def.ValueConversionList = new List<ValueConversion>() { new ValueConversion() { DataIn = 1.0 } };
+                                reducedList.Add(def);
+                            }
+                        }
+                    }
+                    quantityUnitConversionList = reducedList;
+                }
+                else 
+                {
+                    quantityUnitConversionList = [];
+                }
+                success = true;
+            }
+            else
+            {
+                logger.LogError("Problem while getting UnitConversionSet of given ID");
+                Snackbar.Add("Problem while getting UnitConversionSet of given ID", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem on UnitConversionSet initialization");
+            Snackbar.Add("Problem on UnitConversionSet initialization", Severity.Error);
+        }
+        await InvokeAsync(() => { StateHasChanged(); });
+        if (!success)
+            OnUpdate?.Invoke();
+    }
+
+    private async Task Update()
+    {
+        try
+        {
+            if (unitConversionSet != null && unitConversionSet.MetaInfo != null)
+            {
+                UnitConversionSet uConvSet = new()
+                    {
+                        MetaInfo = unitConversionSet.MetaInfo,
+                        Name = name,
+                        Description = descr,
+                        CreationDate = unitConversionSet.CreationDate,
+                        LastModificationDate = DateTimeOffset.UtcNow,
+                        QuantityUnitConversionList = quantityUnitConversionList
+                    };
+                await APIUtils.ClientUnitConversion.PutUnitConversionSetByIdAsync(uConvSet.MetaInfo.ID, uConvSet);
+
+                // configure Snackbar to prevent it from being triggered several times in a row (which occurs for example when OnDebounceIntervalElapsed is triggered)
+                var config = (SnackbarOptions options) =>
+                {
+                    options.DuplicatesBehavior = SnackbarDuplicatesBehavior.Prevent;
+                };
+                logger.LogInformation("Updated the UnitConversionSet successfully");
+                Snackbar.Add("Updated the UnitConversionSet successfully", Severity.Success, configure: config, key: "update");
+            }
+            else
+            {
+                logger.LogWarning("Problem while updating the UnitConversionSet");
+                Snackbar.Add("Problem while updating the UnitConversionSet", Severity.Warning);
+            }
+        }
+        catch (ApiException ex)
+        {
+            logger.LogError(ex, "Problem while updating the UnitConversionSet");
+            Snackbar.Add("Problem while updating the UnitConversionSet", Severity.Warning);
+        }
+        await OnInitializedAsync();
+    }
+
+    private void Close()
+    {
+        OnUpdate?.Invoke();
+    }
+
+    private async Task AddValue(QuantityUnitConversion qtyUnitConv)
+    {
+        int idx = quantityUnitConversionList.IndexOf(qtyUnitConv);
+        var qty = PhysicalQuantityList!.ElementAt(0);
+        Guid siUnitID = qty.UnitChoices.First(u => u.IsSI)!.ID;
+        quantityUnitConversionList.Insert(idx, new()
+            {
+                QuantityID = qty.ID,
+                UnitChoiceIDIn = siUnitID,
+                UnitChoiceIDOut = siUnitID,
+                ValueConversionList = [new ValueConversion() { DataIn = 1.0 }]
+            });
+        await Update();
+    }
+
+    private async Task ClearValue(QuantityUnitConversion qtyUnitConv)
+    {
+        qtyUnitConv.ValueConversionList.ElementAt(0).DataIn = 1.0;
+        await Update();
+    }
+
+    private async Task SwapUnit(QuantityUnitConversion qtyUnitConv)
+    {
+        var unitIn = qtyUnitConv.UnitChoiceIDIn;
+        qtyUnitConv.UnitChoiceIDIn = qtyUnitConv.UnitChoiceIDOut;
+        qtyUnitConv.UnitChoiceIDOut = unitIn;
+        await Update();
+    }
+
+    private async Task DeleteQuantityUnitConversion(QuantityUnitConversion qtyUniConv)
+    {
+        quantityUnitConversionList.Remove(qtyUniConv);
+        await Update();
+    }
+    // events
+    void StartedEditingItem(QuantityUnitConversion item)
+    {
+    }
+
+    void CanceledEditingItem(QuantityUnitConversion item)
+    {
+    }
+
+    async void CommittedItemChanges(QuantityUnitConversion item)
+    {
+        await Update();
+    }
+}

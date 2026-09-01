@@ -1,0 +1,343 @@
+@page "/"
+<MudContainer>
+    <MudText Typo="Typo.h3">Home</MudText>
+    <MudDivider/>
+    <MudToolBar Class="pt-2 mt-2 d-flex align-center">
+        <MudText Typo="Typo.h5">Drilling Fluid</MudText>
+        <MudIconButton OnClick="@ShowDrillingFluid" Icon="@showDrillingFluidIcon">@showDrillingFluidText</MudIconButton>
+    </MudToolBar>
+    <MudCollapse Expanded="@showDrillingFluid">
+        <MudDivider/>
+        <MudText Typo="Typo.body1" Align="Align.Justify">
+            <p>
+            This app is a client to the <b>Drilling Fluid</b> microservice. 
+            The aim is to provide a user-friendly interface to describe drilling fluids with several layers of detail. 
+            This service connects with the <b>Drill String</b> service and the Open Source Drilling Community <b> Yield Power-Law Calibration 
+            From Rheometer </b> service. In the home page, you can find examples of the app and basic information on the structure of the service. 
+            </p>
+            <br/>
+            <p>
+            The drilling fluid element is composed of two main fields: the <b>Drilling Fluid Description</b> and the <b>Drill String ID</b>. 
+            In the first field, the drilling fluid is specified through:
+            <ul style="padding-left: 40px;">
+                <li>the brine/base oil composition, as well as the solid fraction of the mud. The user can also specify the thermophysical properties of both brine and base oil; </li>
+                <li>the flow curve that can be defined by different rheological measurements;</li>
+                <li>a table with the gelling properties of the fluid. Those properties are limited to the gelling time and gel strength at certain pressure and temperature.</li>
+            </ul>
+            The second part is limited to the drill string identification. This is meant to connect the fluid 
+            to the drill string used in a specific section of a well. However, if more details of the drill string 
+            are needed, it can be recovered through the identification directly form the drill string service. 
+            </p>   
+            <MudStack Spacing="2" Class="my-4">
+                <center>
+                    <img src="Others/Diagram.svg"  width="720" height="405" alt="Service structure"  onerror="this.src='Others/Diagram.png'" >               
+                </center>
+            </MudStack>
+            <p>
+                In the app, this is defined by a simple interface, where the user can select a drilling fluid description and the drill string by name. 
+                If the desired fluid description is not in the list, a new one can be created. 
+            </p>
+            <MudStack Spacing="2" Class="my-4">
+                <center>
+                    <img src="Others/DrillingFluid.png"  width="960"  alt="Drilling fluid app" >               
+                </center>
+            </MudStack>        
+        </MudText>
+    </MudCollapse>
+    <MudToolBar Class="pt-2 mt-2 d-flex align-center">
+        <MudText Typo="Typo.h5">Drilling Fluid Description</MudText>
+        <MudIconButton OnClick="@ShowDrillingFluidDescription" 
+            Icon="@showDrillingFluidDescriptionIcon">@showDrillingFluidDescriptionText
+        </MudIconButton>
+    </MudToolBar>    
+    <MudCollapse Expanded="@showDrillingFluidDescription">
+        <MudDivider/>
+        <MudText Typo="Typo.body1" Align="Align.Justify">
+            <p>
+                The body of the drilling fluid lies in its description. Thus, this is where most of the information is filled when creating 
+                a new fluid. The addition of a new description can be done in several occasions throughout the app. However, once created, 
+                the added description can only be edited in the <b>Drilling Fluid Description</b> page, which can be easily reached through the 
+                navigation menu. 
+            </p>
+            <br/>
+            <p>
+                In this page, the user can add new descriptions and edit old ones. There are two differences between creation and edition of a 
+                fluid descriptions: when editing, the fields are pre-filled with the relevant information and the user is given the option to either
+                overwrite or save as a new description. The process is otherwise the same. Because of this, only the addition of the addition of a new
+                instance is described here.
+            </p>
+            <br/>
+            <p>
+                After filling the name and description of the data, the first step is providing the composition. This is defiend by a <b>Brine</b>, a 
+                <b>Base Oil</b>, <b>Water/Oil Ratio</b> as a number between 0 and 1, <b>Low and High Gravity Solid Densities</b> and <b> Lost Circulation Material Density</b>.
+                At this step, the user can select brine data and base oil available in the service. If the desired selection is not available, a new one can be created. More information on 
+                this is provided in the next section.  
+            </p>
+            <MudStack Spacing="2" Class="my-4">
+                <MudButton Class="shades-text text-white"
+                    Variant="Variant.Filled"
+                    Style="@($"background:{HideColors(_expandCompositionTutorial)};")"
+                    OnClick="OnExpandCollapseClickCompTutorial">@(_expandCompositionTutorial ? "Hide tutorial for fluid composition" : "Show tutorial for fluid composition")        
+                </MudButton>
+                <MudCollapse Expanded="_expandCompositionTutorial">                
+                    <center>
+                        <video width="960" height="540" autoplay loop muted>
+                            <source src="Others/Composition.webm" type="video/webm">
+                            Your browser does not support the video tag.
+                        </video>
+                    </center>
+                </MudCollapse>
+            </MudStack>
+            <p>
+                Both brine and base oil components allow for inputs on the thermophysical properties. However, it is often better to gather this data from 
+                the final fluid directly. In this case, the user can choose to fill the thermophysical properties manualy.   
+            </p>
+            <MudStack Spacing="2" Class="my-4">
+                <MudButton Class="shades-text text-white"
+                    Variant="Variant.Filled"
+                    Style="@($"background:{HideColors(_expandThermophysical)};")"
+                    OnClick="OnExpandCollapseClickThermoTutorial">@(_expandThermophysical ? "Hide tutorial for thermophysical properties" : "Show tutorial for thermophysical properties")        
+                </MudButton>
+                <MudCollapse Expanded="_expandThermophysical">                
+                    <center>
+                        <video width="960" height="540" autoplay loop muted>
+                            <source src="Others/Thermophysical.webm" type="video/webm">
+                            Your browser does not support the video tag.
+                        </video>
+                    </center>
+                </MudCollapse>
+            </MudStack>
+            <p>
+                The next step in creating a fluid description, is adding the gelling properties. This is defined by a table which requires at least two pairs  
+                of gel strength and gel duration. In the <b>View Chart</b> button, the data filled is displayed as a scatter and a lograthimic approximation of 
+                the data is provided as a line. This line is fitted through the least square method. 
+            </p>
+            <MudStack Spacing="2" Class="my-4">
+                <MudButton Class="shades-text text-white"
+                    Variant="Variant.Filled"
+                    Style="@($"background:{HideColors(_expandGelling)};")"
+                    OnClick="OnExpandCollapseClickGellingTutorial">@(_expandGelling ? "Hide tutorial for gelling properties" : "Show tutorial for gelling properties")        
+                </MudButton>
+                <MudCollapse Expanded="_expandGelling">                
+                    <center>
+                        <video width="960" height="540" autoplay loop muted>
+                            <source src="Others/GellingProperties.webm" type="video/webm">
+                            Your browser does not support the video tag.
+                        </video>
+                    </center>
+                </MudCollapse>
+            </MudStack>
+            <p>
+                The final section to be filled are the fluid rheological measurements. Initially, the user is asked to fill the information on the 
+                rheometer used, such as name, dimensions and configuration (e.e.: fixed cup and rotating cup). If this information is available, it
+                can be used further on for correcting the data into a specific rheological model.
+            </p>
+            <br/>
+            <p>
+                With the base information provided, the user can choose the type of inputs available through a checkbox system. In this, at least 
+                <b>one x-axis </b> and <b>one y-axis</b> type of data must be selected. For the <b>x-axis</b>, the user can chose to have the measured 
+                rotation, the shear-rate and the shear-rate at the bob. These measurements assume that the ISO norms have been applied
+                to obtain the <b>equivalent Newtonian shear-rate</b>.
+
+            </p>
+            <br/>
+            <p>
+                For the <b>y-axis</b> allows the user to input the shear-stress, the shear-stress at the bob and the torque. Likewise, it is assumed 
+                that the shear-stress follow the ISO standard to estimate the <b>equivalent Newtonian shear-stress</b>. 
+            </p>
+            <br/>
+            <p>
+                If more than one set of data is available, the user can choose to fill it as well. For instance, if the measuring equipment provides
+                both rotation and (Newtonian) shear-rate data, both can be used for filling the provided table. 
+            </p>
+            <br/>
+            <p>
+                Once again, the user can show a scatter of the provided data. At this stage, no fitting is provided, as it is strictly model dependent. 
+                If more than one option is provided for the x-axis and y-axis, the user will be able to chose which set of data to be shown in each axes.  
+            </p>
+
+
+            <MudStack Spacing="2" Class="my-4">
+                <MudButton Class="shades-text text-white"
+                    Variant="Variant.Filled"
+                    Style="@($"background:{HideColors(_expandRheometer)};")"
+                    OnClick="OnExpandCollapseClickRheometerTutorial">@(_expandRheometer ? "Hide tutorial for gelling properties" : "Show tutorial for gelling properties")        
+                </MudButton>
+                <MudCollapse Expanded="_expandRheometer">                
+                    <center>
+                        <video width="960" height="540" autoplay loop muted>
+                            <source src="Others/Measurements.webm" type="video/webm">
+                            Your browser does not support the video tag.
+                        </video>
+                    </center>
+                </MudCollapse>
+            </MudStack>
+
+        </MudText>
+    </MudCollapse>
+    <MudToolBar Class="pt-2 mt-2 d-flex align-center">
+        <MudText Typo="Typo.h5">Drilling Fluid Composition</MudText>
+        <MudIconButton OnClick="@ShowDrillingFluidComposition" 
+            Icon="@showDrillingFluidCompositionIcon">@showDrillingFluidCompositionText
+        </MudIconButton>
+    </MudToolBar>  
+    <MudCollapse Expanded="@showDrillingFluidComposition">
+        <MudDivider/>
+        <MudText Typo="Typo.body1" Align="Align.Justify">
+            <p>
+            The fluid composition tab in the navigation menu is divided into <b>Brine</b> and <b>Base Oil</b>. Each has its own database
+            and its own editor. As before, in their specific base, the user can add and edit the components.
+            </p>
+            <br/>
+            <p>
+            Both pages editors share most of its base structure, with the main difference that a <b>Brine</b> component can be described by
+            either a <b>Single Salt Brine</b> or a <b>Multiple Salt Brine</b>. In the case of a <b>Base Oil</b>, the options are similar to those
+            of a single salt brine. Thus, the tutorial will only cover how to provide a <b>Brine</b> configuration.
+            </p>
+            <br/>
+            <p>
+            When filling the brine properties, the first part contains thermophysical properties. Those are a linearization of the properties and hence,
+            at least two points are needed to define it. When the information is filled, the system might give a warning that the property is negative
+            at zero Kelvin. As this can be an implication of the linearization, the value is nonetheless stored.  
+            </p>
+            <br/>
+            <p>
+                Another consequence of the linearization, is that the values are stored in the form of a line (f(T) = a × T + b). This means that when editing, 
+                the user interface will automatically calculate the properties at the temperatures at 50 °C and 100 °C, as it holds no memory of the actual inputs.
+            </p>
+            <MudStack Spacing="2" Class="my-4">
+                <MudButton Class="shades-text text-white"
+                    Variant="Variant.Filled"
+                    Style="@($"background:{HideColors(_expandBrineThermo)};")"
+                    OnClick="OnExpandCollapseClickBrineThermoTutorial">@(_expandBrineThermo ? "Hide tutorial for brine thermophysical properties" : "Show tutorial for thermophysical properties")        
+                </MudButton>
+                <MudCollapse Expanded="_expandBrineThermo">                
+                    <center>
+                        <video width="960" height="540" autoplay loop muted>
+                            <source src="Others/BrineThermo.webm" type="video/webm">
+                            Your browser does not support the video tag.
+                        </video>
+                    </center>
+                </MudCollapse>
+            </MudStack>
+            <p>
+                The final step is providing the composition specific mass information. This depends on whether the brine contains either single salt or 
+                multiple salts. In the former case, the user can provide the data from a Pressure × Temperature interpolation data to calculate the specific 
+                mass. If the multiple salt composition is selected, the user must manually select the salt from the option list and add the mass for unit volume.
+                The final mass density is than updated to the summation of all salt components.                
+            </p>
+
+            <MudStack Spacing="2" Class="my-4">
+                <MudButton Class="shades-text text-white"
+                    Variant="Variant.Filled"
+                    Style="@($"background:{HideColors(_expandBrineSalt)};")"
+                    OnClick="OnExpandCollapseClickBrineSaltTutorial">@(_expandBrineSalt ? "Hide tutorial for brine salt composition" : "Show tutorial for salt composition")        
+                </MudButton>
+                <MudCollapse Expanded="_expandBrineSalt">                
+                    <center>
+                        <video width="960" height="540" autoplay loop muted>
+                            <source src="Others/BrineSalt.webm" type="video/webm">
+                            Your browser does not support the video tag.
+                        </video>
+                    </center>
+                </MudCollapse>
+            </MudStack>
+        </MudText>
+    </MudCollapse>
+
+</MudContainer>
+@code
+{
+    //Drilling fluid section collapse
+    private bool showDrillingFluid = true;
+    private string showDrillingFluidText = "Hide";
+    private string showDrillingFluidIcon = @Icons.Material.Filled.ExpandLess;
+    //Drilling fluid description section collapse
+    private bool showDrillingFluidDescription = true;
+    private string showDrillingFluidDescriptionText = "Hide";
+    private string showDrillingFluidDescriptionIcon = @Icons.Material.Filled.ExpandLess;
+    //Drilling fluid  composition section collapse
+    private bool showDrillingFluidComposition = true;
+    private string showDrillingFluidCompositionText = "Hide";
+    private string showDrillingFluidCompositionIcon = @Icons.Material.Filled.ExpandLess;
+
+    private bool _expandCompositionTutorial = true;
+    private bool _expandThermophysical = true;
+    private bool _expandGelling = true;
+    private bool _expandRheometer = true;
+    private bool _expandBrineThermo = true;
+    private bool _expandBrineSalt = true;
+
+    private void OnExpandCollapseClickCompTutorial() {
+        _expandCompositionTutorial = !_expandCompositionTutorial;
+    }
+    private void OnExpandCollapseClickThermoTutorial() {
+        _expandThermophysical = !_expandThermophysical;
+    }
+    private void OnExpandCollapseClickGellingTutorial() {
+        _expandGelling = !_expandGelling;
+    }
+    private void OnExpandCollapseClickRheometerTutorial() {
+        _expandRheometer = !_expandRheometer;
+    }
+    private void OnExpandCollapseClickBrineThermoTutorial() {
+        _expandBrineThermo = !_expandBrineThermo;
+    }
+    private void OnExpandCollapseClickBrineSaltTutorial() {
+        _expandBrineSalt = !_expandBrineSalt;
+    }
+
+    private void ShowDrillingFluid()
+    {
+        showDrillingFluid = !showDrillingFluid;
+        if (showDrillingFluid)
+        {
+            showDrillingFluidText = "Hide";
+            showDrillingFluidIcon = @Icons.Material.Filled.ExpandLess;
+        }
+        else
+        {
+            showDrillingFluidText = "Show";
+            showDrillingFluidIcon = @Icons.Material.Filled.ExpandMore;            
+        }
+    }
+    private void ShowDrillingFluidDescription()
+    {
+        showDrillingFluidDescription = !showDrillingFluidDescription;
+        if (showDrillingFluidDescription)
+        {
+            showDrillingFluidDescriptionText = "Hide";
+            showDrillingFluidDescriptionIcon = @Icons.Material.Filled.ExpandLess;
+        }
+        else
+        {
+            showDrillingFluidDescriptionText = "Show";
+            showDrillingFluidDescriptionIcon = @Icons.Material.Filled.ExpandMore;            
+        }
+    }
+    private void ShowDrillingFluidComposition()
+    {
+        showDrillingFluidComposition = !showDrillingFluidComposition;
+        if (showDrillingFluidComposition)
+        {
+            showDrillingFluidCompositionText = "Hide";
+            showDrillingFluidCompositionIcon = @Icons.Material.Filled.ExpandLess;
+        }
+        else
+        {
+            showDrillingFluidCompositionText = "Show";
+            showDrillingFluidCompositionIcon = @Icons.Material.Filled.ExpandMore;            
+        }
+    }
+    private string HideColors(bool expandBool)
+    {
+        if (expandBool)
+        {
+            return Colors.Indigo.Lighten1;
+        }
+        else
+        {
+            return Colors.Indigo.Darken4;            
+        }
+    }
+}

@@ -1,0 +1,657 @@
+@inject IDrillingFluidAPIUtils Api
+@inject ISnackbar Snackbar
+@inject ILogger<MudInputWithUnitAdornment> logger
+<MudPaper Elevation="2" Class="py-6" Style="@($"position: {DataUtils.FLOATING_POSITION}; background:{DataUtils.FLOATING_COLOUR_DEEP};")" >            
+    <MudPaper Class="mx-4 my-4">
+        
+        <MudToolBar>
+            <MudText Class="mx-n1 mt-2 mb-1" Typo="Typo.body1"><b>NEW BRINE ELEMENT</b></MudText>
+        </MudToolBar>
+        <MudGrid Class="xm-2 ym-2">
+            <MudItem Class="ml-4 mr-2 my-2" xs="2">
+                <MudTextField @bind-Value="@brineInstance.Name" Label="Name" ShrinkLabel Variant="Variant.Text"/>
+            </MudItem>
+            <MudItem xs="2" Class ="my-2">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                    QuantityLabel="Mass Density" QuantityName="MassDensityDrilling"
+                    SIValueNullable="@massDensity"
+                    SIValueNullableChanged="@UpdateMassDensity"/>
+            </MudItem> 
+            <MudItem xs="2" Class ="my-2">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                    QuantityLabel="Mass Fraction" QuantityName="MassDrilling"
+                    SIValueNullable="@massFraction"
+                    SIValueNullableChanged="@UpdateMassFraction"/>
+            </MudItem> 
+            <MudSpacer/>    
+            <MudItem xs="3" Class="my-2">
+                <MudSwitch T="bool" Color="Color.Primary" UncheckedColor="Color.Tertiary"
+                    Value="@singleSaltBoolean" ValueChanged="@SingleSaltSelect" Label="@SelectString"/>
+            </MudItem>
+        </MudGrid>
+        <br/>
+        <MudGrid Class="xm-2 ym-2 yp-2">
+            <MudItem xs="6" >
+                <MudPaper Class="my-4 mx-4" Style="@($"background:{Colors.Gray.Lighten4};")">
+                    <MudText Class="my-1 mx-2" Typo="Typo.body2"><b>Heat Capacity</b></MudText>
+                    <MudGrid Class="my-2 mx-3">
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Temperature 1" QuantityName="TemperatureDrilling"
+                                SIValueNullable="@temperatureHeatCapacity1"
+                                SIValueNullableChanged="@UpdateTemperatureHeatCapacity1"/>
+                        </MudItem>   
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Temperature 2" QuantityName="TemperatureDrilling"
+                                SIValueNullable="@temperatureHeatCapacity2"
+                                SIValueNullableChanged="@UpdateTemperatureHeatCapacity2"/>
+                        </MudItem>   
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Heat Capacity at T1" QuantityName="IsobaricSpecificHeatCapacityDrilling"
+                                SIValueNullable="@heatCapacity1"
+                                SIValueNullableChanged="@UpdateHeatCapacity1"/>
+                        </MudItem>   
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Heat Capacity at T2" QuantityName="IsobaricSpecificHeatCapacityDrilling"
+                                SIValueNullable="@heatCapacity2"
+                                SIValueNullableChanged="@UpdateHeatCapacity2"/>
+                        </MudItem>  
+                    </MudGrid>
+                </MudPaper> 
+            </MudItem>
+            <MudSpacer/>
+            <!-- #region -->
+            <MudItem xs="6">
+                <MudPaper Class="my-4 mx-4" Style="@($"background:{Colors.Gray.Lighten4};")">
+                    <MudText Class="my-1 mx-2" Typo="Typo.body2"><b>Thermal Conductivity</b></MudText>
+                    <MudGrid Class="my-2 mx-3">
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Temperature 1" QuantityName="TemperatureDrilling"
+                                SIValueNullable="@temperatureThermalConductivity1"
+                                SIValueNullableChanged="@UpdateTemperatureThermalConductivity1"/>
+                        </MudItem>   
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Temperature 2" QuantityName="TemperatureDrilling"
+                                SIValueNullable="@temperatureThermalConductivity2"
+                                SIValueNullableChanged="@UpdateTemperatureThermalConductivity2"/>
+                        </MudItem> 
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Thermal Conductivity 1" QuantityName="ThermalConductivityDrilling"
+                                SIValueNullable="@thermalConductivity1"
+                                SIValueNullableChanged="@UpdateThermalConductivity1"/>
+                        </MudItem>   
+                        <MudItem xs="5" Class ="mx-2 my-2">
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Thermal Conductivity 2" QuantityName="ThermalConductivityDrilling"
+                                SIValueNullable="@thermalConductivity2"
+                                SIValueNullableChanged="@UpdateThermalConductivity2"/>
+                        </MudItem> 
+                    </MudGrid>
+                </MudPaper> 
+            </MudItem>
+        </MudGrid>
+        <!-- #Editor of multiple-salt brine -->
+        <div hidden="@singleSaltBoolean">
+            <MudPaper Class="mx-4 my-2" Style="@($"background:{Colors.Gray.Lighten4};")">
+                <MudToolBar>
+                    <MudText Class="my-2 mx-4" Typo="Typo.body2"><b>Brine salt composition</b></MudText>
+                    <MudButton StartIcon="@Icons.Material.Outlined.Add" IconColor="@Color.Success" OnClick="@AddSalt">
+                        Add salt
+                    </MudButton>        
+                    <MudButton StartIcon="@Icons.Material.Outlined.Remove" IconColor="@Color.Error" OnClick="@RemoveSalt">
+                        Remove salt
+                    </MudButton>        
+                </MudToolBar>
+                <MudGrid Class="my-2 mx-3">
+                    @for(int i = 0; i < saltContents.Count; i++)
+                    {
+                        int index = i;
+                        <MudItem xs="2" Class ="mx-2 my-2">                                
+                            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                QuantityLabel="Weight per volume" QuantityName="MassDensityDrilling"
+                                SIValueNullable="@saltWeightPerCubicMetre[index]"
+                                SIValueNullableChanged="val => {UpdateSaltWeight(val, index);}"/>
+                            <MudSelect Class="my-1" T="SaltOptions" Value="@saltList[index]" Label="Salt type" 
+                                ValueChanged="val => {UpdateSaltList(val, index);}" Dense="true">
+                                @foreach (SaltOptions salt in Enum.GetValues(typeof(SaltOptions)))
+                                {
+                                    <MudSelectItem Value="@salt">@salt</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>                                                           
+                    }
+                </MudGrid>                
+            </MudPaper>
+        </div>
+        <!-- #Editor of single-salt brine -->
+        <div hidden="@(!singleSaltBoolean)">
+            <MudPaper Class="mx-4 my-2" Style="@($"background:{Colors.Gray.Lighten4};")">
+                <MudText Class="my-2 mx-4" Typo="Typo.body2"><b>Single salt PVT relation</b></MudText>
+                <MudText Align="Align.Center" Class="my-4 mx-4" Typo="Typo.body2">
+                    ρ [@(Parent.GetUnitLabel("MassDensityDrilling"))] = @(RoundDoubleForTextWithUnits(s0, "MassDensityDrilling")) 
+                        + @(RoundDoubleForText(s1)) × W
+                        + @(RoundDoubleForTextWithUnits(s2, "SpecificVolumeDrilling")) × W²
+                        + @(RoundDoubleForTextWithUnits(s3, "SpecificVolumeSquaredDrilling")) × W³
+                        + @(RoundDoubleForTextWithUnits(bw, "MassDensityGradientPerTemperatureDrilling")) × T 
+                        + (@(RoundDoubleForTextWithUnits(cw, "MassDensityGradientPerPressureDrilling")) 
+                        + @(RoundDoubleForTextWithUnits(dw, "MassDensityGradientPerPressureTemperatureDrilling")) × T) × P 
+                        + (@(RoundDoubleForTextWithUnits(ew, "MassDensityGradientPerPressureSquaredDrilling"))
+                        + @(RoundDoubleForTextWithUnits(fw, "MassDensityGradientPerPressureSquaredTemperatureDrilling")) × T) × P²
+                </MudText>
+                <MudGrid Class="my-2 mx-3">
+                    <MudItem xs="2" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Pressure" QuantityName="PressureDrilling"
+                            SIValueNullable="@pressure"
+                            SIValueNullableChanged="@UpdatePressure"/>
+                    </MudItem>   
+                    <MudItem xs="2" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Temperature" QuantityName="TemperatureDrilling"
+                            SIValueNullable="@temperature"
+                            SIValueNullableChanged="@UpdateTemperature"/>
+                    </MudItem>   
+                    <MudItem xs="2" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Salt weight/volume" QuantityName="MassDensityDrilling"
+                            SIValueNullable="@singleSaltWeight"
+                            SIValueNullableChanged="@UpdateSingleSaltWeight"/>
+                    </MudItem>   
+                </MudGrid>
+                <MudGrid Class="my-2 mx-3">
+                    <MudItem xs="2" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="S0" QuantityName="MassDensityDrilling"
+                            SIValueNullable="@s0"
+                            SIValueNullableChanged="@UpdateS0"/>
+                    </MudItem>   
+                    <MudItem xs="2" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="S1" QuantityName=""
+                            SIValueNullable="@s1"
+                            SIValueNullableChanged="@UpdateS1"/>
+                    </MudItem>   
+                    <MudItem xs="2" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="S2" QuantityName="SpecificVolumeDrilling"
+                            SIValueNullable="@s2"
+                            SIValueNullableChanged="@UpdateS2"/>
+                    </MudItem>   
+                    <MudItem xs="2" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="S3" QuantityName="SpecificVolumeSquaredDrilling"
+                            SIValueNullable="@s3"
+                            SIValueNullableChanged="@UpdateS3"/>
+                    </MudItem>
+                    <MudItem xs="2" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Bw" QuantityName="MassDensityGradientPerTemperatureDrilling"
+                            SIValueNullable="@bw"
+                            SIValueNullableChanged="@UpdateBw"/>
+                    </MudItem>                  
+                    <MudItem xs="2" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Cw" QuantityName="MassDensityGradientPerPressureDrilling"
+                            SIValueNullable="@cw"
+                            SIValueNullableChanged="@UpdateCw"/>
+                    </MudItem>   
+                    <MudItem xs="2" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Dw" QuantityName="MassDensityGradientPerPressureTemperatureDrilling"
+                            SIValueNullable="@dw"
+                            SIValueNullableChanged="@UpdateDw"/>
+                    </MudItem>   
+                    <MudItem xs="2" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Ew" QuantityName="MassDensityGradientPerPressureSquaredDrilling"
+                            SIValueNullable="@ew"
+                            SIValueNullableChanged="@UpdateEw"/>
+                    </MudItem>   
+                    <MudItem xs="2" Class ="mx-2 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Fw" QuantityName="MassDensityGradientPerPressureSquaredTemperatureDrilling"
+                            SIValueNullable="@fw"
+                            SIValueNullableChanged="@UpdateFw"/>
+                    </MudItem>       
+                </MudGrid>
+            </MudPaper>
+        </div>
+        <MudToolBar>
+            <MudButton StartIcon="@Icons.Material.Outlined.Save" IconColor="@Color.Primary" 
+                OnClick="@AddBrineComponent">Save New</MudButton>        
+            @if (BrineId != null)
+            {
+                <MudButton StartIcon="@Icons.Material.Outlined.SaveAs" IconColor="@Color.Primary" 
+                    OnClick="@SaveBrineComponent">Save changes</MudButton>        
+            }
+            <MudSpacer/>
+            <MudButton StartIcon="@Icons.Material.Outlined.Close" IconColor="@Color.Error" 
+                OnClick="@CloseAddPanel">Close</MudButton>                    
+        </MudToolBar>
+
+    </MudPaper>
+</MudPaper>
+
+@code{
+    [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? Parent { get; set; }
+ 
+    [Parameter]
+    public Guid? BrineId {get; set;} = null;
+
+    [Parameter]
+    public EventCallback OnMessageSent {get; set;}
+    
+    private bool singleSaltBoolean = true;
+    private string SelectString = "Single salt brine";
+    
+    // Create a base Brine composition with properly initialized empty values
+    private Brine brineInstance = PseudoConstructors.ConstructBrine();
+    private double? massDensity;
+    private double? massFraction;    
+    private double? heatCapacity1;// = 3.49;
+    private double? temperatureHeatCapacity1;// = 273;
+    private double? heatCapacity2;// = 3.53;
+    private double? temperatureHeatCapacity2;// = 300;
+    private double? thermalConductivity1;
+    private double? temperatureThermalConductivity1;
+    private double? thermalConductivity2;
+    private double? temperatureThermalConductivity2;
+    private double? s0 = null;
+    private double? s1 = null;
+    private double? s2 = null;
+    private double? s3 = null;
+    private double? bw = null;
+    private double? cw = null;
+    private double? dw = null;
+    private double? ew = null;
+    private double? fw = null;
+    private double? pressure = 100_000;
+    private double? temperature = 323;
+    private double? singleSaltWeight = null;
+    private List<SaltOptions> saltList = new List<SaltOptions>{SaltOptions.NaCl};
+    private List<double?> saltWeightPerCubicMetre = new List<double?> {null};     
+    private BrinePVTParameters pvtParameters = PseudoConstructors.ConstructBrinePVTParameters();
+    private List<SaltContent> saltContents = new List<SaltContent>
+        {
+            new SaltContent 
+            {
+                Salt = SaltOptions.NaCl,
+                WeightPerCubicMeter = ConversionsFromOSDC.DoubleToGaussian(null)
+            }
+        };
+    private async Task SendMessage()
+    {
+        await OnMessageSent.InvokeAsync();
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        if (BrineId != null)
+        {
+            brineInstance = await Api.ClientDrillingFluid.GetBrineByIdAsync((Guid)BrineId);
+        }
+    }
+    private async Task AddBrineComponent()
+    {
+        try
+        {
+            //  Check if it is a single salt brine or not and populate the correct
+            //field
+            if (singleSaltBoolean)
+            {
+                brineInstance.SaltContent = null;
+                brineInstance.PVTParameters = pvtParameters;
+            }
+            else
+            {
+                brineInstance.SaltContent = saltContents;
+                brineInstance.PVTParameters = null;
+            }                                                 
+            brineInstance.MetaInfo = new MetaInfo{ID = Guid.NewGuid()};            
+            await Api.ClientDrillingFluid.PostBrineAsync(brineInstance);
+            logger.LogInformation("Brine component posted successfully");
+            Snackbar.Add("Brine component posted successfully", Severity.Success);            
+            await SendMessage();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to add a new brine component");
+            Snackbar.Add("Impossible to add a new brine component", Severity.Warning);
+        }
+    }
+    private async Task SaveBrineComponent()
+    {
+        try
+        {
+            //  Check if it is a single salt brine or not and populate the correct
+            //field
+            if (singleSaltBoolean)
+            {
+                brineInstance.SaltContent = null;
+                brineInstance.PVTParameters = pvtParameters;
+            }
+            else
+            {
+                brineInstance.SaltContent = saltContents;
+                brineInstance.PVTParameters = null;
+            }                                                 
+            await Api.ClientDrillingFluid.PutBrineByIdAsync(brineInstance.MetaInfo.ID, brineInstance);
+            logger.LogInformation("Brine component posted successfully");
+            Snackbar.Add("Brine component posted successfully", Severity.Success);            
+            await SendMessage();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to add a new brine component");
+            Snackbar.Add("Impossible to add a new brine component", Severity.Warning);
+        }
+    }
+    private void AddSalt()
+    {
+        saltContents.Add(
+            PseudoConstructors.ConstructSaltContent()
+        );
+        saltList.Add(SaltOptions.NaCl);
+        saltWeightPerCubicMetre.Add(null);
+    }
+    private void RemoveSalt()
+    {
+        if (saltContents.Count > 1)
+        {
+            saltContents.RemoveAt(saltContents.Count-1);
+            saltList.RemoveAt(saltList.Count-1);
+            saltWeightPerCubicMetre.RemoveAt(saltWeightPerCubicMetre.Count-1);        
+        }
+    }
+    private async Task CloseAddPanel()
+    {
+        await SendMessage();
+    }
+    protected override void OnInitialized()
+    {
+    }
+    private string RoundDoubleForText(double? val)
+    {
+        if (val == null)
+        {
+            return "0";
+        }
+        else 
+        {
+            int valRound = (int) val * 100;
+            return $"{(double)valRound/100}";
+        }
+    }
+    private string RoundDoubleForTextWithUnits(double? val, string Units)
+    {
+        if (val == null)
+        {
+            return "0";
+        }
+        else 
+        {
+            int valRound = (int) val * 100;
+            return $"{ Parent.FromSI((double)valRound/100, Units)}";
+        }
+    }  
+    private void ManageUnits(){}
+    private void UpdateMassDensity(double? val)
+    {
+        massDensity = val;
+        brineInstance.MassDensity.GaussianValue.Mean =  val;
+    } 
+    private void UpdateMassFraction(double? val)
+    {
+        massFraction = val;
+        brineInstance.MassFraction.GaussianValue.Mean = val;
+    } 
+    private void SingleSaltSelect(bool val)
+    {
+        singleSaltBoolean = val;
+        if (singleSaltBoolean)
+        {
+            SelectString = "Single salt brine"; 
+            brineInstance.SaltContent = null;            
+        }
+        else 
+        {
+            SelectString = "Multiple salt brine";      
+            brineInstance.PVTParameters = null;       
+        }
+    }
+    private void CalculateLinearHeatCapacity()
+    {
+        if( heatCapacity1 != null &&
+            heatCapacity2 != null &&
+            temperatureHeatCapacity1 != null &&
+            temperatureHeatCapacity2 != null        
+        )
+        {            
+            brineInstance.SpecificHeatCapacity.TemperatureRange = new List<double?>
+            {  
+                temperatureHeatCapacity1, temperatureHeatCapacity2
+            };
+            brineInstance.SpecificHeatCapacity.CoefficientRange = new List<double?>
+            {  
+                heatCapacity1, heatCapacity2
+            };
+            double slope = (double)((heatCapacity2-heatCapacity1)/(temperatureHeatCapacity2-temperatureHeatCapacity1));
+            double atZeroKelvin = (double)(heatCapacity2 - slope * temperatureHeatCapacity2);
+            brineInstance.SpecificHeatCapacity.Slope = ConversionsFromOSDC.DoubleToGaussian(slope);
+            brineInstance.SpecificHeatCapacity.HeatCapacityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(atZeroKelvin);
+            if (atZeroKelvin < 0.0) 
+            {
+                Snackbar.Add("Specific heat capacity negative at zero Kelvin!.", Severity.Error);
+            }     
+        }
+        else
+        {
+            brineInstance.SpecificHeatCapacity.Slope = ConversionsFromOSDC.DoubleToGaussian(null);
+            brineInstance.SpecificHeatCapacity.HeatCapacityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(null);
+        }
+    }
+    private void CalculateLinearThermalConductivity()
+    {
+        if( thermalConductivity1 != null &&
+            thermalConductivity2 != null &&
+            temperatureThermalConductivity1 != null &&
+            temperatureThermalConductivity2 != null        
+        )
+        {
+            brineInstance.ThermalConductivity.TemperatureRange = new List<double?>
+            {  
+                temperatureThermalConductivity1, temperatureThermalConductivity2                
+            };
+            brineInstance.ThermalConductivity.CoefficientRange = new List<double?>
+            {  
+                thermalConductivity1, thermalConductivity2
+            };
+            double slope = (double)((thermalConductivity2-thermalConductivity1)/(temperatureThermalConductivity2-temperatureThermalConductivity1));
+            double atZeroKelvin = (double)(thermalConductivity2 - slope * temperatureThermalConductivity2);
+            brineInstance.ThermalConductivity.Slope = ConversionsFromOSDC.DoubleToGaussian(slope);
+            brineInstance.ThermalConductivity.ThermalConductivityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(atZeroKelvin); 
+            if (atZeroKelvin < 0.0) 
+            {
+                Snackbar.Add("Thermal conductivity negative at zero Kelvin!.", Severity.Error);
+            }         
+        }
+        else
+        {
+            brineInstance.ThermalConductivity.Slope = ConversionsFromOSDC.DoubleToGaussian(null);
+            brineInstance.ThermalConductivity.ThermalConductivityAtZeroKelvin = ConversionsFromOSDC.DoubleToGaussian(null);
+        }
+    }
+
+    private void UpdateTemperatureHeatCapacity1(double? val)
+    {
+        temperatureHeatCapacity1 = val;
+        CalculateLinearHeatCapacity();
+    }
+    private void UpdateTemperatureHeatCapacity2(double? val)
+    {
+        temperatureHeatCapacity2 = val;
+        CalculateLinearHeatCapacity();
+    } 
+    private void UpdateHeatCapacity1(double? val)
+    {
+        heatCapacity1 = val;
+        CalculateLinearHeatCapacity();
+    }
+    private void UpdateHeatCapacity2(double? val)
+    {
+        heatCapacity2 = val;
+        CalculateLinearHeatCapacity();
+    } 
+
+
+    private void UpdateTemperatureThermalConductivity1(double? val)
+    {
+        temperatureThermalConductivity1 = val;
+        CalculateLinearThermalConductivity();
+    }
+    private void UpdateTemperatureThermalConductivity2(double? val)
+    {
+        temperatureThermalConductivity2 = val;
+        CalculateLinearThermalConductivity();
+    } 
+    private void UpdateThermalConductivity1(double? val)
+    {
+        thermalConductivity1 = val;
+        CalculateLinearThermalConductivity();
+    }
+    private void UpdateThermalConductivity2(double? val)
+    {
+        thermalConductivity2 = val;
+        CalculateLinearThermalConductivity();
+    }
+    private void CalculateMassDensityCalculation()
+    {
+        if(singleSaltBoolean)
+        {
+            if(temperature != null &&
+                pressure != null &&
+                singleSaltWeight != null &&
+                pvtParameters.S0.GaussianValue.Mean != null &&
+                pvtParameters.S1.GaussianValue.Mean != null &&
+                pvtParameters.S2.GaussianValue.Mean != null &&
+                pvtParameters.S3.GaussianValue.Mean != null &&
+                pvtParameters.Bw.GaussianValue.Mean != null &&
+                pvtParameters.Cw.GaussianValue.Mean != null &&
+                pvtParameters.Dw.GaussianValue.Mean != null &&
+                pvtParameters.Ew.GaussianValue.Mean != null &&
+                pvtParameters.Fw.GaussianValue.Mean != null
+                )
+            {
+                massDensity = 
+                    ConversionsFromOSDC.GaussianToDouble(pvtParameters.S0) + 
+                    ConversionsFromOSDC.GaussianToDouble(pvtParameters.S1) * singleSaltWeight  + 
+                    ConversionsFromOSDC.GaussianToDouble(pvtParameters.S2) * singleSaltWeight * singleSaltWeight + 
+                    ConversionsFromOSDC.GaussianToDouble(pvtParameters.S3) * singleSaltWeight * singleSaltWeight * singleSaltWeight + 
+                    ConversionsFromOSDC.GaussianToDouble(pvtParameters.Bw) * temperature +
+                    (
+                        ConversionsFromOSDC.GaussianToDouble(pvtParameters.Cw) + 
+                        ConversionsFromOSDC.GaussianToDouble(pvtParameters.Dw) * temperature) * pressure +
+                    (
+                        ConversionsFromOSDC.GaussianToDouble(pvtParameters.Ew) + 
+                        ConversionsFromOSDC.GaussianToDouble(pvtParameters.Fw) * temperature) * pressure * pressure;
+                brineInstance.MassDensity = ConversionsFromOSDC.DoubleToGaussian(massDensity); 
+            }
+        }
+        else
+        {
+            massDensity = 0.0;
+            foreach(SaltContent salt in saltContents)
+            {
+                massDensity += ConversionsFromOSDC.GaussianToDouble(salt.WeightPerCubicMeter);
+                brineInstance.MassDensity = ConversionsFromOSDC.DoubleToGaussian(massDensity);         
+            }
+        }
+    }
+    private void UpdatePressure(double? val)
+    {
+        pressure = val;
+        CalculateMassDensityCalculation();
+    } 
+    private void UpdateTemperature(double? val)
+    {
+        temperature = val;
+        CalculateMassDensityCalculation();
+    } 
+    private void UpdateSingleSaltWeight(double? val)
+    {
+        singleSaltWeight = val;
+        CalculateMassDensityCalculation();
+    } 
+    private void UpdateS0(double? val)
+    {
+        s0 = val;
+        pvtParameters.S0 = ConversionsFromOSDC.DoubleToGaussian(val);
+        CalculateMassDensityCalculation();
+    }
+    private void UpdateS1(double? val)
+    {
+        s1 = val;
+        pvtParameters.S1 = ConversionsFromOSDC.DoubleToGaussian(val);
+        CalculateMassDensityCalculation();
+    }    
+    private void UpdateS2(double? val)
+    {
+        s2 = val;
+        pvtParameters.S2 = ConversionsFromOSDC.DoubleToGaussian(val);
+        CalculateMassDensityCalculation();
+    }    
+    private void UpdateS3(double? val)
+    {
+        s3 = val;
+        pvtParameters.S3 = ConversionsFromOSDC.DoubleToGaussian(val);
+        CalculateMassDensityCalculation();
+    }
+    private void UpdateBw(double? val)
+    {
+        bw = val;
+        pvtParameters.Bw = ConversionsFromOSDC.DoubleToGaussian(val);
+        CalculateMassDensityCalculation();
+    }
+    private void UpdateCw(double? val)
+    {
+        cw = val;
+        pvtParameters.Cw = ConversionsFromOSDC.DoubleToGaussian(val);
+        CalculateMassDensityCalculation();
+    }
+    private void UpdateDw(double? val)
+    {
+        dw = val;
+        pvtParameters.Dw = ConversionsFromOSDC.DoubleToGaussian(val);
+        CalculateMassDensityCalculation();
+    }
+    private void UpdateEw(double? val)
+    {
+        ew = val;
+        pvtParameters.Ew = ConversionsFromOSDC.DoubleToGaussian(val);
+        CalculateMassDensityCalculation();
+    }
+    private void UpdateFw(double? val)
+    {
+        fw = val;
+        pvtParameters.Fw = ConversionsFromOSDC.DoubleToGaussian(val);
+        CalculateMassDensityCalculation();
+    }
+    private void UpdateSaltWeight(double? val, int index)
+    {
+        saltWeightPerCubicMetre[index] = val;
+        saltContents[index].WeightPerCubicMeter = ConversionsFromOSDC.DoubleToGaussian(val);
+         CalculateMassDensityCalculation();
+    }
+    private void UpdateSaltList(SaltOptions selectedSalt, int index)
+    {
+        saltList[index] = selectedSalt;
+        saltContents[index].Salt = selectedSalt; 
+        CalculateMassDensityCalculation();
+    }
+}

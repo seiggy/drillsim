@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+	<AssemblyName>NORCE.Drilling.CartographicProjection.WebPages</AssemblyName>
+	<RootNamespace>NORCE.Drilling.CartographicProjection.WebPages</RootNamespace>
+    <PackageId>NORCE.Drilling.CartographicProjection.WebPages</PackageId>
+    <Title>NORCE.Drilling.CartographicProjection.WebPages</Title>
+    <Authors>Eric Cayeux</Authors>
+    <Company>NORCE</Company>
+    <Description>Reusable Razor class library containing the CartographicProjection, CartographicConverter, and statistics web pages. See the package README for setup, dependencies, and usage.</Description>
+    <PackageTags>cartographicprojection;drilling;blazor;razor;mudblazor</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/Open-Source-Drilling-Community/CartographicProjection</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/Open-Source-Drilling-Community/CartographicProjection</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MudBlazor" Version="8.14.0" />
+    <PackageReference Include="OSDC.DotnetLibraries.Drilling.WebAppUtils" Version="1.1.4" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<!-- Include generated DTO source files directly from ModelSharedOut -->
+	<ItemGroup>
+		<Compile Include="..\ModelSharedOut\CartographicProjectionMergedModel.cs" Link="GeneratedDtos\%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+</Project>

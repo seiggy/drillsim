@@ -1,0 +1,505 @@
+﻿<table class="table" hidden="@IsHidden" style="text-align: center">
+    <thead>
+        <tr>
+            <td>
+                <span>Rotational Speed</span>
+            </td>
+            <td>
+                <span>Torque at the bob</span>
+            </td>
+            <td>
+                <span>Newtonian ISO Shear-rate</span>
+            </td>
+            <td>
+                <span>Newtonian ISO Shear-stress</span>
+            </td>
+            <td>
+                <span>Newtonian Shear-rate at the Bob</span>
+            </td>
+            <td>
+                <span>Newtonian Shear-stress at the Bob</span>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>
+                [<SpanUnitLabel QuantityName="Small Rotation Frequency" />]
+            </td>
+            <td>
+                [<SpanUnitLabel QuantityName="Small Torque" />]
+            </td>
+            <td>
+                [<SpanUnitLabel QuantityName="FluidShearRate" />]
+            </td>
+            <td>
+                [<SpanUnitLabel QuantityName="FluidShearStress" />]
+            </td>
+            <td>
+                [<SpanUnitLabel QuantityName="FluidShearRate" />]
+            </td>
+            <td>
+                [<SpanUnitLabel QuantityName="FluidShearStress" />]
+            </td>
+            <td></td>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Rheogram != null && Rheogram.Measurements != null)
+        {
+            @for (int j = 0; j < Rheogram.Measurements.Count; j++)
+            {
+                var local_j = j; // defined because loop variables cannot be used directly in a lambda expression (see below)
+                var inputIterData1 = Rheogram.Measurements.ElementAt(j);
+                @if (inputIterData1 != null)
+                {
+                    @if (IsHidInputAdd && j == rowIndex)
+                    {
+                        <tr>
+                            <td>
+                                <InputWithUnit Hidden="@(!UseRotationalSpeed || IsFixedSpeed)"
+                               QuantityName="Small Rotation Frequency"
+                               SIValueNullable="@updatedRotationalSpeed"
+                               SIValueNullableChanged="@((val) => ManageUpdatedRotationalSpeed(val))" />
+                            </td>
+                            <td>
+                                <InputWithUnit Hidden="@(!UseTorque)"
+                               QuantityName="Small Torque"
+                               SIValueNullable="@updatedTorque"
+                               SIValueNullableChanged="@((val) => ManageUpdatedTorque(val))" />
+                            </td>
+                            <td>
+                                <InputWithUnit Hidden="@(!UseISONewtonianShearRate || IsFixedSpeed)"
+                               QuantityName="FluidShearRate"
+                               SIValueNullable="@updatedISOShearRate"
+                               SIValueNullableChanged="@((val) => ManageUpdatedISOShearRate(val))" />
+                            </td>
+                            <td>
+                                <InputWithUnit Hidden="@(!UseISONewtonianShearStress)"
+                               QuantityName="FluidShearStress"
+                               SIValueNullable="@updatedISOShearStress"
+                               SIValueNullableChanged="@((val) => ManageUpdatedISOShearStress(val))" />
+                            </td>
+                            <td>
+                                <InputWithUnit Hidden="@(!UseBobNewtonianShearRate || IsFixedSpeed)"
+                               QuantityName="FluidShearRate"
+                               SIValueNullable="@updatedBobShearRate"
+                               SIValueNullableChanged="@((val) => ManageUpdatedBobShearRate(val))" />
+                            </td>
+                            <td>
+                                <InputWithUnit Hidden="@(!UseBobNewtonianShearStress)"
+                               QuantityName="FluidShearStress"
+                               SIValueNullable="@updatedBobShearStress"
+                               SIValueNullableChanged="@((val) => ManageUpdatedBobShearStress(val))" />
+                            </td>
+                            <td align="right">
+                                @if (local_j > -1)
+                                {
+                                    <button class="btn btn-primary" @onclick="@(() => UpdateRheometerMeasurement(local_j))">Update</button>
+                                    <button class="btn btn-primary" @onclick="@(() => CancelRheometerMeasurement(local_j))">Cancel</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td>
+                                <SpanWithUnit QuantityName="Small Rotation Frequency"
+                              SIValue="@(inputIterData1.RotationalSpeed)" />
+                            </td>
+                            <td>
+                                <SpanWithUnit QuantityName="Small Torque"
+                              SIValue="@(inputIterData1.Torque)" />
+                            </td>
+                            <td>
+                                <SpanWithUnit QuantityName="FluidShearRate"
+                              SIValue="@(inputIterData1.ISONewtonianShearRate)" />
+                            </td>
+                            <td>
+                                <SpanWithUnit QuantityName="FluidShearStress"
+                              SIValue="@(inputIterData1.ISONewtonianShearStress)" />
+                            </td>
+                            <td>
+                                <SpanWithUnit QuantityName="FluidShearRate"
+                              SIValue="@(inputIterData1.BobNewtonianShearRate)" />
+                            </td>
+                            <td>
+                                <SpanWithUnit QuantityName="FluidShearStress"
+                              SIValue="@(inputIterData1.BobNewtonianShearStress)" />
+                            </td>
+                            <td align="right">
+                                @if (!IsHidInputAdd)
+                                {
+                                    <button class="btn btn-primary" @onclick="@(() => EditRheometerMeasurement(local_j))">Edit</button>
+                                    @if (!IsFixedSpeed)
+                                    {
+                                        <button class="btn btn-primary" @onclick="@(() => DeleteRheometerMeasurement(local_j))">Delete</button>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+        }
+    </tbody>
+    <tfoot hidden="@(IsHidInputAdd || IsFixedSpeed)">
+        <tr>
+            <td>
+                <InputWithUnit Hidden="@(!UseRotationalSpeed)"
+                               QuantityName="Small Rotation Frequency"
+                               SIValueNullable="@addedRotationalSpeed"
+                               SIValueNullableChanged="@((val) => ManageAddedRotationalSpeed(val))" />
+            </td>
+            <td>
+                <InputWithUnit Hidden="@(!UseTorque)"
+                               QuantityName="Small Torque"
+                               SIValueNullable="@addedTorque"
+                               SIValueNullableChanged="@((val) => ManageAddedTorque(val))" />
+            </td>
+            <td>
+                <InputWithUnit Hidden="@(!UseISONewtonianShearRate)"
+                               QuantityName="FluidShearRate"
+                               SIValueNullable="@addedISOShearRate"
+                               SIValueNullableChanged="@((val) => ManageAddedISOShearRate(val))" />
+            </td>
+            <td>
+                <InputWithUnit Hidden="@(!UseISONewtonianShearStress)"
+                               QuantityName="FluidShearStress"
+                               SIValueNullable="@addedISOShearStress"
+                               SIValueNullableChanged="@((val) => ManageAddedISOShearStress(val))" />
+            </td>
+            <td>
+                <InputWithUnit Hidden="@(!UseBobNewtonianShearRate)"
+                               QuantityName="FluidShearRate"
+                               SIValueNullable="@addedBobShearRate"
+                               SIValueNullableChanged="@((val) => ManageAddedBobShearRate(val))" />
+            </td>
+            <td>
+                <InputWithUnit Hidden="@(!UseBobNewtonianShearStress)"
+                               QuantityName="FluidShearStress"
+                               SIValueNullable="@addedBobShearStress"
+                               SIValueNullableChanged="@((val) => ManageAddedBobShearStress(val))" />
+            </td>
+            <td align="right">
+                <button class="btn btn-primary" @onclick="@(() => AddRheometerMeasurement())">Add</button>
+                <button class="btn btn-primary" @onclick="@(() => CancelRheometerMeasurement())">Cancel</button>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+
+
+@code {
+    [Parameter]
+    public HttpClient HTTPClient { get; set; }
+
+    [Parameter]
+    public bool IsHidden { get; set; }
+
+    [Parameter]
+    public Rheogram Rheogram { get; set; }
+
+    [Parameter]
+    public Guid RheogramID { get; set; }
+
+    [Parameter]
+    public bool IsFixedSpeed { get; set; }
+
+    private bool UseRotationalSpeed
+    {
+        get
+        {
+            return (Rheogram != null && Rheogram.RateSource == RateSourceEnum.RotationalSpeed);
+        }
+    }
+    private bool UseTorque
+    {
+        get
+        {
+            return (Rheogram != null && Rheogram.StressSource == StressSourceEnum.Torque);
+        }
+    }
+    private bool UseISONewtonianShearRate
+    {
+        get
+        {
+            return (Rheogram != null && Rheogram.RateSource == RateSourceEnum.ISONewtonianShearRate);
+        }
+    }
+    private bool UseISONewtonianShearStress
+    {
+        get
+        {
+            return (Rheogram != null && Rheogram.StressSource == StressSourceEnum.ISONewtonianShearStress);
+        }
+    }
+    private bool UseBobNewtonianShearRate
+    {
+        get
+        {
+            return (Rheogram != null && Rheogram.RateSource == RateSourceEnum.BobNewtonianShearRate);
+        }
+    }
+    private bool UseBobNewtonianShearStress
+    {
+        get
+        {
+            return (Rheogram != null && Rheogram.StressSource == StressSourceEnum.BobNewtonianShearStress);
+        }
+    }
+
+    private double? addedRotationalSpeed = null;
+    private double? addedTorque = null;
+    private double? addedISOShearRate = null;
+    private double? addedISOShearStress = null;
+    private double? addedBobShearRate = null;
+    private double? addedBobShearStress = null;
+    private double? updatedRotationalSpeed = null;
+    private double? updatedTorque = null;
+    private double? updatedISOShearRate = null;
+    private double? updatedISOShearStress = null;
+    private double? updatedBobShearRate = null;
+    private double? updatedBobShearStress = null;
+    private int rowIndex = -1; // the index of the row selected in the Input panel
+    private bool IsHidInputAdd = false;
+
+    private void EditRheometerMeasurement(int rowIdx)
+    {
+        rowIndex = rowIdx;
+        IsHidInputAdd = true;
+        if (Rheogram != null)
+        {
+            switch (Rheogram.RateSource)
+            {
+                case RateSourceEnum.ISONewtonianShearRate:
+                    updatedISOShearRate = Rheogram.Measurements.ElementAt(rowIdx).ISONewtonianShearRate;
+                    break;
+                case RateSourceEnum.RotationalSpeed:
+                    updatedRotationalSpeed = Rheogram.Measurements.ElementAt(rowIdx).RotationalSpeed;
+                    break;
+                default:
+                    updatedBobShearRate = Rheogram.Measurements.ElementAt(rowIdx).BobNewtonianShearRate;
+                    break;
+            }
+            switch (Rheogram.StressSource)
+            {
+                case StressSourceEnum.Torque:
+                    updatedTorque = Rheogram.Measurements.ElementAt(rowIdx).Torque;
+                    break;
+                case StressSourceEnum.ISONewtonianShearStress:
+                    updatedISOShearStress = Rheogram.Measurements.ElementAt(rowIdx).ISONewtonianShearStress;
+                    break;
+                default:
+                    updatedBobShearStress = Rheogram.Measurements.ElementAt(rowIdx).BobNewtonianShearStress;
+                    break;
+            }
+        }
+    }
+
+    private async void DeleteRheometerMeasurement(int rowIdx)
+    {
+        rowIndex = rowIdx;
+        if (Rheogram != null)
+        {
+            int iterData1Count = Rheogram.Measurements.Count;
+            if (iterData1Count > 0)
+            {
+                // remove the RheometerMeasurement to be deleted
+                RheometerMeasurement iterData1 = Rheogram.Measurements.ElementAt(rowIdx);
+                if (iterData1 != null)
+                {
+                    // then update the database
+                    if (!RheogramID.Equals(Guid.Empty) && Rheogram.Measurements.Remove(iterData1))
+                    {
+                        StringContent content = new StringContent(Rheogram.GetJson(), Encoding.UTF8, "application/json");
+                        var a = await HTTPClient.PutAsync("Rheograms/" + RheogramID.ToString(), content);
+                        if (a.IsSuccessStatusCode)
+                        {
+                            await OnInitializedAsync();
+                            await InvokeAsync(() => { StateHasChanged(); });
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private async void UpdateRheometerMeasurement(int rowIdx)
+    {
+        rowIndex = rowIdx;
+        int iterData1Count = Rheogram.Measurements.Count;
+
+        if (Rheogram != null && !RheogramID.Equals(Guid.Empty) && iterData1Count > 0)
+        {
+            // collect UI data
+            if (updatedRotationalSpeed.HasValue)
+            {
+                Rheogram.Measurements.ElementAt(rowIdx).RotationalSpeed = (double)updatedRotationalSpeed; // else unchanged
+            }
+            if (updatedTorque.HasValue)
+            {
+                Rheogram.Measurements.ElementAt(rowIdx).Torque = (double)updatedTorque; // else unchanged
+            }
+            if (updatedISOShearRate.HasValue)
+            {
+                Rheogram.Measurements.ElementAt(rowIdx).ISONewtonianShearRate = (double)updatedISOShearRate; // else unchanged
+            }
+            if (updatedISOShearStress.HasValue)
+            {
+                Rheogram.Measurements.ElementAt(rowIdx).ISONewtonianShearStress = (double)updatedISOShearStress; // else unchanged
+            }
+            if (updatedBobShearRate.HasValue)
+            {
+                Rheogram.Measurements.ElementAt(rowIdx).BobNewtonianShearRate = (double)updatedBobShearRate; // else unchanged
+            }
+            if (updatedBobShearStress.HasValue)
+            {
+                Rheogram.Measurements.ElementAt(rowIdx).BobNewtonianShearStress = (double)updatedBobShearStress; // else unchanged
+            }
+
+            // then refresh the UI
+            updatedRotationalSpeed = null;
+            updatedTorque = null;
+            updatedISOShearRate = null;
+            updatedISOShearStress = null;
+            updatedBobShearRate = null;
+            updatedBobShearStress = null;
+            IsHidInputAdd = false;
+            rowIndex = -1;
+
+            // finally update the Rheogram
+            StringContent content = new StringContent(Rheogram.GetJson(), Encoding.UTF8, "application/json");
+            var a = await HTTPClient.PutAsync("Rheograms/" + RheogramID.ToString(), content);
+            if (a.IsSuccessStatusCode)
+            {
+                await OnInitializedAsync();
+                await InvokeAsync(() => { StateHasChanged(); });
+            }
+        }
+    }
+
+    private void CancelRheometerMeasurement(int rowIdx)
+    {
+        // rowIndex is just used to make the distinction with the no-argument overload
+        IsHidInputAdd = false;
+        rowIndex = -1;
+        // empty UI edit boxes
+        updatedRotationalSpeed = null;
+        updatedTorque = null;
+        updatedISOShearRate = null;
+        updatedISOShearStress = null;
+        updatedBobShearRate = null;
+        updatedBobShearStress = null;
+    }
+
+    private async void AddRheometerMeasurement()
+    {
+        if (Rheogram != null && !RheogramID.Equals(Guid.Empty) && !Rheogram.CouetteRheometerID.Equals(Guid.Empty))
+        {
+            RheometerMeasurement measurement = new RheometerMeasurement(); // attribute must be set separately because non-empty constructors cannot be passed through the ModelClientShared json conversion mechanism
+            if (addedRotationalSpeed.HasValue)
+            {
+                measurement.RotationalSpeed = (double)addedRotationalSpeed; // else unchanged
+            }
+            if (addedTorque.HasValue)
+            {
+                measurement.Torque = (double)addedTorque; // else unchanged
+            }
+            if (addedISOShearRate.HasValue)
+            {
+                measurement.ISONewtonianShearRate = (double)addedISOShearRate; // else unchanged
+            }
+            if (addedISOShearStress.HasValue)
+            {
+                measurement.ISONewtonianShearStress = (double)addedISOShearStress; // else unchanged
+            }
+            if (addedBobShearRate.HasValue)
+            {
+                measurement.BobNewtonianShearRate = (double)addedBobShearRate; // else unchanged
+            }
+            if (addedBobShearStress.HasValue)
+            {
+                measurement.BobNewtonianShearStress = (double)addedBobShearStress; // else unchanged
+            }
+            Rheogram.Measurements.Add(measurement);
+            // update UI
+            addedRotationalSpeed = null;
+            addedTorque = null;
+            addedISOShearRate = null;
+            addedISOShearStress = null;
+            addedBobShearRate = null;
+            addedBobShearStress = null;
+
+            // then update the database
+            StringContent content = new StringContent(Rheogram.GetJson(), Encoding.UTF8, "application/json");
+            var a = await HTTPClient.PutAsync("Rheograms/" + RheogramID.ToString(), content);
+            if (a.IsSuccessStatusCode)
+            {
+                await OnInitializedAsync();
+                await InvokeAsync(() => { StateHasChanged(); });
+            }
+        }
+    }
+
+    private void CancelRheometerMeasurement()
+    {
+        // empty UI edit boxes
+        addedRotationalSpeed = null;
+        addedTorque = null;
+        addedISOShearRate = null;
+        addedISOShearStress = null;
+        addedBobShearRate = null;
+        addedBobShearStress = null;
+    }
+    private void ManageUpdatedRotationalSpeed(double? val)
+    {
+        updatedRotationalSpeed = val;
+    }
+    private void ManageUpdatedTorque(double? val)
+    {
+        updatedTorque = val;
+    }
+    private void ManageAddedRotationalSpeed(double? val)
+    {
+        addedRotationalSpeed = val;
+    }
+    private void ManageAddedTorque(double? val)
+    {
+        addedTorque = val;
+    }
+
+    private void ManageUpdatedISOShearRate(double? val)
+    {
+        updatedISOShearRate = val;
+    }
+    private void ManageUpdatedISOShearStress(double? val)
+    {
+        updatedISOShearStress = val;
+    }
+    private void ManageAddedISOShearRate(double? val)
+    {
+        addedISOShearRate = val;
+    }
+    private void ManageAddedISOShearStress(double? val)
+    {
+        addedISOShearStress = val;
+    }
+
+    private void ManageUpdatedBobShearRate(double? val)
+    {
+        updatedBobShearRate = val;
+    }
+    private void ManageUpdatedBobShearStress(double? val)
+    {
+        updatedBobShearStress = val;
+    }
+    private void ManageAddedBobShearRate(double? val)
+    {
+        addedBobShearRate = val;
+    }
+    private void ManageAddedBobShearStress(double? val)
+    {
+        addedBobShearStress = val;
+    }
+}

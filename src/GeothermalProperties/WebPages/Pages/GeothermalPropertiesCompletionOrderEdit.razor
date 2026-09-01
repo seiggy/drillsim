@@ -1,0 +1,123 @@
+﻿@using MudBlazor.Internal
+@inject ILogger<MudInputWithUnitAdornment> logger
+@inject ISnackbar Snackbar
+
+
+<MudPaper Class="my-2 mx-2 py-2 my-2" Style="@($"background:{DataUtils.FLOATING_COLOUR};")">
+    <MudPaper Class="my-1 mx-1 py-1 my-1">
+        <MudToolBar>
+            <MudText Typo="Typo.h6" Class="mx-2 px-2">Edit GeothermalPropertiesCompletionOrder</MudText>
+            <MudButton StartIcon="@Icons.Material.Filled.SaveAs" Variant="Variant.Filled" IconColor="Color.Primary" OnClick="SaveAsGeothermalPropertiesCompletionOrder">Save new</MudButton>
+            @if (GeothermalPropertiesCompletionOrderId != null)
+            {
+                <MudButton StartIcon="@Icons.Material.Filled.Save" Variant="Variant.Filled" IconColor="Color.Primary" OnClick="SaveGeothermalPropertiesCompletionOrder">Save</MudButton>
+            }
+            <MudSpacer />
+            <MudButton StartIcon="@Icons.Material.Filled.Close" Variant="Variant.Filled" IconColor="Color.Error" OnClick="SendMessage">Close</MudButton>                
+        </MudToolBar>
+        <MudDivider Class="py-1 my-1"/>
+        <MudGrid Class="mx-2 my-2">
+            <MudItem xs="3">
+                <MudTextField @bind-Value="currentGeothermalPropertiesCompletionOrder.Name" Label="Name" Required="true" For="@(() => currentGeothermalPropertiesCompletionOrder.Name)" />
+            </MudItem>
+            <MudItem xs="3">            
+                <MudTextField @bind-Value="currentGeothermalPropertiesCompletionOrder.Description" Label="Description" For="@(() => currentGeothermalPropertiesCompletionOrder.Description)" />
+            </MudItem>
+            <MudItem xs="3">
+                @if (GeothermalPropertiesList != null)
+                {
+                    <MudSelect T="GeothermalProperties" Label="Geothermal Properties" @bind-Value="currentGeothermalPropertiesCompletionOrder.ReferenceGeothermalProperties">
+                        @foreach(GeothermalProperties geothermalProperties in GeothermalPropertiesList)
+                        {
+                            <MudSelectItem Value="@geothermalProperties">@geothermalProperties.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                }
+            </MudItem>
+            <MudItem xs="3">
+                <MudInputWithUnit
+                    QuantityLabel="Interpolation Step"
+                    QuantityName="DepthDrilling"
+                    SIValue="currentGeothermalPropertiesCompletionOrder.InterpolationStep"
+                    SIValueChanged="val => currentGeothermalPropertiesCompletionOrder.InterpolationStep = val"/>            
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudPaper>
+
+@code{
+     [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? Parent { get; set; }
+    [Parameter]
+    public Guid? GeothermalPropertiesCompletionOrderId { get; set; }
+    [Parameter]
+    public List<GeothermalProperties>? GeothermalPropertiesList { get; set; }
+    [Parameter]
+    public EventCallback ValueChanged {get; set;}    
+
+    private GeothermalPropertiesCompletionOrder currentGeothermalPropertiesCompletionOrder = PseudoConstructors.ConstructGeothermalPropertiesCompletionOrder();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (GeothermalPropertiesCompletionOrderId != null)
+        {
+            currentGeothermalPropertiesCompletionOrder = await APIUtils.ClientGeothermalProperties.GetGeothermalPropertiesCompletionOrderByIdAsync(GeothermalPropertiesCompletionOrderId.Value);
+        }
+        if (GeothermalPropertiesList == null)
+        {
+            Snackbar.Add("No geothermal table available", Severity.Warning);
+            await SendMessage();
+        }
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    //Send message to parent component
+    private async Task SendMessage()
+    {
+        await ValueChanged.InvokeAsync();
+    }  
+    //Add/Edit panel controls
+    private async Task SaveGeothermalPropertiesCompletionOrder()
+    {
+        try
+        {
+            if (GeothermalPropertiesCompletionOrderId != null)
+            {
+                currentGeothermalPropertiesCompletionOrder.LastModificationDate = DateTimeOffset.UtcNow;            
+                await APIUtils.ClientGeothermalProperties.PutGeothermalPropertiesCompletionOrderByIdAsync((Guid) GeothermalPropertiesCompletionOrderId, currentGeothermalPropertiesCompletionOrder);
+                Snackbar.Add("GeothermalPropertiesCompletionOrder updated successfully", Severity.Success);
+                await SendMessage();
+            }
+            else
+            {
+                Snackbar.Add("GeothermalPropertiesCompletionOrder not found for edition", Severity.Success);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error saving GeothermalPropertiesCompletionOrder");
+            Snackbar.Add("Error saving GeothermalPropertiesCompletionOrder: " + ex.Message, Severity.Warning);
+        }
+    }
+    private async Task SaveAsGeothermalPropertiesCompletionOrder()
+    {
+        try
+        {
+            currentGeothermalPropertiesCompletionOrder.MetaInfo.ID = Guid.NewGuid();
+            currentGeothermalPropertiesCompletionOrder.CreationDate = DateTimeOffset.UtcNow;
+            currentGeothermalPropertiesCompletionOrder.LastModificationDate = DateTimeOffset.UtcNow;
+            await APIUtils.ClientGeothermalProperties.PostGeothermalPropertiesCompletionOrderAsync(currentGeothermalPropertiesCompletionOrder);
+            Snackbar.Add("GeothermalPropertiesCompletionOrder updated successfully", Severity.Success);
+            await SendMessage();                        
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error saving GeothermalPropertiesCompletionOrder");
+            Snackbar.Add("Error saving GeothermalPropertiesCompletionOrder: " + ex.Message, Severity.Warning);
+        }
+    }      
+
+    //Update unit system
+    private void ManageUnits(){}        
+}

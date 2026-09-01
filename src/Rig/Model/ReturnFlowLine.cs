@@ -1,0 +1,7 @@
+namespace OSDC.Drilling.Rig.Model
+{
+    public class ReturnFlowLine : RigComponentBase
+    {
+        public ReturnFlowLine() { }
+    }
+}

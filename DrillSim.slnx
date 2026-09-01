@@ -1,0 +1,107 @@
+<Solution>
+  <Folder Name="/Aspire/">
+    <Project Path="aspire/DrillSim.AppHost/DrillSim.AppHost.csproj" />
+    <Project Path="aspire/DrillSim.ServiceDefaults/DrillSim.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/Services/" />
+  <Folder Name="/Services/CartographicProjection/">
+    <Project Path="src/CartographicProjection/Model/Model.csproj" />
+    <Project Path="src/CartographicProjection/ModelSharedIn/ModelSharedIn.csproj" />
+    <Project Path="src/CartographicProjection/Service/Service.csproj" />
+    <Project Path="src/CartographicProjection/WebPages/WebPages.csproj" />
+  </Folder>
+  <Folder Name="/Services/Cluster/">
+    <Project Path="src/Cluster/Model/Model.csproj" />
+    <Project Path="src/Cluster/Service/Service.csproj" />
+    <Project Path="src/Cluster/WebApp/WebApp.csproj" />
+    <Project Path="src/Cluster/WebPages/WebPages.csproj" />
+  </Folder>
+  <Folder Name="/Services/DrillingFluid/">
+    <Project Path="src/DrillingFluid/Model/Model.csproj" />
+    <Project Path="src/DrillingFluid/ModelSharedIn/ModelSharedIn.csproj" />
+    <Project Path="src/DrillingFluid/ParticleSwarmOptimization/ParticleSwarmOptimization.csproj" />
+    <Project Path="src/DrillingFluid/RheologicalModels/RheologicalModels.csproj" />
+    <Project Path="src/DrillingFluid/Service/Service.csproj" />
+  </Folder>
+  <Folder Name="/Services/DrillString/">
+    <Project Path="src/DrillString/Model/Model.csproj" />
+    <Project Path="src/DrillString/Service/Service.csproj" />
+  </Folder>
+  <Folder Name="/Services/EarthGravity/">
+    <Project Path="src/EarthGravity/Model/Model.csproj" />
+    <Project Path="src/EarthGravity/Service/Service.csproj" />
+    <Project Path="src/EarthGravity/WebPages/WebPages.csproj" />
+  </Folder>
+  <Folder Name="/Services/EarthMagneticField/">
+    <Project Path="src/EarthMagneticField/Model/Model.csproj" />
+    <Project Path="src/EarthMagneticField/Service/Service.csproj" />
+    <Project Path="src/EarthMagneticField/WebPages/WebPages.csproj" />
+  </Folder>
+  <Folder Name="/Services/EarthVerticalDatum/">
+    <Project Path="src/EarthVerticalDatum/Model/Model.csproj" />
+    <Project Path="src/EarthVerticalDatum/Service/Service.csproj" />
+    <Project Path="src/EarthVerticalDatum/WebPages/WebPages.csproj" />
+  </Folder>
+  <Folder Name="/Services/Field/">
+    <Project Path="src/Field/Model/Model.csproj" />
+    <Project Path="src/Field/ModelSharedIn/ModelSharedIn.csproj" />
+    <Project Path="src/Field/Service/Service.csproj" />
+    <Project Path="src/Field/WebPages/WebPages.csproj" />
+  </Folder>
+  <Folder Name="/Services/GeodeticDatum/">
+    <Project Path="src/GeodeticDatum/Model/Model.csproj" />
+    <Project Path="src/GeodeticDatum/Service/Service.csproj" />
+    <Project Path="src/GeodeticDatum/WebPages/WebPages.csproj" />
+  </Folder>
+  <Folder Name="/Services/GeologicalProperties/">
+    <Project Path="src/GeologicalProperties/Model/Model.csproj" />
+    <Project Path="src/GeologicalProperties/Service/Service.csproj" />
+  </Folder>
+  <Folder Name="/Services/GeothermalProperties/">
+    <Project Path="src/GeothermalProperties/Interpolation/Interpolation.csproj" />
+    <Project Path="src/GeothermalProperties/Model/Model.csproj" />
+    <Project Path="src/GeothermalProperties/ModelSharedIn/ModelSharedIn.csproj" />
+    <Project Path="src/GeothermalProperties/Service/Service.csproj" />
+  </Folder>
+  <Folder Name="/Services/Rig/">
+    <Project Path="src/Rig/Model/Model.csproj" />
+    <Project Path="src/Rig/Service/Service.csproj" />
+    <Project Path="src/Rig/WebPages/WebPages.csproj" />
+  </Folder>
+  <Folder Name="/Services/Simulator4nDOF/">
+    <Project Path="src/Simulator4nDOF/Model/Model.csproj" />
+    <Project Path="src/Simulator4nDOF/ModelSharedIn/ModelSharedIn.csproj" />
+    <Project Path="src/Simulator4nDOF/Service/Service.csproj" />
+    <Project Path="src/Simulator4nDOF/Simulator/Simulator.csproj" />
+  </Folder>
+  <Folder Name="/Services/SurveyInstrument/">
+    <Project Path="src/SurveyInstrument/Model/Model.csproj" />
+    <Project Path="src/SurveyInstrument/Service/Service.csproj" />
+  </Folder>
+  <Folder Name="/Services/Trajectory/">
+    <Project Path="src/Trajectory/GlobalAntiCollision/GlobalAntiCollision.csproj" />
+    <Project Path="src/Trajectory/Model/Model.csproj" />
+    <Project Path="src/Trajectory/ModelSharedIn/ModelSharedIn.csproj" />
+    <Project Path="src/Trajectory/Service/Service.csproj" />
+  </Folder>
+  <Folder Name="/Services/UnitConversion/">
+    <Project Path="src/UnitConversion/Model/Model.csproj" />
+    <Project Path="src/UnitConversion/Service/Service.csproj" />
+  </Folder>
+  <Folder Name="/Services/Well/">
+    <Project Path="src/Well/Model/Model.csproj" />
+    <Project Path="src/Well/Service/Service.csproj" />
+  </Folder>
+  <Folder Name="/Services/WellBore/">
+    <Project Path="src/WellBore/Model/Model.csproj" />
+    <Project Path="src/WellBore/Service/Service.csproj" />
+  </Folder>
+  <Folder Name="/Services/WellBoreArchitecture/">
+    <Project Path="src/WellBoreArchitecture/Model/Model.csproj" />
+    <Project Path="src/WellBoreArchitecture/Service/Service.csproj" />
+  </Folder>
+  <Folder Name="/Services/YPLCalibrationFromRheometer/">
+    <Project Path="src/YPLCalibrationFromRheometer/YPLCalibrationFromRheometer.Model/YPLCalibrationFromRheometer.Model.csproj" />
+    <Project Path="src/YPLCalibrationFromRheometer/YPLCalibrationFromRheometer.Service/YPLCalibrationFromRheometer.Service.csproj" />
+  </Folder>
+</Solution>

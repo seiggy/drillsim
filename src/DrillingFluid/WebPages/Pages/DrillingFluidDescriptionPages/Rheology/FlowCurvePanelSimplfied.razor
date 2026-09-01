@@ -1,0 +1,309 @@
+<MudPaper Class="my-4 mx-4" Style="@($"background:{Colors.Gray.Lighten4};")">  
+    <MudToolBar>          
+        <MudText Class="mt-1 mx-2" Typo="Typo.body1"><b>Flow Curve Properties</b></MudText>        
+                    
+        <MudSpacer/>
+        <MudButton Class="mx-2" StartIcon="@showGellingIcon" OnClick="OpenAndCloseTab " Size="Size.Medium"/>                                  
+    </MudToolBar>
+    <MudCollapse Expanded="@showPanel">
+        <MudDivider Class="pb-2"/> 
+         <MudToolBar>          
+            <MudText Class="mt-1 mx-2" Typo="Typo.body1"><b>Rheometer Properties</b></MudText>                        
+            <MudSpacer/>         
+        </MudToolBar>                 
+        <MudGrid Class="mx-3 pb-4 align-end"> 
+            <MudItem xs="2" Class ="mx-2 my-2">
+                <MudTextField @bind-Value="@rheometer.Name" Label="Name" ShrinkLabel/>
+            </MudItem>
+            <MudItem xs="2" Class ="mx-2 my-2">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                    QuantityLabel="Bob Radius" QuantityName="LengthSmall"
+                    SIValueNullable="@rheometer.BobRadius"
+                    SIValueNullableChanged="@UpdateBobDiameter"/>
+            </MudItem> 
+            <MudItem xs="2" Class ="mx-2 my-2">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                    QuantityLabel="Gap Size" QuantityName="LengthSmall"
+                    SIValueNullable="@rheometer.Gap"
+                    SIValueNullableChanged="@UpdateGap"/>
+            </MudItem>   
+            <MudItem xs="2" Class ="mx-2 my-2">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                    QuantityLabel="Bob length" QuantityName="LengthSmall"
+                    SIValueNullable="@rheometer.BobLength"
+                    SIValueNullableChanged="@UpdateBobLength"/>
+            </MudItem>
+            <MudItem xs="2" Class ="mx-2 my-2">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                    QuantityLabel="End-effect correction" QuantityName=""
+                    SIValueNullable="@rheometer.NewtonianEndEffectCorrection"
+                    SIValueNullableChanged="@UpdateNewtonianCorrectionCoeff"/>
+            </MudItem>   
+            <MudItem xs="2" Class ="mx-2 my-2">
+                <MudSelect T="RheometerTypeEnum" @bind-Value="@rheometer.RheometerType"
+                        Text="@(RheoConfigurationDict[rheometer.RheometerType])"
+                        Label="Configuration" ShrinkLabel>
+                    @foreach (RheometerTypeEnum rheoConf in Enum.GetValues(typeof(RheometerTypeEnum)))
+                    {
+                        <MudSelectItem Value="@rheoConf">@RheoConfigurationDict[rheoConf]</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+        </MudGrid>
+        <MudDivider Class="pb-2"/>       
+        <MudItem>
+            <MudStack Class="mx-4 my-2">
+                <MudText Typo="@Typo.body1"><b>x-axis:</b></MudText>
+                <MudRadioGroup T="MeasurementTypesShearRate" Value="@shearRateInputType" ValueChanged="@ShearRateRadioChanged">
+                    <MudRadio  Value="MeasurementTypesShearRate.Rotation"> Rotation </MudRadio>
+                    <MudRadio  Value="MeasurementTypesShearRate.IsoNewtonianShearRate" > Shear-Rate </MudRadio>
+                    <MudRadio  Value="MeasurementTypesShearRate.BobNewtonianShearRate" > Shear-Rate at Bob </MudRadio>                
+                </MudRadioGroup>
+                <MudText Typo="@Typo.body1"><b>y-axis:</b></MudText>
+                <MudRadioGroup T="MeasurementTypesShearStress" Value="@shearStressInputType" ValueChanged="@ShearStressRadioChanged">
+                    <MudRadio  Value="MeasurementTypesShearStress.Torque"> Torque </MudRadio>
+                    <MudRadio  Value="MeasurementTypesShearStress.IsoNewtonianShearStress" > Shear-Stress </MudRadio>
+                    <MudRadio  Value="MeasurementTypesShearStress.BobNewtonianShearStress" > Shear-Stress at Bob </MudRadio>                
+                </MudRadioGroup>
+            </MudStack>            
+        </MudItem>     
+        <MudDivider/>
+        <MudGrid Class="mx-3 pb-4 pt-2">        
+            <MudItem xs="2" Class ="mx-2 my-2">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                    QuantityLabel="Temperature" QuantityName="TemperatureDrilling"
+                    SIValueNullable="@temperatureList[0]"
+                    SIValueNullableChanged="val => {UpdateTemperature(val, 0);}"/>
+            </MudItem>
+            <MudItem xs="2" Class ="mx-2 my-2">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                    QuantityLabel="PressureDrilling" QuantityName="PressureDrilling"
+                    SIValueNullable="@pressureList[0]"
+                    SIValueNullableChanged="val => {UpdatePressure(val, 0);}"/>
+            </MudItem>   
+                                    
+        </MudGrid>
+        <RheometerMeasurementsEdit 
+            ShearRateInputType="@shearRateInputType"
+            ShearStressInputType="@shearStressInputType"
+            RheometerMeasurements="@rheometerMeasurements[0]" 
+            OnMessageSent="@UpdateRheometerMeasurements" />                      
+        @if (showAlert)
+        {
+            <MudAlert Severity="Severity.Error" 
+                ContentAlignment="HorizontalAlignment.Center" 
+                ShowCloseIcon="true" 
+                CloseIconClicked="CloseAlert">
+                    At least <b>two</b> itens are necessary!
+            </MudAlert>
+        }
+    </MudCollapse>
+</MudPaper>    
+
+@code{
+    [Parameter]
+    public FlowCurve FlowCurve {get; set;}
+    private bool showPanel = true;
+    private string showGellingIcon = Icons.Material.Filled.ExpandLess; 
+    private CouetteRheometer rheometer = new CouetteRheometer
+    {
+        Name = "Couette Rheometer",
+        BobLength = 10E-3,
+        BobRadius = 2.5E-3,
+        Gap = 0.1E-3,
+        RheometerType = RheometerTypeEnum._0,
+        NewtonianEndEffectCorrection = 1.0    
+    };
+    
+    private List<FlowCurveTable> flowCurveTable = new List<FlowCurveTable>
+    {   
+        new FlowCurveTable
+        {
+            Temperature = ConversionsFromOSDC.DoubleToGaussian(null),
+            Pressure = ConversionsFromOSDC.DoubleToGaussian(null),
+            ShearRateReference = MeasurementTypesShearRate.Rotation,
+            ShearStressReference = MeasurementTypesShearStress.IsoNewtonianShearStress,
+            RheometerMeasurements = new List<RheometerMeasurement>
+            {
+                new RheometerMeasurement
+                {
+                    RotationalSpeed = 0.0,
+                    Torque = 0.0,                    
+                    IsoNewtonianShearRate = 0.0,
+                    IsoNewtonianShearStress = 0.0,
+                    BobNewtonianShearRate = 0.0,
+                    BobNewtonianShearStress = 0.0,
+                }
+            }
+        }
+    };
+    private List<double?> temperatureList = new List<double?>{323};
+    private List<double?> pressureList = new List<double?>{100_000};
+    private List<List<RheometerMeasurement>> rheometerMeasurements = new List<List<RheometerMeasurement>>
+        { 
+            new List<RheometerMeasurement>
+            {
+              new RheometerMeasurement
+                {
+                    RotationalSpeed = 0.0,
+                    Torque = 0.0,                    
+                    IsoNewtonianShearRate = 0.0,
+                    IsoNewtonianShearStress = 0.0,
+                    BobNewtonianShearRate = 0.0,
+                    BobNewtonianShearStress = 0.0,
+                }
+            }
+        };
+    private MeasurementTypesShearRate shearRateInputType = MeasurementTypesShearRate.Rotation;
+    private MeasurementTypesShearStress shearStressInputType = MeasurementTypesShearStress.IsoNewtonianShearStress;
+    
+    private Dictionary<RheometerTypeEnum, string> RheoConfigurationDict = new Dictionary<RheometerTypeEnum, string>
+    {   
+        {RheometerTypeEnum._0, "Rotating Cup"},
+        {RheometerTypeEnum._1, "Rotating Bob"},
+    };
+
+    private bool showAlert = false;
+            
+    protected override void OnInitialized()
+    {
+        if (FlowCurve != null)
+        {
+            rheometer = FlowCurve.CouetteRheometer;
+            flowCurveTable = FlowCurve.TableValues.ToList();
+            //GUI accepts only one type of measurement per fluid
+            shearRateInputType = flowCurveTable[0].ShearRateReference;
+            shearStressInputType = flowCurveTable[0].ShearStressReference;
+            for (int i = 0; i < flowCurveTable.Count; i++)
+            {
+                if (i < temperatureList.Count)
+                {
+                    temperatureList[i] = ConversionsFromOSDC.GaussianToDouble(flowCurveTable[i].Temperature);
+                    pressureList[i] = ConversionsFromOSDC.GaussianToDouble(flowCurveTable[i].Pressure);
+                    rheometerMeasurements[i] = flowCurveTable[i].RheometerMeasurements.ToList();                    
+                }
+                else
+                {
+                    temperatureList.Add(ConversionsFromOSDC.GaussianToDouble(flowCurveTable[i].Temperature));
+                    pressureList.Add(ConversionsFromOSDC.GaussianToDouble(flowCurveTable[i].Pressure));
+                    rheometerMeasurements[i] = flowCurveTable[i].RheometerMeasurements.ToList();          
+                }
+            }
+        }
+        base.OnInitialized();
+    }
+    protected override void OnParametersSet()
+    {
+        if (FlowCurve != null)
+        {
+            rheometer = FlowCurve.CouetteRheometer;
+            flowCurveTable = FlowCurve.TableValues.ToList();
+            shearRateInputType = flowCurveTable[0].ShearRateReference;
+            shearStressInputType = flowCurveTable[0].ShearStressReference;
+            int i = 0;
+            foreach (FlowCurveTable table in FlowCurve.TableValues)
+            {
+                if (i < temperatureList.Count)
+                {
+                    temperatureList[i] = ConversionsFromOSDC.GaussianToDouble(table.Temperature);
+                    pressureList[i] = ConversionsFromOSDC.GaussianToDouble(table.Pressure);
+                    rheometerMeasurements[i] = flowCurveTable[i].RheometerMeasurements.ToList();                  
+                }
+                else
+                {
+                    temperatureList.Add(ConversionsFromOSDC.GaussianToDouble(table.Temperature));
+                    pressureList.Add(ConversionsFromOSDC.GaussianToDouble(table.Pressure));
+                    rheometerMeasurements.Add(flowCurveTable[i].RheometerMeasurements.ToList());                                
+                }
+                i += 1;
+            }
+        }
+    }
+    void OpenAndCloseTab()
+    {
+        //Control collapse of this property
+        if (showPanel)
+        {
+            showGellingIcon = Icons.Material.Filled.ExpandMore;     
+        }    
+        else
+        {
+            showGellingIcon = Icons.Material.Filled.ExpandLess;
+        }
+        showPanel = !showPanel;
+    }
+ 
+    void CloseAlert()
+    {
+        showAlert = false;
+    }
+    //Unit management
+    void ManageUnits(){}
+    void UpdateBobDiameter(double? val)
+    {
+        if (val == null)
+            return;
+        else
+            rheometer.BobRadius   = (double)val;
+    }
+    void UpdateGap(double? val)
+    {
+        if (val == null)
+            return;
+        else
+            rheometer.Gap = (double)val;        
+    }
+    void UpdateBobLength(double? val)
+    {
+        if (val == null)
+            return;
+        else
+            rheometer.BobLength = (double)val;        
+    }
+    void UpdateNewtonianCorrectionCoeff(double? val)
+    {
+        if (val == null)
+            return;
+        else
+            rheometer.NewtonianEndEffectCorrection = (double)val;        
+    }
+    void UpdateTemperature(double? val, int index)
+    {
+        temperatureList[index] = val;
+        flowCurveTable[index].Temperature = ConversionsFromOSDC.DoubleToGaussian(val);
+        FlowCurve.TableValues = flowCurveTable;
+    }
+    void UpdatePressure(double? val, int index)
+    {
+        pressureList[index] = val;
+        flowCurveTable[index].Pressure = ConversionsFromOSDC.DoubleToGaussian(val);
+        FlowCurve.TableValues = flowCurveTable;
+    }
+    private void UpdateRheometerMeasurements()
+    {
+        for (int index = 0; index < flowCurveTable.Count; index++)
+        {
+            flowCurveTable[index].RheometerMeasurements = rheometerMeasurements[index];
+            FlowCurve.TableValues = flowCurveTable; 
+        }        
+    }
+    private void ShearRateRadioChanged(MeasurementTypesShearRate val)
+    {
+        shearRateInputType = val;
+        for (int index = 0; index < flowCurveTable.Count; index++)
+        {
+            flowCurveTable[index].ShearRateReference = shearRateInputType;
+            flowCurveTable[index].ShearStressReference = shearStressInputType;            
+        }
+    }
+    private void ShearStressRadioChanged(MeasurementTypesShearStress val)
+    {
+        shearStressInputType = val;
+        for (int index = 0; index < flowCurveTable.Count; index++)
+        {
+            flowCurveTable[index].ShearRateReference = shearRateInputType;
+            flowCurveTable[index].ShearStressReference = shearStressInputType;
+        }
+    }
+
+}

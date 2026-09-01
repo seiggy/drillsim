@@ -1,0 +1,502 @@
+@implements IUnitAwareComponent
+@inject ILogger<SpheroidEdit> logger
+@inject IGeodeticDatumAPIUtils Api
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<MudText Class="mt-4 mb-4" Typo="Typo.h6">Edit Spheroid</MudText>
+<MudContainer Class="d-flex flex-row align-center mt-4 mb-4">
+    <MudButton Class="me-1" Variant="Variant.Filled" Color="Color.Success" OnClick="Save">Save</MudButton>
+    <MudButton Class="me-1" Variant="Variant.Filled" Color="Color.Error" OnClick="CloseEditorAsync">Close</MudButton>
+</MudContainer>
+
+<MudExpansionPanels Class="mt-4 mb-4">
+    <MudExpansionPanel Text="Description" Expanded="true">
+        <MudGrid>
+            <MudItem xs="12" md="3">
+                <MudTextField @bind-Value="@name" Label="Name" Required="true" ShrinkLabel Immediate="true" />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudTextField @bind-Value="@descr" Label="Description" ShrinkLabel Immediate="true" />
+            </MudItem>
+        </MudGrid>
+    </MudExpansionPanel>
+    <MudExpansionPanel Text="Configuration">
+        <MudGrid>
+            <MudItem xs="12" md="4">
+                <MudCheckBox Label="Use Semi-major Axis"
+                             Value="@IsSemiMajorAxisSet"
+                             ValueChanged="@(EventCallback.Factory.Create<bool>(this, ToggleSemiMajorAxis))">
+                </MudCheckBox>
+            </MudItem>
+            <MudItem xs="12" md="8">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                           QuantityLabel="Semi-major Axis"
+                                           QuantityName="LengthStandard"
+                                           SIValueNullable="SemiMajorAxis"
+                                           SIValueNullableChanged="SetSemiMajorAxis"
+                                           ReadOnly="@(!IsSemiMajorAxisSet)"
+                                           Immediate="true" />
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudCheckBox Label="Use Semi-minor Axis"
+                             Value="@IsSemiMinorAxisSet"
+                             ValueChanged="@(EventCallback.Factory.Create<bool>(this, ToggleSemiMinorAxis))"></MudCheckBox>
+            </MudItem>
+            <MudItem xs="12" md="8">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                           QuantityLabel="Semi-minor Axis"
+                                           QuantityName="LengthStandard"
+                                           SIValueNullable="SemiMinorAxis"
+                                           SIValueNullableChanged="SetSemiMinorAxis"
+                                           ReadOnly="@(!IsSemiMinorAxisSet)"
+                                           Immediate="true" />
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudCheckBox Label="Use Eccentricity"
+                             Value="@IsEccentricitySet"
+                             ValueChanged="@(EventCallback.Factory.Create<bool>(this, ToggleEccentricity))"></MudCheckBox>
+            </MudItem>
+            <MudItem xs="12" md="8">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                           QuantityLabel="Eccentricity"
+                                           QuantityName="DimensionLessStandard"
+                                           SIValueNullable="Eccentricity"
+                                           SIValueNullableChanged="SetEccentricity"
+                                           ReadOnly="@(!IsEccentricitySet)"
+                                           Immediate="true" />
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudCheckBox Label="Use Squared Eccentricity"
+                             Value="@IsSquaredEccentricitySet"
+                             ValueChanged="@(EventCallback.Factory.Create<bool>(this, ToggleSquaredEccentricity))"></MudCheckBox>
+            </MudItem>
+            <MudItem xs="12" md="8">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                           QuantityLabel="Squared Eccentricity"
+                                           QuantityName="DimensionLessStandard"
+                                           SIValueNullable="SquaredEccentricity"
+                                           SIValueNullableChanged="SetSquaredEccentricity"
+                                           ReadOnly="@(!IsSquaredEccentricitySet)"
+                                           Immediate="true" />
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudCheckBox Label="Use Flattening"
+                             Value="@IsFlatteningSet"
+                             ValueChanged="@(EventCallback.Factory.Create<bool>(this, ToggleFlattening))"></MudCheckBox>
+            </MudItem>
+            <MudItem xs="12" md="8">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                           QuantityLabel="Flattening"
+                                           QuantityName="DimensionLessStandard"
+                                           SIValueNullable="Flattening"
+                                           SIValueNullableChanged="SetFlattening"
+                                           ReadOnly="@(!IsFlatteningSet)"
+                                           Immediate="true" />
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudCheckBox Label="Use Inverse Flattening"
+                             Value="@IsInverseFlatteningSet"
+                             ValueChanged="@(EventCallback.Factory.Create<bool>(this, ToggleInverseFlattening))"></MudCheckBox>
+            </MudItem>
+            <MudItem xs="12" md="8">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                                           QuantityLabel="Inverse Flattening"
+                                           QuantityName="DimensionLessStandard"
+                                           SIValueNullable="InverseFlattening"
+                                           SIValueNullableChanged="SetInverseFlattening"
+                                           ReadOnly="@(!IsInverseFlatteningSet)"
+                                           Immediate="true" />
+            </MudItem>
+        </MudGrid>
+    </MudExpansionPanel>
+</MudExpansionPanels>
+@code {
+    [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? Parent { get; set; }
+
+    [Parameter]
+    public Spheroid? CurrentSpheroid { get; set; }
+
+    [Parameter]
+    public Action? OnUpdate { get; set; }
+
+    // Local variables used to retrieve user-defined parameters
+    private string? name;
+    private string? descr;
+    private bool IsSemiMajorAxisSet = false;
+    private bool IsSemiMinorAxisSet = false;
+    private bool IsEccentricitySet = false;
+    private bool IsSquaredEccentricitySet = false;
+    private bool IsFlatteningSet = false;
+    private bool IsInverseFlatteningSet = false;
+    private double? SemiMajorAxis = null;
+    private double? SemiMinorAxis = null;
+    private double? Eccentricity = null;
+    private double? SquaredEccentricity = null;
+    private double? Flattening = null;
+    private double? InverseFlattening = null;
+    private string? cleanSpheroidSnapshot_;
+    private bool hasUnsavedSpheroidChanges_;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (Parent == null)
+                throw new ArgumentNullException(nameof(Parent), "TargetEdit page must exist within a MudUnitAndReferenceChoiceTag");
+            Parent.Add(this);
+            ManageUnits();
+
+            if (CurrentSpheroid != null && CurrentSpheroid.MetaInfo != null)
+            {
+                name = CurrentSpheroid.Name;
+                descr = CurrentSpheroid.Description;
+                IsSemiMajorAxisSet = CurrentSpheroid.IsSemiMajorAxisSet;
+                IsSemiMinorAxisSet = CurrentSpheroid.IsSemiMinorAxisSet;
+                IsEccentricitySet = CurrentSpheroid.IsEccentricitySet;
+                IsSquaredEccentricitySet = CurrentSpheroid.IsSquaredEccentricitySet;
+                IsFlatteningSet = CurrentSpheroid.IsFlatteningSet;
+                IsInverseFlatteningSet = CurrentSpheroid.IsInverseFlatteningSet;
+                if (CurrentSpheroid.IsSemiMajorAxisSet && CurrentSpheroid.SemiMajorAxis != null && CurrentSpheroid.SemiMajorAxis.DiracDistributionValue != null)
+                {
+                    SemiMajorAxis = CurrentSpheroid.SemiMajorAxis.DiracDistributionValue.Value;
+                }
+                else
+                {
+                    SemiMajorAxis = null;
+                }
+                if (CurrentSpheroid.IsSemiMinorAxisSet && CurrentSpheroid.SemiMinorAxis != null && CurrentSpheroid.SemiMinorAxis.DiracDistributionValue != null)
+                {
+                    SemiMinorAxis = CurrentSpheroid.SemiMinorAxis.DiracDistributionValue.Value;
+                }
+                else
+                {
+                    SemiMinorAxis = null;
+                }
+                if (CurrentSpheroid.IsEccentricitySet && CurrentSpheroid.Eccentricity != null && CurrentSpheroid.Eccentricity.DiracDistributionValue != null)
+                {
+                    Eccentricity = CurrentSpheroid.Eccentricity.DiracDistributionValue.Value;
+                }
+                else
+                {
+                    Eccentricity = null;
+                }
+                if (CurrentSpheroid.IsSquaredEccentricitySet && CurrentSpheroid.SquaredEccentricity != null && CurrentSpheroid.SquaredEccentricity.DiracDistributionValue != null)
+                {
+                    SquaredEccentricity = CurrentSpheroid.SquaredEccentricity.DiracDistributionValue.Value;
+                }
+                else
+                {
+                    SquaredEccentricity = null;
+                }
+                if (CurrentSpheroid.IsFlatteningSet && CurrentSpheroid.Flattening != null && CurrentSpheroid.Flattening.DiracDistributionValue != null)
+                {
+                    Flattening = CurrentSpheroid.Flattening.DiracDistributionValue.Value;
+                }
+                else
+                {
+                    Flattening = null;
+                }
+                if (CurrentSpheroid.IsInverseFlatteningSet && CurrentSpheroid.InverseFlattening != null && CurrentSpheroid.InverseFlattening.DiracDistributionValue != null)
+                {
+                    InverseFlattening = CurrentSpheroid.InverseFlattening.DiracDistributionValue.Value;
+                }
+                else
+                {
+                    InverseFlattening = null;
+                }
+            }
+            else
+            {
+                logger.LogError("Current Spheroid is null or badly formed");
+                Snackbar.Add("Current Spheroid is null or badly formed", Severity.Error);
+            }
+            MarkSpheroidClean();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem on Spheroid initialization");
+            Snackbar.Add("Problem on Spheroid initialization", Severity.Error);
+        }
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    public void ManageUnits()
+    {
+
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            if (CurrentSpheroid != null && CurrentSpheroid.MetaInfo != null)
+            {
+                int count = 0;
+                int countAxes = 0;
+                if (IsSemiMajorAxisSet && SemiMajorAxis != null)
+                {
+                    count++;
+                    countAxes++;
+                }
+                if (IsSemiMinorAxisSet && SemiMinorAxis != null)
+                {
+                    count++;
+                    countAxes++;
+                }
+                if (IsEccentricitySet && Eccentricity != null)
+                {
+                    count++;
+                }
+                if (IsSquaredEccentricitySet && SquaredEccentricity != null)
+                {
+                    count++;
+                }
+                if (IsFlatteningSet && Flattening != null)
+                {
+                    count++;
+                }
+                if (IsInverseFlatteningSet && InverseFlattening != null)
+                {
+                    count++;
+                }
+                if (count != 2 || countAxes == 0)
+                {
+                    if (count != 2)
+                    {
+                        logger.LogWarning("There shall be exactly two parameters defined.");
+                        Snackbar.Add("There shall be exactly two parameters defined.", Severity.Warning);
+                    }
+                    else if (countAxes == 0)
+                    {
+                        logger.LogWarning("It is necessary to define at least one of the semi-major or the semi-minor axes.");
+                        Snackbar.Add("It is necessary to define at least one of the semi-major or the semi-minor axes.", Severity.Warning);
+                    }
+                }
+                else
+                {
+                    Spheroid spheroid = BuildEditedSpheroid(DateTimeOffset.UtcNow);
+                    await Api.ClientGeodeticDatum.PutSpheroidByIdAsync(CurrentSpheroid.MetaInfo.ID, spheroid);
+                    CurrentSpheroid = await Api.ClientGeodeticDatum.GetSpheroidByIdAsync(CurrentSpheroid.MetaInfo.ID);
+                    MarkSpheroidClean();
+                    logger.LogInformation("Updated the Spheroid successfully");
+                    Snackbar.Add("Saved the Spheroid successfully", Severity.Success);
+                }
+            }
+            else
+            {
+                logger.LogWarning("Problem while updating the Spheroid");
+                Snackbar.Add("Problem while updating the Spheroid", Severity.Warning);
+            }
+        }
+        catch (ApiException ex)
+        {
+            logger.LogError(ex, "Problem while updating the Spheroid");
+            Snackbar.Add("Problem while updating the Spheroid", Severity.Warning);
+        }
+    }
+
+    private async Task CloseEditorAsync()
+    {
+        if (HasUnsavedSpheroidChanges() && !await ConfirmCloseWithoutSavingAsync())
+        {
+            return;
+        }
+
+        OnUpdate?.Invoke();
+    }
+
+    private Spheroid BuildEditedSpheroid(DateTimeOffset lastModificationDate)
+    {
+        if (CurrentSpheroid?.MetaInfo == null)
+        {
+            throw new InvalidOperationException("Current Spheroid is null or badly formed");
+        }
+
+        Spheroid spheroid = new()
+        {
+            MetaInfo = CurrentSpheroid.MetaInfo,
+            Name = name,
+            Description = descr,
+            CreationDate = CurrentSpheroid.CreationDate,
+            LastModificationDate = lastModificationDate
+        };
+
+        if (IsSemiMajorAxisSet)
+        {
+            spheroid.SemiMajorAxis = new() { DiracDistributionValue = new() { Value = SemiMajorAxis } };
+            spheroid.IsSemiMajorAxisSet = true;
+        }
+        if (IsSemiMinorAxisSet)
+        {
+            spheroid.SemiMinorAxis = new() { DiracDistributionValue = new() { Value = SemiMinorAxis } };
+            spheroid.IsSemiMinorAxisSet = true;
+        }
+        if (IsEccentricitySet)
+        {
+            spheroid.Eccentricity = new() { DiracDistributionValue = new() { Value = Eccentricity } };
+            spheroid.IsEccentricitySet = true;
+        }
+        if (IsSquaredEccentricitySet)
+        {
+            spheroid.SquaredEccentricity = new() { DiracDistributionValue = new() { Value = SquaredEccentricity } };
+            spheroid.IsSquaredEccentricitySet = true;
+        }
+        if (IsFlatteningSet)
+        {
+            spheroid.Flattening = new() { DiracDistributionValue = new() { Value = Flattening } };
+            spheroid.IsFlatteningSet = true;
+        }
+        if (IsInverseFlatteningSet)
+        {
+            spheroid.InverseFlattening = new() { DiracDistributionValue = new() { Value = InverseFlattening } };
+            spheroid.IsInverseFlatteningSet = true;
+        }
+
+        return spheroid;
+    }
+
+    private void MarkSpheroidClean()
+    {
+        cleanSpheroidSnapshot_ = BuildSpheroidDirtySnapshot();
+        hasUnsavedSpheroidChanges_ = false;
+    }
+
+    private bool HasUnsavedSpheroidChanges()
+    {
+        return hasUnsavedSpheroidChanges_ ||
+            cleanSpheroidSnapshot_ != null &&
+            !string.Equals(cleanSpheroidSnapshot_, BuildSpheroidDirtySnapshot(), StringComparison.Ordinal);
+    }
+
+    private string BuildSpheroidDirtySnapshot()
+    {
+        return JsonSerializer.Serialize(new
+        {
+            SpheroidId = CurrentSpheroid?.MetaInfo?.ID,
+            Name = name,
+            Description = descr,
+            IsSemiMajorAxisSet,
+            IsSemiMinorAxisSet,
+            IsEccentricitySet,
+            IsSquaredEccentricitySet,
+            IsFlatteningSet,
+            IsInverseFlatteningSet,
+            SemiMajorAxis,
+            SemiMinorAxis,
+            Eccentricity,
+            SquaredEccentricity,
+            Flattening,
+            InverseFlattening
+        });
+    }
+
+    private async Task<bool> ConfirmCloseWithoutSavingAsync()
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Unsaved changes",
+            "Some changes have not been saved. Close without saving?",
+            yesText: "Close without saving",
+            cancelText: "Stay",
+            options: new DialogOptions
+            {
+                CloseOnEscapeKey = true,
+                FullWidth = false,
+                MaxWidth = MaxWidth.ExtraSmall
+            });
+
+        return result == true;
+    }
+
+    private void ToggleSemiMajorAxis(bool x)
+    {
+        hasUnsavedSpheroidChanges_ = true;
+        IsSemiMajorAxisSet = x;
+        if (!x)
+        {
+            SemiMajorAxis = null;
+        }
+    }
+    private void ToggleSemiMinorAxis(bool x)
+    {
+        hasUnsavedSpheroidChanges_ = true;
+        IsSemiMinorAxisSet = x;
+        if (!x)
+        {
+            SemiMinorAxis = null;
+        }
+    }
+    private void ToggleEccentricity(bool x)
+    {
+        hasUnsavedSpheroidChanges_ = true;
+        IsEccentricitySet = x;
+        if (!x)
+        {
+            Eccentricity = null;
+        }
+    }
+    private void ToggleSquaredEccentricity(bool x)
+    {
+        hasUnsavedSpheroidChanges_ = true;
+        IsSquaredEccentricitySet = x;
+        if (!x)
+        {
+            SquaredEccentricity = null;
+        }
+    }
+    private void ToggleFlattening(bool x)
+    {
+        hasUnsavedSpheroidChanges_ = true;
+        IsFlatteningSet = x;
+        if (!x)
+        {
+            Flattening = null;
+        }
+    }
+    private void ToggleInverseFlattening(bool x)
+    {
+        hasUnsavedSpheroidChanges_ = true;
+        IsInverseFlatteningSet = x;
+        if (!x)
+        {
+            InverseFlattening = null;
+        }
+    }
+
+    private void SetSemiMajorAxis(double? value)
+    {
+        SemiMajorAxis = value;
+        hasUnsavedSpheroidChanges_ = true;
+    }
+
+    private void SetSemiMinorAxis(double? value)
+    {
+        SemiMinorAxis = value;
+        hasUnsavedSpheroidChanges_ = true;
+    }
+
+    private void SetEccentricity(double? value)
+    {
+        Eccentricity = value;
+        hasUnsavedSpheroidChanges_ = true;
+    }
+
+    private void SetSquaredEccentricity(double? value)
+    {
+        SquaredEccentricity = value;
+        hasUnsavedSpheroidChanges_ = true;
+    }
+
+    private void SetFlattening(double? value)
+    {
+        Flattening = value;
+        hasUnsavedSpheroidChanges_ = true;
+    }
+
+    private void SetInverseFlattening(double? value)
+    {
+        InverseFlattening = value;
+        hasUnsavedSpheroidChanges_ = true;
+    }
+}

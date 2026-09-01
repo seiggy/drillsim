@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <AssemblyName>OSDC.UnitConversion.WebPages</AssemblyName>
+    <RootNamespace>OSDC.UnitConversion.WebPages</RootNamespace>
+    <PackageId>OSDC.UnitConversion.WebPages</PackageId>
+    <Title>OSDC.UnitConversion.WebPages</Title>
+    <Authors>Eric Cayeux</Authors>
+    <Company>NORCE</Company>
+    <Description>Reusable Razor class library containing the UnitConversion web pages.</Description>
+    <PackageTags>unitconversion;drilling;blazor;razor;mudblazor</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/Open-Source-Drilling-Community/UnitConversion</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/Open-Source-Drilling-Community/UnitConversion</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Version>3.4.1</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MudBlazor" Version="6.21.0" />
+    <PackageReference Include="MudBlazor.Markdown" Version="1.0.2" />
+    <PackageReference Include="OSDC.DotnetLibraries.General.DataManagement" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\ModelShared\ModelSharedFromOpenApi.cs" Link="GeneratedDtos\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

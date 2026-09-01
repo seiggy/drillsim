@@ -1,0 +1,96 @@
+﻿@inject ILogger<MudAutoCompleteForUnit> logger
+
+<MudAutocomplete T="UnitChoice" Value="Unit" ValueChanged="UpdateFromUnit"
+                 ToStringFunc="@(e=> e==null?null : $"{e.UnitLabel} ({(e.IsSI ? "SI, " : "")}{e.UnitName})")" SearchFunc="@SearchUnit"
+                 MaxItems="null" ResetValueOnEmptyText="true" CoerceText="false" CoerceValue="false"
+                 Adornment="Adornment.End" adornmentIcon="@adornmentIcon" adornmentColor="@adornmentColor" Immediate="true">
+    @Unit.UnitLabel
+</MudAutocomplete>
+
+@code {
+        [CascadingParameter]
+        public MudDataGrid<QuantityUnitConversion> DataGrid { get; set; } = default!;
+
+        [Parameter]
+        [EditorRequired]
+        public CellContext<QuantityUnitConversion> Context { get; set; } = default!;
+
+        [Parameter]
+        [EditorRequired]
+        public ICollection<UnitChoice> UnitChoices { get; set; } = default!;
+
+        [Parameter]
+        [EditorRequired]
+        public bool IsUnitChoiceIn { get; set; }
+
+    private UnitChoice Unit
+    {
+        get => IsUnitChoiceIn ? UnitChoices.First(u => u.ID == Context.Item.UnitChoiceIDIn) : UnitChoices.First(u => u.ID == Context.Item.UnitChoiceIDOut);
+    }
+
+    private string adornmentIcon = MudBlazor.Icons.Material.Filled.Search;
+    private Color adornmentColor = Color.Primary;
+
+    public async Task UpdateFromUnit(UnitChoice unitChoice)
+    {
+        if (unitChoice != null)
+        {
+            try
+            {
+                if (IsUnitChoiceIn)
+                {
+                    Context.Item.UnitChoiceIDIn = unitChoice.ID;
+                }
+                else
+                {
+                    Context.Item.UnitChoiceIDOut = unitChoice.ID;
+                }
+                await DataGrid.CommittedItemChanges.InvokeAsync(Context.Item);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Unit label does not belong to the available names or labels");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Function that searches for the given unit string inside any of the unit labels and unit names of the current unit choices
+    /// </summary>
+    /// <param name="unitString"></param>
+    /// <returns></returns>
+    private async Task<IEnumerable<UnitChoice>> SearchUnit(string unitString)
+    {
+        List<UnitChoice> unitChoiceList = [];
+        await Task.Delay(1);
+
+        // if text is null or empty, show complete list
+        if (string.IsNullOrWhiteSpace(unitString))
+        {
+            unitChoiceList = UnitChoices.ToList();
+        }
+        else
+        {
+            // case 1 and 2 account for the string present when clicking on the autocomplete, it needs to be validated too
+            // case 3 accounts for the search after the SI unit choice
+            // case 4 and 5 account for the standard search of a string contained within the unit name or label
+            unitChoiceList = UnitChoices.Where(x => $"{x.UnitLabel} ({x.UnitName})".Equals(unitString, StringComparison.InvariantCultureIgnoreCase) ||
+                                                    $"{x.UnitLabel} (SI, {x.UnitName})".Equals(unitString, StringComparison.InvariantCultureIgnoreCase) ||
+                                                    (x.IsSI && (unitString.Equals("S", StringComparison.InvariantCultureIgnoreCase) ||
+                                                                unitString.Equals("SI", StringComparison.InvariantCultureIgnoreCase) ||
+                                                                unitString.Equals("I", StringComparison.InvariantCultureIgnoreCase))) ||
+                                                    x.UnitLabel.Contains(unitString, StringComparison.InvariantCultureIgnoreCase) ||
+                                                    x.UnitName.Contains(unitString, StringComparison.InvariantCultureIgnoreCase)).ToList();
+            if (unitChoiceList == null || !unitChoiceList.Any())
+            {
+                adornmentIcon = MudBlazor.Icons.Material.Filled.Warning;
+                adornmentColor = Color.Warning;
+                await InvokeAsync(() => { StateHasChanged(); });
+                return [];
+            }
+    }
+            adornmentIcon = MudBlazor.Icons.Material.Filled.Search;
+            adornmentColor = Color.Primary;
+            return unitChoiceList;
+        }
+    }

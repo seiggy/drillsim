@@ -1,0 +1,607 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Service, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+    "version": "1.0"
+  },
+  "paths": {
+    "/GeothermalProperties": {
+      "get": {
+        "tags": [
+          "GeothermalProperties"
+        ],
+        "operationId": "GetAllGeothermalPropertiesId",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "GeothermalProperties"
+        ],
+        "operationId": "PostGeothermalProperties",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalProperties"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalProperties"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalProperties"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/GeothermalProperties/MetaInfo": {
+      "get": {
+        "tags": [
+          "GeothermalProperties"
+        ],
+        "operationId": "GetAllGeothermalPropertiesMetaInfo",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GeothermalProperties/{id}": {
+      "get": {
+        "tags": [
+          "GeothermalProperties"
+        ],
+        "operationId": "GetGeothermalPropertiesById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalProperties"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "GeothermalProperties"
+        ],
+        "operationId": "PutGeothermalPropertiesById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalProperties"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalProperties"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalProperties"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "GeothermalProperties"
+        ],
+        "operationId": "DeleteGeothermalPropertiesById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/GeothermalProperties/HeavyData": {
+      "get": {
+        "tags": [
+          "GeothermalProperties"
+        ],
+        "operationId": "GetAllGeothermalProperties",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalProperties"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GeothermalPropertiesCompletionOrder": {
+      "get": {
+        "tags": [
+          "GeothermalPropertiesCompletionOrder"
+        ],
+        "operationId": "GetAllGeothermalPropertiesCompletionOrderId",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "GeothermalPropertiesCompletionOrder"
+        ],
+        "operationId": "PostGeothermalPropertiesCompletionOrder",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalPropertiesCompletionOrder"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalPropertiesCompletionOrder"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalPropertiesCompletionOrder"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/GeothermalPropertiesCompletionOrder/MetaInfo": {
+      "get": {
+        "tags": [
+          "GeothermalPropertiesCompletionOrder"
+        ],
+        "operationId": "GetAllGeothermalPropertiesCompletionOrderMetaInfo",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GeothermalPropertiesCompletionOrder/{id}": {
+      "get": {
+        "tags": [
+          "GeothermalPropertiesCompletionOrder"
+        ],
+        "operationId": "GetGeothermalPropertiesCompletionOrderById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalPropertiesCompletionOrder"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "GeothermalPropertiesCompletionOrder"
+        ],
+        "operationId": "PutGeothermalPropertiesCompletionOrderById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalPropertiesCompletionOrder"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalPropertiesCompletionOrder"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalPropertiesCompletionOrder"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "GeothermalPropertiesCompletionOrder"
+        ],
+        "operationId": "DeleteGeothermalPropertiesCompletionOrderById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/GeothermalPropertiesCompletionOrder/LightData": {
+      "get": {
+        "tags": [
+          "GeothermalPropertiesCompletionOrder"
+        ],
+        "operationId": "GetAllGeothermalPropertiesCompletionOrderLight",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalPropertiesCompletionOrderLight"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GeothermalPropertiesCompletionOrder/HeavyData": {
+      "get": {
+        "tags": [
+          "GeothermalPropertiesCompletionOrder"
+        ],
+        "operationId": "GetAllGeothermalPropertiesCompletionOrder",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalPropertiesCompletionOrder"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "NORCE.Drilling.GeothermalProperties.Model.CompletionMethod": {
+        "enum": [
+          "LinearInterpolation",
+          "LinearExtrapolation"
+        ],
+        "type": "string"
+      },
+      "NORCE.Drilling.GeothermalProperties.Model.GeothermalData": {
+        "type": "object",
+        "properties": {
+          "RegionType": {
+            "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalPropertiesType"
+          },
+          "VerticalDepth": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "Temperature": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "TemperatureGradient": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "NORCE.Drilling.GeothermalProperties.Model.GeothermalProperties": {
+        "type": "object",
+        "properties": {
+          "MetaInfo": {
+            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "WellBoreID": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "TrajectoryID": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "CreationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "LastModificationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "TableType": {
+            "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.TableType"
+          },
+          "GeothermalDataList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalData"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "NORCE.Drilling.GeothermalProperties.Model.GeothermalPropertiesCompletionOrder": {
+        "type": "object",
+        "properties": {
+          "MetaInfo": {
+            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "CreationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "LastModificationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ReferenceGeothermalProperties": {
+            "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalProperties"
+          },
+          "CompletedGeothermalProperties": {
+            "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.GeothermalProperties"
+          },
+          "InterpolationStep": {
+            "type": "number",
+            "format": "double"
+          },
+          "CompletionMethod": {
+            "$ref": "#/components/schemas/NORCE.Drilling.GeothermalProperties.Model.CompletionMethod"
+          }
+        },
+        "additionalProperties": false
+      },
+      "NORCE.Drilling.GeothermalProperties.Model.GeothermalPropertiesCompletionOrderLight": {
+        "type": "object",
+        "properties": {
+          "MetaInfo": {
+            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "CreationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "LastModificationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "NORCE.Drilling.GeothermalProperties.Model.GeothermalPropertiesType": {
+        "enum": [
+          "Air",
+          "Water",
+          "RockFormation"
+        ],
+        "type": "string"
+      },
+      "NORCE.Drilling.GeothermalProperties.Model.TableType": {
+        "enum": [
+          "RawData",
+          "Interpolated"
+        ],
+        "type": "string"
+      },
+      "OSDC.DotnetLibraries.General.DataManagement.MetaInfo": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "HttpHostName": {
+            "type": "string",
+            "nullable": true
+          },
+          "HttpHostBasePath": {
+            "type": "string",
+            "nullable": true
+          },
+          "HttpEndPoint": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

@@ -1,0 +1,67 @@
+<MudContainer Class="@Class">
+    <MudToolBar>
+        <MudText Typo="@Typo.body1"><b>@Label</b></MudText>
+    </MudToolBar>
+    <MudGrid>
+        <MudItem xs="3" Class ="mx-2 my-2">
+            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                QuantityLabel="Density" QuantityName="MassDensityDrilling"
+                SIValueNullable="@massDensity"
+                SIValueNullableChanged="@UpdateMassDensity"/>
+        </MudItem>   
+        <MudItem xs="3" Class ="mx-2 my-2">
+            <MudInputWithUnitAdornment VariantType="Variant.Text"
+                QuantityLabel="Mass Fraction" QuantityName="MassDrilling"
+                SIValueNullable="@massFraction"
+                SIValueNullableChanged="@UpdateMassFraction"/>
+        </MudItem>
+        <MudItem xs="3" Class ="mx-2 my-2">
+            <MudSelect T="LostCiruclationMaterialGrainType" Label="Grain Type" Value="@LostCirculationMaterial.GrainSize" ValueChanged="@UpdateGrainType" ShrinkLabel>
+                @foreach(LostCiruclationMaterialGrainType grainType in Enum.GetValues<LostCiruclationMaterialGrainType>())
+                {   
+                    <MudSelectItem Value="@grainType">
+                        @grainType
+                    </MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>           
+    </MudGrid>
+    <CompositionThemophysicalEdit SpecificHeatCapacity="@LostCirculationMaterial.SpecificHeatCapacity" ThermalConductivity="@LostCirculationMaterial.ThermalConductivity" />
+</MudContainer>
+@code
+{
+    [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? Parent { get; set; }
+    [Parameter]
+    public LostCirculationMaterial LostCirculationMaterial {get; set;}
+    [Parameter]
+    public string Label {get; set;}
+    [Parameter]
+    public string Class {get; set;}
+    [Parameter]
+    public EventCallback OnMessageSent {get; set;}
+    private double? massDensity;
+    private double? massFraction;
+
+    private async Task UpdateMassDensity(double? val)
+    {
+        massDensity = val;
+        LostCirculationMaterial.MassDensity = ConversionsFromOSDC.DoubleToGaussian(val);
+        await SendMessage();
+    }
+    private async Task UpdateMassFraction(double? val)
+    {
+        massFraction = val;
+        LostCirculationMaterial.MassFraction = ConversionsFromOSDC.DoubleToGaussian(val);
+        await SendMessage();    
+    }
+    private async Task UpdateGrainType(LostCiruclationMaterialGrainType val)
+    {
+        LostCirculationMaterial.GrainSize = val;
+        await SendMessage();
+    }
+    private async Task SendMessage()
+    {
+        await OnMessageSent.InvokeAsync();
+    }
+}

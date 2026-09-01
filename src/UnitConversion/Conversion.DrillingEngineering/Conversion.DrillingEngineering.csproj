@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Authors>Eric Cayeux</Authors>
+		<Company>NORCE Norwegian Research Institute</Company>
+		<Description>A package for unit conversion that accounts for Drilling Engineering meaningful precisions</Description>
+		<PackageProjectUrl>https://github.com/Open-Source-Drilling-Community/UnitConversion</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/Open-Source-Drilling-Community/UnitConversion</RepositoryUrl>
+		<Version>3.4.1</Version>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageId>OSDC.UnitConversion.Conversion.DrillingEngineering</PackageId>
+		<RootNamespace>OSDC.UnitConversion.Conversion.DrillingEngineering</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup Condition="'$(UseLocalUnitConversionProjects)' != 'true'">
+	  <PackageReference Include="OSDC.UnitConversion.Conversion" Version="3.4.1" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseLocalUnitConversionProjects)' == 'true'">
+	  <ProjectReference Include="..\Conversion\Conversion.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="LICENSE">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Update="README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,478 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "TupleOfCouetteRheometerAndYPLCalibrationAndYPLCorrection",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "Item1": {
+      "$ref": "#/definitions/CouetteRheometer"
+    },
+    "Item2": {
+      "$ref": "#/definitions/YPLCalibration"
+    },
+    "Item3": {
+      "$ref": "#/definitions/YPLCorrection"
+    }
+  },
+  "definitions": {
+    "CouetteRheometer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Name": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "Description": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "ID": {
+          "type": "string",
+          "format": "guid"
+        },
+        "RheometerType": {
+          "$ref": "#/definitions/RheometerTypeEnum"
+        },
+        "BobRadius": {
+          "type": "number",
+          "format": "double"
+        },
+        "Gap": {
+          "type": "number",
+          "format": "double"
+        },
+        "NewtonianEndEffectCorrection": {
+          "type": "number",
+          "format": "double"
+        },
+        "BobLength": {
+          "type": "number",
+          "format": "double"
+        },
+        "ConicalAngle": {
+          "type": "number",
+          "format": "double"
+        },
+        "MeasurementPrecision": {
+          "type": "number",
+          "format": "double"
+        },
+        "UseISOConvention": {
+          "type": "boolean"
+        },
+        "FixedSpeedList": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      }
+    },
+    "RheometerTypeEnum": {
+      "type": "integer",
+      "description": "",
+      "x-enumNames": [
+        "RotorBob",
+        "RotatingBob"
+      ],
+      "enum": [
+        0,
+        1
+      ]
+    },
+    "YPLCalibration": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ID": {
+          "type": "string",
+          "format": "guid"
+        },
+        "Name": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "Description": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "RheogramInput": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/Rheogram"
+            }
+          ]
+        },
+        "YPLModelKelessidis": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/YPLModel"
+            }
+          ]
+        },
+        "YPLModelMullineux": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/YPLModel"
+            }
+          ]
+        },
+        "YPLModelLevenbergMarquardt": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/YPLModel"
+            }
+          ]
+        }
+      }
+    },
+    "Rheogram": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ID": {
+          "type": "string",
+          "format": "guid"
+        },
+        "Name": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "Description": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "CouetteRheometerID": {
+          "type": "string",
+          "format": "guid"
+        },
+        "RateSource": {
+          "$ref": "#/definitions/RateSourceEnum"
+        },
+        "StressSource": {
+          "$ref": "#/definitions/StressSourceEnum"
+        },
+        "Measurements": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/RheometerMeasurement"
+          }
+        },
+        "ShearRateCorrection": {
+          "$ref": "#/definitions/ShearRateCorrectionEnum"
+        },
+        "ShearStressCorrection": {
+          "$ref": "#/definitions/ShearStressCorrectionEnum"
+        },
+        "CalibrationMethod": {
+          "$ref": "#/definitions/CalibrationMethodEnum"
+        },
+        "CorrectedFlowCurve": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/ShearRateAndStress"
+          }
+        },
+        "CalibratedYPLModel": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/YPLModel"
+            }
+          ]
+        },
+        "Count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "IsReadOnly": {
+          "type": "boolean"
+        }
+      }
+    },
+    "RateSourceEnum": {
+      "type": "integer",
+      "description": "",
+      "x-enumNames": [
+        "RotationalSpeed",
+        "ISONewtonianShearRate",
+        "BobNewtonianShearRate"
+      ],
+      "enum": [
+        0,
+        1,
+        2
+      ]
+    },
+    "StressSourceEnum": {
+      "type": "integer",
+      "description": "",
+      "x-enumNames": [
+        "Torque",
+        "ISONewtonianShearStress",
+        "BobNewtonianShearStress"
+      ],
+      "enum": [
+        0,
+        1,
+        2
+      ]
+    },
+    "RheometerMeasurement": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "RotationalSpeed": {
+          "type": "number",
+          "format": "double"
+        },
+        "Torque": {
+          "type": "number",
+          "format": "double"
+        },
+        "ISONewtonianShearRate": {
+          "type": "number",
+          "format": "double"
+        },
+        "ISONewtonianShearStress": {
+          "type": "number",
+          "format": "double"
+        },
+        "BobNewtonianShearRate": {
+          "type": "number",
+          "format": "double"
+        },
+        "BobNewtonianShearStress": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "ShearRateCorrectionEnum": {
+      "type": "integer",
+      "description": "",
+      "x-enumNames": [
+        "SkadsemSaasen",
+        "None"
+      ],
+      "enum": [
+        0,
+        1
+      ]
+    },
+    "ShearStressCorrectionEnum": {
+      "type": "integer",
+      "description": "",
+      "x-enumNames": [
+        "LacParry",
+        "None"
+      ],
+      "enum": [
+        0,
+        1
+      ]
+    },
+    "CalibrationMethodEnum": {
+      "type": "integer",
+      "description": "",
+      "x-enumNames": [
+        "Mullineux",
+        "LevenbergMarquardt",
+        "Kelessidis"
+      ],
+      "enum": [
+        0,
+        1,
+        2
+      ]
+    },
+    "ShearRateAndStress": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ShearRate": {
+          "type": "number",
+          "format": "double"
+        },
+        "ShearStress": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "YPLModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ID": {
+          "type": "string",
+          "format": "guid"
+        },
+        "Name": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "Description": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "Tau0": {
+          "type": "number",
+          "format": "double"
+        },
+        "K": {
+          "type": "number",
+          "format": "double"
+        },
+        "N": {
+          "type": "number",
+          "format": "double"
+        },
+        "Chi2": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "YPLCorrection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ID": {
+          "type": "string",
+          "format": "guid"
+        },
+        "Name": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "Description": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "RheogramInput": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/Rheogram"
+            }
+          ]
+        },
+        "YPLModelBasedOnNewtonianInputs": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/YPLModel"
+            }
+          ]
+        },
+        "RheogramFullyCorrected": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/ShearRateAndStress"
+          }
+        },
+        "YPLModelFullyCorrected": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/YPLModel"
+            }
+          ]
+        },
+        "RheogramShearRateCorrected": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/ShearRateAndStress"
+          }
+        },
+        "YPLModelShearRateCorrected": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/YPLModel"
+            }
+          ]
+        },
+        "RheogramShearStressCorrected": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/ShearRateAndStress"
+          }
+        },
+        "YPLModelShearStressCorrected": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/YPLModel"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,150 @@
+<MudGrid Style="width:100vw;">
+    <MudItem Class="d-flex justify-center" xs="9">
+        <PlotlyChart
+            @bind-Config="config" @bind-Layout="layout" 
+            @bind-Data="data" @ref="chart"/>
+    </MudItem>
+</MudGrid>
+@code{
+    [CascadingParameter]
+    private MudTheme Theme {get; set;}
+    [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? Parent { get; set; }
+    [Parameter]
+    public List<GelData> GelDataList {get; set;}
+    // Parameters control if there are relevant changes or not to avoid unnecessary calculations.
+    [Parameter]
+    public bool updatebool {get; set;}
+    private List<object> gelDuration = new();
+    private List<object> gelStrength = new();
+    private List<double> time = new();
+    private List<double> stressExp = new();
+    private double dt = 2.5;
+    // Plot related variables
+    private PlotlyChart chart;
+    private Config config;
+    private Layout layout = new Layout 
+    {
+        Height = 500,
+        YAxis = new List<YAxis>
+        {
+            new YAxis
+            {
+                Title = new Plotly.Blazor.LayoutLib.YAxisLib.Title { Text = "Gel Strength" },
+            }
+        },
+        XAxis = new List<XAxis>
+        {
+            new XAxis
+            {
+                Title = new Plotly.Blazor.LayoutLib.XAxisLib.Title { Text = "Gel Duration" },
+            }
+        },
+        ShowLegend = false,
+        PaperBgColor = "rgba(200, 200, 200, 0.0)",
+        Font = new Font
+        {
+            Size = 12
+        }        
+    };
+    IList<ITrace> data = new List<ITrace>
+    {
+        new Scatter
+        {
+            Name = "ScatterTrace",
+            Mode = ModeFlag.Markers,
+            Line = new Line
+                {
+                    Color = "blue",   // Color of connecting line if Mode includes Lines
+                    Width = 2
+                },
+            X = new List<object>{},
+            Y = new List<object>{}
+        }
+    };
+    protected override async Task OnParametersSetAsync()
+    {
+
+        double maxTime = 0.0;
+        gelDuration.Clear();
+        gelStrength.Clear();
+        time.Clear();
+        stressExp.Clear();
+
+        if (chart != null)
+        {
+            await chart.Clear();
+            for (int i = 0; i < GelDataList.Count; i++)
+            {
+                double? tempGelDuration = ConversionsFromOSDC.GaussianToDouble(GelDataList[i].GelDuration);
+                double? tempGelStrength = ConversionsFromOSDC.GaussianToDouble(GelDataList[i].GelStrength);
+
+                if (tempGelDuration != null && tempGelStrength != null)
+                {
+                    maxTime = Math.Max(maxTime, (double) tempGelDuration);
+                    time.Add((double) tempGelDuration);
+                    stressExp.Add(Math.Exp((double)tempGelStrength));                    
+                    gelDuration.Add((object) Parent.FromSI(tempGelDuration, "DurationDrilling"));
+                    gelStrength.Add((object) Parent.FromSI(tempGelStrength, "FluidShearStress"));
+                }            
+            }
+            if (gelDuration != null)
+            {
+                if (gelDuration.Count > 0)
+                {                                        
+                    layout.YAxis[0].Title = new Plotly.Blazor.LayoutLib.YAxisLib.Title
+                    {    
+                        Text = "Gel Strength [" + Parent.GetUnitLabel("FluidShearStress") + "]",
+                    };        
+                    layout.XAxis[0].Title = new Plotly.Blazor.LayoutLib.XAxisLib.Title
+                    {    
+                        Text = "Gel Duration [" + Parent.GetUnitLabel("DurationDrilling") + "]",
+                    };      
+                    
+                    await chart.React();
+                    await chart.AddTrace(
+                        new Scatter
+                        {
+                            Mode = ModeFlag.Markers,
+                            Line = new Line
+                                {
+                                    Color = "blue",   // Color of connecting line if Mode includes Lines
+                                    Width = 2
+                                },
+                            X = gelDuration, // X-coordinate (e.g., in data units or paper units)
+                            Y = gelStrength, // Y-coordinate
+                        }
+                    );
+                    if (gelDuration.Count > 1)
+                    {
+                        double[] coeff = LSQM.CalculateCoefficientsLine(time, stressExp);
+                        List<object> tPlot = new List<object>{0.1};
+                        List<object> stressPlot = new List<object>{Math.Log(coeff[0]*0.1 + coeff[1])};
+                        for (double ti = dt; ti < maxTime; ti += dt)
+                        {
+                            tPlot.Add((object) ti);
+                            stressPlot.Add((object)(Math.Log(coeff[0]*ti + coeff[1])));
+                        }
+                        await chart.AddTrace(
+                        new Scatter
+                        {
+                            Mode = ModeFlag.Lines,
+                            Line = new Line
+                                {
+                                    Color = "black",   // Color of connecting line if Mode includes Lines
+                                    Width = 1
+                                },
+                            X = tPlot, // X-coordinate (e.g., in data units or paper units)
+                            Y = stressPlot, // Y-coordinate
+                        }
+                    );
+
+                    }
+
+
+                }
+            }
+        }
+    }
+    void ManageUnits(){}
+}

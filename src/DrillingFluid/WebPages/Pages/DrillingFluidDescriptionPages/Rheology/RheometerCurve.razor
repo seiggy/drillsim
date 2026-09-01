@@ -1,0 +1,198 @@
+<MudPaper Class="px-4 mx-4 d-flex align-center justify-center" Elevation="0">
+        <div>
+            <PlotlyChart @bind-Config="config" @bind-Layout="layout" @bind-Data="data" @ref="chart"/>
+        </div>
+</MudPaper>
+
+@code{ 
+    [CascadingParameter]
+    private MudTheme Theme {get; set;}
+    [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? Parent { get; set; }
+    [Parameter]
+    public List<RheometerMeasurement> RheometerMeasurements { get; set; }
+    [Parameter]
+    public RheometerMeasurementOptions RheometerBooleans { get; set; }
+    [Parameter]
+    public MeasurementTypesShearRate ShearRateInputType {get; set;} = MeasurementTypesShearRate.Rotation;
+    [Parameter]
+    public MeasurementTypesShearStress ShearStressInputType {get; set;} = MeasurementTypesShearStress.IsoNewtonianShearStress;
+    
+    
+    //Plot control options
+    private PlotlyChart chart;
+    private Config config;
+    private Layout layout = new Layout 
+    {
+        Height = 350,
+        Width = 900,
+        ShowLegend = false,
+        Margin = new Plotly.Blazor.LayoutLib.Margin 
+        {
+            L = 50,
+            R = 5,
+            T = 50,
+            B = 50
+        },
+        YAxis = new List<YAxis>
+        {
+            new YAxis
+            {
+                Title = new Plotly.Blazor.LayoutLib.YAxisLib.Title { Text = "Shear-Stress" },
+            }
+        },
+        XAxis = new List<XAxis>
+        {
+            new XAxis
+            {
+                Title = new Plotly.Blazor.LayoutLib.XAxisLib.Title { Text = "Rotation" },
+            }
+        },
+        //PaperBgColor = "rgba(200, 200, 200, 0.0)",
+        Font = new Font
+        {
+            Size = 16
+        }        
+    };
+
+    private List<object> xData = new();
+    private List<object> yData = new();
+    private bool axisBool {get; set;} = true;
+    IList<ITrace> data = new List<ITrace>
+    {
+        new Scatter
+        {
+            Name = "ScatterTrace",
+            Mode = ModeFlag.Markers,
+            Line = new Line
+                {
+                    Color = "blue",   // Color of connecting line if Mode includes Lines
+                    Width = 2
+                },
+            X = new List<object>{},
+            Y = new List<object>{}
+        }
+    };
+    
+    protected override async Task OnParametersSetAsync()
+    {
+        if (RheometerMeasurements != null)
+        {
+            //Code body
+            if (RheometerMeasurements.Count > 1)
+            {
+                await UpdateXAxis();
+                await UpdateYAxis();                            
+            }
+        }
+    }
+    private async Task UpdateXAxis()
+    {
+        xData.Clear();
+        if (chart != null){
+            switch (ShearRateInputType)
+            {
+                case MeasurementTypesShearRate.Rotation:
+                {
+                    layout.XAxis[0].Title = new Plotly.Blazor.LayoutLib.XAxisLib.Title
+                        {    
+                            Text = "Rotation [" + Parent.GetUnitLabel("AngularVelocityDrilling") + "]",
+                        };
+                    foreach (RheometerMeasurement rheoMeasure in RheometerMeasurements)
+                    {
+                        xData.Add((object) Parent.FromSI(rheoMeasure.RotationalSpeed, "AngularVelocityDrilling"));
+                    }     
+                    break;
+                }
+                case MeasurementTypesShearRate.IsoNewtonianShearRate:
+                {
+                    layout.XAxis[0].Title = new Plotly.Blazor.LayoutLib.XAxisLib.Title
+                        {    
+                            Text = "Shear-Rate [" + Parent.GetUnitLabel("FluidShearRate") + "]",
+                        };   
+                    foreach (RheometerMeasurement rheoMeasure in RheometerMeasurements)
+                    {
+                        xData.Add((object) Parent.FromSI(rheoMeasure.IsoNewtonianShearRate,"FluidShearRate"));
+                    }  
+                    break;
+                }
+                case MeasurementTypesShearRate.BobNewtonianShearRate:
+                {
+                    layout.XAxis[0].Title = new Plotly.Blazor.LayoutLib.XAxisLib.Title
+                        {    
+                            Text = "Shear-Rate (bob) [" + Parent.GetUnitLabel("FluidShearRate") + "]",
+                        };  
+                    foreach (RheometerMeasurement rheoMeasure in RheometerMeasurements)
+                    {
+                        xData.Add((object) Parent.FromSI(rheoMeasure.BobNewtonianShearRate, "FluidShearRate"));
+                    }       
+                    break;
+                }            
+            }
+            await chart.React();
+        }//End If chart != null
+    }
+    private async Task UpdateYAxis()
+    {
+        yData.Clear();     
+        if (chart != null)
+        {
+            switch (ShearStressInputType)
+            {
+                case MeasurementTypesShearStress.IsoNewtonianShearStress:
+                {
+                    layout.YAxis[0].Title = new Plotly.Blazor.LayoutLib.YAxisLib.Title
+                        {    
+                            Text = "Shear-Stress [" + Parent.GetUnitLabel("FluidShearStress") + "]",
+                        };    
+                    foreach (RheometerMeasurement rheoMeasure in RheometerMeasurements)
+                    {
+                        yData.Add((object) Parent.FromSI(rheoMeasure.IsoNewtonianShearStress,"FluidShearStress"));
+                    } 
+                    break;
+                }
+                case MeasurementTypesShearStress.BobNewtonianShearStress:
+                {
+                    layout.YAxis[0].Title = new Plotly.Blazor.LayoutLib.YAxisLib.Title
+                        {    
+                            Text = "Shear-Stress (bob) [" + Parent.GetUnitLabel("FluidShearStress") + "]",
+                        };  
+                    foreach (RheometerMeasurement rheoMeasure in RheometerMeasurements)
+                    {
+                        yData.Add((object) Parent.FromSI(rheoMeasure.BobNewtonianShearStress,"FluidShearStress"));
+                    }    
+                    break;
+                }
+                case MeasurementTypesShearStress.Torque:
+                {
+                    layout.YAxis[0].Title = new Plotly.Blazor.LayoutLib.YAxisLib.Title
+                        {    
+                            Text = "Torque [" + Parent.GetUnitLabel("TorqueDrilling") + "]",
+                        }; 
+                    foreach (RheometerMeasurement rheoMeasure in RheometerMeasurements)
+                    {
+                        yData.Add((object) Parent.FromSI(rheoMeasure.Torque,"TorqueDrilling"));
+                    }      
+                    break;
+                }            
+            }//Close switch
+            await chart.React();
+            await chart.Clear();
+            await chart.AddTrace(
+                new Scatter
+                {
+                    Mode = ModeFlag.Markers,    
+                    Marker = new Marker
+                    {
+                        Color = "blue",
+                        Size = 10
+                    },                     
+                    X = xData, 
+                    Y = yData, 
+                }
+            );
+        }//End if chart != null
+    }
+  
+
+}

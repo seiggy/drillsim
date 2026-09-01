@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "earthmagneticfieldservice.fullname" . }}-test-connection"
+  labels:
+    {{- include "earthmagneticfieldservice.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ["wget"]
+      args: ["{{ include "earthmagneticfieldservice.fullname" . }}:{{ .Values.service.port }}/EarthMagneticField/api/health/live"]
+  restartPolicy: Never

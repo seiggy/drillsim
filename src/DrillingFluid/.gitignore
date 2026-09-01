@@ -1,0 +1,9 @@
+﻿**/bin/**
+**/obj/**
+**/home/**
+**/.vs/**
+Print.png
+global.json
+commonLibFiles/*
+RheologicalModels/CalibTestsJulia/*
+*.csv

@@ -1,0 +1,65 @@
+﻿<table class="table" hidden="@IsHidden" style="text-align: center">
+    <thead>
+        <tr>
+            <td>
+                <span>τ₀</span>
+            </td>
+            <td>
+                <span>K</span>
+            </td>
+            <td>n</td>
+            <td>
+                <span>χ²</span>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>
+                [<SpanUnitLabel QuantityName="FluidShearStress" />]
+            </td>
+            <td>
+                [<SpanUnitLabel QuantityName="FluidShearStress" />]
+            </td>
+            <td>n</td>
+            <td>
+                [<SpanUnitLabel QuantityName="FluidShearStress" />]
+            </td>
+            <td></td>
+        </tr>
+    </thead>
+    <tbody>
+        @if (YPLModel != null)
+        {
+            <tr>
+                <td>
+                    <SpanWithUnit QuantityName="FluidShearStress"
+                              SIValue="@(YPLModel.Tau0)" />
+                </td>
+                <td>
+                    <SpanWithUnit QuantityName="RheologyConsistencyIndex"
+                              SIValue="@(YPLModel.K)" />
+                </td>
+                <td>
+                    <SpanWithUnit QuantityName="StandardDimensionless"
+                              SIValue="@(YPLModel.N)" />
+                </td>
+                <td>
+                    <SpanWithUnit QuantityName="FluidShearStress"
+                              SIValue="@(YPLModel.Chi2)" />
+                </td>
+                <td></td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+    </tfoot>
+</table>
+
+@code {
+    [Parameter]
+    public YPLModel YPLModel { get; set; }
+
+    [Parameter]
+    public bool IsHidden { get; set; }
+
+}

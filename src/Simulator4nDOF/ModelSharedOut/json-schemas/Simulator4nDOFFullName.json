@@ -1,0 +1,949 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Service, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+    "version": "1.0"
+  },
+  "paths": {
+    "/Simulation": {
+      "get": {
+        "tags": [
+          "Simulation"
+        ],
+        "operationId": "GetAllSimulationId",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Simulation"
+        ],
+        "operationId": "PostSimulation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Simulation/MetaInfo": {
+      "get": {
+        "tags": [
+          "Simulation"
+        ],
+        "operationId": "GetAllSimulationMetaInfo",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Simulation/Light/{id}\"": {
+      "get": {
+        "tags": [
+          "Simulation"
+        ],
+        "operationId": "GetSimulatioLightById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.SimulationLight"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Simulation/Heavy/{id}\"": {
+      "get": {
+        "tags": [
+          "Simulation"
+        ],
+        "operationId": "GetSimulationById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Simulation/Results/{id}/page/{sequenceNumber}\"": {
+      "get": {
+        "tags": [
+          "Simulation"
+        ],
+        "operationId": "GetSimulationResultById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sequenceNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Results"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Simulation/LightData": {
+      "get": {
+        "tags": [
+          "Simulation"
+        ],
+        "operationId": "GetAllSimulationLight",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.SimulationLight"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Simulation/HeavyData": {
+      "get": {
+        "tags": [
+          "Simulation"
+        ],
+        "operationId": "GetAllSimulation",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Simulation/{id}": {
+      "put": {
+        "tags": [
+          "Simulation"
+        ],
+        "operationId": "PutSimulationById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Simulation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Simulation"
+        ],
+        "operationId": "DeleteSimulationById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "NORCE.Drilling.Simulator4nDOF.Model.Config": {
+        "type": "object",
+        "properties": {
+          "VirtualSensorPositionFromBit": {
+            "type": "number",
+            "format": "double"
+          },
+          "LoggingIntervalScalarValues": {
+            "type": "number",
+            "format": "double"
+          },
+          "LoggingIntervalProfiles": {
+            "type": "number",
+            "format": "double"
+          },
+          "CoulombStaticFriction": {
+            "type": "number",
+            "format": "double"
+          },
+          "CoulombKineticFriction": {
+            "type": "number",
+            "format": "double"
+          },
+          "UseHeave": {
+            "type": "boolean"
+          },
+          "HeaveAmplitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "HeavePeriod": {
+            "type": "number",
+            "format": "double"
+          },
+          "TopDriveStartupTime": {
+            "type": "number",
+            "format": "double"
+          },
+          "LengthBetweenLumpedElements": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "NORCE.Drilling.Simulator4nDOF.Model.ContextualData": {
+        "type": "object",
+        "properties": {
+          "DrillStringID": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "DrillingFluidDescriptionID": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "WellBoreArchitectureID": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "TrajectoryID": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "RigID": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "GeothermalPropertiesID": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "CasingID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "Temperature": {
+            "type": "number",
+            "format": "double"
+          },
+          "WellheadPressure": {
+            "type": "number",
+            "format": "double"
+          },
+          "SurfacePipePressure": {
+            "type": "number",
+            "format": "double"
+          },
+          "SolverType": {
+            "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.SolverType"
+          }
+        },
+        "additionalProperties": false
+      },
+      "NORCE.Drilling.Simulator4nDOF.Model.InitialValues": {
+        "type": "object",
+        "properties": {
+          "BitDepth": {
+            "type": "number",
+            "format": "double"
+          },
+          "HoleDepth": {
+            "type": "number",
+            "format": "double"
+          },
+          "TopOfStringPosition": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "NORCE.Drilling.Simulator4nDOF.Model.Profiles": {
+        "type": "object",
+        "properties": {
+          "Time": {
+            "type": "number",
+            "format": "double"
+          },
+          "Depth": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "DepthAll": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "SleevesDepth": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "SideForce": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "SideForceSoftString": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "PipeAngularVelocity": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "SleevesAngularVelocity": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "RadialClearance": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "LateralDisplacement": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "LateralDisplacementAngle": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "BendingMoment": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "Torque": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "Tension": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "AxialVelocityD": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "Inclination": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "Azimuth": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "Curvature": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "BuildUpRate": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "NORCE.Drilling.Simulator4nDOF.Model.Results": {
+        "type": "object",
+        "properties": {
+          "AvgCumulativeSSI": {
+            "type": "number",
+            "format": "double"
+          },
+          "Scalars": {
+            "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Scalars"
+          },
+          "Profiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Profiles"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "NORCE.Drilling.Simulator4nDOF.Model.Scalars": {
+        "type": "object",
+        "properties": {
+          "AvgCumulativeSSI": {
+            "type": "number",
+            "format": "double"
+          },
+          "BitAxialVelocity": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "TopOfStringAxialVelocity": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "WOB": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "BitRPM": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "SurfaceRPM": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "BitDepth": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "HoleDepth": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "SurfaceTorque": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "BitTorque": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "SensorAngularVelocity": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "SensorWhirlVelocity": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "SensorAxialVelocity": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "SensorRadialVelocity": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "SensorRadialAcc": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "SensorTangentialAcc": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "SensorAxialAcc": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "SensorBendingMomentX": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "SensorBendingMomentY": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "SensorTension": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "SensorTorque": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "Time": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "SSI": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "NORCE.Drilling.Simulator4nDOF.Model.SetPoints": {
+        "type": "object",
+        "properties": {
+          "TimeDuration": {
+            "type": "number",
+            "format": "double"
+          },
+          "SurfaceRPM": {
+            "type": "number",
+            "format": "double"
+          },
+          "TopOfStringVelocity": {
+            "type": "number",
+            "format": "double"
+          },
+          "BottomExtraSideForce": {
+            "type": "number",
+            "format": "double"
+          },
+          "StribeckCriticalVelocity": {
+            "type": "number",
+            "format": "double"
+          },
+          "DifferenceStaticKineticFriction": {
+            "type": "number",
+            "format": "double"
+          },
+          "Sticking": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "NORCE.Drilling.Simulator4nDOF.Model.Simulation": {
+        "type": "object",
+        "properties": {
+          "MetaInfo": {
+            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "CreationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "LastModificationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ContextualData": {
+            "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.ContextualData"
+          },
+          "WellBoreID": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "Config": {
+            "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Config"
+          },
+          "InitialValues": {
+            "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.InitialValues"
+          },
+          "SetPointsList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.SetPoints"
+            },
+            "nullable": true
+          },
+          "CurrentTime": {
+            "type": "number",
+            "format": "double"
+          },
+          "Progress": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "TerminationState": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "Results": {
+            "$ref": "#/components/schemas/NORCE.Drilling.Simulator4nDOF.Model.Results"
+          }
+        },
+        "additionalProperties": false
+      },
+      "NORCE.Drilling.Simulator4nDOF.Model.SimulationLight": {
+        "type": "object",
+        "properties": {
+          "MetaInfo": {
+            "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.DataManagement.MetaInfo"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Description": {
+            "type": "string",
+            "nullable": true
+          },
+          "CreationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "LastModificationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "WellBoreID": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "Progress": {
+            "type": "number",
+            "format": "double"
+          },
+          "TerminationState": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "NORCE.Drilling.Simulator4nDOF.Model.SolverType": {
+        "enum": [
+          "EulerMethod",
+          "VerletMethod"
+        ],
+        "type": "string"
+      },
+      "OSDC.DotnetLibraries.General.DataManagement.MetaInfo": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "HttpHostName": {
+            "type": "string",
+            "nullable": true
+          },
+          "HttpHostBasePath": {
+            "type": "string",
+            "nullable": true
+          },
+          "HttpEndPoint": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

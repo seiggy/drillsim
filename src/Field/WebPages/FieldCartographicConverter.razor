@@ -1,0 +1,175 @@
+@page "/FieldCartographicConverter"
+@inject ILogger<FieldCartographicConverter> logger
+@inject ISnackbar Snackbar
+@inject IFieldAPIUtils Api
+
+<MudUnitAndReferenceChoiceTag HttpHost="@Api.HostNameUnitConversion" HttpBasePath="@Api.HostBasePathUnitConversion"
+                              HttpController="UnitSystem/" UnitSystemName="@DataUtils.UnitAndReferenceParameters.UnitSystemName"
+                              UnitSystemNameChanged="@DataUtils.UpdateUnitSystemName">
+    <MudText Typo="Typo.h4" Class="mb-4">Field coordinate conversion</MudText>
+    @if (_fields == null)
+    {
+        <MudProgressLinear Indeterminate="true" />
+    }
+    else
+    {
+        <MudExpansionPanels MultiExpansion="true">
+            <MudExpansionPanel Text="Forward projection" Expanded="true">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">Input</MudText>
+                <MudGrid>
+                    <MudItem xs="12" md="6">@FieldSelector(true)</MudItem>
+                    <MudItem xs="12" md="6" Class="d-flex align-center gap-2">
+                        <MudButton Variant="@ReferenceVariant(FieldGeographicReference.ProjectionDatum)" OnClick="@(() => _forwardReference = FieldGeographicReference.ProjectionDatum)">Projection datum</MudButton>
+                        <MudButton Variant="@ReferenceVariant(FieldGeographicReference.Wgs84)" OnClick="@(() => _forwardReference = FieldGeographicReference.Wgs84)">WGS 84</MudButton>
+                    </MudItem>
+                    <MudItem xs="12" md="3"><MudInputAngleWithUnitAdornment QuantityLabel="Latitude (sexagesimal)" SIValueNullable="@_forwardLatitude" SIValueNullableChanged="@(value => _forwardLatitude = value)" /></MudItem>
+                    <MudItem xs="12" md="3"><MudInputWithUnitAdornment QuantityName="PlaneAngleGeodesic" QuantityLabel="Latitude (decimal)" SIValueNullable="@_forwardLatitude" SIValueNullableChanged="@(value => _forwardLatitude = value)" /></MudItem>
+                    <MudItem xs="12" md="3"><MudInputAngleWithUnitAdornment QuantityLabel="Longitude (sexagesimal)" SIValueNullable="@_forwardLongitude" SIValueNullableChanged="@(value => _forwardLongitude = value)" /></MudItem>
+                    <MudItem xs="12" md="3"><MudInputWithUnitAdornment QuantityName="PlaneAngleGeodesic" QuantityLabel="Longitude (decimal)" SIValueNullable="@_forwardLongitude" SIValueNullableChanged="@(value => _forwardLongitude = value)" /></MudItem>
+                    <MudItem xs="12" md="4"><MudInputWithUnitAdornment QuantityName="DepthDrilling" QuantityLabel="Vertical depth" SIValueNullable="@_forwardDepth" SIValueNullableChanged="@(value => _forwardDepth = value)" /></MudItem>
+                    <MudItem xs="12" md="4" Class="d-flex align-end"><MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="@_busy" OnClick="ForwardAsync">Convert</MudButton></MudItem>
+                </MudGrid>
+                <MudDivider Class="my-4" />
+                <MudText Typo="Typo.subtitle1">Output</MudText>
+                <MudGrid>
+                    <MudItem xs="12" md="4"><MudInputWithUnitAdornment QuantityName="PositionDrilling" QuantityLabel="Easting" ReadOnly="true" SIValueNullable="@_forwardResult?.ProjectedCoordinate.Easting" /></MudItem>
+                    <MudItem xs="12" md="4"><MudInputWithUnitAdornment QuantityName="PositionDrilling" QuantityLabel="Northing" ReadOnly="true" SIValueNullable="@_forwardResult?.ProjectedCoordinate.Northing" /></MudItem>
+                    <MudItem xs="12" md="4"><MudInputWithUnitAdornment QuantityName="PlaneAngleGeodesic" QuantityLabel="Grid convergence" ReadOnly="true" SIValueNullable="@_forwardResult?.GridConvergence" /></MudItem>
+                </MudGrid>
+                @if (_forwardReference == FieldGeographicReference.ProjectionDatum)
+                {
+                    @GeographicOutput("WGS 84", _forwardResult?.Wgs84GeographicCoordinate, _forwardResult?.Wgs84VerticalDepth)
+                }
+                else
+                {
+                    @GeographicOutput("Projection datum", _forwardResult?.ProjectionDatumGeographicCoordinate, _forwardResult?.ProjectionDatumVerticalDepth)
+                }
+            </MudExpansionPanel>
+            <MudExpansionPanel Text="Inverse projection">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">Input</MudText>
+                <MudGrid>
+                    <MudItem xs="12" md="6">@FieldSelector(false)</MudItem>
+                    <MudItem xs="12" md="3"><MudInputWithUnitAdornment QuantityName="PositionDrilling" QuantityLabel="Easting" SIValueNullable="@_inverseEasting" SIValueNullableChanged="@(value => _inverseEasting = value)" /></MudItem>
+                    <MudItem xs="12" md="3"><MudInputWithUnitAdornment QuantityName="PositionDrilling" QuantityLabel="Northing" SIValueNullable="@_inverseNorthing" SIValueNullableChanged="@(value => _inverseNorthing = value)" /></MudItem>
+                    <MudItem xs="12" md="4"><MudInputWithUnitAdornment QuantityName="DepthDrilling" QuantityLabel="Vertical depth" SIValueNullable="@_inverseDepth" SIValueNullableChanged="@(value => _inverseDepth = value)" /></MudItem>
+                    <MudItem xs="12" md="4" Class="d-flex align-end"><MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="@_busy" OnClick="InverseAsync">Convert</MudButton></MudItem>
+                </MudGrid>
+                <MudDivider Class="my-4" />
+                <MudText Typo="Typo.subtitle1">Output</MudText>
+                @GeographicOutput("Projection datum", _inverseResult?.ProjectionDatumGeographicCoordinate, _inverseResult?.ProjectionDatumVerticalDepth)
+                @GeographicOutput("WGS 84", _inverseResult?.Wgs84GeographicCoordinate, _inverseResult?.Wgs84VerticalDepth)
+            </MudExpansionPanel>
+        </MudExpansionPanels>
+    }
+</MudUnitAndReferenceChoiceTag>
+
+@code {
+    private List<OSDC.Drilling.Field.ModelShared.Field>? _fields;
+    private OSDC.Drilling.Field.ModelShared.Field? _forwardField;
+    private OSDC.Drilling.Field.ModelShared.Field? _inverseField;
+    private FieldGeographicReference _forwardReference = FieldGeographicReference.ProjectionDatum;
+    private double? _forwardLatitude, _forwardLongitude, _forwardDepth;
+    private double? _inverseEasting, _inverseNorthing, _inverseDepth;
+    private FieldCoordinateConversionPositionResult? _forwardResult, _inverseResult;
+    private bool _busy;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _fields = ((await Api.ClientField.GetAllFieldAsync()) ?? [])
+                .Where(item => item.ProjectionDefinitionID is Guid id && id != Guid.Empty)
+                .OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase).ToList();
+            _forwardField = _fields.FirstOrDefault();
+            _inverseField = _fields.FirstOrDefault();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Unable to load fields for coordinate conversion");
+            _fields = [];
+            Snackbar.Add("Unable to load fields for coordinate conversion.", Severity.Error);
+        }
+    }
+
+    private Variant ReferenceVariant(FieldGeographicReference value) => _forwardReference == value ? Variant.Filled : Variant.Outlined;
+
+    private async Task ForwardAsync()
+    {
+        if (_forwardField?.MetaInfo?.ID is not Guid id || id == Guid.Empty || _forwardLatitude == null || _forwardLongitude == null || _forwardDepth == null)
+        {
+            Snackbar.Add("Select a field and enter latitude, longitude and vertical depth.", Severity.Warning);
+            return;
+        }
+        _forwardResult = null;
+        await RunAsync(async () =>
+        {
+            var response = await Api.ClientField.ForwardFieldCoordinatesAsync(new FieldForwardConversionRequest
+            {
+                FieldID = id, SourceGeographicReference = _forwardReference, ProjectionApplicabilityPolicy = FieldApplicabilityPolicy.AllowUnknown,
+                Transformation = new FieldTransformationOptions
+                {
+                    SelectionPolicy = FieldTransformationSelectionPolicy.FirstAvailable,
+                    ApplicabilityPolicy = FieldApplicabilityPolicy.RequireApplicable,
+                    DepthPolicy = FieldDepthTransformationPolicy.AllowUntransformedDepthFor2D
+                },
+                Positions = [new FieldForwardConversionPosition { Latitude = _forwardLatitude.Value, Longitude = _forwardLongitude.Value, VerticalDepth = _forwardDepth.Value }]
+            });
+            _forwardResult = response.Positions?.FirstOrDefault();
+        });
+    }
+
+    private async Task InverseAsync()
+    {
+        if (_inverseField?.MetaInfo?.ID is not Guid id || id == Guid.Empty || _inverseEasting == null || _inverseNorthing == null || _inverseDepth == null)
+        {
+            Snackbar.Add("Select a field and enter easting, northing and vertical depth.", Severity.Warning);
+            return;
+        }
+        _inverseResult = null;
+        await RunAsync(async () =>
+        {
+            var response = await Api.ClientField.InverseFieldCoordinatesAsync(new FieldInverseConversionRequest
+            {
+                FieldID = id, ProjectionApplicabilityPolicy = FieldApplicabilityPolicy.AllowUnknown,
+                Transformation = new FieldTransformationOptions
+                {
+                    SelectionPolicy = FieldTransformationSelectionPolicy.FirstAvailable,
+                    ApplicabilityPolicy = FieldApplicabilityPolicy.RequireApplicable,
+                    DepthPolicy = FieldDepthTransformationPolicy.AllowUntransformedDepthFor2D
+                },
+                Positions = [new FieldInverseConversionPosition { Easting = _inverseEasting.Value, Northing = _inverseNorthing.Value, VerticalDepth = _inverseDepth.Value }]
+            });
+            _inverseResult = response.Positions?.FirstOrDefault();
+        });
+    }
+
+    private async Task RunAsync(Func<Task> operation)
+    {
+        try { _busy = true; await operation(); Snackbar.Add("Coordinate conversion completed.", Severity.Success); }
+        catch (ApiException<FieldConversionErrorEnvelope> ex)
+        {
+            logger.LogError(ex, "Coordinate conversion failed: {ErrorCode} {ErrorMessage}", ex.Result?.Error, ex.Result?.Message);
+            string detail = ex.Result?.Errors?.FirstOrDefault()?.Message ?? ex.Result?.Message
+                ?? "Coordinate conversion failed. Check the field and coordinate values.";
+            Snackbar.Add(detail, Severity.Error);
+        }
+        catch (Exception ex) { logger.LogError(ex, "Coordinate conversion failed"); Snackbar.Add("Coordinate conversion failed. Check the field and coordinate values.", Severity.Error); }
+        finally { _busy = false; }
+    }
+
+    private RenderFragment FieldSelector(bool forward) => @<MudSelect T="OSDC.Drilling.Field.ModelShared.Field" Label="Field and projection"
+        Value="@(forward ? _forwardField : _inverseField)" ValueChanged="@((OSDC.Drilling.Field.ModelShared.Field value) => { if (forward) _forwardField = value; else _inverseField = value; })" ToStringFunc="@(value => value?.Name)">
+        @foreach (var item in _fields ?? []) { <MudSelectItem T="OSDC.Drilling.Field.ModelShared.Field" Value="@item">@item.Name</MudSelectItem> }
+    </MudSelect>;
+
+    private RenderFragment GeographicOutput(string title, FieldGeographicCoordinate? coordinate, double? depth) => @<div class="mt-4">
+        <MudText Typo="Typo.subtitle2">@title</MudText>
+        <MudGrid>
+            <MudItem xs="12" md="3"><MudInputAngleWithUnitAdornment QuantityLabel="Latitude (sexagesimal)" ReadOnly="true" SIValueNullable="@coordinate?.Latitude" /></MudItem>
+            <MudItem xs="12" md="3"><MudInputWithUnitAdornment QuantityName="PlaneAngleGeodesic" QuantityLabel="Latitude (decimal)" ReadOnly="true" SIValueNullable="@coordinate?.Latitude" /></MudItem>
+            <MudItem xs="12" md="3"><MudInputAngleWithUnitAdornment QuantityLabel="Longitude (sexagesimal)" ReadOnly="true" SIValueNullable="@coordinate?.Longitude" /></MudItem>
+            <MudItem xs="12" md="3"><MudInputWithUnitAdornment QuantityName="PlaneAngleGeodesic" QuantityLabel="Longitude (decimal)" ReadOnly="true" SIValueNullable="@coordinate?.Longitude" /></MudItem>
+            <MudItem xs="12" md="4"><MudInputWithUnitAdornment QuantityName="DepthDrilling" QuantityLabel="Vertical depth" ReadOnly="true" SIValueNullable="@depth" /></MudItem>
+        </MudGrid>
+    </div>;
+}

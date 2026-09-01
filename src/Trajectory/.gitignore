@@ -1,0 +1,5 @@
+﻿**/bin/**
+**/obj/**
+**/home/**
+**/.vs/**
+/Trajectory.slnLaunch.user

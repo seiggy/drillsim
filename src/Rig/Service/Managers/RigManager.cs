@@ -1,0 +1,684 @@
+using System;
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+using OSDC.DotnetLibraries.General.DataManagement;
+using Microsoft.Data.Sqlite;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Data;
+using OSDC.Drilling.Rig.Model;
+
+namespace OSDC.Drilling.Rig.Service.Managers
+{
+    /// <summary>
+    /// A manager for Rig. The manager implements the singleton pattern as defined by 
+    /// Gamma, Erich, et al. "Design patterns: Abstraction and reuse of object-oriented design." 
+    /// European Conference on Object-Oriented Programming. Springer, Berlin, Heidelberg, 1993.
+    /// </summary>
+    public class RigManager
+    {
+        private const string RigTableName = "RigTable";
+        private const string MetaInfoIdJsonPath = "$.ID";
+        private static RigManager? _instance = null;
+        private readonly ILogger<RigManager> _logger;
+        private readonly SqlConnectionManager _connectionManager;
+
+        private RigManager(ILogger<RigManager> logger, SqlConnectionManager connectionManager)
+        {
+            _logger = logger;
+            _connectionManager = connectionManager;
+        }
+
+        public static RigManager GetInstance(ILogger<RigManager> logger, SqlConnectionManager connectionManager)
+        {
+            _instance ??= new RigManager(logger, connectionManager);
+            return _instance;
+        }
+
+        public int Count
+        {
+            get
+            {
+                int count = 0;
+                using var connection = _connectionManager.GetConnection();
+                if (connection != null)
+                {
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"SELECT COUNT(*) FROM {RigTableName}";
+                    try
+                    {
+                        using SqliteDataReader reader = command.ExecuteReader();
+                        if (reader.Read())
+                        {
+                            count = (int)reader.GetInt64(0);
+                        }
+                    }
+                    catch (SqliteException ex)
+                    {
+                        _logger.LogError(ex, "Impossible to count records in the RigTable");
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("Impossible to access the SQLite database");
+                }
+                return count;
+            }
+        }
+
+        public bool Clear()
+        {
+            using var connection = _connectionManager.GetConnection();
+            if (connection != null)
+            {
+                bool success = false;
+                using var transaction = connection.BeginTransaction();
+                try
+                {
+                    //empty RigTable
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"DELETE FROM {RigTableName}";
+                    command.ExecuteNonQuery();
+
+                    transaction.Commit();
+                    success = true;
+                }
+                catch (SqliteException ex)
+                {
+                    transaction.Rollback();
+                    _logger.LogError(ex, "Impossible to clear the RigTable");
+                }
+                return success;
+            }
+            else
+            {
+                _logger.LogWarning("Impossible to access the SQLite database");
+                return false;
+            }
+        }
+
+        public bool Contains(Guid guid)
+        {
+            int count = 0;
+            using var connection = _connectionManager.GetConnection();
+            if (connection != null)
+            {
+                var command = connection.CreateCommand();
+                command.CommandText = $"SELECT COUNT(*) FROM {RigTableName} WHERE json_extract(MetaInfo, '{MetaInfoIdJsonPath}') = $id";
+                command.Parameters.AddWithValue("$id", guid.ToString());
+                try
+                {
+                    using SqliteDataReader reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        count = (int)reader.GetInt64(0);
+                    }
+                }
+                catch (SqliteException ex)
+                {
+                    _logger.LogError(ex, "Impossible to count rows from RigTable");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Impossible to access the SQLite database");
+            }
+            return count >= 1;
+        }
+
+        /// <summary>
+        /// Returns the list of Guid of all Rig present in the microservice database 
+        /// </summary>
+        /// <returns>the list of Guid of all Rig present in the microservice database</returns>
+        public List<Guid>? GetAllRigId()
+        {
+            List<Guid> ids = [];
+            using var connection = _connectionManager.GetConnection();
+            if (connection != null)
+            {
+                var command = connection.CreateCommand();
+                command.CommandText = $"SELECT MetaInfo FROM {RigTableName}";
+                try
+                {
+                    using var reader = command.ExecuteReader();
+                    while (reader.Read() && !reader.IsDBNull(0))
+                    {
+                        MetaInfo? metaInfo = DeserializeMetaInfo(reader.GetString(0));
+                        if (metaInfo != null && metaInfo.ID != Guid.Empty)
+                        {
+                            ids.Add(metaInfo.ID);
+                        }
+                    }
+                    _logger.LogInformation("Returning the list of ID of existing records from RigTable");
+                    return ids;
+                }
+                catch (SqliteException ex)
+                {
+                    _logger.LogError(ex, "Impossible to get IDs from RigTable");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Impossible to access the SQLite database");
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the list of MetaInfo of all Rig present in the microservice database 
+        /// </summary>
+        /// <returns>the list of MetaInfo of all Rig present in the microservice database</returns>
+        public List<MetaInfo?>? GetAllRigMetaInfo()
+        {
+            List<MetaInfo?> metaInfos = new();
+            using var connection = _connectionManager.GetConnection();
+            if (connection != null)
+            {
+                var command = connection.CreateCommand();
+                command.CommandText = $"SELECT MetaInfo FROM {RigTableName}";
+                try
+                {
+                    using var reader = command.ExecuteReader();
+                    while (reader.Read() && !reader.IsDBNull(0))
+                    {
+                        metaInfos.Add(DeserializeMetaInfo(reader.GetString(0)));
+                    }
+                    _logger.LogInformation("Returning the list of MetaInfo of existing records from RigTable");
+                    return metaInfos;
+                }
+                catch (SqliteException ex)
+                {
+                    _logger.LogError(ex, "Impossible to get IDs from RigTable");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Impossible to access the SQLite database");
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the Rig identified by its Guid from the microservice database 
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <returns>the Rig identified by its Guid from the microservice database</returns>
+        public Model.Rig? GetRigById(Guid guid)
+        {
+            if (!guid.Equals(Guid.Empty))
+            {
+                using var connection = _connectionManager.GetConnection();
+                if (connection != null)
+                {
+                    Model.Rig? rig;
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"SELECT data FROM {RigTableName} WHERE json_extract(MetaInfo, '{MetaInfoIdJsonPath}') = $id";
+                    command.Parameters.AddWithValue("$id", guid.ToString());
+                    try
+                    {
+                        using var reader = command.ExecuteReader();
+                        if (reader.Read() && !reader.IsDBNull(0))
+                        {
+                            string data = reader.GetString(0);
+                            rig = DeserializeRig(data);
+                            if (rig != null && rig.MetaInfo != null && !rig.MetaInfo.ID.Equals(guid))
+                                throw new SqliteException("SQLite database corrupted: returned Rig is null or has been jsonified with the wrong ID.", 1);
+                        }
+                        else
+                        {
+                            _logger.LogInformation("No Rig of given ID in the database");
+                            return null;
+                        }
+                    }
+                    catch (SqliteException ex)
+                    {
+                        _logger.LogError(ex, "Impossible to get the Rig with the given ID from RigTable");
+                        return null;
+                    }
+                    _logger.LogInformation("Returning the Rig of given ID from RigTable");
+                    return rig;
+                }
+                else
+                {
+                    _logger.LogWarning("Impossible to access the SQLite database");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("The given Rig ID is null or empty");
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the list of all Rig present in the microservice database 
+        /// </summary>
+        /// <returns>the list of all Rig present in the microservice database</returns>
+        public List<Model.Rig?>? GetAllRig()
+        {
+            List<Model.Rig?> vals = [];
+            using var connection = _connectionManager.GetConnection();
+            if (connection != null)
+            {
+                var command = connection.CreateCommand();
+                command.CommandText = $"SELECT data FROM {RigTableName}";
+                try
+                {
+                    using var reader = command.ExecuteReader();
+                    while (reader.Read() && !reader.IsDBNull(0))
+                    {
+                        string data = reader.GetString(0);
+                        Model.Rig? rig = DeserializeRig(data);
+                        vals.Add(rig);
+                    }
+                    _logger.LogInformation("Returning the list of existing Rig from RigTable");
+                    return vals;
+                }
+                catch (SqliteException ex)
+                {
+                    _logger.LogError(ex, "Impossible to get Rig from RigTable");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Impossible to access the SQLite database");
+            }
+            return null;
+        }
+
+        private static Model.Rig? DeserializeRig(string data)
+        {
+            JsonObject? root = JsonNode.Parse(data) as JsonObject;
+            if (root?["MudPumpList"] is JsonArray pumps)
+            {
+                foreach (JsonObject pump in pumps.OfType<JsonObject>())
+                {
+                    if (pump["LinerConfigurations"] is null)
+                    {
+                        JsonObject row = new();
+                        CopyIfDefined(pump, "LinerId", row, "LinerInnerDiameter");
+                        CopyIfDefined(pump, "PumpDisplacement", row, "DisplacementPerStroke");
+                        CopyIfDefined(pump, "MaxLimitOperatingFlowRate", row, "MaximumVolumetricFlowRate");
+                        CopyIfDefined(pump, "MaxLimitOperatingPressure", row, "MaximumDischargePressure");
+                        // A liner performance row is meaningful only when all three rated values are known.
+                        // Do not turn incomplete historical pump scalars into a new, invalid configuration or
+                        // infer the liner pressure from the more general pump design-pressure limit.
+                        if (IsPositiveFinite(row["LinerInnerDiameter"]) &&
+                            IsPositiveFinite(row["MaximumVolumetricFlowRate"]) &&
+                            IsPositiveFinite(row["MaximumDischargePressure"]))
+                            pump["LinerConfigurations"] = new JsonArray(row);
+                    }
+
+                    pump.Remove("LinerId");
+                    pump.Remove("PumpDisplacement");
+                    pump.Remove("MaxLimitOperatingFlowRate");
+                    pump.Remove("MaxLimitOperatingPressure");
+                }
+            }
+
+            return root?.Deserialize<Model.Rig>(JsonSettings.Options);
+        }
+
+        private static void CopyIfDefined(JsonObject source, string sourceName, JsonObject target, string targetName)
+        {
+            if (source[sourceName] is JsonNode value)
+                target[targetName] = value.DeepClone();
+        }
+
+        private static bool IsPositiveFinite(JsonNode? value) =>
+            value is JsonValue jsonValue && jsonValue.TryGetValue(out double number) &&
+            number > 0 && double.IsFinite(number);
+
+        /// <summary>
+        /// Returns the list of all RigLight present in the microservice database 
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <returns>the list of RigLight present in the microservice database</returns>
+        public List<Model.RigLight>? GetAllRigLight()
+        {
+            List<Model.RigLight>? rigLightList = [];
+            using var connection = _connectionManager.GetConnection();
+            if (connection != null)
+            {
+                var command = connection.CreateCommand();
+                command.CommandText = $"SELECT MetaInfo, Name, Description, CreationDate, LastModificationDate, IsFixedPlatform, ClusterID, " +
+                    $"json_extract(data, '$.RigType'), json_extract(data, '$.OperatingEnvironment'), json_extract(data, '$.MobilityType') FROM {RigTableName}";
+                try
+                {
+                    using var reader = command.ExecuteReader();
+                    while (reader.Read() && !reader.IsDBNull(0))
+                    {
+                        MetaInfo? metaInfo = DeserializeMetaInfo(reader.GetString(0));
+                        string? name = reader.IsDBNull(1) ? null : reader.GetString(1);
+                        string? descr = reader.IsDBNull(2) ? null : reader.GetString(2);
+                        // make sure DateTimeOffset are properly instantiated when stored values are null (and parsed as empty string)
+                        DateTimeOffset? creationDate = TryReadDateTimeOffset(reader, 3);
+                        DateTimeOffset? lastModificationDate = TryReadDateTimeOffset(reader, 4);
+                        bool isFixedPlatform = !reader.IsDBNull(5) && reader.GetBoolean(5);
+                        Guid? clusterID = null;
+                        if (!reader.IsDBNull(6) && Guid.TryParse(reader.GetString(6), out Guid id))
+                        {
+                            clusterID = id;
+                        }
+                        rigLightList.Add(new Model.RigLight(
+                                metaInfo,
+                                string.IsNullOrEmpty(name) ? null : name,
+                                string.IsNullOrEmpty(descr) ? null : descr,
+                                creationDate,
+                                lastModificationDate,
+                                isFixedPlatform,
+                                clusterID,
+                                TryReadEnum<RigType>(reader, 7),
+                                TryReadEnum<RigEnvironment>(reader, 8),
+                                TryReadEnum<RigMobilityType>(reader, 9)
+                                ));
+                    }
+                    _logger.LogInformation("Returning the list of existing RigLight from RigTable");
+                    return rigLightList;
+                }
+                catch (SqliteException ex)
+                {
+                    _logger.LogError(ex, "Impossible to get light datas from RigTable");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Impossible to access the SQLite database");
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Performs calculation on the given Rig and adds it to the microservice database
+        /// </summary>
+        /// <param name="rig"></param>
+        /// <returns>true if the given Rig has been added successfully to the microservice database</returns>
+        public bool AddRig(Model.Rig? rig)
+        {
+            if (rig != null && rig.MetaInfo != null && rig.MetaInfo.ID != Guid.Empty)
+            {
+                //if successful, check if another parent data with the same ID was calculated/added during the calculation time
+                Model.Rig? newRig = GetRigById(rig.MetaInfo.ID);
+                if (newRig == null)
+                {
+                    //update RigTable
+                    using var connection = _connectionManager.GetConnection();
+                    if (connection != null)
+                    {
+                        using SqliteTransaction transaction = connection.BeginTransaction();
+                        bool success = true;
+                        try
+                        {
+                            //add the Rig to the RigTable
+                            string metaInfo = JsonSerializer.Serialize(rig.MetaInfo, JsonSettings.Options);
+                            string? cDate = FormatDateTimeOffset(rig.CreationDate);
+                            string? lDate = FormatDateTimeOffset(rig.LastModificationDate);
+                            string data = JsonSerializer.Serialize(rig, JsonSettings.Options);
+                            var command = connection.CreateCommand();
+                            command.Transaction = transaction;
+                            command.CommandText = $"INSERT INTO {RigTableName} (" +
+                                "MetaInfo, " +
+                                "Name, " +
+                                "Description, " +
+                                "CreationDate, " +
+                                "LastModificationDate, " +
+                                "IsFixedPlatform, " +
+                                "ClusterID, " +
+                                "data" +
+                                ") VALUES (" +
+                                "$metaInfo, " +
+                                "$name, " +
+                                "$description, " +
+                                "$creationDate, " +
+                                "$lastModificationDate, " +
+                                "$isFixedPlatform, " +
+                                "$clusterId, " +
+                                "$data" +
+                                ")";
+                            AddRigParameters(command, rig, metaInfo, cDate, lDate, data);
+                            int count = command.ExecuteNonQuery();
+                            if (count != 1)
+                            {
+                                _logger.LogWarning("Impossible to insert the given Rig into the RigTable");
+                                success = false;
+                            }
+                        }
+                        catch (SqliteException ex)
+                        {
+                            _logger.LogError(ex, "Impossible to add the given Rig into RigTable");
+                            success = false;
+                        }
+                        //finalizing SQL transaction
+                        if (success)
+                        {
+                            transaction.Commit();
+                            _logger.LogInformation("Added the given Rig of given ID into the RigTable successfully");
+                        }
+                        else
+                        {
+                            transaction.Rollback();
+                        }
+                        return success;
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Impossible to access the SQLite database");
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("Impossible to post Rig. ID already found in database.");
+                    return false;
+                }
+
+            }
+            else
+            {
+                _logger.LogWarning("The Rig ID or the ID of its input are null or empty");
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Performs calculation on the given Rig and updates it in the microservice database
+        /// </summary>
+        /// <param name="rig"></param>
+        /// <returns>true if the given Rig has been updated successfully</returns>
+        public RigUpdateOutcome UpdateRigById(Guid guid, DateTimeOffset expectedModifiedUtc, Model.Rig? rig)
+        {
+            if (guid == Guid.Empty || rig?.MetaInfo?.ID != guid || expectedModifiedUtc == default)
+            {
+                return RigUpdateOutcome.Invalid("The rig UUID, payload identity, and expected modification timestamp are required.");
+            }
+
+            using var connection = _connectionManager.GetConnection();
+            if (connection == null)
+                return RigUpdateOutcome.StorageFailure("The rig database is unavailable.");
+
+            using SqliteTransaction transaction = connection.BeginTransaction();
+            try
+            {
+                DateTimeOffset? storedModified;
+                DateTimeOffset? storedCreated;
+                using (SqliteCommand read = connection.CreateCommand())
+                {
+                    read.Transaction = transaction;
+                    read.CommandText = $"SELECT CreationDate, LastModificationDate FROM {RigTableName} WHERE json_extract(MetaInfo, '{MetaInfoIdJsonPath}') = $id";
+                    read.Parameters.AddWithValue("$id", guid.ToString());
+                    using SqliteDataReader reader = read.ExecuteReader();
+                    if (!reader.Read()) return RigUpdateOutcome.NotFound();
+                    storedCreated = TryReadDateTimeOffset(reader, 0);
+                    storedModified = TryReadDateTimeOffset(reader, 1);
+                }
+
+                if (!storedModified.HasValue || storedModified.Value.UtcTicks != expectedModifiedUtc.UtcTicks)
+                {
+                    transaction.Rollback();
+                    return RigUpdateOutcome.Conflict(storedModified);
+                }
+
+                rig.CreationDate = storedCreated;
+                rig.LastModificationDate = DateTimeOffset.UtcNow;
+                string metaInfo = JsonSerializer.Serialize(rig.MetaInfo, JsonSettings.Options);
+                string data = JsonSerializer.Serialize(rig, JsonSettings.Options);
+                using SqliteCommand command = connection.CreateCommand();
+                command.Transaction = transaction;
+                command.CommandText = $"UPDATE {RigTableName} SET MetaInfo = $metaInfo, Name = $name, Description = $description, " +
+                    "CreationDate = $creationDate, LastModificationDate = $lastModificationDate, IsFixedPlatform = $isFixedPlatform, " +
+                    $"ClusterID = $clusterId, data = $data WHERE json_extract(MetaInfo, '{MetaInfoIdJsonPath}') = $id";
+                AddRigParameters(command, rig, metaInfo, FormatDateTimeOffset(rig.CreationDate), FormatDateTimeOffset(rig.LastModificationDate), data);
+                command.Parameters.AddWithValue("$id", guid.ToString());
+                if (command.ExecuteNonQuery() != 1)
+                {
+                    transaction.Rollback();
+                    return RigUpdateOutcome.StorageFailure("The rig could not be updated.");
+                }
+                transaction.Commit();
+                return RigUpdateOutcome.Success(rig);
+            }
+            catch (SqliteException ex)
+            {
+                _logger.LogError(ex, "Impossible to update the Rig");
+                transaction.Rollback();
+                return RigUpdateOutcome.StorageFailure("The rig could not be updated.");
+            }
+        }
+
+        /// <summary>
+        /// Deletes the Rig of given ID from the microservice database
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <returns>true if the Rig was deleted from the microservice database</returns>
+        public bool DeleteRigById(Guid guid)
+        {
+            if (!guid.Equals(Guid.Empty))
+            {
+                using var connection = _connectionManager.GetConnection();
+                if (connection != null)
+                {
+                    using var transaction = connection.BeginTransaction();
+                    bool success = true;
+                    //delete Rig from RigTable
+                    try
+                    {
+                        var command = connection.CreateCommand();
+                        command.Transaction = transaction;
+                        command.CommandText = $"DELETE FROM {RigTableName} WHERE json_extract(MetaInfo, '{MetaInfoIdJsonPath}') = $id";
+                        command.Parameters.AddWithValue("$id", guid.ToString());
+                        int count = command.ExecuteNonQuery();
+                        if (count < 0)
+                        {
+                            _logger.LogWarning("Impossible to delete the Rig of given ID from the RigTable");
+                            success = false;
+                        }
+                    }
+                    catch (SqliteException ex)
+                    {
+                        _logger.LogError(ex, "Impossible to delete the Rig of given ID from RigTable");
+                        success = false;
+                    }
+                    if (success)
+                    {
+                        transaction.Commit();
+                        _logger.LogInformation("Removed the Rig of given ID from the RigTable successfully");
+                    }
+                    else
+                    {
+                        transaction.Rollback();
+                    }
+                    return success;
+                }
+                else
+                {
+                    _logger.LogWarning("Impossible to access the SQLite database");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("The Rig ID is null or empty");
+            }
+            return false;
+        }
+
+        public RigBatchExportOutcome ExportBatch(RigBatchExportRequest? request,
+            IEnumerable<RigFeatureCategory> categories, Func<Guid, IEnumerable<RigBatchPhoto>> photos)
+        {
+            try
+            {
+                List<Model.Rig?>? rigs = GetAllRig();
+                return rigs is null
+                    ? RigBatchExporter.StorageFailure("The rig database is unavailable.")
+                    : RigBatchExporter.Create(request, rigs, categories, photos, DateTimeOffset.UtcNow);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unable to create rig batch export");
+                return RigBatchExporter.StorageFailure("The rig export snapshot could not be produced.");
+            }
+        }
+
+        public RigBatchRestoreOutcome RestoreBatch(RigBatchRestoreRequest? request,
+            IReadOnlyList<RigBatchExternalReferenceMapping> externalMappings)
+        {
+            try
+            {
+                using SqliteConnection? connection = _connectionManager.GetConnection();
+                return connection is null
+                    ? RigBatchRestorer.StorageFailure("The rig database is unavailable.")
+                    : RigBatchRestorer.Restore(connection, request, DateTimeOffset.UtcNow, externalMappings);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unable to open the rig database for batch restore");
+                return RigBatchRestorer.StorageFailure("The rig database is unavailable.");
+            }
+        }
+
+        private static MetaInfo? DeserializeMetaInfo(string json) =>
+            JsonSerializer.Deserialize<MetaInfo>(json, JsonSettings.Options);
+
+        private static DateTimeOffset? TryReadDateTimeOffset(SqliteDataReader reader, int ordinal)
+        {
+            if (reader.IsDBNull(ordinal))
+            {
+                return null;
+            }
+
+            string value = reader.GetString(ordinal);
+            return DateTimeOffset.TryParse(value, out DateTimeOffset parsed) ? parsed : null;
+        }
+
+        private static TEnum? TryReadEnum<TEnum>(SqliteDataReader reader, int ordinal) where TEnum : struct, Enum =>
+            !reader.IsDBNull(ordinal) && Enum.TryParse(reader.GetString(ordinal), true, out TEnum value) ? value : null;
+
+        private static string? FormatDateTimeOffset(DateTimeOffset? value) =>
+            value?.ToString(SqlConnectionManager.DATE_TIME_FORMAT);
+
+        private static void AddRigParameters(SqliteCommand command, Model.Rig rig, string metaInfo, string? creationDate, string? lastModificationDate, string data)
+        {
+            command.Parameters.AddWithValue("$metaInfo", metaInfo);
+            command.Parameters.AddWithValue("$name", (object?)rig.Name ?? DBNull.Value);
+            command.Parameters.AddWithValue("$description", (object?)rig.Description ?? DBNull.Value);
+            command.Parameters.AddWithValue("$creationDate", (object?)creationDate ?? DBNull.Value);
+            command.Parameters.AddWithValue("$lastModificationDate", (object?)lastModificationDate ?? DBNull.Value);
+            command.Parameters.AddWithValue("$isFixedPlatform", rig.IsFixedPlatform ? 1 : 0);
+            command.Parameters.AddWithValue("$clusterId", rig.ClusterID?.ToString() ?? (object)DBNull.Value);
+            command.Parameters.AddWithValue("$data", data);
+        }
+    }
+
+    public enum RigUpdateFailureKind { None, InvalidRequest, NotFound, Conflict, StorageFailure }
+
+    public sealed record RigUpdateOutcome(Model.Rig? Rig, RigUpdateFailureKind FailureKind, RigMutationErrorEnvelope? Error)
+    {
+        public bool IsSuccess => FailureKind == RigUpdateFailureKind.None;
+        public static RigUpdateOutcome Success(Model.Rig rig) => new(rig, RigUpdateFailureKind.None, null);
+        public static RigUpdateOutcome Invalid(string message) => Failure(RigUpdateFailureKind.InvalidRequest, "invalid_request", "invalid", message);
+        public static RigUpdateOutcome NotFound() => Failure(RigUpdateFailureKind.NotFound, "rig_not_found", "not_found", "The rig does not exist.");
+        public static RigUpdateOutcome Conflict(DateTimeOffset? current) => Failure(RigUpdateFailureKind.Conflict, "concurrency_conflict", "stale_modified_utc",
+            $"The rig changed after it was read. Its current LastModificationDate is {current:O}.");
+        public static RigUpdateOutcome StorageFailure(string message) => Failure(RigUpdateFailureKind.StorageFailure, "storage_failure", "storage_failure", message);
+        private static RigUpdateOutcome Failure(RigUpdateFailureKind kind, string error, string code, string message) =>
+            new(null, kind, new RigMutationErrorEnvelope { Error = error, Message = message, Errors = [new RigMutationError { Property = "expectedModifiedUtc", Code = code, Message = message }] });
+    }
+}

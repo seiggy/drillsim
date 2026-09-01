@@ -1,0 +1,125 @@
+﻿<style>
+    .align-right input {
+        text-align: right;
+    }
+</style>
+
+<MudNumericField T="double?" Value="Value" ValueChanged="UpdateFromValue"
+                 Class="align-right" Culture="@CultureInfo" Format="@Format"
+                 Variant="Variant.Text" HideSpinButtons="true"
+                 DebounceInterval="1500" OnDebounceIntervalElapsed="HandleIntervalElapsed" />
+
+@code {
+    [CascadingParameter]
+    public MudDataGrid<QuantityUnitConversion> DataGrid { get; set; } = default!;
+
+    [Parameter]
+    [EditorRequired]
+    public CellContext<QuantityUnitConversion> Context { get; set; } = default!;
+
+    [Parameter]
+    [EditorRequired]
+    public PhysicalQuantity Quantity { get; set; } = default!;
+
+    [Parameter]
+    [EditorRequired]
+    public bool IsDoublePrecision { get; set; }
+
+    [Parameter]
+    [EditorRequired]
+    public bool NoThousands { get; set; }
+
+
+    /// <summary>
+    /// MeaningfulPrecisionInSI is handled in Conversion.DrillingEngineering but could be exposed better (only DataOut as a sister string rounded to the meaningful precision)
+    /// Therefore, the meaningful precision ToString() post-process, based on the below duplicated function DigitAccuracy(), is duplicated here
+    /// </summary>
+    private string Format
+    {
+        get
+        {
+            int digits = 0;
+            if (Quantity != null && Quantity.MeaningfulPrecisionInSI != null)
+                digits = DigitAccuracy((double)Quantity.MeaningfulPrecisionInSI);
+            if (IsDoublePrecision)
+            {
+                return "N15";
+            }
+            else
+            {
+                if (digits < 0)
+                {
+                    return "N0";
+                }
+                else if (digits == 0)
+                {
+                    return "N";
+                }
+                else
+                {
+                    return "N" + digits;
+                }
+            }
+        }
+    }
+
+    private double? Value
+    {
+        get
+        {
+            if (Context.Item.ValueConversionList.Any())
+            {
+                return Context.Item.ValueConversionList.ElementAt(0).DataIn;
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
+
+    private CultureInfo CultureInfo
+    {
+        get
+        {
+            return NoThousands ? DataUtils.CULTURE_EN_US_WO_SEP : DataUtils.CULTURE_EN_US;
+        }
+    }
+
+    public async Task UpdateFromValue(double? val)
+    {
+        if (val != null)
+        {
+            Context.Item.ValueConversionList.ElementAt(0).DataIn = (double)val;
+        }
+        else
+        {
+            Context.Item.ValueConversionList.ElementAt(0).DataIn = 1;
+        }
+        await DataGrid.CommittedItemChanges.InvokeAsync(Context.Item);
+
+    }
+
+    private async Task HandleIntervalElapsed(string debouncedText)
+    {
+        await DataGrid.CommittedItemChanges.InvokeAsync(Context.Item);
+    }
+
+    /// <summary>
+    /// return the number of digits after the decimal separator that corresponds to this accuracy
+    ///
+    /// </summary>
+    /// <param name="accuracy"></param>
+    /// <returns></returns>
+    private int DigitAccuracy(double accuracy)
+    {
+        if (accuracy <= 0)
+        {
+            return 0;
+        }
+        else
+        {
+            return (int)Math.Round(Math.Log10(1 / accuracy));
+        }
+    }
+}

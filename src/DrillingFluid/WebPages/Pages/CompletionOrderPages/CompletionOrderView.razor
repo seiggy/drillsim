@@ -1,0 +1,383 @@
+@inject IDrillingFluidAPIUtils Api
+@using RheologicalModelLib
+@inject ISnackbar Snackbar
+@inject ILogger<MudInputWithUnitAdornment> logger
+@if(ShowViewPanel && (OrderID != null))
+{
+<div hidden="@(!ShowViewPanel)">
+    <MudPaper Elevation="1" Class="py-6" Style="@($"position: {DataUtils.FLOATING_POSITION}; background:{DataUtils.FLOATING_COLOUR};")" >               
+        <MudPaper Class="mx-4 my-4">
+            <MudToolBar>
+                <MudText Typo="Typo.h6">Completed Drilling Fluid Information</MudText>
+                <MudSpacer/>                 
+            </MudToolBar> 
+            <br/>
+            <MudGrid Class="xm-2 ym-2 px-4">
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body1"><b>Name</b></MudText>
+                    <MudText Typo="Typo.body1">@drillingFluidOrderInstance.Name</MudText>
+                </MudItem>
+                <MudItem xs="7">
+                    <MudText Typo="Typo.body1"><b>Description</b></MudText>
+                    <MudText Typo="Typo.body1">@drillingFluidOrderInstance.Description</MudText>                                
+                </MudItem>
+                @if (heatCapacityTemperatureRange.Count > 0){
+                    <MudItem xs="5">
+                        <MudText Typo="Typo.body1"><b>Heat Capacity Temperature Range: </b></MudText>
+                        <MudText Typo="Typo.body1">T [@(Parent.GetUnitLabel("TemperatureDrilling"))]: @(FormatForPrint(heatCapacityTemperatureRange[0], "TemperatureDrilling")) -- @(FormatForPrint(heatCapacityTemperatureRange[1], "TemperatureDrilling"))</MudText>
+                    </MudItem>
+                    <MudItem xs="5">
+                        <MudText Typo="Typo.body1"><b>Heat Capacity Range: </b></MudText>
+                        <MudText Typo="Typo.body1">T [@(Parent.GetUnitLabel("IsobaricSpecificHeatCapacityDrilling"))]: @(FormatForPrint(heatCapacityCoefficientsRange[0], "IsobaricSpecificHeatCapacityDrilling")) -- @(FormatForPrint(heatCapacityCoefficientsRange[1], "IsobaricSpecificHeatCapacityDrilling"))</MudText>
+                    </MudItem>
+                }
+                @if (thermalConductivityTemperatureRange.Count > 0){
+                    <MudItem xs="5">
+                        <MudText Typo="Typo.body1"><b>Thermal Conductivity Temperature Range: </b></MudText>
+                        <MudText Typo="Typo.body1">T [@(Parent.GetUnitLabel("TemperatureDrilling"))]: @(FormatForPrint(thermalConductivityTemperatureRange[0], "TemperatureDrilling")) -- @(FormatForPrint(thermalConductivityTemperatureRange[1], "TemperatureDrilling"))</MudText>
+                    </MudItem>
+                    <MudItem xs="5">
+                        <MudText Typo="Typo.body1"><b>Thermal Conductivity Range: </b></MudText>
+                        <MudText Typo="Typo.body1">T [@(Parent.GetUnitLabel("ThermalConductivityDrilling"))]: @(FormatForPrint(thermalConductivityCoefficientsRange[0], "ThermalConductivityDrilling")) -- @(FormatForPrint(thermalConductivityCoefficientsRange[1], "ThermalConductivityDrilling"))</MudText>
+                    </MudItem>
+                }   
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body1"><b>Rheological Model</b></MudText>
+                    <MudText Typo="Typo.body1">@rheoModelName[drillingFluidOrderInstance.RheologicalModelsEnum]</MudText>                                
+                </MudItem>            
+            </MudGrid>
+            <div>
+                <MudGrid Style="width:100vw;">
+                    <MudItem Class="d-flex justify-center" xs="9">
+                        <PlotlyChart
+                            @bind-Config="config" @bind-Layout="layout" 
+                            @bind-Data="data" @ref="chart"/>
+                    </MudItem>
+                </MudGrid>
+            </div>
+            <MudToolBar>
+                <MudSpacer/>
+                <MudButton StartIcon="@Icons.Material.Outlined.Close" IconColor="@Color.Error" 
+                        OnClick="@ClosePanel">Close</MudButton>     
+            </MudToolBar>
+            
+        </MudPaper>        
+    </MudPaper>    
+</div>
+}
+@code{
+    [CascadingParameter]
+    private MudTheme Theme {get; set;}
+    [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? Parent { get; set; }
+    [Parameter]
+    public bool ShowViewPanel {get; set;} = false;
+    [Parameter]
+    public Guid? OrderID {get; set;}
+    [Parameter]
+    public EventCallback OnMessageSent {get; set;}
+    private Dictionary<RheologicalModelsEnum, string> rheoModelName = new Dictionary<RheologicalModelsEnum, string>
+    {
+        {RheologicalModelsEnum.Unkown, "Unkown"},
+        {RheologicalModelsEnum.Bingham, "Bingham plastic"},
+        {RheologicalModelsEnum.PowerLaw, "Power-law"},
+        {RheologicalModelsEnum.HerschelBulkley, "Herschel-Bulkley"},
+        {RheologicalModelsEnum.Quemada, "Quemada"},
+        {RheologicalModelsEnum.RobertsonStiff, "Robertson-Stiff"},        
+    };
+
+    private List<double?> heatCapacityTemperatureRange = new();
+    private List<double?> heatCapacityCoefficientsRange = new();
+    private List<double?> thermalConductivityTemperatureRange = new();
+    private List<double?> thermalConductivityCoefficientsRange = new();
+
+
+    private ThermalConductivity thermalConductivity = new();
+    
+    #region Plotting variables    
+    private PlotlyChart chart;
+    private Config config;
+    private string UnitSystemName = "";
+    private Layout layout = new Layout 
+    {
+        Height = 350,
+        Width = 900,
+        ShowLegend = true,
+        Margin = new Plotly.Blazor.LayoutLib.Margin 
+        {
+            L = 50,
+            R = 5,
+            T = 50,
+            B = 50
+        },
+        YAxis = new List<YAxis>
+        {
+            new YAxis
+            {
+                Title = new Plotly.Blazor.LayoutLib.YAxisLib.Title { Text = "Shear-Stress [Pa]" },
+            }
+        },
+        XAxis = new List<XAxis>
+        {
+            new XAxis
+            {
+                Title = new Plotly.Blazor.LayoutLib.XAxisLib.Title { Text = "Shear-Rate [1/s]" },
+            }
+        },
+        Font = new Font
+        {
+            Size = 16
+        }        
+    };
+    private string unitName = "";
+    private List<object> xData = new();
+    private List<object> yData = new();
+    private List<object> xReferenceData = new();
+    private List<object> yReferenceData = new();
+    private double maxShearRate = 0.0;
+    private double deltaGamma = 1.0;
+    private bool axisBool {get; set;} = true;
+    IList<ITrace> data = new List<ITrace>
+    {
+        new Scatter
+        {
+            Name = "ScatterTrace",
+            Mode = ModeFlag.Markers,
+            Line = new Line
+                {
+                    Color = "blue",   // Color of connecting line if Mode includes Lines
+                    Width = 2
+                },
+            X = new List<object>{},
+            Y = new List<object>{}
+        }
+    };
+    #endregion
+
+    private async Task SendMessage()
+    {
+        await OnMessageSent.InvokeAsync();
+    }
+    private DrillingFluidOrder drillingFluidOrderInstance = new();
+    private async Task UpdateChart()
+    {
+        await chart.Clear();
+        await chart.NewPlot();
+        List<string> chartLegends = new();                   
+        int j = 0;
+        int Ntables = drillingFluidOrderInstance.CompletedDrillingFluid.PostProcessedFlowCurve.TableValues.Count;
+        foreach (FlowCurveTable flowCurveTable in drillingFluidOrderInstance.CompletedDrillingFluid.PostProcessedFlowCurve.TableValues)
+        {
+            xReferenceData.Clear();
+            yReferenceData.Clear();
+            //Create a legend for the chart using the temperature and pressure
+            chartLegends.Add(FormatLegend(flowCurveTable));
+            foreach (RheometerMeasurement rheoMeasurement in flowCurveTable.RheometerMeasurements)
+            {
+                maxShearRate = Math.Max(maxShearRate, rheoMeasurement.IsoNewtonianShearRate);
+                xReferenceData.Add((object) Parent.FromSI(rheoMeasurement.IsoNewtonianShearRate, "FluidShearRate"));
+                yReferenceData.Add((object) Parent.FromSI(rheoMeasurement.IsoNewtonianShearStress, "FluidShearStress"));                               
+            }//Close loop in table measurements
+           
+            await chart.AddTrace(
+                new Scatter
+                {
+                    Mode = ModeFlag.Markers,     
+                    Marker = new Marker {Color = $"rgb(0,0,{255*(Ntables-j)/Ntables})"},                         
+                    X = xReferenceData, // X-coordinate (e.g., in data units or paper units)
+                    Y = yReferenceData, // Y-coordinate
+                    ShowLegend = true,
+                    Name = chartLegends[chartLegends.Count-1]
+                });
+            j++;
+        }//Close loop in flow curve tables
+        deltaGamma = maxShearRate/100.0;
+        j = 0;
+        foreach (GenericRheologicalModel rheoModel in drillingFluidOrderInstance.CompletedDrillingFluid.RheologicalModelProperties)
+        {                        
+            xData.Clear();
+            yData.Clear();
+            switch (drillingFluidOrderInstance.RheologicalModelsEnum)
+            {
+                case RheologicalModelsEnum.Quemada:
+                {
+                    QuemadaModel quemadaModel = new QuemadaModel(rheoModel);
+                    for (double gamma = 0.1; gamma < maxShearRate; gamma += deltaGamma)
+                    {
+                        xData.Add((object) Parent.FromSI(gamma, "FluidShearRate"));
+                        yData.Add((object) Parent.FromSI(quemadaModel.ShearStress(gamma), "FluidShearStress"));                                
+                    }
+                    break;
+                }
+                case RheologicalModelsEnum.PowerLaw:
+                {
+                    PowerLawModel powerLawModel = new PowerLawModel(rheoModel);
+                    for (double gamma = 0.1; gamma < maxShearRate; gamma += deltaGamma)
+                    {
+                        xData.Add((object) Parent.FromSI(gamma, "FluidShearRate"));
+                        yData.Add((object) Parent.FromSI(powerLawModel.ShearStress(gamma), "FluidShearStress"));                                                                
+                    }
+                    break;
+                }
+                case RheologicalModelsEnum.RobertsonStiff:
+                {
+                    RobertsonStiffModel robertsonStiffModel = new RobertsonStiffModel(rheoModel);
+                    for (double gamma = 0.1; gamma < maxShearRate; gamma += deltaGamma)
+                    {
+                        xData.Add((object) Parent.FromSI(gamma, "FluidShearRate"));
+                        yData.Add((object) Parent.FromSI(robertsonStiffModel.ShearStress(gamma), "FluidShearStress"));                                                                    
+                    }
+                    break;
+                }
+                case RheologicalModelsEnum.HerschelBulkley:
+                {
+                    HerschelBulkleyModel herschelBulkleyModel = new HerschelBulkleyModel(rheoModel);
+                    for (double gamma = 0.1; gamma < maxShearRate; gamma += deltaGamma)
+                    {
+                        xData.Add((object) Parent.FromSI(gamma, "FluidShearRate"));
+                        yData.Add((object) Parent.FromSI(herschelBulkleyModel.ShearStress(gamma), "FluidShearStress"));                              
+                    }
+                    break;
+                }
+                case RheologicalModelsEnum.Bingham:
+                {
+                    BinghamPlasticModel binghamPlasticModel = new BinghamPlasticModel(rheoModel);
+                    for (double gamma = 0.1; gamma < maxShearRate; gamma += deltaGamma)
+                    {
+                        xData.Add((object) Parent.FromSI(gamma, "FluidShearRate"));
+                        yData.Add((object) Parent.FromSI(binghamPlasticModel.ShearStress(gamma), "FluidShearStress"));                              
+                    }
+                    break;
+                }
+            }//End switch
+            await chart.AddTrace(
+                new Scatter
+                {
+                    Mode = ModeFlag.Lines, 
+                    Line = new Line {Color = $"rgb(0,0,{255*(Ntables-j)/Ntables})"},                             
+                    X = xData, // X-coordinate (e.g., in data units or paper units)
+                    Y = yData, // Y-coordinate
+                    ShowLegend = true,
+                    Name = chartLegends[j]
+                });
+            j++;                                                            
+        }//End foreach   
+       
+        
+    }
+    private async Task UpdateAxisTitles()
+    {
+        //Update axis titles
+        layout.XAxis[0].Title = new Plotly.Blazor.LayoutLib.XAxisLib.Title
+        {    
+            Text = "Shear-Rate [" + Parent.GetUnitLabel("FluidShearRate") + "]",
+        }; 
+        layout.YAxis[0].Title = new Plotly.Blazor.LayoutLib.YAxisLib.Title
+        {    
+            Text = "Shear-Stress [" + Parent.GetUnitLabel("FluidShearStress") + "]",                        
+        };    
+        await chart.React();
+    }
+    private async Task GetCompletedFluid()
+    {   
+        if (OrderID != null){
+            logger.LogInformation("Trying to load completed fluid from client: " + Api.HttpClientDrillingFluid);
+            var drillingFluidOrderInstanceTask = Api.ClientDrillingFluid.GetDrillingFluidOrderByIdAsync((Guid) OrderID);        
+            List<Task> loadingTaskList = new List<Task> { drillingFluidOrderInstanceTask };
+            Task finishedTask = await Task.WhenAny(loadingTaskList);
+            if (finishedTask == drillingFluidOrderInstanceTask)
+            {
+                try
+                {
+                    drillingFluidOrderInstance = (DrillingFluidOrder)await drillingFluidOrderInstanceTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                    heatCapacityTemperatureRange = drillingFluidOrderInstance.CompletedDrillingFluid.SpecificHeatCapacity.TemperatureRange.ToList();
+                    heatCapacityCoefficientsRange = drillingFluidOrderInstance.CompletedDrillingFluid.SpecificHeatCapacity.CoefficientRange.ToList();
+                    thermalConductivityTemperatureRange = drillingFluidOrderInstance.CompletedDrillingFluid.ThermalConductivity.TemperatureRange.ToList();
+                    thermalConductivityCoefficientsRange = drillingFluidOrderInstance.CompletedDrillingFluid.ThermalConductivity.CoefficientRange.ToList();
+                                                   
+                    if (drillingFluidOrderInstance == null)    
+                    {
+                        logger.LogWarning("Returned list of Drilling Fluid Description were null on initialization");
+                        Snackbar.Add("Returned list of Drilling Fluid Description were null on initialization", Severity.Warning);
+                    }
+                }
+                catch (ApiException ex)
+                {
+                    logger.LogError(ex, "Impossible to load Drilling Fluid Description from client");
+                }
+            }
+        }//Close orderid is null
+    }
+    private string FormatLegend(FlowCurveTable fcTable)
+    {
+        double temperature;
+        if (fcTable.Temperature.GaussianValue.Mean == null)
+        {
+            temperature = 0.0;        
+        }
+        else
+        {
+            temperature = Parent.FromSI(((double)fcTable.Temperature.GaussianValue.Mean), "TemperatureDrilling");
+        }            
+        string tString = temperature.ToString("F2");
+        string temperatureText = "T [" + Parent!.GetUnitLabel("TemperatureDrilling") + "]: " + tString;        
+        ///
+        double pressure;
+        if (fcTable.Pressure.GaussianValue.Mean == null)
+        {
+            pressure = 0.0;        
+        }
+        else
+        {
+            pressure = Parent.FromSI( (double) fcTable.Pressure.GaussianValue.Mean, "PressureDrilling");
+        }            
+        string pString = pressure.ToString("F2");
+        string pressureText = "P [" + Parent.GetUnitLabel("PressureDrilling") + "]: " +  pString;        
+        return temperatureText + "   " + pressureText;
+    }
+    private async Task ClosePanel()
+    {
+        chart.Clear();
+        unitName = "";
+        ShowViewPanel = false;
+        await Task.Delay(10);
+        await SendMessage();
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        if (ShowViewPanel)
+        {
+            await GetCompletedFluid();               
+        }
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+    string FormatForPrint(double? value, string Unit)
+    {
+        int? formatValue = null;
+        if(value != null)
+        {
+            formatValue = (int) (100 * Parent.FromSI(value, Unit));
+            return (((double) formatValue)/100).ToString();
+        }        
+        else
+        {
+            return "";
+        }
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        if (ShowViewPanel)
+        {
+            await GetCompletedFluid();
+            if (Parent.UnitSystemName != unitName)
+            {
+                unitName = Parent.UnitSystemName;
+                // Add the delay to keep the UI responsive
+                await Task.Delay(50);
+                await UpdateAxisTitles();
+                await UpdateChart();      
+            }
+        }
+    }
+  
+}

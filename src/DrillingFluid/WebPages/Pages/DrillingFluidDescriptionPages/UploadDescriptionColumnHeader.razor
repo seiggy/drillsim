@@ -1,0 +1,26 @@
+<MudText Typo="Typo.body1"><b> @Label</b></MudText>    
+<MudGrid>
+    <MudItem xs="5">
+        <MudNumericField T="int?" @bind-Value="@ColumnNumber" Label="Column" Variant="Variant.Text" Min="1" Max="@MaxColumns" ShrinkLabel/>
+    </MudItem>
+    <MudItem xs="5">
+        <MudSelect T="string?" @bind-Value="@SelectedUnit" Label="Unit">             
+            @foreach(string unit in UnitDict.Keys)
+            {
+                <MudSelectItem Value="@unit">@unit</MudSelectItem>
+            }                
+        </MudSelect>
+    </MudItem>
+</MudGrid>
+@code{
+    [Parameter]
+    public Dictionary<string, UnitChoice> UnitDict {get; set;}
+    [Parameter]
+    public string? SelectedUnit {get; set;}
+    [Parameter]
+    public int? ColumnNumber {get; set;}
+    [Parameter]
+    public string? Label {get; set;}
+    [Parameter]
+    public int MaxColumns {get;set;}
+}

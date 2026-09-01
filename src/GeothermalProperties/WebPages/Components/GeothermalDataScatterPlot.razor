@@ -1,0 +1,77 @@
+@using Plotly.Blazor
+@using Plotly.Blazor.Traces.ScatterLib
+@using NORCE.Drilling.GeothermalProperties.ModelShared
+@inherits ComponentBase
+
+<div>
+    <PlotlyChart @ref="chart" Config="config" Data="data" Layout="layout" />
+</div>
+
+@code {
+    [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? Parent { get; set; }
+    private PlotlyChart chart;
+    private Config config = new Config();
+    private Layout layout = new Layout
+    {
+        AutoSize = true,
+        Height = 800,
+        Width = 400,
+        XAxis = new List<XAxis> { new XAxis { Title = new Plotly.Blazor.LayoutLib.XAxisLib.Title { Text = "Temperature " } } },
+        YAxis = new List<YAxis> 
+            { 
+                new YAxis 
+                { 
+                    Title = new Plotly.Blazor.LayoutLib.YAxisLib.Title { Text = "Vertical Depth" },
+                    AutoRange = Plotly.Blazor.LayoutLib.YAxisLib.AutoRangeEnum.Reversed 
+                } 
+            }
+    };
+    private IList<ITrace> data = new List<ITrace>();
+    [Parameter]
+    public GeothermalProperties Properties { get; set; }
+    private List<GeothermalData> Data { get; set; } = new();
+    
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        UpdatePlot();
+    }
+    private double FromSI(string quantity, double value)
+    {
+        double? val = Parent?.FromSI(value, quantity);
+        if (val == null)
+        {
+            return double.NaN;
+        }
+        return (double) val;
+    } 
+    private void UpdatePlot()
+    {
+        //chart!.Clear();
+        Data = Properties?.GeothermalDataList ?? new List<GeothermalData>();
+        layout.YAxis[0].Title.Text = "Vertical Depth [" + Parent?.GetUnitLabel("DepthDrilling") + "]";
+        layout.XAxis[0].Title.Text = "Temperature [" + Parent?.GetUnitLabel("TemperatureDrilling") + "]";
+        
+
+        if (Data == null || !Data.Any(d => d.VerticalDepth.HasValue && d.Temperature.HasValue))
+        {
+            data = new List<ITrace>();
+            return;
+        }
+        List<GeothermalData> validData = Data.Where(d => d.VerticalDepth != null && d.Temperature != null).ToList();
+        List<object> yValues = validData.Select(d => (object) FromSI("DepthDrilling", d.VerticalDepth!.Value)).ToList();
+        List<object> xValues = validData.Select(d => (object) FromSI("TemperatureDrilling", d.Temperature!.Value)).ToList();
+        
+        var scatter = new Scatter
+        {
+            X = xValues,
+            Y = yValues,
+            Mode = ModeFlag.Markers
+        };
+
+        data = new List<ITrace> { scatter };
+            
+    }
+    private void ManageUnits(){}
+}

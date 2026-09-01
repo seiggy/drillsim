@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>OSDC.UnitConversion.Conversion.UnitSystem</RootNamespace>
+    <Authors>Eric Cayeux</Authors>
+    <Company>NORCE Norwegian Research Centre</Company>
+    <Version>3.4.1</Version>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>Manipulation of set of unit choices forming a unit system</Title>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageId>OSDC.UnitConversion.Conversion.UnitSystem</PackageId>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(UseLocalUnitConversionProjects)' != 'true'">
+    <PackageReference Include="OSDC.UnitConversion.Conversion" Version="3.4.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseLocalUnitConversionProjects)' == 'true'">
+    <ProjectReference Include="..\Conversion\Conversion.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>

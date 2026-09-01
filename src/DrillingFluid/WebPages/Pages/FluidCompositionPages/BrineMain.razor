@@ -1,0 +1,179 @@
+@inject IDrillingFluidAPIUtils Api
+@page "/Brine"
+@inject ILogger<DrillingFluidMain> logger
+@inject ISnackbar Snackbar
+<MudUnitAndReferenceChoiceTag HttpHost=@Api.HostNameUnitConversion
+                HttpBasePath=@Api.HostBasePathUnitConversion
+                HttpController="UnitSystem/"
+                UnitSystemName="@DataUtils.UnitAndReferenceParameters.UnitSystemName"
+                UnitSystemNameChanged="@DataUtils.UpdateUnitSystemName">
+    @if (brineList == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {     
+        <MudToolBar>
+            <MudText Typo="Typo.h5"> Brine Description @brineMessage </MudText>
+            <MudSpacer/>
+            <MudButton StartIcon="@Icons.Material.Outlined.Delete" IconColor="@Color.Error" OnClick="@DeleteSelectedBrine">Delete selection</MudButton>       
+            <MudButton StartIcon="@Icons.Material.Outlined.Add" IconColor="@Color.Success" OnClick="@AddBrine">Add Brine element</MudButton>
+        </MudToolBar>
+        <MudDataGrid T="Brine" MultiSelection="true" Items="@brineList" SelectedItemsChanged="@SelectedItemsChanged"
+                Hover="true"
+                SortMode="SortMode.Multiple" QuickFilter="@_brineFilter" Filterable="false">
+            <Columns>
+                <SelectColumn T="Brine" />
+                <PropertyColumn Property="x => x.Name" Title="Name" CellStyle="width: 20%;" Sortable="true" Editable="false" />
+                <PropertyColumn Property="x => x.Description" Title="Description" CellStyle="width: 60%;" Sortable="true" Editable="false" />         
+                <TemplateColumn>
+                    <CellTemplate>
+                        <MudIconButton Class="mx-2" Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" 
+                            OnClick="(() => EditBrine(context.Item.MetaInfo.ID))" />        
+                        <MudIconButton Size="@Size.Medium" Icon="@Icons.Material.Outlined.Delete" 
+                            OnClick="(() => DeleteBrine(context.Item.MetaInfo.ID))"/>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="Brine" />
+            </PagerContent>
+        </MudDataGrid>
+    }
+    @if(showAddPanel)
+    {
+        <BrineAddAndEdit BrineId="@brineIdForEdit"  OnMessageSent="@HandleBrineAddition"/>
+    }
+    
+</MudUnitAndReferenceChoiceTag>
+
+
+
+@code{
+    private List<Brine> brineList = new();
+    private List<Brine> selectedBrineList = new();
+    [Inject] private IDialogService DialogService { get; set; }
+    private bool showAddPanel = false;
+     private Guid? brineIdForEdit;
+    private string? _searchString;
+    private string brineMessage = "";
+    protected override async Task OnInitializedAsync()
+    {
+
+        // Starting all loading tasks asynchronously
+        logger.LogInformation("Trying to load list of Brine from client: " + Api.HttpClientDrillingFluid);
+        var brineTask = Api.ClientDrillingFluid.GetAllBrineAsync();
+        
+        List<Task> loadingTaskList = new List<Task> { brineTask };
+        Task finishedTask = await Task.WhenAny(loadingTaskList);
+        if (finishedTask == brineTask)
+        {
+            try
+            {
+                brineList = (List<Brine>)await brineTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                if (brineList != null)
+                {
+                    brineList.Sort((f1, f2) => f1.Name.CompareTo(f2.Name));
+                }
+                else
+                {
+                    logger.LogWarning("Returned list of Drilling Fluid Description were null on initialization");
+                    Snackbar.Add("Returned list of Drilling Fluid Description were null on initialization", Severity.Warning);
+                }
+            }
+            catch (ApiException ex)
+            {
+                logger.LogError(ex, "Impossible to load Drilling Fluid Description from client");
+            }
+        }
+        
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    private Func<Brine, bool>
+    _brineFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+        if ($"{x.Name} {x.Description}".Contains(_searchString))
+            return true;
+
+        return false;
+    };
+    void SelectedItemsChanged(HashSet<Brine>items)
+    {
+        selectedBrineList.Clear();
+        selectedBrineList.InsertRange(0, items);
+    }
+    private async Task HandleBrineAddition()
+    {
+        showAddPanel = false;
+        brineIdForEdit = null;
+        await OnInitializedAsync();
+    }
+    private void AddBrine()
+    {
+        showAddPanel = true;
+        brineIdForEdit = null;
+        //showEditPanel = false;
+    }
+    private void EditBrine(Guid id)
+    {
+        brineIdForEdit = id;
+        //showEditPanel = true;
+        showAddPanel = true;
+    }
+    private async Task DeleteBrine(Guid id)
+    {
+        try
+        {
+            if (await ConfirmDeletion())
+            {
+                await Api.ClientDrillingFluid.DeleteBrineByIdAsync(id);
+                await OnInitializedAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to delete DrillingFluid");
+        }
+    }
+    private async Task DeleteSelectedBrine()
+    {
+        if (await ConfirmDeletion())
+        {
+            foreach (Brine brine in selectedBrineList)
+            {
+                await Api.ClientDrillingFluid.DeleteBrineByIdAsync(brine.MetaInfo.ID);
+                await OnInitializedAsync();
+            }
+            selectedBrineList.Clear();
+        }        
+    }
+    private async Task<bool> ConfirmDeletion()
+    {
+        var options = new DialogOptions 
+        { 
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true    
+        };
+        var dialog = await DialogService.ShowAsync<DialogDeleteTemplate>("DELETE", options);
+        var result = await dialog.Result;
+        StateHasChanged();
+        if (result == null)
+        {
+            return false;
+        }
+        else
+        {
+            return (!result.Canceled);
+        }
+    }
+    async void OnClickCloseEditPanel() {
+        showAddPanel = false;
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+
+}

@@ -1,0 +1,293 @@
+<MudPaper Class="my-4 mx-4 py-4" Style="@($"background:{Colors.Gray.Lighten5};")">  
+    <MudToolBar>
+        <MudText Typo="Typo.body1"><b>Rheometer measurements</b></MudText>
+        <MudSpacer/>
+        <MudButton StartIcon="@chartIcon" IconColor="@chartButtonColor" OnClick="@ShowChart">@chartText</MudButton>                
+        <MudButton StartIcon="@Icons.Material.Outlined.Add" IconColor="@Color.Success" OnClick="@AddTableLine">Add measurement</MudButton>      
+        <MudButton StartIcon="@Icons.Material.Outlined.Remove" IconColor="@Color.Error" OnClick="@RemoveTableLine">Remove measurement</MudButton>         
+    </MudToolBar>
+    <MudContainer>
+        @if(checkBoxAlert)
+        {
+            <MudAlert Severity="Severity.Error" 
+                ContentAlignment="HorizontalAlignment.Center" 
+                ShowCloseIcon="true" 
+                CloseIconClicked="CloseAlertCheckBox">
+                    At least <b>one</b> component each needed!
+            </MudAlert>
+        }
+    </MudContainer>
+    <MudCollapse Expanded="@showChart">
+        <RheometerCurve RheometerBooleans="@rheoOpt" RheometerMeasurements="@RheometerMeasurements" 
+            ShearRateInputType="@ShearRateInputType" ShearStressInputType="@ShearStressInputType"/>
+    </MudCollapse>
+    @for(int i = 0; i < RheometerMeasurements.Count; i++)
+    {
+        int index = i; 
+        <MudPaper Class="my-0 mx-4 pb-2" Style="@(RowColor(index))" Elevation="0">  
+            <MudGrid Class="my-0 mx-1 py-1">
+                @if(rheoOpt.showRPM)
+                {
+                    <MudItem xs="@itemSize" Class ="mx-1 by-1">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Rotational Speed" QuantityName="AngularVelocityDrilling"
+                            SIValue="@RheometerMeasurements[index].RotationalSpeed"
+                            SIValueChanged="val => {UpdateRotationalSpeed(val, index);}"/>
+                    </MudItem>
+                }
+                @if(rheoOpt.showShearRate)
+                {
+                    <MudItem xs="@itemSize" Class ="mx-1 by-1">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Shear-Rate" QuantityName="FluidShearRate"
+                            SIValue="@RheometerMeasurements[index].IsoNewtonianShearRate"
+                            SIValueChanged="val => {UpdateIsoNewtonianShearRate(val, index);}"/>
+                    </MudItem>
+                }
+                @if(rheoOpt.showShearRateBob)
+                {
+                    <MudItem xs="@itemSize" Class ="mx-1 by-1">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Shear-Rate (Bob)" QuantityName="FluidShearRate"
+                            SIValue="@RheometerMeasurements[index].BobNewtonianShearRate"
+                            SIValueChanged="val => {UpdateIsoNewtonianShearRate(val, index);}"/>
+                    </MudItem>   
+                }                                             
+                @if(rheoOpt.showShearStress)
+                {
+                    <MudItem xs="@itemSize" Class ="mx-1 by-1">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Shear-Stress" QuantityName="FluidShearStress"
+                            SIValue="@RheometerMeasurements[index].IsoNewtonianShearStress"
+                            SIValueChanged="val => {UpdateIsoNewtonianShearStress(val, index);}"/>
+                    </MudItem>    
+                }
+                @if(rheoOpt.showShearStressBob)
+                {
+                    <MudItem xs="@itemSize" Class ="mx-1 by-1">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Shear-Stress (Bob)" QuantityName="FluidShearStress"
+                            SIValue="@RheometerMeasurements[index].BobNewtonianShearStress"
+                            SIValueChanged="val => {UpdateBobNewtonianShearStress(val, index);}"/>
+                    </MudItem>     
+                }  
+                @if(rheoOpt.showTorque)
+                {
+                    <MudItem xs="@itemSize" Class ="mx-1 by-1">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Torque" QuantityName="TorqueDrilling"
+                            SIValue="@RheometerMeasurements[index].Torque"
+                            SIValueChanged="val => {UpdateTorque(val, index);}"/>
+                    </MudItem> 
+                }                
+            </MudGrid>
+        </MudPaper>
+    }
+    <div hidden="@(!showAlert)">
+        <MudAlert Severity="Severity.Error" 
+            ContentAlignment="HorizontalAlignment.Center" 
+            ShowCloseIcon="true" 
+            CloseIconClicked="CloseAlert">
+                At least <b>one</b> measurement are necessary!
+        </MudAlert>
+    </div>
+    
+</MudPaper>
+
+@code{
+    [Parameter]
+    public EventCallback OnMessageSent {get; set;}    
+    [Parameter]
+    public MeasurementTypesShearRate ShearRateInputType {get; set;} = MeasurementTypesShearRate.Rotation;
+    [Parameter]
+    public MeasurementTypesShearStress ShearStressInputType {get; set;} = MeasurementTypesShearStress.IsoNewtonianShearStress;
+    [Parameter]
+    public List<RheometerMeasurement> RheometerMeasurements {get; set;} = new List<RheometerMeasurement>
+    {
+      new RheometerMeasurement
+        {
+            RotationalSpeed = 0.0,
+            Torque = 0.0,                    
+            IsoNewtonianShearRate = 0.0,
+            IsoNewtonianShearStress = 0.0,
+            BobNewtonianShearRate = 0.0,
+            BobNewtonianShearStress = 0.0,
+        }
+    };
+    bool showAlert = false;
+    //Chart control options
+    bool showChart = false;
+    string chartText = "Show";
+    private string chartIcon = Icons.Material.Filled.InsertChart;
+    private MudBlazor.Color chartButtonColor = Color.Primary;
+    //Checkbox booleans
+    private RheometerMeasurementOptions rheoOpt = new();    
+    
+    private bool checkBoxAlert = false;
+    private int itemSize = 4;
+    protected override void OnParametersSet()
+    {
+       
+        switch (ShearRateInputType)
+        {
+            case MeasurementTypesShearRate.Rotation:
+            {
+                rheoOpt.showRPM = true;
+                rheoOpt.showShearRate = false;
+                rheoOpt.showShearRateBob = false;
+                break;
+            }
+            case MeasurementTypesShearRate.IsoNewtonianShearRate:
+            {
+                rheoOpt.showRPM = false;
+                rheoOpt.showShearRate = true;
+                rheoOpt.showShearRateBob = false;
+                break;
+            }
+            case MeasurementTypesShearRate.BobNewtonianShearRate:
+            {
+                rheoOpt.showRPM = false;
+                rheoOpt.showShearRate = false;
+                rheoOpt.showShearRateBob = true;
+                break;
+            }
+        }//Close switch shear rate input
+        switch (ShearStressInputType)
+        {
+            case MeasurementTypesShearStress.Torque:
+            {
+                rheoOpt.showTorque = true;
+                rheoOpt.showShearStress = false;
+                rheoOpt.showShearStressBob = false;
+                break;
+            }
+            case MeasurementTypesShearStress.IsoNewtonianShearStress:
+            {
+                rheoOpt.showTorque = false;
+                rheoOpt.showShearStress = true;
+                rheoOpt.showShearStressBob = false;
+                break;
+            }
+            case MeasurementTypesShearStress.BobNewtonianShearStress:
+            {
+                rheoOpt.showTorque = false;
+                rheoOpt.showShearStress = false;
+                rheoOpt.showShearStressBob = true;
+                break;
+            }
+        }//Close switch shear stress input
+    }
+    //
+    void AddTableLine()
+    {
+        RheometerMeasurements.Add(
+            new RheometerMeasurement
+            {
+                RotationalSpeed = 0.0,
+                Torque = 0.0,                    
+                IsoNewtonianShearRate = 0.0,
+                IsoNewtonianShearStress = 0.0,
+                BobNewtonianShearRate = 0.0,
+                BobNewtonianShearStress = 0.0,
+            }
+        );
+    }
+    void ShowChart()
+    {
+        showChart = !showChart;
+        if (showChart)
+        {
+            chartText = "Hide chart";  
+            chartIcon = Icons.Material.Filled.InsertChartOutlined;
+            chartButtonColor = Color.Error;  
+        }
+        else
+        {
+            chartText = "Show chart";
+            chartIcon = Icons.Material.Filled.InsertChart;
+            chartButtonColor = Color.Primary;  
+        }
+    }
+    void RemoveTableLine()
+    {
+        if(RheometerMeasurements.Count > 1)
+        {
+            RheometerMeasurements.RemoveAt(RheometerMeasurements.Count-1);
+        }
+        else
+        {
+            showAlert = true;
+        }
+    }
+    private string RowColor(int index)
+    {
+        string color = "";
+        if (index%2 == 0)
+        {
+            color = Colors.Gray.Lighten3;
+        }
+        else
+        {
+           color = Colors.Gray.Lighten2; 
+        }
+        return $"background:{color};";
+    }    
+    void CloseAlert()
+    {
+        showAlert = false;
+    }
+    void CloseAlertCheckBox()
+    {
+        checkBoxAlert = false;
+    }
+    private async Task SendMessage()
+    {
+        await OnMessageSent.InvokeAsync();
+    }
+    //Unit management
+    void ManageUnits(){}
+    private async Task UpdateRotationalSpeed(double var, int index)
+    {   
+        RheometerMeasurements[index].RotationalSpeed = var;
+        await SendMessage();
+    }
+    private async Task UpdateTorque(double var, int index)
+    {   
+        RheometerMeasurements[index].Torque = var;
+        await SendMessage();
+    }
+    private async Task UpdateIsoNewtonianShearRate(double var, int index)
+    {   
+        RheometerMeasurements[index].IsoNewtonianShearRate = var;
+        await SendMessage();
+    }
+    private async Task UpdateIsoNewtonianShearStress(double var, int index)
+    {   
+        RheometerMeasurements[index].IsoNewtonianShearStress = var;
+        await SendMessage();
+    }
+    private async Task UpdateBobNewtonianShearRate(double var, int index)
+    {   
+        RheometerMeasurements[index].BobNewtonianShearRate = var;
+        await SendMessage();
+    }
+    private async Task UpdateBobNewtonianShearStress(double var, int index)
+    {   
+        RheometerMeasurements[index].BobNewtonianShearStress = var;
+        await SendMessage();
+    }
+
+    private void TextBoxSize()
+    {
+        if (rheoOpt.showRPM && rheoOpt.showShearRate && rheoOpt.showShearRateBob && rheoOpt.showShearStress && rheoOpt.showShearStressBob && rheoOpt.showTorque)
+        {
+            itemSize = 1;
+        }
+        else 
+        {
+            itemSize = 2;
+        }
+
+    }
+    
+}

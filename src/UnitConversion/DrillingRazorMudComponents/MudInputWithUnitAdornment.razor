@@ -1,0 +1,298 @@
+﻿@namespace OSDC.UnitConversion.DrillingRazorMudComponents
+@implements IUnitAwareComponent
+@inject ILogger<MudInputWithUnitAdornment> logger
+
+<MudTextField ShrinkLabel @bind-Value="@ValueInUserUnit" Label="@QuantityLabel" Variant="@VariantType" Adornment="Adornment.End" AdornmentText="@UnitLabel" Disabled="@Disabled" ReadOnly="@ReadOnly" Immediate="@Immediate"></MudTextField>
+
+@code {
+    [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? Parent { get; set; }
+
+    [Parameter]
+    public String? QuantityLabel { get; set; }
+
+    [Parameter]
+    public String? QuantityName { get; set; }
+
+    [Parameter]
+    public Variant VariantType { get; set; } = Variant.Text;
+
+    [Parameter]
+    public bool Disabled { get; set; } = false;
+
+    [Parameter]
+    public bool ReadOnly { get; set; } = false;
+
+    [Parameter]
+    public bool Immediate { get; set; } = false;
+
+    [Parameter]
+    public double SIValue
+    {
+        get
+        {
+            if (SIValue_ == null)
+            {
+                return double.NaN;
+            }
+            else
+            {
+                return (double)SIValue_;
+            }
+        }
+        set
+        {
+            if (double.IsNaN(value))
+            {
+                SIValue_ = null;
+            }
+            else
+            {
+                SIValue_ = value;
+            }
+            ManageUnits();
+        }
+    }
+
+    [Parameter]
+    public double? SIValueNullable
+    {
+        get
+        {
+            return SIValue_;
+        }
+        set
+        {
+            SIValue_ = value;
+            ManageUnits();
+        }
+    }
+    private double? SIValue_;
+
+    [Parameter]
+    public EventCallback<double> SIValueChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<double?> SIValueNullableChanged { get; set; }
+
+    [Parameter]
+    public DrillingSignalReferenceType DrillingSignalReference { get; set; } = DrillingSignalReferenceType.Independent;
+
+    [Parameter]
+    public PositionDirectionType PositionDirection { get; set; } = PositionDirectionType.Independent;
+
+    [Parameter]
+    public bool Hidden { get; set; }
+
+    [Parameter]
+    public int Size { get; set; }
+
+    private bool inhibited_ = false;
+
+    private string? ValueInUserUnit
+    {
+        get
+        {
+            return valueInUserUnit_;
+        }
+        set
+        {
+            valueInUserUnit_ = value;
+            ManageChangedValue().Wait();
+        }
+    }
+
+    private string? UnitLabel;
+    private string? valueInUserUnit_;
+
+    protected override void OnInitialized()
+    {
+        if (Parent == null)
+            throw new ArgumentNullException(nameof(Parent), "InputWithUnit must exist within a UnitAndReferenceChoiceTag");
+        base.OnInitialized();
+        Parent.Add(this);
+        ManageUnits();
+    }
+
+    public async Task ManageChangedValue()
+    {
+        if (!inhibited_)
+        {
+            double valueInUserUnit;
+            if (Parent != null && TryParse(valueInUserUnit_!, out valueInUserUnit))
+            {
+                switch (DrillingSignalReference)
+                {
+                    case DrillingSignalReferenceType.Pressure:
+                        SIValue = Parent.ToAbsolutePressureSI(valueInUserUnit, QuantityName!);
+                        break;
+                    case DrillingSignalReferenceType.Azimuth:
+                        SIValue = Parent.ToTrueNorthAzimuthSI(valueInUserUnit, QuantityName!);
+                        break;
+                    case DrillingSignalReferenceType.Depth:
+                        SIValue = Parent.ToWGS84DepthSI(valueInUserUnit, QuantityName!);
+                        break;
+                    case DrillingSignalReferenceType.Position:
+                        SIValue = Parent.ToWGS84PositionSI(valueInUserUnit, QuantityName!, PositionDirection);
+                        break;
+                    case DrillingSignalReferenceType.Geodetic:
+                        SIValue = Parent.ToWGS84GeodeticSI(valueInUserUnit, QuantityName!, PositionDirection);
+                        break;
+                    default:
+                        SIValue = Parent.ToSI(valueInUserUnit, QuantityName!);
+                        break;
+                }
+            }
+            else if (string.IsNullOrWhiteSpace(valueInUserUnit_))
+            {
+                SIValueNullable = null;
+            }
+
+            inhibited_ = false;
+            try
+            {
+                await SIValueChanged.InvokeAsync(SIValue);
+                await SIValueNullableChanged.InvokeAsync(SIValueNullable);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Problem while managing changed value in MudInputWithUnitAdornment razor component");
+            }
+            inhibited_ = false;
+        }
+    }
+
+    public void ManageUnits()
+    {
+        if (!inhibited_)
+        {
+            inhibited_ = true;
+            try
+            {
+                if (Parent != null && !string.IsNullOrEmpty(Parent.UnitSystemName))
+                {
+                    switch (DrillingSignalReference)
+                    {
+                        case DrillingSignalReferenceType.Pressure:
+                            ValueInUserUnit = Parent.FromAbsolutePressureSI(SIValueNullable, QuantityName!, false);
+                            UnitLabel = Parent.GetPressureUnitLabel(QuantityName!);
+                            break;
+                        case DrillingSignalReferenceType.Azimuth:
+                            ValueInUserUnit = Parent.FromTrueNorthAzimuthSI(SIValueNullable, QuantityName!, false);
+                            UnitLabel = Parent.GetAzimuthUnitLabel(QuantityName!);
+                            break;
+                        case DrillingSignalReferenceType.Depth:
+                            ValueInUserUnit = Parent.FromWGS84DepthSI(SIValueNullable, QuantityName!, false);
+                            UnitLabel = Parent.GetDepthUnitLabel(QuantityName!);
+                            break;
+                        case DrillingSignalReferenceType.Position:
+                            ValueInUserUnit = Parent.FromWGS84PositionSI(SIValueNullable, QuantityName!, false, PositionDirection);
+                            UnitLabel = Parent.GetPositionUnitLabel(QuantityName!);
+                            break;
+                        case DrillingSignalReferenceType.Geodetic:
+                            ValueInUserUnit = Parent.FromWGS84GeodeticSI(SIValueNullable, QuantityName!, false, PositionDirection);
+                            UnitLabel = Parent.GetGeodeticUnitLabel(QuantityName!);
+                            break;
+                        default:
+                            ValueInUserUnit = Parent.FromSI(SIValueNullable, QuantityName!, false);
+                            UnitLabel = Parent.GetUnitLabel(QuantityName!);
+                            break;
+                    }
+                }
+                else
+                {
+                    ValueInUserUnit = "";
+                    UnitLabel = "";
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Problem while managing units in MudInputWithUnitAdornment");
+            }
+            inhibited_ = false;
+        }
+    }
+
+    private static bool TryParse(string value, out double result)
+    {
+        return double.TryParse(value, out result) ||
+               double.TryParse(value, NumberStyles.Float, US_NUMBER_FORMAT, out result) ||
+               double.TryParse(value, NumberStyles.Float, NO_NUMBER_FORMAT, out result) ||
+               double.TryParse(value, NumberStyles.Float, FR_NUMBER_FORMAT, out result) ||
+               double.TryParse(value, NumberStyles.Float, IT_NUMBER_FORMAT, out result) ||
+               double.TryParse(value, NumberStyles.Float, SP_NUMBER_FORMAT, out result) ||
+               double.TryParse(value, NumberStyles.Float, PT_NUMBER_FORMAT, out result) ||
+               double.TryParse(value, NumberStyles.Float, UK_NUMBER_FORMAT, out result);
+    }
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("en-US")
+    /// </summary>
+    private static CultureInfo US_CULTURE = new CultureInfo("en-US");
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("nb-NO")
+    /// </summary>
+    private static CultureInfo NO_CULTURE = new CultureInfo("nb-NO");
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("fr-FR")
+    /// </summary>
+    private static CultureInfo FR_CULTURE = new CultureInfo("fr-FR");
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("it-IT")
+    /// </summary>
+    private static CultureInfo IT_CULTURE = new CultureInfo("it-IT");
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("es-ES")
+    /// </summary>
+    private static CultureInfo SP_CULTURE = new CultureInfo("es-ES");
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("en-GB")
+    /// </summary>
+    private static CultureInfo UK_CULTURE = new CultureInfo("en-GB");
+
+    /// <summary>
+    /// Shorthand for System.Globalization.CultureInfo("pt-PT")
+    /// </summary>
+    private static CultureInfo PT_CULTURE = new CultureInfo("pt-PT");
+
+    /// <summary>
+    /// Shorthand for US_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo US_NUMBER_FORMAT = US_CULTURE.NumberFormat;
+
+    /// <summary>
+    /// Shorthand for NO_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo NO_NUMBER_FORMAT = NO_CULTURE.NumberFormat;
+
+    /// <summary>
+    /// Shorthand for FR_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo FR_NUMBER_FORMAT = FR_CULTURE.NumberFormat;
+
+    /// <summary>
+    /// Shorthand for IT_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo IT_NUMBER_FORMAT = IT_CULTURE.NumberFormat;
+
+    /// <summary>
+    /// Shorthand for SP_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo SP_NUMBER_FORMAT = SP_CULTURE.NumberFormat;
+
+    /// <summary>
+    /// Shorthand for UK_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo UK_NUMBER_FORMAT = UK_CULTURE.NumberFormat;
+
+    /// <summary>
+    /// Shorthand for PT_CULTURE.NumberFormat
+    /// </summary>
+    private static NumberFormatInfo PT_NUMBER_FORMAT = PT_CULTURE.NumberFormat;
+
+}

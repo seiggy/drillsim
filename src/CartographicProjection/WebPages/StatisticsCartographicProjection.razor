@@ -1,0 +1,279 @@
+@page "/StatisticsCartographicProjection"
+@inject ILogger<StatisticsCartographicProjection> logger
+@inject ICartographicProjectionAPIUtils Api
+@inject ISnackbar Snackbar
+
+@if (statistics_ == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div hidden="@isHiddenMainPanel">
+        <MudText Class="mt-4 mb-4" Typo="Typo.h5"><strong>Usage Statistics</strong></MudText>
+        <div style="width: 90%; margin: auto">
+            <MudGrid>
+                <MudItem xs="6">
+                    <MudText Typo="Typo.h6">Total count:</MudText>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudText Typo="Typo.body1">@totalCount_</MudText>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudText Typo="Typo.h6">Cartographic Projection Count:</MudText>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudText Typo="Typo.body1">@cartographicProjectionCount_</MudText>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudText Typo="Typo.h6">Cartographic Projection Type count:</MudText>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudText Typo="Typo.body1">@cartographicProjectionTypeCount_</MudText>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudText Typo="Typo.h6">Cartographic Projection Conversion Set count:</MudText>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudText Typo="Typo.body1">@cartographicConversionSetCount_</MudText>
+                </MudItem>
+            </MudGrid>
+        </div>
+    </div>
+}
+
+@code {
+    private UsageStatisticsCartographicProjection statistics_ = null!;
+    private long totalCount_ = 0;
+    private long cartographicProjectionCount_ = 0;
+    private long cartographicProjectionTypeCount_ = 0;
+    private long cartographicConversionSetCount_ = 0;
+
+    private bool isHiddenMainPanel = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            statistics_ = await Api.ClientCartographicProjection.GetCartographicProjectionUsageStatisticsAsync();
+            if (statistics_ != null)
+            {
+                totalCount_ = 0;
+                cartographicProjectionCount_ = 0;
+                cartographicProjectionTypeCount_ = 0;
+                cartographicConversionSetCount_ = 0;
+
+                if (statistics_.GetAllCartographicProjectionIdPerDay != null && statistics_.GetAllCartographicProjectionIdPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.GetAllCartographicProjectionIdPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            cartographicProjectionCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.GetAllCartographicProjectionMetaInfoPerDay != null && statistics_.GetAllCartographicProjectionMetaInfoPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.GetAllCartographicProjectionMetaInfoPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            cartographicProjectionCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.GetCartographicProjectionByIdPerDay != null && statistics_.GetCartographicProjectionByIdPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.GetCartographicProjectionByIdPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            cartographicProjectionCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.GetAllCartographicProjectionPerDay != null && statistics_.GetAllCartographicProjectionPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.GetAllCartographicProjectionPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            cartographicProjectionCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.PostCartographicProjectionPerDay != null && statistics_.PostCartographicProjectionPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.PostCartographicProjectionPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            cartographicProjectionCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.PutCartographicProjectionByIdPerDay != null && statistics_.PutCartographicProjectionByIdPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.PutCartographicProjectionByIdPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            cartographicProjectionCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.DeleteCartographicProjectionByIdPerDay != null && statistics_.DeleteCartographicProjectionByIdPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.DeleteCartographicProjectionByIdPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            cartographicProjectionCount_ += count.Count;
+                        }
+                    }
+                }
+
+                if (statistics_.GetAllCartographicProjectionTypeIdPerDay != null && statistics_.GetAllCartographicProjectionTypeIdPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.GetAllCartographicProjectionTypeIdPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            cartographicProjectionTypeCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.GetAllCartographicProjectionTypePerDay != null && statistics_.GetAllCartographicProjectionTypePerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.GetAllCartographicProjectionTypePerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            cartographicProjectionTypeCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.GetCartographicProjectionTypeByIdPerDay != null && statistics_.GetCartographicProjectionTypeByIdPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.GetCartographicProjectionTypeByIdPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            cartographicProjectionTypeCount_ += count.Count;
+                        }
+                    }
+                }
+           
+                if (statistics_.GetAllCartographicConversionSetIdPerDay != null && statistics_.GetAllCartographicConversionSetIdPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.GetAllCartographicConversionSetIdPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            cartographicConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.GetAllCartographicConversionSetMetaInfoPerDay != null && statistics_.GetAllCartographicConversionSetMetaInfoPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.GetAllCartographicConversionSetMetaInfoPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            cartographicConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.GetCartographicConversionSetByIdPerDay != null && statistics_.GetCartographicConversionSetByIdPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.GetCartographicConversionSetByIdPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            cartographicConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.GetAllCartographicConversionSetLightPerDay != null && statistics_.GetAllCartographicConversionSetLightPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.GetAllCartographicConversionSetLightPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            cartographicConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.GetAllCartographicConversionSetPerDay != null && statistics_.GetAllCartographicConversionSetPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.GetAllCartographicConversionSetPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            cartographicConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.PostCartographicConversionSetPerDay != null && statistics_.PostCartographicConversionSetPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.PostCartographicConversionSetPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            cartographicConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+
+                if (statistics_.PutCartographicConversionSetByIdPerDay != null && statistics_.PutCartographicConversionSetByIdPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.PutCartographicConversionSetByIdPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            cartographicConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+                if (statistics_.DeleteCartographicConversionSetByIdPerDay != null && statistics_.DeleteCartographicConversionSetByIdPerDay.Data != null)
+                {
+                    foreach (CountPerDay count in statistics_.DeleteCartographicConversionSetByIdPerDay.Data)
+                    {
+                        if (count != null)
+                        {
+                            totalCount_ += count.Count;
+                            cartographicConversionSetCount_ += count.Count;
+                        }
+                    }
+                }
+            }
+            // Show main panel
+            isHiddenMainPanel = false;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem UsageStatistics initialization");
+        }
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+}
+

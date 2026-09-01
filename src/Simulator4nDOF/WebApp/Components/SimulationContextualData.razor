@@ -1,0 +1,626 @@
+@implements IUnitAwareComponent
+@inject ILogger<SimulationContextualData> logger
+@inject ISnackbar Snackbar
+
+@if (Simulation != null && Simulation.ContextualData != null)
+{
+    <MudGrid>
+
+              @if (Fields != null)
+        {
+            <MudItem xs="12" sm="6" md="6" lg="6" xl="6">
+                <MudSelect Label="Field" @bind-Value="@_selectedField" Dense="true" ToStringFunc="@(s => s?.Name)">
+                    @foreach (var field in Fields.Where(x => string.IsNullOrEmpty(_fieldSearchText) || (x != null && !string.IsNullOrEmpty(x.Name) && x.Name.Contains(_fieldSearchText, StringComparison.OrdinalIgnoreCase))))
+                    {
+                        <MudSelectItem Value="@field">@field.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="6" lg="6" xl="6">
+                <MudTextField @bind-Value="@_fieldSearchText" Label="Filter Fields"></MudTextField>
+            </MudItem>
+        }
+        @if (Clusters != null && _selectedField != null)
+        {
+            <MudItem xs="10" sm="4" md="4" lg="4" xl="4">
+                <MudSwitch @bind-Value="@_useSingleWells" Color="Color.Primary">Use Single Wells</MudSwitch>
+            </MudItem>
+            <MudItem xs="2" sm="4" md="8" lg="8" xl="8">
+            </MudItem>
+            if (!_useSingleWells)
+            {
+                <MudItem xs="12" sm="6" md="6" lg="6" xl="6">
+                    <MudSelect Label="Cluster" @bind-Value="@SelectedCluster" Dense="true" ToStringFunc="@(s => s?.Name)">
+                        @foreach (var cluster in Clusters.Where(x =>
+                                    (x != null && x.FieldID != null && _selectedField != null && _selectedField.MetaInfo != null && _selectedField.MetaInfo.ID == x.FieldID && !x.IsSingleWell) &&
+                                    (string.IsNullOrEmpty(_clusterSearchText) || (x != null && !string.IsNullOrEmpty(x.Name) && x.Name.Contains(_clusterSearchText, StringComparison.OrdinalIgnoreCase)))))
+                        {
+                            <MudSelectItem Value="@cluster">@cluster.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="6" lg="6" xl="6">
+                    <MudTextField @bind-Value="@_clusterSearchText" Label="Filter Clusters"></MudTextField>
+                </MudItem>
+            }
+        }
+        @if (Wells != null && (SelectedCluster != null || _useSingleWells))
+        {
+            <MudItem xs="12" sm="6" md="6" lg="6" xl="6">
+                <MudSelect Label="Well" @bind-Value="@SelectedWell" Dense="true" ToStringFunc="@(s => s?.Name)">
+                    @foreach (var well in Wells.Where(x =>
+                                (x != null && x.ClusterID != null &&
+                                ((!_useSingleWells && SelectedCluster != null && SelectedCluster.MetaInfo != null && SelectedCluster.MetaInfo.ID == x.ClusterID) ||
+                                (_useSingleWells && x.IsSingleWell))) &&
+                                (string.IsNullOrEmpty(_wellSearchText) || (x != null && !string.IsNullOrEmpty(x.Name) && x.Name.Contains(_wellSearchText, StringComparison.OrdinalIgnoreCase)))))
+                    {
+                        <MudSelectItem Value="@well">@well.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="6" lg="6" xl="6">
+                <MudTextField @bind-Value="@_wellSearchText" Label="Filter Wells"></MudTextField>
+            </MudItem>
+        }
+        @if (WellBores != null && _selectedWell != null)
+        {
+            <MudItem xs="12" sm="6" md="6" lg="6" xl="6">
+                <MudSelect Label="Wellbore" @bind-Value="@SelectedWellBore" Dense="true" ToStringFunc="@(s => s?.Name)">
+                    @foreach (var wellBore in WellBores.Where(x =>
+                                (x != null && x.WellID != null &&
+                                (_selectedWell != null && _selectedWell.MetaInfo != null && _selectedWell.MetaInfo.ID == x.WellID) &&
+                                (string.IsNullOrEmpty(_wellBoreSearchText) || (x != null && !string.IsNullOrEmpty(x.Name) && x.Name.Contains(_wellBoreSearchText, StringComparison.OrdinalIgnoreCase))))))
+                    {
+                        <MudSelectItem Value="@wellBore">@wellBore.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="6" lg="6" xl="6">
+                <MudTextField @bind-Value="@_wellSearchText" Label="Filter Wells"></MudTextField>
+            </MudItem>
+        }
+    </MudGrid>
+    <MudGrid RowSpacing="0" Style="margin-top:-0px;">
+        <MudItem Style="width:500px;">
+            <MudSelect T="DrillStringLight" Label="Drill String" @bind-Value="SelectedDrillString" Variant="Variant.Text">
+                @if (DrillStrings != null)
+                {
+                    @foreach (var drillString in DrillStrings)
+                    {
+                        @if (drillString != null && !string.IsNullOrEmpty(drillString.Name))
+                        {
+                            <MudSelectItem Value="@drillString">@drillString.Name</MudSelectItem>
+                        }
+                    }
+                }
+            </MudSelect>
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudSelect T="Trajectory" Label="Trajectory source" @bind-Value="SelectedTrajectory" Variant="Variant.Text">
+                @if (Trajectories != null)
+                {
+                    @foreach (Trajectory trajectory in Trajectories)
+                    {
+                        @if (trajectory != null && !string.IsNullOrEmpty(trajectory.Name))
+                        {
+                            <MudSelectItem Value="@trajectory">@trajectory.Name</MudSelectItem>
+                        }
+                    }
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="6">
+            <MudSelect T="WellBoreArchitecture" Label="Architecture source" @bind-Value="SelectedArchitecture" Variant="Variant.Text">
+                @if (WellBoreArchitectures != null)
+                {
+                    @foreach (WellBoreArchitecture architecture in WellBoreArchitectures)
+                    {
+                        @if (architecture != null && !string.IsNullOrEmpty(architecture.Name))
+                        {
+                            <MudSelectItem Value="@architecture">@architecture.Name</MudSelectItem>
+                        }
+                    }
+                }
+            </MudSelect>
+        </MudItem>
+        
+        <MudItem xs="6">
+            @if (SelectedArchitecture != null)
+            {
+                <MudSelect T="int" Label="Casing Section" Value="casingID" ValueChanged="UpdateCasingSectionIndex">
+                    @if (SelectedArchitecture.CasingSections != null)
+                    {
+                        @foreach (CasingSection casingSection in SelectedArchitecture.CasingSections)
+                        {
+                            <MudSelectItem Value="@casingSections.IndexOf(casingSection)">
+                                @ProcessCasingOption(casingSection)                            
+                            </MudSelectItem>    
+                        }                              
+                    }     
+                </MudSelect>
+            }
+        </MudItem>
+        
+        @if (SelectedCluster != null && !SelectedCluster.IsFixedPlatform)
+        {
+            <MudItem xs="12">
+                <MudSelect T="RigLight" @bind-Value="SelectedRig" Label="Rig for simulation case" Variant="Variant.Text">
+                    @if (Rigs != null)
+                    {
+                        @foreach (var rig in Rigs.Where(rig => rig != null && !rig.IsFixedPlatform))
+                        {
+                            @if (rig != null && !string.IsNullOrEmpty(rig.Name))
+                            {
+                                <MudSelectItem Value="@rig">@rig.Name</MudSelectItem>
+                            }
+                        }
+                    }
+                </MudSelect>
+            </MudItem>
+        }
+        <MudItem xs="12">
+            <MudSelect T="GeothermalProperties" Label="Geothermal Properties Source" @bind-Value="SelectedGeothermal" Variant="Variant.Text">
+                @if (GeothermalProperties != null)
+                {
+                    @foreach (GeothermalProperties geothermalProperties in GeothermalProperties)
+                    {
+                        @if (geothermalProperties != null && !string.IsNullOrEmpty(geothermalProperties.Name))
+                        {
+                            <MudSelectItem Value="@geothermalProperties">@geothermalProperties.Name</MudSelectItem>
+                        }
+                    }
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="6">
+            <MudSelect T="DrillingFluidDescription" Label="Fluid" @bind-Value="SelectedFluid" Variant="Variant.Text">
+                @if (FluidDescriptions != null)
+                {
+                    @foreach (DrillingFluidDescription fluidDescription in FluidDescriptions)
+                    {
+                        @if (fluidDescription != null && !string.IsNullOrEmpty(fluidDescription.Name))
+                        {
+                            <MudSelectItem Value="@fluidDescription">@fluidDescription.Name</MudSelectItem>
+                        }
+                    }
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="3">
+            <MudInputWithUnit VariantType="Variant.Text"
+                              QuantityLabel="Drill-string surface pressure"
+                              QuantityName="PressureDrilling"
+                              SIValue="Simulation.ContextualData.SurfacePipePressure"
+                              SIValueChanged="val => { if (val != null) Simulation.ContextualData.SurfacePipePressure = val; }" />
+        </MudItem>        
+        <MudItem xs="3">
+            <MudInputWithUnit VariantType="Variant.Text"
+                              QuantityLabel="Wellhead pressure"
+                              QuantityName="PressureDrilling"
+                              SIValue="Simulation.ContextualData.WellheadPressure"
+                              SIValueChanged="val => { if (val != null) Simulation.ContextualData.WellheadPressure = val; }" />
+        </MudItem>
+        
+        <MudItem xs = "6">
+            <MudText Typo="Typo.body1"><b>Solver method</b></MudText>
+            <MudRadioGroup T = "SolverType" @bind-Value="@Simulation.ContextualData.SolverType">
+                    <MudRadio Value="@SolverType.EulerMethod" Dense="true" Color="Color.Primary">Euler Method</MudRadio>
+                    <MudRadio Value="@SolverType.VerletMethod" Dense="true" Color="Color.Primary">Verlet Method (Recommended)</MudRadio>
+            </MudRadioGroup>
+
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    [Parameter]
+    public Simulation? Simulation { get; set; } = null;
+
+    [Parameter]
+    public List<Field>? Fields { get; set; } = null;
+
+    [Parameter]
+    public List<Cluster>? Clusters { get; set; } = null;
+
+    [Parameter]
+    public List<Well>? Wells { get; set; } = null;
+
+    [Parameter]
+    public List<WellBore>? WellBores { get; set; } = null;
+
+    [Parameter]
+    public List<DrillStringLight>? DrillStrings { get; set; } = null;
+
+    [Parameter]
+    public List<RigLight>? Rigs { get; set; } = null;
+
+    [Parameter]
+    public List<Trajectory>? Trajectories { get; set; } = null;
+
+    [Parameter]
+    public List<WellBoreArchitecture>? WellBoreArchitectures { get; set; } = null;
+
+    [Parameter]
+    public List<DrillingFluidDescription>? FluidDescriptions { get; set; } = null;
+
+    [Parameter]
+    public GroundMudLineDepthReferenceSource? GroundMudLineDepthSource { get; set; }
+
+    [Parameter]
+    public SeaWaterLevelDepthReferenceSource? TopWaterDepthSource { get; set; }
+
+    [Parameter]
+    public WellHeadDepthReferenceSource? WellHeadDepthSource { get; set; }
+
+    [Parameter]
+    public RotaryTableDepthReferenceSource? RotaryTableDepthSource { get; set; }
+    [Parameter]
+    public List<GeothermalProperties>? GeothermalProperties { get; set; }
+
+    [CascadingParameter]
+    public MudUnitAndReferenceChoiceTag? Parent { get; set; }
+
+    private WellBoreArchitecture? selectedArchitcture;
+    private List<CasingSection> casingSections = new();
+    private int casingID = 0;
+    
+    private GeothermalProperties? _selectedGeothermal = null;
+    private GeothermalProperties? SelectedGeothermal
+    {
+        get
+        {
+            return _selectedGeothermal;
+        }
+        set
+        {
+            _selectedGeothermal = value;
+            SyncSelectedGeothermalContext();
+        }
+    }
+
+    private void SyncSelectedGeothermalContext()
+    {
+        if (Simulation?.ContextualData != null)
+        {
+            Simulation.ContextualData.GeothermalPropertiesID = _selectedGeothermal?.MetaInfo?.ID;
+        }
+    }
+
+    private Field? _selectedField = null;
+    private Cluster? _selectedCluster = null;
+    private Cluster? SelectedCluster { get { return _selectedCluster; } set { _selectedCluster = value; ProcessSelectedCluster(); } }
+    private Well? _selectedWell = null;
+    private Well? SelectedWell
+    {
+        get
+        {
+            return _selectedWell;
+        }
+        set
+        {
+            _selectedWell = value;
+            SyncSelectedWellContext();
+        }
+    }
+    private WellBore? _selectedWellBore = null;
+    private WellBore? SelectedWellBore
+    {
+        get
+        {
+            return _selectedWellBore;
+        }
+        set
+        {
+            _selectedWellBore = value;
+            if (Simulation != null && _selectedWellBore != null && _selectedWellBore.MetaInfo != null)
+            {
+                Simulation.WellBoreID = _selectedWellBore.MetaInfo.ID;
+            }
+            else if (Simulation != null)
+            {
+                Simulation.WellBoreID = null;
+            }
+        }
+    }
+    private DrillStringLight? _selectedDrillString = null;
+    private DrillStringLight? SelectedDrillString
+    {
+        get
+        {
+            return _selectedDrillString;
+        }
+        set
+        {
+            _selectedDrillString = value;
+            if (Simulation?.ContextualData != null)
+            {
+                Simulation.ContextualData.DrillStringID = _selectedDrillString?.MetaInfo?.ID;
+            }
+        }
+    }
+    private Trajectory? _selectedTrajectory = null;
+    private Trajectory? SelectedTrajectory
+    {
+        get
+        {
+            return _selectedTrajectory;
+        }
+        set
+        {
+            _selectedTrajectory = value;
+            if (Simulation?.ContextualData != null)
+            {
+                Simulation.ContextualData.TrajectoryID = _selectedTrajectory?.MetaInfo?.ID;
+            }
+        }
+    }
+    private DrillingFluidDescription? _selectedFluid = null;
+    private DrillingFluidDescription? SelectedFluid 
+    {
+        get {
+            return _selectedFluid;
+        }
+        set {
+            _selectedFluid = value;
+            if (Simulation != null && Simulation.ContextualData != null) 
+            {
+                if (_selectedFluid != null && _selectedFluid.MetaInfo != null) 
+                {
+                   Simulation.ContextualData.DrillingFluidDescriptionID = _selectedFluid.MetaInfo.ID;
+                }
+                else 
+                {
+                    Simulation.ContextualData.DrillingFluidDescriptionID = null;
+                }
+            }
+        }
+    }
+    private RigLight? _selectedRig = null;
+    private RigLight? SelectedRig
+    {
+        get
+        {
+            return _selectedRig;
+        }
+        set
+        {
+            _selectedRig = value;
+            if (Simulation?.ContextualData != null)
+            {
+                Simulation.ContextualData.RigID = _selectedRig?.MetaInfo?.ID;
+            }
+        }
+    }
+    private WellBoreArchitecture? SelectedArchitecture
+    {
+        get
+        {
+            return selectedArchitcture;
+        }
+        set
+        {
+            selectedArchitcture = value;
+            casingSections = selectedArchitcture?.CasingSections?.ToList() ?? new List<CasingSection>();
+            if (Simulation?.ContextualData != null)
+            {
+                Simulation.ContextualData.WellBoreArchitectureID = selectedArchitcture?.MetaInfo?.ID;
+            }
+        }
+    }
+    private string? _fieldSearchText = null;
+    private bool _useSingleWells = false;
+    private string? _clusterSearchText = null;
+    private string? _wellSearchText = null;
+    private string? _wellBoreSearchText = null;
+    private void UpdateCasingSectionIndex(int val)
+    {
+        casingID = val;
+        Simulation!.ContextualData.CasingID = val;
+    }
+    private string ProcessCasingOption(CasingSection casingSection)
+    {
+        string outputString = "";
+        if (casingSection.CasingSectionSizeTable.Count == 1)
+        {
+
+            double? nullableVal1 = Parent!.FromSI(
+                    casingSection.CasingSectionSizeTable.ElementAt(0).HoleSize.GaussianValue.Mean,
+                    "DiameterPipeDrilling"
+                )!;
+            double val1 = (nullableVal1 == null) ? Double.NaN : (double) nullableVal1;
+            outputString += "Initial Hole Diameter [" + Parent!.GetUnitLabel("DiameterPipeDrilling") + "]: " 
+                + val1.ToString("F2");
+        }
+        else if (casingSection.CasingSectionSizeTable.Count > 1)
+        {
+            double? nullableVal1 = Parent!.FromSI(
+                    casingSection.CasingSectionSizeTable.ElementAt(0).HoleSize.GaussianValue.Mean,
+                    "DiameterPipeDrilling"
+                )!;
+            double? nullableVal2 = Parent.FromSI(
+                casingSection.CasingSectionSizeTable.ElementAt(casingSection.CasingSectionSizeTable.Count-1).HoleSize.GaussianValue.Mean,
+                "DiameterPipeDrilling"
+            )!;
+            double val1 = (nullableVal1 == null) ? Double.NaN : (double) nullableVal1;
+            double val2 = (nullableVal2 == null) ? Double.NaN : (double) nullableVal2;
+            
+            outputString += "Initial Hole Diameter [" + Parent!.GetUnitLabel("DiameterPipeDrilling") + "]: " 
+                + val1.ToString("F2");
+            outputString += " ||  Final Hole Diameter [" + Parent!.GetUnitLabel("DiameterPipeDrilling") + "]: " 
+                + val2.ToString("F2");
+        }
+
+        return outputString;
+    }
+
+    private void ProcessSelectedCluster()
+    {
+        if (Simulation?.ContextualData != null && (SelectedCluster == null || SelectedCluster.IsFixedPlatform))
+        {
+            Simulation.ContextualData.RigID = null;
+        }
+
+        if (_selectedCluster == null)
+        {
+            if (GroundMudLineDepthSource != null)
+            {
+                GroundMudLineDepthSource.GroundMudLineDepthReference = null;
+            }
+            if (TopWaterDepthSource != null)
+            {
+                TopWaterDepthSource.SeaWaterLevelDepthReference = null;
+            }
+            if (WellHeadDepthSource != null)
+            {
+                WellHeadDepthSource.WellHeadDepthReference = null;
+            }
+        }
+        else
+        {
+            if (GroundMudLineDepthSource != null && _selectedCluster.GroundMudLineDepth != null && _selectedCluster.GroundMudLineDepth.GaussianValue != null)
+            {
+                GroundMudLineDepthSource.GroundMudLineDepthReference = _selectedCluster.GroundMudLineDepth.GaussianValue.Mean;
+            }
+            if (TopWaterDepthSource != null && _selectedCluster.TopWaterDepth != null && _selectedCluster.TopWaterDepth.GaussianValue != null)
+            {
+                TopWaterDepthSource.SeaWaterLevelDepthReference = _selectedCluster.TopWaterDepth.GaussianValue.Mean;
+            }
+            if (WellHeadDepthSource != null && _selectedCluster.ReferenceDepth != null && _selectedCluster.ReferenceDepth.GaussianValue != null)
+            {
+                WellHeadDepthSource.WellHeadDepthReference = _selectedCluster.ReferenceDepth.GaussianValue.Mean;
+            }
+        }
+    }
+
+    private void SyncSelectedWellContext()
+    {
+        if (_selectedWell == null)
+        {
+            if (!_useSingleWells)
+            {
+                return;
+            }
+
+            SelectedCluster = null;
+            _selectedField = null;
+            return;
+        }
+
+        if (Clusters != null && _selectedWell.ClusterID != null && _selectedWell.ClusterID != Guid.Empty)
+        {
+            var cluster = Clusters.FirstOrDefault(x => x.MetaInfo?.ID == _selectedWell.ClusterID);
+            if (cluster != null)
+            {
+                SelectedCluster = cluster;
+            }
+        }
+
+        if (Fields != null && SelectedCluster?.FieldID != null && SelectedCluster.FieldID != Guid.Empty)
+        {
+            var field = Fields.FirstOrDefault(x => x.MetaInfo?.ID == SelectedCluster.FieldID);
+            if (field != null)
+            {
+                _selectedField = field;
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (Parent == null)
+                throw new ArgumentNullException(nameof(Parent), "TargetEdit page must exist within a MudUnitAndReferenceChoiceTag");
+            Parent.Add(this);
+            ManageUnits();
+            if (Simulation != null && Simulation.WellBoreID != null && Simulation.WellBoreID != Guid.Empty)
+            {
+                if (WellBores != null)
+                {
+                    foreach (var wellbore in WellBores)
+                    {
+                        if (wellbore != null && wellbore.MetaInfo != null && wellbore.MetaInfo.ID == Simulation.WellBoreID)
+                        {
+                            _selectedWellBore = wellbore;
+                            break;
+                        }
+                    }
+                }
+                if (Wells != null && _selectedWellBore != null && _selectedWellBore.WellID != null && _selectedWellBore.WellID != Guid.Empty)
+                {
+                    foreach (var well in Wells)
+                    {
+                        if (well != null && well.MetaInfo != null && well.MetaInfo.ID == _selectedWellBore.WellID)
+                        {
+                            SelectedWell = well;
+                            break;
+                        }
+                    }
+                }
+                if (_selectedWell != null)
+                {
+                    _useSingleWells = _selectedWell.IsSingleWell;
+                }
+                if (Clusters != null && _selectedWell != null && _selectedWell.ClusterID != Guid.Empty)
+                {
+                    foreach (var cluster in Clusters)
+                    {
+                        if (cluster != null && cluster.MetaInfo != null && cluster.MetaInfo.ID == _selectedWell.ClusterID)
+                        {
+                            SelectedCluster = cluster;
+                            break;
+                        }
+                    }
+                }
+                if (Fields != null && SelectedCluster != null && SelectedCluster.FieldID != Guid.Empty)
+                {
+                    foreach (var field in Fields)
+                    {
+                        if (field != null && field.MetaInfo != null && field.MetaInfo.ID == SelectedCluster.FieldID)
+                        {
+                            _selectedField = field;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (Simulation?.ContextualData?.WellBoreArchitectureID != null && WellBoreArchitectures != null)
+            {
+                selectedArchitcture = WellBoreArchitectures.FirstOrDefault(x => x.MetaInfo?.ID == Simulation.ContextualData.WellBoreArchitectureID);
+                casingSections = selectedArchitcture?.CasingSections?.ToList() ?? new List<CasingSection>();
+            }
+            if (Simulation?.ContextualData?.DrillStringID != null && DrillStrings != null)
+            {
+                _selectedDrillString = DrillStrings.FirstOrDefault(x => x.MetaInfo?.ID == Simulation.ContextualData.DrillStringID);
+            }
+            if (Simulation?.ContextualData?.TrajectoryID != null && Trajectories != null)
+            {
+                _selectedTrajectory = Trajectories.FirstOrDefault(x => x.MetaInfo?.ID == Simulation.ContextualData.TrajectoryID);
+            }
+            if (Simulation?.ContextualData?.GeothermalPropertiesID != null && GeothermalProperties != null)
+            {
+                _selectedGeothermal = GeothermalProperties.FirstOrDefault(x => x.MetaInfo?.ID == Simulation.ContextualData.GeothermalPropertiesID);
+            }
+            if (Simulation?.ContextualData?.DrillingFluidDescriptionID != null && FluidDescriptions != null)
+            {
+                _selectedFluid = FluidDescriptions.FirstOrDefault(x => x.MetaInfo?.ID == Simulation.ContextualData.DrillingFluidDescriptionID);
+            }
+            if (Simulation?.ContextualData?.RigID != null && Rigs != null)
+            {
+                _selectedRig = Rigs.FirstOrDefault(x => x.MetaInfo?.ID == Simulation.ContextualData.RigID);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem on Contextual Data initialization");
+            Snackbar.Add("Problem on Contextual Data initialization", Severity.Error);
+        }
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    public void ManageUnits()
+    {
+    }
+}

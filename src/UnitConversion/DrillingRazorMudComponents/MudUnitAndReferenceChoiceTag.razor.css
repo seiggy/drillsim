@@ -1,0 +1,19 @@
+.unit-reference-choice-tag-table {
+    --choice-tag-height-scale: clamp(0.5, calc(0.5 + ((100vh - 1080px) / 720)), 1);
+    --choice-tag-cell-padding-y: calc(0.5rem * var(--choice-tag-height-scale));
+    --choice-tag-cell-padding-x: calc(0.5rem * var(--choice-tag-height-scale));
+    --choice-tag-row-height: calc(56px * var(--choice-tag-height-scale));
+}
+
+.unit-reference-choice-tag-table > :not(caption) > * > * {
+    padding: var(--choice-tag-cell-padding-y) var(--choice-tag-cell-padding-x);
+    vertical-align: top;
+}
+
+.unit-reference-choice-tag-table ::deep .unit-reference-choice-select .mud-input-control {
+    margin-top: 0;
+}
+
+.unit-reference-choice-tag-table ::deep .unit-reference-choice-select .mud-input-slot {
+    min-height: var(--choice-tag-row-height);
+}

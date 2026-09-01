@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<DockerfileBuildArguments>--build-arg NORCE_NUGET_USER --build-arg NORCE_NUGET_APIKEY</DockerfileBuildArguments>
+		<UserSecretsId>d4693808-78e9-47c7-919b-bed83a86870d</UserSecretsId>
+		<RootNamespace>OSDC.Drilling.Rig.Service</RootNamespace>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+		<Nullable>enable</Nullable>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="ModelContextProtocol.AspNetCore" Version="0.4.0-preview.3" />
+		<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
+		<PackageReference Include="Microsoft.OpenApi" Version="1.6.31" />
+		<PackageReference Include="Microsoft.OpenApi.Readers" Version="1.6.31" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="8.1.1" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="8.1.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Model\Model.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="wwwroot\json-schema\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="LICENSE" Pack="true" PackagePath="" />
+		<None Include="README.md" Pack="true" PackagePath="" />
+	</ItemGroup>
+
+	<Target Name="CreateSwaggerJson" AfterTargets="Build" Condition="$(Configuration)=='Debug'">
+		<Exec Command="dotnet swagger tofile --output ../ModelSharedOut/json-schemas/RigFullName.json $(OutputPath)$(AssemblyName).dll v1" WorkingDirectory="$(ProjectDir)" EnvironmentVariables="DOTNET_ROLL_FORWARD=Major" />
+	</Target>
+
+</Project>

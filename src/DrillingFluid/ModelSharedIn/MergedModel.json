@@ -1,0 +1,1295 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ModelShared (Service)",
+    "description": "Data model containing model dependencies of the clients of the current microservice (WebApp, ServiceTest)",
+    "version": "1.0"
+  },
+  "paths": {
+    "/CouetteRheometers": {
+      "get": {
+        "tags": [
+          "CouetteRheometers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "CouetteRheometers"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CouetteRheometer"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CouetteRheometer"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CouetteRheometer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/CouetteRheometers/{id}": {
+      "get": {
+        "tags": [
+          "CouetteRheometers"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CouetteRheometer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "CouetteRheometers"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CouetteRheometer"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CouetteRheometer"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CouetteRheometer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "CouetteRheometers"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/DrillingPhysicalQuantities": {
+      "get": {
+        "tags": [
+          "DrillingPhysicalQuantities"
+        ],
+        "parameters": [
+          {
+            "name": "option",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MetaInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/DrillingPhysicalQuantities/{id}": {
+      "get": {
+        "tags": [
+          "DrillingPhysicalQuantities"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhysicalQuantity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/DrillingUnitChoiceSets": {
+      "get": {
+        "tags": [
+          "DrillingUnitChoiceSets"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MetaInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "DrillingUnitChoiceSets"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DrillingUnitChoiceSet"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DrillingUnitChoiceSet"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DrillingUnitChoiceSet"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/DrillingUnitChoiceSets/{id}": {
+      "get": {
+        "tags": [
+          "DrillingUnitChoiceSets"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DrillingUnitChoiceSet"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "DrillingUnitChoiceSets"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DrillingUnitChoiceSet"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DrillingUnitChoiceSet"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DrillingUnitChoiceSet"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "DrillingUnitChoiceSets"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/Rheograms": {
+      "get": {
+        "tags": [
+          "Rheograms"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Rheograms"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Rheogram"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Rheogram"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Rheogram"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/Rheograms/{id}": {
+      "get": {
+        "tags": [
+          "Rheograms"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Rheogram"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Rheograms"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Rheogram"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Rheogram"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Rheogram"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Rheograms"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/YPLCalibrations": {
+      "get": {
+        "tags": [
+          "YPLCalibrations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "YPLCalibrations"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/YPLCalibration"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/YPLCalibration"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/YPLCalibration"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/YPLCalibrations/{id}": {
+      "get": {
+        "tags": [
+          "YPLCalibrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YPLCalibration"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "YPLCalibrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/YPLCalibration"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/YPLCalibration"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/YPLCalibration"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "YPLCalibrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/YPLCorrections": {
+      "get": {
+        "tags": [
+          "YPLCorrections"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "YPLCorrections"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/YPLCorrection"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/YPLCorrection"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/YPLCorrection"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/YPLCorrections/{id}": {
+      "get": {
+        "tags": [
+          "YPLCorrections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YPLCorrection"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "YPLCorrections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/YPLCorrection"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/YPLCorrection"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/YPLCorrection"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "YPLCorrections"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CalibrationMethodEnum": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CouetteRheometer": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rheometerType": {
+            "$ref": "#/components/schemas/RheometerTypeEnum"
+          },
+          "bobRadius": {
+            "type": "number",
+            "format": "double"
+          },
+          "gap": {
+            "type": "number",
+            "format": "double"
+          },
+          "newtonianEndEffectCorrection": {
+            "type": "number",
+            "format": "double"
+          },
+          "bobLength": {
+            "type": "number",
+            "format": "double"
+          },
+          "conicalAngle": {
+            "type": "number",
+            "format": "double"
+          },
+          "measurementPrecision": {
+            "type": "number",
+            "format": "double"
+          },
+          "useISOConvention": {
+            "type": "boolean"
+          },
+          "fixedSpeedList": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          }
+        }
+      },
+      "DrillingUnitChoiceSet": {
+        "type": "object",
+        "properties": {
+          "choices": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            },
+            "nullable": true
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "isDefault": {
+            "type": "boolean"
+          },
+          "isSI": {
+            "type": "boolean"
+          }
+        }
+      },
+      "MetaInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "typeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "creationDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModificationDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "httpHostBasePath": {
+            "type": "string",
+            "nullable": true
+          },
+          "httpEndPoint": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PhysicalQuantity": {
+        "type": "object",
+        "properties": {
+          "siUnitName": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "siUnitLabel": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "lengthDimension": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "timeDimension": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true
+          },
+          "unitChoices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnitChoice"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "massDimension": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "temperatureDimension": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "amountSubstanceDimension": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "electricCurrentDimension": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "luminousIntensityDimension": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "planeAngleDimension": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "solidAngleDimension": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "meaningfulPrecisionInSI": {
+            "type": "number",
+            "format": "double",
+            "nullable": true,
+            "readOnly": true
+          }
+        }
+      },
+      "RateSourceEnum": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "Rheogram": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "couetteRheometerID": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rateSource": {
+            "$ref": "#/components/schemas/RateSourceEnum"
+          },
+          "stressSource": {
+            "$ref": "#/components/schemas/StressSourceEnum"
+          },
+          "measurements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RheometerMeasurement"
+            },
+            "nullable": true
+          },
+          "shearRateCorrection": {
+            "$ref": "#/components/schemas/ShearRateCorrectionEnum"
+          },
+          "shearStressCorrection": {
+            "$ref": "#/components/schemas/ShearStressCorrectionEnum"
+          },
+          "calibrationMethod": {
+            "$ref": "#/components/schemas/CalibrationMethodEnum"
+          },
+          "correctedFlowCurve": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShearRateAndStress"
+            },
+            "nullable": true
+          },
+          "calibratedYPLModel": {
+            "$ref": "#/components/schemas/YPLModel"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "isReadOnly": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        }
+      },
+      "RheometerMeasurement": {
+        "type": "object",
+        "properties": {
+          "rotationalSpeed": {
+            "type": "number",
+            "format": "double"
+          },
+          "torque": {
+            "type": "number",
+            "format": "double"
+          },
+          "isoNewtonianShearRate": {
+            "type": "number",
+            "format": "double"
+          },
+          "isoNewtonianShearStress": {
+            "type": "number",
+            "format": "double"
+          },
+          "bobNewtonianShearRate": {
+            "type": "number",
+            "format": "double"
+          },
+          "bobNewtonianShearStress": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "RheometerTypeEnum": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "ShearRateAndStress": {
+        "type": "object",
+        "properties": {
+          "shearRate": {
+            "type": "number",
+            "format": "double"
+          },
+          "shearStress": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "ShearRateCorrectionEnum": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "ShearStressCorrectionEnum": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "StressSourceEnum": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "UnitChoice": {
+        "type": "object",
+        "properties": {
+          "unitName": {
+            "type": "string",
+            "nullable": true
+          },
+          "unitLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "conversionFactorFromSI": {
+            "type": "number",
+            "format": "double"
+          },
+          "conversionBiasFromSI": {
+            "type": "number",
+            "format": "double"
+          },
+          "isSI": {
+            "type": "boolean"
+          }
+        }
+      },
+      "YPLCalibration": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "rheogramInput": {
+            "$ref": "#/components/schemas/Rheogram"
+          },
+          "yplModelKelessidis": {
+            "$ref": "#/components/schemas/YPLModel"
+          },
+          "yplModelMullineux": {
+            "$ref": "#/components/schemas/YPLModel"
+          },
+          "yplModelLevenbergMarquardt": {
+            "$ref": "#/components/schemas/YPLModel"
+          }
+        }
+      },
+      "YPLCorrection": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "rheogramInput": {
+            "$ref": "#/components/schemas/Rheogram"
+          },
+          "yplModelBasedOnNewtonianInputs": {
+            "$ref": "#/components/schemas/YPLModel"
+          },
+          "rheogramFullyCorrected": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShearRateAndStress"
+            },
+            "nullable": true
+          },
+          "yplModelFullyCorrected": {
+            "$ref": "#/components/schemas/YPLModel"
+          },
+          "rheogramShearRateCorrected": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShearRateAndStress"
+            },
+            "nullable": true
+          },
+          "yplModelShearRateCorrected": {
+            "$ref": "#/components/schemas/YPLModel"
+          },
+          "rheogramShearStressCorrected": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShearRateAndStress"
+            },
+            "nullable": true
+          },
+          "yplModelShearStressCorrected": {
+            "$ref": "#/components/schemas/YPLModel"
+          }
+        }
+      },
+      "YPLModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "tau0": {
+            "type": "number",
+            "format": "double"
+          },
+          "k": {
+            "type": "number",
+            "format": "double"
+          },
+          "n": {
+            "type": "number",
+            "format": "double"
+          },
+          "chi2": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      }
+    }
+  }
+}

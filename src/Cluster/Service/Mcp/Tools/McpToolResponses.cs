@@ -1,0 +1,21 @@
+using System.Text.Json.Nodes;
+
+namespace OSDC.Drilling.Cluster.Service.Mcp.Tools;
+
+internal static class McpToolResponses
+{
+    public static JsonNode CreateValidationError(string message)
+    {
+        return new JsonObject
+        {
+            ["status"] = 400,
+            ["data"] = new JsonObject
+            {
+                ["error"] = "validation_failed",
+                ["message"] = message,
+                ["errors"] = new JsonArray()
+            }
+        };
+    }
+
+}

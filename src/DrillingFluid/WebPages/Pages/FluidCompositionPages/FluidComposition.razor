@@ -1,0 +1,67 @@
+<MudContainer Class="my-2">  
+    <SolidMassEditor SolidMass="@DrillingFluidCompositionInstance.LowGravitySolid" Label="Low gravity solid"/>                  
+    <SolidMassEditor SolidMass="@DrillingFluidCompositionInstance.HighGravitySolid" Label="High gravity solid"/>                  
+    <MudToolBar Class="align-center">    
+            <MudText Typo="Typo.body1"><b>Lost Circulation Materials</b></MudText>               
+            <MudIconButton Icon="@showSectionIcon" OnClick="@OnClickShow">@showSectionText</MudIconButton>    
+            <MudSpacer/>     
+            <MudButton StartIcon="@Icons.Material.Outlined.Add" IconColor="@Color.Success" OnClick="@AddLostCirculationMaterial">Add material</MudButton>      
+            <MudButton StartIcon="@Icons.Material.Outlined.Remove" IconColor="@Color.Error" OnClick="@RemoveLostCirculationMaterial">Remove material</MudButton>                          
+    </MudToolBar>  
+    <MudCollapse Expanded="@showSection">
+        @for(int i = 0; i <lostCirculationMaterials.Count; i++)
+        {
+            int index = i;
+            <LostCirculationMaterialEditor Class="my-2" 
+                LostCirculationMaterial="@lostCirculationMaterials[index]" OnMessageSent="@UpdateLostCirculationMaterial"/>
+        }
+    </MudCollapse>
+</MudContainer>
+
+@code
+{    
+    [Parameter]
+    public EventCallback OnMessageSent {get; set;}
+    [Parameter]
+    public DrillingFluidComposition DrillingFluidCompositionInstance {get; set;}
+    private List<LostCirculationMaterial> lostCirculationMaterials = new List<LostCirculationMaterial>
+        { 
+            PseudoConstructors.ConstructLostCirculationMaterial()
+        };
+    private bool showSection = true;
+    private string showSectionText = "Hide";
+    private string showSectionIcon = @Icons.Material.Filled.ExpandLess;
+    void OnClickShow()
+    {
+        showSection = !showSection;
+        if (showSection)
+        {   
+            showSectionText = "Hide";
+            showSectionIcon = @Icons.Material.Filled.ExpandLess;
+        }
+        else
+        {
+            showSectionText = "Show";
+            showSectionIcon = @Icons.Material.Filled.ExpandMore;
+        }
+    }
+
+    private async Task SendMessage()
+    {
+        await OnMessageSent.InvokeAsync();
+    }
+    private void UpdateLostCirculationMaterial()
+    {
+        DrillingFluidCompositionInstance.LostCirculationMaterials = lostCirculationMaterials;
+    }
+    private void AddLostCirculationMaterial()
+    {
+        lostCirculationMaterials.Add(PseudoConstructors.ConstructLostCirculationMaterial());
+    }
+    private void RemoveLostCirculationMaterial()
+    {
+        lostCirculationMaterials.RemoveAt(lostCirculationMaterials.Count-1);
+    }
+    
+
+}

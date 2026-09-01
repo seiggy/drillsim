@@ -1,0 +1,269 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using NUnit.Framework;
+using OSDC.Drilling.Cluster.Service.Controllers;
+using OSDC.Drilling.Cluster.Service.Managers;
+using OSDC.Drilling.Cluster.Service;
+using OSDC.Drilling.Cluster.Model;
+using System.Threading;
+using OSDC.DotnetLibraries.General.DataManagement;
+
+namespace ServiceTest.Controllers
+{
+    [TestFixture]
+    public class ClusterControllerTests
+    {
+        private SqliteConnection? _masterConnection;
+        private SqlConnectionManager? _sqlConnectionManager;
+        private ILogger<SqlConnectionManager>? _sqlLogger;
+        private ILogger<ClusterManager>? _clusterLogger;
+        private ClusterController? _controller;
+
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
+        {
+            // Keep a master connection open to persist the in-memory DB across connections
+            _masterConnection = new SqliteConnection("Data Source=ClusterTest;Mode=Memory;Cache=Shared");
+            _masterConnection.Open();
+
+            _sqlLogger = NullLogger<SqlConnectionManager>.Instance;
+            _clusterLogger = NullLogger<ClusterManager>.Instance;
+
+            _sqlConnectionManager = new SqlConnectionManager(
+                "Data Source=ClusterTest;Mode=Memory;Cache=Shared",
+                _sqlLogger);
+
+            // Instantiate controller normally; it will pick up the singleton ClusterManager
+            _controller = new ClusterController(_clusterLogger, _sqlConnectionManager, new EmptyExternalReferenceResolver());
+        }
+
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            _masterConnection?.Dispose();
+        }
+
+        [SetUp]
+        public void SetUp()
+        {
+            // Ensure DB is clean before each test
+            var manager = ClusterManager.GetInstance(_clusterLogger!, _sqlConnectionManager!);
+            manager.Clear();
+        }
+
+        private static OSDC.Drilling.Cluster.Model.Cluster MakeCluster(Guid id)
+        {
+            return new OSDC.Drilling.Cluster.Model.Cluster
+            {
+                MetaInfo = new MetaInfo { ID = id },
+                Name = "Test Cluster",
+                Description = "",
+                FieldID = null,
+                IsSingleWell = false
+            };
+        }
+
+        [Test]
+        public void GetAllClusterId_Empty_ReturnsOkWithEmptyList()
+        {
+            var result = _controller!.GetAllClusterId();
+            Assert.That(result.Result, Is.TypeOf<OkObjectResult>());
+            var ok = (OkObjectResult)result.Result!;
+            Assert.That(ok.Value, Is.InstanceOf<IEnumerable<Guid>>());
+            Assert.That(((IEnumerable<Guid>)ok.Value!).GetEnumerator().MoveNext(), Is.False);
+        }
+
+        [Test]
+        public void PostCluster_NewItem_ReturnsOkAndPersists()
+        {
+            var id = Guid.NewGuid();
+            var cluster = MakeCluster(id);
+
+            var postRes = _controller!.PostCluster(cluster);
+            Assert.That(postRes, Is.TypeOf<OkObjectResult>());
+
+            var getById = _controller!.GetClusterById(id);
+            Assert.That(getById.Result, Is.TypeOf<OkObjectResult>());
+            var ok = (OkObjectResult)getById.Result!;
+            Assert.That(ok.Value, Is.Not.Null);
+            var returned = ok.Value as OSDC.Drilling.Cluster.Model.Cluster;
+            Assert.That(returned, Is.Not.Null);
+            Assert.That(returned!.MetaInfo, Is.Not.Null);
+            Assert.That(returned!.MetaInfo!.ID, Is.EqualTo(id));
+        }
+
+        [Test]
+        public void PostCluster_Duplicate_ReturnsConflict()
+        {
+            var id = Guid.NewGuid();
+            var cluster = MakeCluster(id);
+            var cluster2 = MakeCluster(id);
+
+            var r1 = _controller!.PostCluster(cluster);
+            Assert.That(r1, Is.TypeOf<OkObjectResult>());
+
+            var r2 = _controller!.PostCluster(cluster2);
+            Assert.That(r2, Is.TypeOf<StatusCodeResult>());
+            var obj = (StatusCodeResult)r2;
+            Assert.That(obj.StatusCode, Is.EqualTo(409));
+        }
+
+        [Test]
+        public void PostCluster_BadRequestOnNullOrInvalid()
+        {
+            var r1 = _controller!.PostCluster(null);
+            Assert.That(r1, Is.TypeOf<BadRequestResult>());
+
+            var r2 = _controller!.PostCluster(new OSDC.Drilling.Cluster.Model.Cluster { MetaInfo = null });
+            Assert.That(r2, Is.TypeOf<BadRequestResult>());
+
+            var r3 = _controller!.PostCluster(new OSDC.Drilling.Cluster.Model.Cluster { MetaInfo = new MetaInfo { ID = Guid.Empty } });
+            Assert.That(r3, Is.TypeOf<BadRequestResult>());
+        }
+
+        [Test]
+        public void GetClusterById_EmptyGuid_BadRequest()
+        {
+            var res = _controller!.GetClusterById(Guid.Empty);
+            Assert.That(res.Result, Is.TypeOf<BadRequestResult>());
+        }
+
+        [Test]
+        public void GetClusterById_NotFound()
+        {
+            var res = _controller!.GetClusterById(Guid.NewGuid());
+            Assert.That(res.Result, Is.TypeOf<NotFoundResult>());
+        }
+
+        [Test]
+        public void GetAllCluster_ReturnsOkWithItems()
+        {
+            var id1 = Guid.NewGuid();
+            var id2 = Guid.NewGuid();
+            _controller!.PostCluster(MakeCluster(id1));
+            _controller!.PostCluster(MakeCluster(id2));
+
+            var res = _controller!.GetAllCluster();
+            Assert.That(res.Result, Is.TypeOf<OkObjectResult>());
+            var ok = (OkObjectResult)res.Result!;
+            Assert.That(ok.Value, Is.InstanceOf<IEnumerable<OSDC.Drilling.Cluster.Model.Cluster?>>());
+            var list = (IEnumerable<OSDC.Drilling.Cluster.Model.Cluster?>)ok.Value!;
+            Assert.That(list, Is.Not.Null);
+        }
+
+        private sealed class EmptyExternalReferenceResolver : IClusterExternalReferenceResolver
+        {
+            public Task<List<ClusterBatchError>> PopulateExportManifestAsync(ClusterBatchExportDocument document, CancellationToken cancellationToken) => Task.FromResult(new List<ClusterBatchError>());
+            public Task<ClusterExternalReferenceResolutionOutcome> ResolveRestoreManifestAsync(ClusterBatchExportDocument document, CancellationToken cancellationToken) => Task.FromResult(new ClusterExternalReferenceResolutionOutcome());
+        }
+
+        [Test]
+        public void GetAllClusterLight_ReturnsOkWithLightItems()
+        {
+            var id = Guid.NewGuid();
+            _controller!.PostCluster(MakeCluster(id));
+
+            var res = _controller!.GetAllClusterLight();
+            Assert.That(res.Result, Is.TypeOf<OkObjectResult>());
+            var ok = (OkObjectResult)res.Result!;
+            Assert.That(ok.Value, Is.InstanceOf<IEnumerable<OSDC.Drilling.Cluster.Model.ClusterLight>>());
+            var list = ((IEnumerable<OSDC.Drilling.Cluster.Model.ClusterLight>)ok.Value!).ToList();
+            Assert.That(list, Has.Count.EqualTo(1));
+            Assert.That(list[0].MetaInfo?.ID, Is.EqualTo(id));
+            Assert.That(list[0].Name, Is.EqualTo("Test Cluster"));
+        }
+
+        [Test]
+        public void PutClusterById_NotFound()
+        {
+            var id = Guid.NewGuid();
+            var cluster = MakeCluster(id);
+            var res = _controller!.PutClusterById(id, DateTimeOffset.UtcNow, cluster);
+            // Not found because item not yet created
+            Assert.That(res, Is.TypeOf<NotFoundObjectResult>());
+        }
+
+        [Test]
+        public void PutClusterById_BadRequest_OnIdMismatch()
+        {
+            var id = Guid.NewGuid();
+            var other = Guid.NewGuid();
+            var cluster = MakeCluster(other);
+            var res = _controller!.PutClusterById(id, DateTimeOffset.UtcNow, cluster);
+            Assert.That(res, Is.TypeOf<BadRequestObjectResult>());
+        }
+
+        [Test]
+        public void PutClusterById_UpdatesAndReturnsOk()
+        {
+            var id = Guid.NewGuid();
+            var cluster = MakeCluster(id);
+            var post = _controller!.PostCluster(cluster);
+            Assert.That(post, Is.TypeOf<OkObjectResult>());
+
+            // Update some non-key data
+            cluster.Description = "updated";
+            var res = _controller!.PutClusterById(id, cluster.LastModificationDate!.Value, cluster);
+            Assert.That(res, Is.TypeOf<OkObjectResult>());
+        }
+
+        [Test]
+        public void PutClusterById_RejectsStaleTimestamp()
+        {
+            var id = Guid.NewGuid();
+            var cluster = MakeCluster(id);
+            Assert.That(_controller!.PostCluster(cluster), Is.TypeOf<OkObjectResult>());
+            DateTimeOffset original = cluster.LastModificationDate!.Value;
+            cluster.Description = "first update";
+            Assert.That(_controller.PutClusterById(id, original, cluster), Is.TypeOf<OkObjectResult>());
+            cluster.Description = "stale update";
+            Assert.That(_controller.PutClusterById(id, original, cluster), Is.TypeOf<ConflictObjectResult>());
+        }
+
+        [Test]
+        public void PostCluster_RejectsSlotDictionaryKeyMismatch()
+        {
+            var cluster = MakeCluster(Guid.NewGuid());
+            Guid key = Guid.NewGuid();
+            cluster.Slots = new Dictionary<Guid, Slot> { [key] = new Slot { ID = Guid.NewGuid() } };
+            var result = _controller!.PostCluster(cluster);
+            Assert.That(result, Is.TypeOf<BadRequestObjectResult>());
+            var envelope = ((BadRequestObjectResult)result).Value as ClusterMutationErrorEnvelope;
+            Assert.That(envelope?.Errors.Any(error => error.Code == "slot_id_mismatch"), Is.True);
+        }
+
+        [Test]
+        public void PutClusterById_PersistsQuotedTextAndRigWithoutField()
+        {
+            var id = Guid.NewGuid();
+            var rigId = Guid.NewGuid();
+            var cluster = MakeCluster(id);
+            Assert.That(_controller!.PostCluster(cluster), Is.TypeOf<OkObjectResult>());
+            cluster.Name = "O'Brien's cluster";
+            cluster.FieldID = null;
+            cluster.RigID = rigId;
+            Assert.That(_controller.PutClusterById(id, cluster.LastModificationDate!.Value, cluster), Is.TypeOf<OkObjectResult>());
+            var stored = ((OkObjectResult)_controller.GetClusterById(id).Result!).Value as OSDC.Drilling.Cluster.Model.Cluster;
+            Assert.That(stored?.Name, Is.EqualTo("O'Brien's cluster"));
+            Assert.That(stored?.RigID, Is.EqualTo(rigId));
+        }
+
+        [Test]
+        public void DeleteClusterById_NotFound_ThenOk()
+        {
+            var id = Guid.NewGuid();
+            var nf = _controller!.DeleteClusterById(id);
+            Assert.That(nf, Is.TypeOf<NotFoundResult>());
+
+            _controller!.PostCluster(MakeCluster(id));
+            var ok = _controller!.DeleteClusterById(id);
+            Assert.That(ok, Is.TypeOf<OkResult>());
+        }
+    }
+}

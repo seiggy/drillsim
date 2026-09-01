@@ -1,0 +1,219 @@
+﻿@page "/UnitConversion"
+@inject ILogger<UnitConversionMain> logger
+@inject ISnackbar Snackbar
+@namespace OSDC.UnitConversion.WebPages
+
+@if (unitConversionSetList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div hidden="@isHiddenMainPanel">
+        <MudText Class="mt-4 mb-4" Typo="Typo.h5"><strong>Unit Conversions</strong></MudText>
+        <div style="width: 90%; margin: auto">
+            <MudDataGrid T="UnitConversionSet" Items="@unitConversionSetList"
+                         EditMode="DataGridEditMode.Cell"
+                         Hover="true" RowClick="@RowClicked"
+                         SortMode="SortMode.Multiple" QuickFilter="@_unitConversionSetFilter" Filterable="false"
+                         ReadOnly="false" ColumnResizeMode="ResizeMode.Column" Elevation="0">
+                <ToolBarContent>
+                    <MudTextField @bind-Value="_searchString" Placeholder="Search for unit conversions (name/description)" Adornment="Adornment.Start" Immediate="true"
+                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                    <MudSpacer />
+                    <MudButton Variant="Variant.Filled" Color="@Color.Success" Size="Size.Large" OnClick="@AddUnitConversionSet">Add</MudButton>
+
+                </ToolBarContent>
+                <Columns>
+                    <PropertyColumn Property="x => x.Name" Title="Name" CellStyle="width: 30%;" Sortable="true" IsEditable="false" />
+                    <PropertyColumn Property="x => x.Description" Title="Description" CellStyle="width: 60%;" Sortable="true" IsEditable="false" />
+                    <TemplateColumn CellStyle="width: 5%;">
+                        <EditTemplate>
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" OnClick="(() => DeleteUnitConversionSet(context.Item.MetaInfo.ID))" />
+                        </EditTemplate>
+                    </TemplateColumn>
+                </Columns>
+            </MudDataGrid>
+        </div>
+    </div>
+}
+@if (isHiddenMainPanel)
+{
+    <UnitConversionEdit UnitConversionSetID="@unitConversionSetID" PhysicalQuantityList="@physicalQuantityList" OnUpdate="@ShowMainPanel" />
+}
+
+@code {
+    // UnitConversionSet related variables
+    private List<UnitConversionSet> unitConversionSetList = new();
+    private List<PhysicalQuantity> physicalQuantityList = new();
+    private Guid unitConversionSetID;
+
+    // UI related variables
+    public bool isHiddenMainPanel;
+    public bool isHiddenEditPanel;
+    private string? _searchString;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Show main panel
+            isHiddenMainPanel = false;
+            isHiddenEditPanel = true;
+
+            // Starting all loading tasks asynchronously
+            logger.LogInformation("Trying to load list of UnitConversionSet from client: " + APIUtils.HostNameUnitConversion);
+            var unitConversionSetTask = APIUtils.ClientUnitConversion.GetAllUnitConversionSetAsync();
+            logger.LogInformation("Trying to load list of PhysicalQuantity from client: " + APIUtils.HostNameUnitConversion);
+            var physicalQuantityTask = APIUtils.ClientUnitConversion.GetAllPhysicalQuantityAsync();
+
+            List<Task> loadingTaskList = new List<Task> { unitConversionSetTask, physicalQuantityTask };
+
+            // Awaiting tasks and retrieve results as they become available
+            while (loadingTaskList.Count > 0)
+            {
+                Task finishedTask = await Task.WhenAny(loadingTaskList);
+                if (finishedTask == unitConversionSetTask)
+                {
+                    try
+                    {
+                        unitConversionSetList = (List<UnitConversionSet>)await unitConversionSetTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (unitConversionSetList != null)
+                        {
+                            unitConversionSetList.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of UnitConversionSet were null on initialization");
+                            Snackbar.Add("Returned list of UnitConversionSet were null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load UnitConversionSet from client");
+                    }
+                }
+                else if (finishedTask == physicalQuantityTask)
+                {
+                    try
+                    {
+                        physicalQuantityList = (List<PhysicalQuantity>)await physicalQuantityTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (physicalQuantityList != null)
+                        {
+                            physicalQuantityList.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of PhysicalQuantity were null on initialization");
+                            Snackbar.Add("Returned list of PhysicalQuantity were null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load PhysicalQuantity from client");
+                    }
+                }
+                loadingTaskList.Remove(finishedTask);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem UnitConversionSet initialization");
+        }
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    private async Task AddUnitConversionSet()
+    {
+        try
+        {
+            MetaInfo metaInfo = new() { ID = Guid.NewGuid(), HttpHostName = APIUtils.HostNameUnitConversion, HttpHostBasePath = APIUtils.HostBasePathUnitConversion, HttpEndPoint = "UnitConversionSet/" };
+            DateTimeOffset creationDate = DateTimeOffset.UtcNow;
+            UnitConversionSet currentUnitConversionSet = new()
+                {
+                    MetaInfo = metaInfo,
+                    Name = DataUtils.DEFAULT_NAME_UnitConversionSet,
+                    Description = DataUtils.DEFAULT_DESCR_UnitConversionSet,
+                    CreationDate = creationDate,
+                    LastModificationDate = creationDate,
+                    QuantityUnitConversionList = []
+                };
+            await APIUtils.ClientUnitConversion.PostUnitConversionSetAsync(currentUnitConversionSet);
+            logger.LogInformation("UnitConversionSet posted successfully");
+            Snackbar.Add("UnitConversionSet posted successfully", Severity.Success);
+            await OnInitializedAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to add a new UnitConversionSet");
+            Snackbar.Add("Impossible to add a new UnitConversionSet", Severity.Warning);
+        }
+    }
+
+    private async Task EditUnitConversionSet(Guid id)
+    {
+        try
+        {
+            unitConversionSetID = id;
+            isHiddenMainPanel = true;
+            isHiddenEditPanel = false;
+            await InvokeAsync(() => { StateHasChanged(); });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to load UnitConversionSet to be edited");
+        }
+    }
+
+    private async Task RowClicked(DataGridRowClickEventArgs<UnitConversionSet> args)
+    {
+        await EditUnitConversionSet(args.Item.MetaInfo.ID);
+    }
+
+    private async Task DeleteUnitConversionSet(Guid id)
+    {
+        try
+        {
+            await APIUtils.ClientUnitConversion.DeleteUnitConversionSetByIdAsync(id);
+            await OnInitializedAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to delete UnitConversionSet");
+        }
+    }
+
+    //Quick filter - filter gobally across multiple columns with the same input
+    private Func<UnitConversionSet, bool>
+    _unitConversionSetFilter => x =>
+    {
+        return (
+            string.IsNullOrWhiteSpace(_searchString) ||
+            x.Name.Contains(_searchString, StringComparison.InvariantCultureIgnoreCase) ||
+            x.Description.Contains(_searchString, StringComparison.InvariantCultureIgnoreCase)
+        );
+    };
+
+    //Events
+    private void StartedEditingItem(UnitConversionSet item)
+    {
+        //Activating Edit event capture with parameter StartedEditingItem="@StartedEditingItem" in MudDataGrid; arguments are specified in OnClick="@context.Actions.StartedEditingItem(...)"
+    }
+
+    private void CancelledEditingItem(UnitConversionSet item)
+    {
+        //Activating Cancel event capture with parameter CancelledEditingItem = "@CancelledEditingItem" in MudDataGrid; arguments are specified in OnClick="@context.Actions.CancelledEditingItem(...)"
+    }
+
+    private void CommittedItemChanges(UnitConversionSet item)
+    {
+        //Activating Commit event capture with parameter CommittedItemChanges = "@CommittedItemChanges" in MudDataGrid; arguments are specified in OnClick="@context.Actions.CommittedEditingItem(...)"
+    }
+
+    private async void ShowMainPanel()
+    {
+        isHiddenMainPanel = false;
+        isHiddenEditPanel = true;
+        await OnInitializedAsync();
+    }
+}

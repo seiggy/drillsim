@@ -1,0 +1,39 @@
+﻿<div class="top-row pl-4 navbar navbar-dark">
+    <a class="navbar-brand" href="">Yield Power Law Calibration</a>
+    <button class="navbar-toggler" @onclick="ToggleNavMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <ul class="nav flex-column">
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="/YPLCalibrationFromRheometer/webapp/CouetteRheometers" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Couette Rheometers
+            </NavLink>
+            <NavLink class="nav-link" href="/YPLCalibrationFromRheometer/webapp/Rheograms" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Rheograms
+            </NavLink>
+            <NavLink class="nav-link" href="/YPLCalibrationFromRheometer/webapp/YPLCalibrations" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> YPL Calibrations
+            </NavLink>
+            <NavLink class="nav-link" href="/YPLCalibrationFromRheometer/webapp/YPLCorrections" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> YPL Corrections
+            </NavLink>
+            <NavLink class="nav-link" href="/YPLCalibrationFromRheometer/webapp/DrillingUnitChoiceSets" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Unit Choice Sets
+            </NavLink>
+        </li>
+    </ul>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

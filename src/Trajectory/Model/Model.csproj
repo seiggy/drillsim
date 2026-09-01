@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Remove="docfx.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="docfx.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="OSDC.DotnetLibraries.Drilling.Section" Version="1.0.1" />
+	  <PackageReference Include="OSDC.DotnetLibraries.Drilling.Surveying" Version="1.2.22" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\ModelSharedIn\ModelSharedIn.csproj" />
+	</ItemGroup>
+
+</Project>

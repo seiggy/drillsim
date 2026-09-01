@@ -1,0 +1,366 @@
+@page "/SingleUnitConversion"
+@namespace OSDC.UnitConversion.WebPages
+@inject ILogger<SingleUnitConversionMain> logger
+@inject ISnackbar Snackbar
+
+<MudText Class="mt-4 mb-4" Typo="Typo.h5"><strong>Unit Conversion</strong></MudText>
+
+<style>
+    .single-conversion-selected-row {
+        background-color: rgba(25, 118, 210, 0.12);
+    }
+</style>
+
+@if (isLoading_)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <MudGrid Spacing="3">
+        <MudItem xs="12">
+            <MudTextField @bind-Value="quantityFilter_"
+                          Label="Filter physical quantities"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Dense="true" />
+            <MudTable T="PhysicalQuantity"
+                      Items="@FilteredPhysicalQuantities"
+                      Hover="true"
+                      Dense="true"
+                      FixedHeader="true"
+                      Height="260px"
+                      Elevation="0"
+                      Breakpoint="Breakpoint.Sm"
+                      OnRowClick="OnQuantityRowClicked"
+                      RowClassFunc="SelectedQuantityRowClass">
+                <HeaderContent>
+                    <MudTh>Name</MudTh>
+                    <MudTh>SI unit</MudTh>
+                    <MudTh>Usual names</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.Name</MudTd>
+                    <MudTd>@SelectedQuantityDescriptionFor(context)</MudTd>
+                    <MudTd>@string.Join(", ", context.UsualNames ?? [])</MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudItem>
+
+        <MudItem xs="12" md="5">
+            <MudText Typo="Typo.h6">Input unit</MudText>
+            <MudTextField @bind-Value="inputUnitFilter_"
+                          Label="Filter input units"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Dense="true"
+                          Disabled="@(selectedQuantity_ == null)" />
+            <MudTable T="UnitChoice"
+                      Items="@FilteredInputUnits"
+                      Hover="true"
+                      Dense="true"
+                      FixedHeader="true"
+                      Height="230px"
+                      Elevation="0"
+                      Breakpoint="Breakpoint.Sm"
+                      OnRowClick="OnInputUnitRowClicked"
+                      RowClassFunc="SelectedInputUnitRowClass">
+                <HeaderContent>
+                    <MudTh>Label</MudTh>
+                    <MudTh>Name</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.UnitLabel</MudTd>
+                    <MudTd>@(context.IsSI ? $"SI, {context.UnitName}" : context.UnitName)</MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudItem>
+        <MudItem xs="12" md="5">
+            <MudText Typo="Typo.h6">Output unit</MudText>
+            <MudTextField @bind-Value="outputUnitFilter_"
+                          Label="Filter output units"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Dense="true"
+                          Disabled="@(selectedQuantity_ == null)" />
+            <MudTable T="UnitChoice"
+                      Items="@FilteredOutputUnits"
+                      Hover="true"
+                      Dense="true"
+                      FixedHeader="true"
+                      Height="230px"
+                      Elevation="0"
+                      Breakpoint="Breakpoint.Sm"
+                      OnRowClick="OnOutputUnitRowClicked"
+                      RowClassFunc="SelectedOutputUnitRowClass">
+                <HeaderContent>
+                    <MudTh>Label</MudTh>
+                    <MudTh>Name</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.UnitLabel</MudTd>
+                    <MudTd>@(context.IsSI ? $"SI, {context.UnitName}" : context.UnitName)</MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudItem>
+        <MudItem xs="12" md="2" Class="d-flex align-center justify-center">
+            <MudIconButton Icon="@Icons.Material.Filled.SwapHoriz"
+                           Color="Color.Primary"
+                           Variant="Variant.Outlined"
+                           Disabled="@(!CanSwap)"
+                           OnClick="SwapUnits"
+                           Title="Swap units" />
+        </MudItem>
+
+        <MudItem xs="12" md="5">
+            <MudNumericField T="double?"
+                             Label="Input value"
+                             Value="@inputValue_"
+                             ValueChanged="OnInputValueChanged"
+                             Immediate="true"
+                             Variant="Variant.Outlined"
+                             Disabled="@(selectedQuantity_ == null)"
+                             Dense="true" />
+        </MudItem>
+        <MudItem xs="12" md="2" Class="d-flex align-center justify-center">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Disabled="@(!CanCalculate)"
+                       OnClick="CalculateAsync">
+                Calculate
+            </MudButton>
+        </MudItem>
+        <MudItem xs="12" md="5">
+            <MudTextField Value="@outputText_"
+                          Label="Output value"
+                          ReadOnly="true"
+                          Variant="Variant.Outlined"
+                          Dense="true" />
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    private List<PhysicalQuantity> physicalQuantities_ = [];
+    private PhysicalQuantity? selectedQuantity_;
+    private UnitChoice? inputUnit_;
+    private UnitChoice? outputUnit_;
+    private double? inputValue_ = 1.0;
+    private string? outputText_;
+    private string? quantityFilter_;
+    private string? inputUnitFilter_;
+    private string? outputUnitFilter_;
+    private bool isLoading_ = true;
+    private bool isCalculating_;
+
+    private string SelectedQuantityDescription =>
+        selectedQuantity_ == null
+            ? string.Empty
+            : $"{selectedQuantity_.SIUnitLabel} ({selectedQuantity_.SIUnitName})";
+
+    private bool CanSwap => inputUnit_ != null && outputUnit_ != null;
+
+    private bool CanCalculate =>
+        !isCalculating_ &&
+        selectedQuantity_ != null &&
+        inputUnit_ != null &&
+        outputUnit_ != null &&
+        inputValue_ != null;
+
+    private IEnumerable<PhysicalQuantity> FilteredPhysicalQuantities =>
+        string.IsNullOrWhiteSpace(quantityFilter_)
+            ? physicalQuantities_
+            : physicalQuantities_.Where(quantity =>
+                Contains(quantity.Name, quantityFilter_) ||
+                Contains(quantity.SIUnitName, quantityFilter_) ||
+                Contains(quantity.SIUnitLabel, quantityFilter_) ||
+                (quantity.UsualNames?.Any(name => Contains(name, quantityFilter_)) ?? false));
+
+    private IEnumerable<UnitChoice> FilteredInputUnits => FilterUnits(inputUnitFilter_);
+
+    private IEnumerable<UnitChoice> FilteredOutputUnits => FilterUnits(outputUnitFilter_);
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            ICollection<PhysicalQuantity> quantities = await APIUtils.ClientUnitConversion.GetAllPhysicalQuantityAsync();
+            physicalQuantities_ = quantities
+                .Where(quantity => quantity != null)
+                .OrderBy(quantity => quantity.Name)
+                .ToList();
+
+            SelectQuantity(physicalQuantities_.FirstOrDefault());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem while loading physical quantities");
+            Snackbar.Add("Problem while loading physical quantities", Severity.Error);
+        }
+        finally
+        {
+            isLoading_ = false;
+        }
+    }
+
+    private void OnQuantityRowClicked(TableRowClickEventArgs<PhysicalQuantity> args)
+    {
+        SelectQuantity(args.Item);
+    }
+
+    private void SelectQuantity(PhysicalQuantity? quantity)
+    {
+        selectedQuantity_ = quantity;
+        List<UnitChoice> units = GetCurrentUnits().ToList();
+        UnitChoice? siUnit = units.FirstOrDefault(unit => unit.IsSI) ?? units.FirstOrDefault();
+        inputUnit_ = siUnit;
+        outputUnit_ = siUnit;
+        inputUnitFilter_ = null;
+        outputUnitFilter_ = null;
+        outputText_ = null;
+    }
+
+    private void OnInputUnitRowClicked(TableRowClickEventArgs<UnitChoice> args)
+    {
+        inputUnit_ = args.Item;
+        outputText_ = null;
+    }
+
+    private void OnOutputUnitRowClicked(TableRowClickEventArgs<UnitChoice> args)
+    {
+        outputUnit_ = args.Item;
+        outputText_ = null;
+    }
+
+    private Task OnInputValueChanged(double? value)
+    {
+        inputValue_ = value;
+        outputText_ = null;
+        return Task.CompletedTask;
+    }
+
+    private Task SwapUnits()
+    {
+        (inputUnit_, outputUnit_) = (outputUnit_, inputUnit_);
+        outputText_ = null;
+        return Task.CompletedTask;
+    }
+
+    private async Task CalculateAsync()
+    {
+        if (!CanCalculate || selectedQuantity_ == null || inputUnit_ == null || outputUnit_ == null || inputValue_ is not { } inputValue)
+        {
+            return;
+        }
+
+        Guid conversionSetId = Guid.NewGuid();
+        isCalculating_ = true;
+
+        try
+        {
+            UnitConversionSet conversionSet = new()
+            {
+                MetaInfo = new MetaInfo
+                {
+                    ID = conversionSetId,
+                    HttpHostName = APIUtils.HostNameUnitConversion,
+                    HttpHostBasePath = APIUtils.HostBasePathUnitConversion,
+                    HttpEndPoint = "UnitConversionSet/"
+                },
+                Name = "Single unit conversion",
+                Description = "Temporary single unit conversion",
+                CreationDate = DateTimeOffset.UtcNow,
+                LastModificationDate = DateTimeOffset.UtcNow,
+                QuantityUnitConversionList =
+                [
+                    new QuantityUnitConversion
+                    {
+                        QuantityID = selectedQuantity_.ID,
+                        UnitChoiceIDIn = inputUnit_.ID,
+                        UnitChoiceIDOut = outputUnit_.ID,
+                        ValueConversionList =
+                        [
+                            new ValueConversion { DataIn = inputValue }
+                        ]
+                    }
+                ]
+            };
+
+            await APIUtils.ClientUnitConversion.PostUnitConversionSetAsync(conversionSet);
+            UnitConversionSet persistedConversionSet = await APIUtils.ClientUnitConversion.GetUnitConversionSetByIdAsync(conversionSetId);
+            ValueConversion? result = persistedConversionSet.QuantityUnitConversionList?
+                .FirstOrDefault()?
+                .ValueConversionList?
+                .FirstOrDefault();
+
+            outputText_ = !string.IsNullOrWhiteSpace(result?.DataOutString)
+                ? result.DataOutString
+                : result?.DataOut?.ToString("G17", CultureInfo.CurrentCulture);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem while calculating unit conversion");
+            Snackbar.Add("Problem while calculating unit conversion", Severity.Error);
+            outputText_ = null;
+        }
+        finally
+        {
+            try
+            {
+                await APIUtils.ClientUnitConversion.DeleteUnitConversionSetByIdAsync(conversionSetId);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Problem while deleting temporary unit conversion set {ConversionSetId}", conversionSetId);
+            }
+
+            isCalculating_ = false;
+        }
+    }
+
+    private IEnumerable<UnitChoice> FilterUnits(string? searchString)
+    {
+        IEnumerable<UnitChoice> results = GetCurrentUnits();
+
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            results = results.Where(unit =>
+                Contains(unit.UnitName, searchString) ||
+                Contains(unit.UnitLabel, searchString) ||
+                Contains(unit.SIUnitName, searchString) ||
+                (unit.IsSI && Contains("SI", searchString)));
+        }
+
+        return results;
+    }
+
+    private IEnumerable<UnitChoice> GetCurrentUnits() =>
+        selectedQuantity_?.UnitChoices?
+            .Where(unit => unit != null)
+            .OrderBy(unit => unit.UnitName)
+            .ThenBy(unit => unit.UnitLabel) ??
+        Enumerable.Empty<UnitChoice>();
+
+    private static string SelectedQuantityDescriptionFor(PhysicalQuantity? quantity) =>
+        quantity == null
+            ? string.Empty
+            : string.IsNullOrWhiteSpace(quantity.SIUnitLabel)
+                ? quantity.SIUnitName
+                : $"{quantity.SIUnitLabel} ({quantity.SIUnitName})";
+
+    private string SelectedQuantityRowClass(PhysicalQuantity quantity, int rowNumber) =>
+        selectedQuantity_?.ID == quantity.ID ? "single-conversion-selected-row" : string.Empty;
+
+    private string SelectedInputUnitRowClass(UnitChoice unit, int rowNumber) =>
+        inputUnit_?.ID == unit.ID ? "single-conversion-selected-row" : string.Empty;
+
+    private string SelectedOutputUnitRowClass(UnitChoice unit, int rowNumber) =>
+        outputUnit_?.ID == unit.ID ? "single-conversion-selected-row" : string.Empty;
+
+    private static bool Contains(string? value, string searchString) =>
+        !string.IsNullOrWhiteSpace(value) &&
+        value.Contains(searchString, StringComparison.InvariantCultureIgnoreCase);
+}

@@ -1,0 +1,2103 @@
+﻿@namespace OSDC.UnitConversion.DrillingRazorMudComponents
+@inject ILogger<MudUnitAndReferenceChoiceTag> logger
+
+@if (unitSystemLightList == null || unitSystemLightList.Count == 0 || httpClient == null || baseUnitSystem_ == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table unit-reference-choice-tag-table">
+        <tbody>
+            <tr>
+                <td width="18%">
+                    <MudSelect Class="unit-reference-choice-select" @bind-Value="UnitSystemName" Label="UnitSystem" Variant="Variant.Filled">
+                        @foreach (UnitSystemLight uSysLight in unitSystemLightList)
+                        {
+                            <MudSelectItem Value="@uSysLight.Name">@uSysLight.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </td>
+                @if (!IsHiddenDepthReference)
+                {
+                    <td width="16%">
+                        <MudSelect Class="unit-reference-choice-select" @bind-Value="DepthReferenceName" Label="Depth Reference" Variant="Variant.Filled">
+                            @foreach (Tuple<Guid, string> tuple in depthReferences)
+                            {
+                                <MudSelectItem Value="@tuple.Item2">@tuple.Item2</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </td>
+                }
+                @if (!IsHiddenPositionReference)
+                {
+                    <td width="16%">
+                        <MudSelect Class="unit-reference-choice-select" @bind-Value="PositionReferenceName" Label="Position Reference" Variant="Variant.Filled">
+                            @foreach (Tuple<Guid, string> tuple in positionReferences)
+                            {
+                                <MudSelectItem Value="@tuple.Item2">@tuple.Item2</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </td>
+                }
+                @if (!IsHiddenGeodeticReference)
+                {
+                    <td width="16%">
+                        <MudSelect Class="unit-reference-choice-select" @bind-Value="GeodeticReferenceName" Label="Geodetic Reference" Variant="Variant.Filled">
+                            @foreach (Tuple<Guid, string> tuple in geodeticReferences)
+                            {
+                                <MudSelectItem Value="@tuple.Item2">@tuple.Item2</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </td>
+                }
+                @if (!IsHiddenAzimuthReference)
+                {
+                    <td width="16%">
+                        <MudSelect Class="unit-reference-choice-select" @bind-Value="AzimuthReferenceName" Label="Azimuth Reference" Variant="Variant.Filled">
+                            @foreach (Tuple<Guid, string> tuple in azimuthReferences)
+                            {
+                                <MudSelectItem Value="@tuple.Item2">@tuple.Item2</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </td>
+                }
+                @if (!IsHiddenPressureReference)
+                {
+                    <td width="16%">
+                        <MudSelect Class="unit-reference-choice-select" @bind-Value="PressureReferenceName" Label="Pressure Reference" Variant="Variant.Filled">
+                            @foreach (Tuple<Guid, string> tuple in pressureReferences)
+                            {
+                                <MudSelectItem Value="@tuple.Item2">@tuple.Item2</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </td>
+                }
+                @if (!IsHiddenDateReference)
+                {
+                    <td width="18%">
+                        <MudSelect Class="unit-reference-choice-select" @bind-Value="dateReferenceName" Label="Date Reference" Variant="Variant.Filled">
+                            @foreach (Tuple<Guid, string> tuple in dateReferences)
+                            {
+                                <MudSelectItem Value="@tuple.Item2">@tuple.Item2</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </td>
+                }
+            </tr>
+        </tbody>
+    </table>
+    <CascadingValue Value="this">
+        @ChildContent
+    </CascadingValue>
+}
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public string? HttpHost { get; set; }
+
+    [Parameter]
+    public string? HttpBasePath { get; set; }
+
+    [Parameter]
+    public string? HttpController { get; set; }
+
+    [Parameter]
+    public IGaugeReferencePressureSource? GaugeReferencePressureSource { get; set; }
+
+    [Parameter]
+    public IGridConvergenceSource? GridConvergenceSource { get; set; }
+
+    [Parameter]
+    public IMagneticDeclinationSource? MagneticDeclinationSource { get; set; }
+
+    [Parameter]
+    public ICartographicGridPositionReferenceSource? CartographicGridPositionReferenceSource { get; set; }
+
+    [Parameter]
+    public IFieldPositionReferenceSource? FieldPositionReferenceSource { get; set; }
+
+    [Parameter]
+    public ICartographicProjectionDatumGeodeticReferenceSource? CartographicProjectionDatumGeodeticReferenceSource { get; set; }
+
+    [Parameter]
+    public IClusterPositionReferenceSource? ClusterPositionReferenceSource { get; set; }
+
+    [Parameter]
+    public IWellHeadPositionReferenceSource? WellHeadPositionReferenceSource { get; set; }
+
+    [Parameter]
+    public IWellHeadDepthReferenceSource? WellHeadDepthReferenceSource { get; set; }
+
+    [Parameter]
+    public IGroundMudLineDepthReferenceSource? GroundMudLineDepthReferenceSource { get; set; }
+
+    [Parameter]
+    public ISeaWaterLevelDepthReferenceSource? SeaWaterLevelDepthReferenceSource { get; set; }
+
+    [Parameter]
+    public IMeanSeaLevelDepthReferenceSource? MeanSeaLevelDepthReferenceSource { get; set; }
+
+    [Parameter]
+    public IRotaryTableDepthReferenceSource? RotaryTableDepthReferenceSource { get; set; }
+
+    [Parameter]
+    public string? UnitSystemName
+    {
+        get
+        {
+            return unitSystemName_;
+        }
+        set
+        {
+            //High risk of entering infinite loop while rendering parent and children components (https://learn.microsoft.com/en-us/aspnet/core/blazor/components/?view=aspnetcore-3.1#overwritten-parameters-2)
+            //Still, these components need to be initialized or updated as long as some fundamental variables are not set, which is ensured by the condition below
+            if (unitSystemName_ == null || !unitSystemName_.Equals(value) || baseUnitSystem_ == null)
+            {
+                unitSystemName_ = value;
+                PostProcessUnitSystem();
+            }
+        }
+    }
+
+    [Parameter]
+    public EventCallback<string> UnitSystemNameChanged { get; set; }
+
+    [Parameter]
+    public string? DepthReferenceName
+    {
+        get
+        {
+            return depthReferenceName_;
+        }
+        set
+        {
+            if (depthReferenceName_ == null || !depthReferenceName_.Equals(value))
+            {
+                depthReferenceName_ = value;
+                PostProcessDepthReference();
+            }
+        }
+    }
+    [Parameter]
+    public EventCallback<string> DepthReferenceNameChanged { get; set; }
+
+    [Parameter]
+    public string? PositionReferenceName
+    {
+        get
+        {
+            return positionReferenceName_;
+        }
+        set
+        {
+            if (positionReferenceName_ == null || !positionReferenceName_.Equals(value))
+            {
+                positionReferenceName_ = value;
+                PostProcessPositionReference();
+            }
+        }
+    }
+
+    [Parameter]
+    public EventCallback<string> PositionReferenceNameChanged { get; set; }
+
+    [Parameter]
+    public string? GeodeticReferenceName
+    {
+        get
+        {
+            return geodeticReferenceName_;
+        }
+        set
+        {
+            if (geodeticReferenceName_ == null || !geodeticReferenceName_.Equals(value))
+            {
+                geodeticReferenceName_ = value;
+                PostProcessGeodeticReference();
+            }
+        }
+    }
+
+    [Parameter]
+    public EventCallback<string> GeodeticReferenceNameChanged { get; set; }
+
+    [Parameter]
+    public string? AzimuthReferenceName
+    {
+        get
+        {
+            return azimuthReferenceName_;
+        }
+        set
+        {
+            if (azimuthReferenceName_ == null || !azimuthReferenceName_.Equals(value))
+            {
+                azimuthReferenceName_ = value;
+                PostProcessAzimuthReference();
+            }
+        }
+    }
+
+    [Parameter]
+    public EventCallback<string> AzimuthReferenceNameChanged { get; set; }
+
+    [Parameter]
+    public string? PressureReferenceName
+    {
+        get
+        {
+            return pressureReferenceName_;
+        }
+        set
+        {
+            if (pressureReferenceName_ == null || !pressureReferenceName_.Equals(value))
+            {
+                pressureReferenceName_ = value;
+                PostProcessPressureReference();
+            }
+        }
+    }
+
+    [Parameter]
+    public EventCallback<string> PressureReferenceNameChanged { get; set; }
+
+    public bool InitializedOnce { get; set; } = false;
+
+    private string? unitSystemName_;
+    private string? depthReferenceName_;
+    private string? positionReferenceName_;
+    private string? geodeticReferenceName_;
+    private string? azimuthReferenceName_;
+    private string? pressureReferenceName_;
+    public string? dateReferenceName;
+
+    private HttpClient? httpClient;
+    private List<UnitSystemLight>? unitSystemLightList = new List<UnitSystemLight>();
+    private List<Tuple<Guid, string>> depthReferences = new List<Tuple<Guid, string>>();
+    private List<Tuple<Guid, string>> positionReferences = new List<Tuple<Guid, string>>();
+    private List<Tuple<Guid, string>> geodeticReferences = new List<Tuple<Guid, string>>();
+    private List<Tuple<Guid, string>> azimuthReferences = new List<Tuple<Guid, string>>();
+    private List<Tuple<Guid, string>> pressureReferences = new List<Tuple<Guid, string>>();
+    private List<Tuple<Guid, string>> dateReferences = new List<Tuple<Guid, string>>();
+
+    private List<IUnitAwareComponent> unitAwareComponents_ = new List<IUnitAwareComponent>();
+    private List<IDateTimeReferenceAwareComponent> dateTimeAwareComponents_ = new List<IDateTimeReferenceAwareComponent>();
+
+    private BaseUnitSystem? baseUnitSystem_;
+
+    private bool IsHiddenPositionReference = true;
+    private bool IsHiddenGeodeticReference = true;
+    private bool IsHiddenDepthReference = true;
+    private bool IsHiddenAzimuthReference = true;
+    private bool IsHiddenPressureReference = true;
+    private bool IsHiddenDateReference = true;
+    private bool _inInitializedAsync = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _inInitializedAsync = true;
+        try
+        {
+            #region Initialize references
+            depthReferences.Add(new Tuple<Guid, string>(new Guid("41c23e00-2fe4-4787-b005-89d962207e97"), "WGS84"));
+            if (RotaryTableDepthReferenceSource != null)
+            {
+                depthReferences.Add(new Tuple<Guid, string>(new Guid("4d4fd143-b00d-4575-b9f2-a7ea4047e9d3"), "Rotary table"));
+            }
+            if (SeaWaterLevelDepthReferenceSource != null)
+            {
+                depthReferences.Add(new Tuple<Guid, string>(new Guid("98f55f50-e9e1-4045-8b2f-b03e6b96e1d1"), "Sea/Water Level"));
+            }
+            if (MeanSeaLevelDepthReferenceSource != null)
+            {
+                depthReferences.Add(new Tuple<Guid, string>(new Guid("f1c8b6d3-74a8-471c-9087-e7e12b9550d6"), "MSL"));
+            }
+            if (GroundMudLineDepthReferenceSource != null)
+            {
+                depthReferences.Add(new Tuple<Guid, string>(new Guid("a4667d26-3bb2-40ac-b26f-9346d1441e4a"), "Mud-line/Ground Level"));
+            }
+            if (WellHeadPositionReferenceSource != null)
+            {
+                depthReferences.Add(new Tuple<Guid, string>(new Guid("51891465-3b02-4874-bf8d-cab7d33eb908"), "Well-head Level"));
+            }
+            IsHiddenDepthReference = depthReferences.Count <= 1;
+
+            positionReferences.Add(new Tuple<Guid, string>(new Guid("94631afe-61f1-494e-96a0-91f0593285c4"), "WGS84"));
+            if (WellHeadPositionReferenceSource != null)
+            {
+                positionReferences.Add(new Tuple<Guid, string>(new Guid("443ffbd3-d0ab-43a1-b41e-ac2c54976e49"), "Well-head"));
+            }
+            if (ClusterPositionReferenceSource != null)
+            {
+                positionReferences.Add(new Tuple<Guid, string>(new Guid("109fc958-bf9c-454d-9505-6a3c34d0a501"), "Cluster-reference"));
+            }
+            if (FieldPositionReferenceSource != null)
+            {
+                positionReferences.Add(new Tuple<Guid, string>(new Guid("4bcd2794-e868-40db-aee6-4082cbba4fae"), "Field"));
+            }
+            if (CartographicGridPositionReferenceSource != null)
+            {
+                positionReferences.Add(new Tuple<Guid, string>(new Guid("073a7b94-09ac-4c9e-a7bb-03de2684123b"), "Cartographic"));
+            }
+            IsHiddenPositionReference = positionReferences.Count <= 1;
+
+            geodeticReferences.Add(new Tuple<Guid, string>(new Guid("94631afe-61f1-494e-96a0-91f0593285c4"), "WGS84"));
+            if (CartographicProjectionDatumGeodeticReferenceSource != null)
+            {
+                geodeticReferences.Add(new Tuple<Guid, string>(new Guid("7286d40e-e3bd-4c39-87fe-101c7ef27362"), "Cartographic Projection Datum"));
+            }
+            IsHiddenGeodeticReference = geodeticReferences.Count <= 1;
+
+            azimuthReferences.Add(new Tuple<Guid, string>(new Guid("73cb739b-aae1-4dcb-a1ed-0aad5a62a6bd"), "True North"));
+            if (GridConvergenceSource != null)
+            {
+                azimuthReferences.Add(new Tuple<Guid, string>(new Guid("7c3b58ff-542c-4ff7-a3a1-44efd3ba7627"), "Grid North"));
+            }
+            if (MagneticDeclinationSource != null)
+            {
+                azimuthReferences.Add(new Tuple<Guid, string>(new Guid("fd21b812-338b-4401-a2be-1a4d7d3756b1"), "Magnetic North"));
+            }
+            IsHiddenAzimuthReference = azimuthReferences.Count <= 1;
+
+            pressureReferences.Add(new Tuple<Guid, string>(new Guid("ffb90df3-d692-4502-9332-d74ddd61b67f"), "Absolute Pressure"));
+            if (GaugeReferencePressureSource != null)
+            {
+                pressureReferences.Add(new Tuple<Guid, string>(new Guid("28ade755-e07a-4580-b51f-10507832db92"), "Gauge Pressure"));
+            }
+            IsHiddenPressureReference = pressureReferences.Count <= 1;
+
+            dateReferences.Add(new Tuple<Guid, string>(new Guid("6fb296eb-eb77-4a6f-82d0-122c74e8d3cf"), "UTC"));
+            dateReferences.Add(new Tuple<Guid, string>(new Guid("f0ee13c7-2b9b-46e1-8d57-3fd6070f8a9b"), "Local Time"));
+            #endregion
+
+            unitSystemLightList = new List<UnitSystemLight>();
+            unitSystemLightList.Clear();
+            if (!string.IsNullOrEmpty(HttpHost) &&
+                !string.IsNullOrEmpty(HttpBasePath) &&
+                !string.IsNullOrEmpty(HttpController))
+            {
+                //Case when a controller of BaseUnitSystem is defined
+                //    - this offers the possibility to define custom BaseUnitSystem
+                //    - the child razor component of the present one (this) must indicate how to send requests to this controller (route, endpoint)
+                httpClient = new HttpClient
+                {
+                    BaseAddress = new Uri(HttpHost + HttpBasePath)
+                };
+                httpClient.DefaultRequestHeaders.Accept.Clear();
+                httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                try
+                {
+                    var a = await httpClient.GetAsync(HttpController + "LightData/");
+                    if (a.IsSuccessStatusCode)
+                    {
+                        string str = await a.Content.ReadAsStringAsync();
+                        if (!string.IsNullOrEmpty(str))
+                        {
+                            unitSystemLightList = System.Text.Json.JsonSerializer.Deserialize<List<UnitSystemLight>>(str);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Problem while initializing first step MudUnitAndReferenceChoiceTag");
+                }
+            }
+            else
+            {
+                //Case when no controller is available: default UnitChoiceSets are used
+                List<BaseUnitSystem> uList = [DrillingUnitSystem.SIUnitSystem, DrillingUnitSystem.MetricUnitSystem, DrillingUnitSystem.ImperialUnitSystem, DrillingUnitSystem.USUnitSystem];
+                foreach (DrillingUnitSystem uSys in uList)
+                {
+                    if (uSys != null)
+                        unitSystemLightList.Add(new UnitSystemLight()
+                        {
+                            ID = uSys.ID,
+                            Name = uSys.Name,
+                            Description = uSys.Description,
+                            IsDefault = uSys.IsDefault,
+                            IsSI = uSys.IsSI
+                        });
+                }
+            }
+            //Initializing baseUnitSystem_ and associated UnitSystemName: default value or checking the validity of the given one
+            UnitSystemLight? defaultUnitSystemLight = null;
+            if (unitSystemLightList != null)
+            {
+                foreach (UnitSystemLight uSysLight in unitSystemLightList)
+                {
+                    defaultUnitSystemLight = uSysLight;
+                    if (string.IsNullOrEmpty(UnitSystemName) || UnitSystemName.Equals(uSysLight.Name))
+                        break; //the given UnitSystemName is checked against each name in the available unitChoiceSets
+                }
+                if (defaultUnitSystemLight != null)
+                {
+                    baseUnitSystem_ = DrillingUnitSystem.Get(defaultUnitSystemLight.ID);
+                }
+                if (defaultUnitSystemLight != null)
+                    UnitSystemName = defaultUnitSystemLight.Name;
+            }
+            await InvokeAsync(() => { StateHasChanged(); });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem while initializing third step MudUnitAndReferenceChoiceTag");
+        }
+        _inInitializedAsync = false;
+        InitializedOnce = true;
+    }
+
+    public void Add(IUnitAwareComponent elt)
+    {
+        unitAwareComponents_.Add(elt);
+    }
+    public void Add(IDateTimeReferenceAwareComponent elt)
+    {
+        dateTimeAwareComponents_.Add(elt);
+    }
+    public Task RefreshDepthReferenceAsync()
+    {
+        return PostProcessDepthReference();
+    }
+    #region management of units without references
+    public UnitChoice? GetUnitChoice(string quantityName)
+    {
+        if (baseUnitSystem_ != null) {
+            return baseUnitSystem_.GetChoice(quantityName);
+        }
+        else
+        {
+            return null;
+        }
+    }
+    public UnitChoice? GetUnitChoice(Guid quantityID)
+    {
+        if (baseUnitSystem_ != null)
+        {
+            return baseUnitSystem_.GetChoice(quantityID);
+        }
+        else
+        {
+            return null;
+        }
+    }
+    public UnitChoice? GetUnitChoice(BasePhysicalQuantity.QuantityEnum quantity)
+    {
+        if (baseUnitSystem_ != null)
+        {
+            return baseUnitSystem_.GetChoice(quantity);
+        }
+        else
+        {
+            return null;
+        }
+    }
+    public UnitChoice? GetUnitChoice(DrillingPhysicalQuantity.QuantityEnum quantity)
+    {
+        if (baseUnitSystem_ != null && baseUnitSystem_ is DrillingUnitSystem drillingUnitSystem)
+        {
+            return drillingUnitSystem.GetChoice(quantity);
+        }
+        else
+        {
+            return null;
+        }
+    }
+    public string FromSI(double? val, string quantityName, bool useUnitLabel)
+    {
+        if (val == null)
+        {
+            return "";
+        }
+        if (string.IsNullOrEmpty(quantityName) || baseUnitSystem_ == null)
+        {
+            return val.ToString()!;
+        }
+        string result = baseUnitSystem_.FromSIString(quantityName, (double)val);
+        if (useUnitLabel)
+        {
+            result += " " + baseUnitSystem_.GetUnitLabel(quantityName);
+        }
+        return result;
+    }
+    public string FromSI(double? val, DrillingPhysicalQuantity.QuantityEnum quantityChoice, bool useUnitLabel)
+    {
+        string result = string.Empty;
+        if (val != null)
+        {
+            if (baseUnitSystem_ is not null && baseUnitSystem_ is DrillingUnitSystem drillingUnitSystem)
+            {
+                result = drillingUnitSystem.FromSIString(quantityChoice, (double)val);
+                if (useUnitLabel)
+                {
+                    result += " " + drillingUnitSystem.GetUnitLabel(quantityChoice);
+                }
+            }
+            else
+            {
+                result = val.ToString()!;
+            }
+        }
+        return result;
+    }
+    public string FromSI(double? val, BasePhysicalQuantity.QuantityEnum quantityChoice, bool useUnitLabel)
+    {
+        string result = string.Empty;
+        if (val != null)
+        {
+            if (baseUnitSystem_ == null)
+            {
+                result = val.ToString()!;
+            }
+            else
+            {
+                result = baseUnitSystem_.FromSIString(quantityChoice, (double)val);
+                if (useUnitLabel)
+                {
+                    result += " " + baseUnitSystem_.GetUnitLabel(quantityChoice);
+                }
+            }
+        }
+        return result;
+    }
+
+    public double? FromSI(double? val, string quantityName)
+    {
+        if (val == null)
+        {
+            return null;
+        }
+        else
+        {
+            return FromSI((double)val, quantityName);
+        }
+    }
+
+    public double FromSI(double val, string quantityName)
+    {
+        if (string.IsNullOrEmpty(quantityName) || baseUnitSystem_ == null)
+        {
+            return val;
+        }
+        double? res = baseUnitSystem_.FromSI(quantityName, val);
+        if (res == null)
+        {
+            return double.NaN;
+        }
+        else
+        {
+            return (double)res;
+        }
+    }
+    public double FromSI(double val, BasePhysicalQuantity.QuantityEnum quantityChoice)
+    {
+        double result = double.NaN;
+        if (baseUnitSystem_ != null)
+        {
+            double? res = baseUnitSystem_.FromSI(quantityChoice, val);
+            if (res != null)
+            {
+                result = res.Value;
+            }
+        }
+        return result;
+    }
+    public double FromSI(double val, DrillingPhysicalQuantity.QuantityEnum quantityChoice)
+    {
+        double result = double.NaN;
+        if (baseUnitSystem_ is not null && baseUnitSystem_ is DrillingUnitSystem drillingUnitSystem)
+        {
+            double? res = drillingUnitSystem.FromSI(quantityChoice, val);
+            if (res != null)
+            {
+                result = res.Value;
+            }
+        }
+        return result;
+    }
+
+    public string GetUnitLabel(string quantityName)
+    {
+        if (baseUnitSystem_ != null)
+        {
+            return baseUnitSystem_.GetUnitLabel(quantityName);
+        }
+        else
+        {
+            return "";
+        }
+    }
+    public string GetUnitLabel(BasePhysicalQuantity.QuantityEnum quantityChoice)
+    {
+        if (baseUnitSystem_ != null)
+        {
+            return baseUnitSystem_.GetUnitLabel(quantityChoice);
+        }
+        else
+        {
+            return "";
+        }
+    }
+    public string GetUnitLabel(DrillingPhysicalQuantity.QuantityEnum quantityChoice)
+    {
+        if (baseUnitSystem_ is not null && baseUnitSystem_ is DrillingUnitSystem drillingUnitSystem)
+        {
+            return drillingUnitSystem.GetUnitLabel(quantityChoice);
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    public double ToSI(double val, string quantityName)
+    {
+        if (string.IsNullOrEmpty(quantityName) || baseUnitSystem_ == null)
+        {
+            return val;
+        }
+        OSDC.UnitConversion.Conversion.UnitChoice choice = baseUnitSystem_.GetChoice(quantityName);
+        if (choice != null)
+        {
+            return choice.ToSI(val);
+        }
+        else
+        {
+            return val;
+        }
+    }
+    public double ToSI(double val, BasePhysicalQuantity.QuantityEnum quantityChoice)
+    {
+        double result = val;
+        if (baseUnitSystem_ != null)
+        {
+            OSDC.UnitConversion.Conversion.UnitChoice choice = baseUnitSystem_.GetChoice(quantityChoice);
+            if (choice != null)
+            {
+                result = choice.ToSI(val);
+            }
+        }
+        return result;
+    }
+    public double ToSI(double val, DrillingPhysicalQuantity.QuantityEnum quantityChoice)
+    {
+        double result = val;
+        if (baseUnitSystem_ is not null && baseUnitSystem_ is DrillingUnitSystem drillingUnitSystem)
+        {
+            OSDC.UnitConversion.Conversion.UnitChoice choice = drillingUnitSystem.GetChoice(quantityChoice);
+            if (choice != null)
+            {
+                result = choice.ToSI(val);
+            }
+        }
+        return result;
+    }
+    #endregion
+
+    #region management of references for datetime
+    public string TimeFromUTC(DateTime? val)
+    {
+        Guid id = Guid.Empty;
+        foreach (Tuple<Guid, string> tuple in dateReferences)
+        {
+            if (tuple.Item2 == dateReferenceName)
+            {
+                id = tuple.Item1;
+                break;
+            }
+        }
+        if (id != Guid.Empty && val != null)
+        {
+            if (id == new Guid("f0ee13c7-2b9b-46e1-8d57-3fd6070f8a9b")) // local time
+            {
+                return ((DateTime)val).ToLocalTime().ToLongTimeString();
+            }
+            else
+            {
+                return ((DateTime)val).ToLongTimeString();
+            }
+        }
+        else
+        {
+            return "";
+        }
+    }
+    public string DateFromUTC(DateTime? val)
+    {
+        Guid id = Guid.Empty;
+        foreach (Tuple<Guid, string> tuple in dateReferences)
+        {
+            if (tuple.Item2 == dateReferenceName)
+            {
+                id = tuple.Item1;
+                break;
+            }
+        }
+        if (id != Guid.Empty && val != null)
+        {
+            if (id == new Guid("f0ee13c7-2b9b-46e1-8d57-3fd6070f8a9b")) // local time
+            {
+                return ((DateTime)val).ToLocalTime().ToLongDateString();
+            }
+            else
+            {
+                return ((DateTime)val).ToLongDateString();
+            }
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    public string DateTimeFromUTC(DateTime? val)
+    {
+        Guid id = Guid.Empty;
+        foreach (Tuple<Guid, string> tuple in dateReferences)
+        {
+            if (tuple.Item2 == dateReferenceName)
+            {
+                id = tuple.Item1;
+                break;
+            }
+        }
+        if (id != Guid.Empty && val != null)
+        {
+            if (id == new Guid("f0ee13c7-2b9b-46e1-8d57-3fd6070f8a9b")) // local time
+            {
+                return ((DateTime)val).ToLocalTime().ToLongDateString() + " " + ((DateTime)val).ToLocalTime().ToLongTimeString();
+            }
+            else
+            {
+                return ((DateTime)val).ToLongDateString() + " " + ((DateTime)val).ToLongTimeString();
+            }
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    public DateTime ToUTC(DateTime val)
+    {
+        Guid id = Guid.Empty;
+        foreach (Tuple<Guid, string> tuple in dateReferences)
+        {
+            if (tuple.Item2 == dateReferenceName)
+            {
+                id = tuple.Item1;
+                break;
+            }
+        }
+        if (id == Guid.Empty)
+        {
+            return val;
+        }
+        if (id == new Guid("f0ee13c7-2b9b-46e1-8d57-3fd6070f8a9b")) // local time
+        {
+            return val.ToUniversalTime();
+        }
+        else
+        {
+            return val;
+        }
+    }
+    #endregion
+
+    #region management of references for pressure
+    public string FromAbsolutePressureSI(double? val, string quantityName, bool useUnitLabel)
+    {
+        if (!IsPressure(quantityName))
+        {
+            return "";
+        }
+        if (val == null)
+        {
+            return "";
+        }
+        double delta = 0;
+        Guid id = Guid.Empty;
+        foreach (Tuple<Guid, string> tuple in pressureReferences)
+        {
+            if (tuple.Item2 == pressureReferenceName_)
+            {
+                id = tuple.Item1;
+                break;
+            }
+        }
+        if (id == new Guid("28ade755-e07a-4580-b51f-10507832db92") &&
+            GaugeReferencePressureSource != null &&
+            GaugeReferencePressureSource.GaugeReferencePressure != null) // gauge
+        {
+            delta = (double)GaugeReferencePressureSource.GaugeReferencePressure;
+            val -= delta;
+        }
+        string valueInUserUnit = FromSI(val, quantityName, false);
+        if (useUnitLabel)
+        {
+            return valueInUserUnit + " " + GetPressureUnitLabel(quantityName);
+        }
+        else
+        {
+            return valueInUserUnit;
+        }
+    }
+    public double? FromAbsolutePressureSI(double? val, string quantityName)
+    {
+        if (val == null)
+        {
+            return null;
+        }
+        else
+        {
+            return FromAbsolutePressureSI((double)val, quantityName);
+        }
+    }
+    public double FromAbsolutePressureSI(double val, string quantityName)
+    {
+        if (!IsPressure(quantityName))
+        {
+            return double.NaN;
+        }
+        double delta = 0;
+        Guid id = Guid.Empty;
+        foreach (Tuple<Guid, string> tuple in pressureReferences)
+        {
+            if (tuple.Item2 == pressureReferenceName_)
+            {
+                id = tuple.Item1;
+                break;
+            }
+        }
+        if (id == new Guid("28ade755-e07a-4580-b51f-10507832db92") &&
+            GaugeReferencePressureSource != null &&
+            GaugeReferencePressureSource.GaugeReferencePressure != null) // gauge
+        {
+            delta = (double)GaugeReferencePressureSource.GaugeReferencePressure;
+            val -= delta;
+        }
+        return FromSI(val, quantityName);
+    }
+
+    public string GetPressureUnitLabel(string quantityName)
+    {
+        if (!IsPressure(quantityName))
+        {
+            return "";
+        }
+        if (baseUnitSystem_ != null)
+        {
+            string label = baseUnitSystem_.GetUnitLabel(quantityName);
+            if (!string.IsNullOrEmpty(label))
+            {
+                Guid id = Guid.Empty;
+                foreach (Tuple<Guid, string> tuple in pressureReferences)
+                {
+                    if (tuple.Item2 == pressureReferenceName_)
+                    {
+                        id = tuple.Item1;
+                        break;
+                    }
+                }
+                if (id == new Guid("28ade755-e07a-4580-b51f-10507832db92")) // gauge
+                {
+                    return label + "g";
+                }
+                else
+                {
+                    return label + "a";
+                }
+            }
+            else
+            {
+                return label;
+            }
+        }
+        else
+        {
+            return "";
+        }
+    }
+    public double ToAbsolutePressureSI(double v, string quantityName)
+    {
+        if (!IsPressure(quantityName))
+        {
+            return double.NaN;
+        }
+        double val = ToSI(v, quantityName);
+        double delta = 0;
+        Guid id = Guid.Empty;
+        foreach (Tuple<Guid, string> tuple in pressureReferences)
+        {
+            if (tuple.Item2 == pressureReferenceName_)
+            {
+                id = tuple.Item1;
+                break;
+            }
+        }
+        if (id == new Guid("28ade755-e07a-4580-b51f-10507832db92") &&
+            GaugeReferencePressureSource != null &&
+            GaugeReferencePressureSource.GaugeReferencePressure != null) // gauge
+        {
+            delta = (double)GaugeReferencePressureSource.GaugeReferencePressure;
+            val += delta;
+        }
+        return val;
+    }
+
+    private bool IsPressure(string quantityName)
+    {
+        OSDC.UnitConversion.Conversion.BasePhysicalQuantity quantity = DrillingPhysicalQuantity.GetQuantity(quantityName);
+        return quantity != null &&
+               quantity.TimeDimension == -2 &&
+               quantity.MassDimension == 1 &&
+               quantity.LengthDimension == -1 &&
+               quantity.LuminousIntensityDimension == 0 &&
+               quantity.AmountSubstanceDimension == 0 &&
+               quantity.ElectricCurrentDimension == 0 &&
+               quantity.SolidAngleDimension == 0 &&
+               quantity.PlaneAngleDimension == 0;
+    }
+    #endregion
+
+    #region management of references for azimuths
+    public string FromTrueNorthAzimuthSI(double? val, string quantityName, bool useUnitLabel)
+    {
+        if (!IsPlaneAngle(quantityName))
+        {
+            return "";
+        }
+        if (val == null)
+        {
+            return "";
+        }
+        double delta = 0;
+        Guid id = Guid.Empty;
+        foreach (Tuple<Guid, string> tuple in azimuthReferences)
+        {
+            if (tuple.Item2 == azimuthReferenceName_)
+            {
+                id = tuple.Item1;
+                break;
+            }
+        }
+        if (id == new Guid("7c3b58ff-542c-4ff7-a3a1-44efd3ba7627") &&
+            GridConvergenceSource != null &&
+            GridConvergenceSource.GridConvergence != null) // grid north
+        {
+            delta = (double)GridConvergenceSource.GridConvergence;
+            val += delta; // the grid convergence is the angle to move from true north to grid north
+        }
+        else if (id == new Guid("fd21b812-338b-4401-a2be-1a4d7d3756b1") &&
+            MagneticDeclinationSource != null &&
+            MagneticDeclinationSource.MagneticDeclination != null) // magnetic north
+        {
+            delta = (double)MagneticDeclinationSource.MagneticDeclination;
+            val += delta; // the magnetic declination is the angle to move from true north to magnetic north
+        }
+        string valueInUserUnit = FromSI(val, quantityName, false);
+        if (useUnitLabel)
+        {
+            return valueInUserUnit + " " + GetAzimuthUnitLabel(quantityName);
+        }
+        else
+        {
+            return valueInUserUnit;
+        }
+    }
+    public double? FromTrueNorthAzimuthSI(double? val, string quantityName)
+    {
+        if (val == null)
+        {
+            return null;
+        }
+        else
+        {
+            return FromTrueNorthAzimuthSI((double)val, quantityName);
+        }
+    }
+    public double FromTrueNorthAzimuthSI(double val, string quantityName)
+    {
+        if (!IsPlaneAngle(quantityName))
+        {
+            return double.NaN;
+        }
+        double delta = 0;
+        Guid id = Guid.Empty;
+        foreach (Tuple<Guid, string> tuple in azimuthReferences)
+        {
+            if (tuple.Item2 == azimuthReferenceName_)
+            {
+                id = tuple.Item1;
+                break;
+            }
+        }
+        if (id == new Guid("7c3b58ff-542c-4ff7-a3a1-44efd3ba7627") &&
+            GridConvergenceSource != null &&
+            GridConvergenceSource.GridConvergence != null) // grid north
+        {
+            delta = (double)GridConvergenceSource.GridConvergence;
+            val += delta; // the grid convergence is the angle to move from true north to grid north
+        }
+        else if (id == new Guid("fd21b812-338b-4401-a2be-1a4d7d3756b1") &&
+            MagneticDeclinationSource != null &&
+            MagneticDeclinationSource.MagneticDeclination != null) // magnetic north
+        {
+            delta = (double)MagneticDeclinationSource.MagneticDeclination;
+            val += delta; // the magnetic declination is the angle to move from true north to magnetic north
+        }
+        return FromSI(val, quantityName);
+    }
+
+    public string GetAzimuthUnitLabel(string quantityName)
+    {
+        if (!IsPlaneAngle(quantityName))
+        {
+            return "";
+        }
+        if (baseUnitSystem_ != null)
+        {
+            string label = baseUnitSystem_.GetUnitLabel(quantityName);
+            if (!string.IsNullOrEmpty(label))
+            {
+                Guid id = Guid.Empty;
+                foreach (Tuple<Guid, string> tuple in azimuthReferences)
+                {
+                    if (tuple.Item2 == azimuthReferenceName_)
+                    {
+                        id = tuple.Item1;
+                        break;
+                    }
+                }
+                if (id == new Guid("7c3b58ff-542c-4ff7-a3a1-44efd3ba7627") &&
+                    GridConvergenceSource != null &&
+                    GridConvergenceSource.GridConvergence != null) // grid north
+                {
+                    return label + "GN";
+                }
+                else if (id == new Guid("fd21b812-338b-4401-a2be-1a4d7d3756b1") &&
+                         MagneticDeclinationSource != null &&
+                         MagneticDeclinationSource.MagneticDeclination != null) // magnetic north
+                {
+                    return label + "MN";
+                }
+                else
+                {
+                    return label + "TN";
+                }
+
+            }
+            else
+            {
+                return label;
+            }
+        }
+        else
+        {
+            return "";
+        }
+    }
+    public double ToTrueNorthAzimuthSI(double v, string quantityName)
+    {
+        if (!IsPlaneAngle(quantityName))
+        {
+            return double.NaN;
+        }
+        double val = ToSI(v, quantityName);
+        double delta = 0;
+        Guid id = Guid.Empty;
+        foreach (Tuple<Guid, string> tuple in azimuthReferences)
+        {
+            if (tuple.Item2 == azimuthReferenceName_)
+            {
+                id = tuple.Item1;
+                break;
+            }
+        }
+        if (id == new Guid("7c3b58ff-542c-4ff7-a3a1-44efd3ba7627") &&
+            GridConvergenceSource != null &&
+            GridConvergenceSource.GridConvergence != null) // grid north
+        {
+            delta = (double)GridConvergenceSource.GridConvergence;
+            val -= delta; // the grid convergence is the angle to move from true north to grid north
+        }
+        else if (id == new Guid("fd21b812-338b-4401-a2be-1a4d7d3756b1") &&
+            MagneticDeclinationSource != null &&
+            MagneticDeclinationSource.MagneticDeclination != null) // magnetic north
+        {
+            delta = (double)MagneticDeclinationSource.MagneticDeclination;
+            val -= delta; // the magnetic declination is the angle to move from true north to magnetic north
+        }
+        return val;
+    }
+
+    private bool IsPlaneAngle(string quantityName)
+    {
+        OSDC.UnitConversion.Conversion.BasePhysicalQuantity quantity = DrillingPhysicalQuantity.GetQuantity(quantityName);
+        return quantity != null &&
+               quantity.TimeDimension == 0 &&
+               quantity.MassDimension == 0 &&
+               quantity.LengthDimension == 0 &&
+               quantity.LuminousIntensityDimension == 0 &&
+               quantity.AmountSubstanceDimension == 0 &&
+               quantity.ElectricCurrentDimension == 0 &&
+               quantity.SolidAngleDimension == 0 &&
+               quantity.PlaneAngleDimension == 1;
+    }
+    #endregion
+
+    #region management of references for depths
+    public string FromWGS84DepthSI(double? val, string quantityName, bool useUnitLabel)
+    {
+        if (!IsLength(quantityName))
+        {
+            return "";
+        }
+        if (val == null)
+        {
+            return "";
+        }
+        double delta = 0;
+        Guid id = Guid.Empty;
+        foreach (Tuple<Guid, string> tuple in depthReferences)
+        {
+            if (tuple.Item2 == depthReferenceName_)
+            {
+                id = tuple.Item1;
+                break;
+            }
+        }
+        if (id == new Guid("4d4fd143-b00d-4575-b9f2-a7ea4047e9d3") &&
+            RotaryTableDepthReferenceSource != null &&
+            RotaryTableDepthReferenceSource.RotaryTableDepthReference != null) // rotary table
+        {
+            delta = (double)RotaryTableDepthReferenceSource.RotaryTableDepthReference;
+            val += delta; // the RotaryTableDepthReference is the depth (positive downward) to move from WGS84 to rotary table reference
+        }
+        else if (id == new Guid("98f55f50-e9e1-4045-8b2f-b03e6b96e1d1") &&
+            SeaWaterLevelDepthReferenceSource != null &&
+            SeaWaterLevelDepthReferenceSource.SeaWaterLevelDepthReference != null) // sea or water level (lake, river)
+        {
+            delta = (double)SeaWaterLevelDepthReferenceSource.SeaWaterLevelDepthReference;
+            val += delta; // the SeaWaterLevelDepthReference is the depth (positive downward) to move from WGS84 to sea or water level
+        }
+        else if (id == new Guid("f1c8b6d3-74a8-471c-9087-e7e12b9550d6") &&
+                 MeanSeaLevelDepthReferenceSource != null &&
+                 MeanSeaLevelDepthReferenceSource.MeanSeaLevelDepthReference != null) // mean sea level
+        {
+            delta = (double)MeanSeaLevelDepthReferenceSource.MeanSeaLevelDepthReference;
+            val += delta; // the MeanSeaLevelDepthReference is the depth (positive downward) to move from WGS84 to MSL
+        }
+        else if (id == new Guid("a4667d26-3bb2-40ac-b26f-9346d1441e4a") &&
+                 GroundMudLineDepthReferenceSource != null &&
+                 GroundMudLineDepthReferenceSource.GroundMudLineDepthReference != null) // ground level or mud line
+        {
+            delta = (double)GroundMudLineDepthReferenceSource.GroundMudLineDepthReference;
+            val += delta; // the GroundMudLineDepthReference is the depth (positive downward) to move from WGS84 to ground level or the mud line
+        }
+        else if (id == new Guid("51891465-3b02-4874-bf8d-cab7d33eb908") &&
+                 WellHeadDepthReferenceSource != null &&
+                 WellHeadDepthReferenceSource.WellHeadDepthReference != null) // well-head
+        {
+            delta = (double)WellHeadDepthReferenceSource.WellHeadDepthReference;
+            val += delta; // the WellHeadDepthReference is the depth (positive downward) to move from WGS84 to the well-head
+        }
+
+        string valueInUserUnit = FromSI(val, quantityName, false);
+        if (useUnitLabel)
+        {
+            return valueInUserUnit + " " + GetDepthUnitLabel(quantityName);
+        }
+        else
+        {
+            return valueInUserUnit;
+        }
+    }
+    public double? FromWGS84DepthSI(double? val, string quantityName)
+    {
+        if (val == null)
+        {
+            return null;
+        }
+        else
+        {
+            return FromWGS84DepthSI((double)val, quantityName);
+        }
+    }
+    public double FromWGS84DepthSI(double val, string quantityName)
+    {
+        if (!IsLength(quantityName))
+        {
+            return double.NaN;
+        }
+        double delta = 0;
+        Guid id = Guid.Empty;
+        foreach (Tuple<Guid, string> tuple in depthReferences)
+        {
+            if (tuple.Item2 == depthReferenceName_)
+            {
+                id = tuple.Item1;
+                break;
+            }
+        }
+        if (id == new Guid("4d4fd143-b00d-4575-b9f2-a7ea4047e9d3") &&
+            RotaryTableDepthReferenceSource != null &&
+            RotaryTableDepthReferenceSource.RotaryTableDepthReference != null) // rotary table
+        {
+            delta = (double)RotaryTableDepthReferenceSource.RotaryTableDepthReference;
+            val += delta; // the RotaryTableDepthReference is the depth (positive downward) to move from WGS84 to rotary table reference
+        }
+        else if (id == new Guid("98f55f50-e9e1-4045-8b2f-b03e6b96e1d1") &&
+            SeaWaterLevelDepthReferenceSource != null &&
+            SeaWaterLevelDepthReferenceSource.SeaWaterLevelDepthReference != null) // sea or water level (lake, river)
+        {
+            delta = (double)SeaWaterLevelDepthReferenceSource.SeaWaterLevelDepthReference;
+            val += delta; // the SeaWaterLevelDepthReference is the depth (positive downward) to move from WGS84 to sea or water level
+        }
+        else if (id == new Guid("f1c8b6d3-74a8-471c-9087-e7e12b9550d6") &&
+                 MeanSeaLevelDepthReferenceSource != null &&
+                 MeanSeaLevelDepthReferenceSource.MeanSeaLevelDepthReference != null) // mean sea level
+        {
+            delta = (double)MeanSeaLevelDepthReferenceSource.MeanSeaLevelDepthReference;
+            val += delta; // the MeanSeaLevelDepthReference is the depth (positive downward) to move from WGS84 to MSL
+        }
+        else if (id == new Guid("a4667d26-3bb2-40ac-b26f-9346d1441e4a") &&
+                 GroundMudLineDepthReferenceSource != null &&
+                 GroundMudLineDepthReferenceSource.GroundMudLineDepthReference != null) // ground level or mud line
+        {
+            delta = (double)GroundMudLineDepthReferenceSource.GroundMudLineDepthReference;
+            val += delta; // the GroundMudLineDepthReference is the depth (positive downward) to move from WGS84 to ground level or the mud line
+        }
+        else if (id == new Guid("51891465-3b02-4874-bf8d-cab7d33eb908") &&
+                 WellHeadDepthReferenceSource != null &&
+                 WellHeadDepthReferenceSource.WellHeadDepthReference != null) // well-head
+        {
+            delta = (double)WellHeadDepthReferenceSource.WellHeadDepthReference;
+            val += delta; // the WellHeadDepthReference is the depth (positive downward) to move from WGS84 to the well-head
+        }
+        return FromSI(val, quantityName);
+    }
+
+    public string GetDepthUnitLabel(string quantityName)
+    {
+        if (!IsLength(quantityName))
+        {
+            return "";
+        }
+        if (baseUnitSystem_ != null)
+        {
+            string label = baseUnitSystem_.GetUnitLabel(quantityName);
+            if (!string.IsNullOrEmpty(label))
+            {
+                Guid id = Guid.Empty;
+                foreach (Tuple<Guid, string> tuple in depthReferences)
+                {
+                    if (tuple.Item2 == depthReferenceName_)
+                    {
+                        id = tuple.Item1;
+                        break;
+                    }
+                }
+                if (id == new Guid("4d4fd143-b00d-4575-b9f2-a7ea4047e9d3") &&
+                    RotaryTableDepthReferenceSource != null &&
+                    RotaryTableDepthReferenceSource.RotaryTableDepthReference != null) // rotary table
+                {
+                    return label + "RTE";
+                }
+                else if (id == new Guid("98f55f50-e9e1-4045-8b2f-b03e6b96e1d1") &&
+                    SeaWaterLevelDepthReferenceSource != null &&
+                    SeaWaterLevelDepthReferenceSource.SeaWaterLevelDepthReference != null) // sea or water level (lake, river)
+                {
+                    return label + "SL-WL";
+                }
+                else if (id == new Guid("f1c8b6d3-74a8-471c-9087-e7e12b9550d6") &&
+                         MeanSeaLevelDepthReferenceSource != null &&
+                         MeanSeaLevelDepthReferenceSource.MeanSeaLevelDepthReference != null) // mean sea level
+                {
+                    return label + "MSL";
+                }
+                else if (id == new Guid("a4667d26-3bb2-40ac-b26f-9346d1441e4a") &&
+                     GroundMudLineDepthReferenceSource != null &&
+                     GroundMudLineDepthReferenceSource.GroundMudLineDepthReference != null) // ground level or mud line
+                {
+                    return label + "GL-ML";
+                }
+                else if (id == new Guid("51891465-3b02-4874-bf8d-cab7d33eb908") &&
+                     WellHeadDepthReferenceSource != null &&
+                     WellHeadDepthReferenceSource.WellHeadDepthReference != null) // well-head
+                {
+                    return label + "WHE";
+                }
+                else
+                {
+                    return label + "WGS84";
+                }
+            }
+            else
+            {
+                return label;
+            }
+        }
+        else
+        {
+            return "";
+        }
+    }
+    public double ToWGS84DepthSI(double v, string quantityName)
+    {
+        if (!IsLength(quantityName))
+        {
+            return double.NaN;
+        }
+        double val = ToSI(v, quantityName);
+        double delta = 0;
+        Guid id = Guid.Empty;
+        foreach (Tuple<Guid, string> tuple in depthReferences)
+        {
+            if (tuple.Item2 == depthReferenceName_)
+            {
+                id = tuple.Item1;
+                break;
+            }
+        }
+        if (id == new Guid("4d4fd143-b00d-4575-b9f2-a7ea4047e9d3") &&
+            RotaryTableDepthReferenceSource != null &&
+            RotaryTableDepthReferenceSource.RotaryTableDepthReference != null) // rotary table
+        {
+            delta = (double)RotaryTableDepthReferenceSource.RotaryTableDepthReference;
+            val -= delta; // the RotaryTableDepthReference is the depth (positive downward) to move from WGS84 to rotary table reference
+        }
+        else if (id == new Guid("98f55f50-e9e1-4045-8b2f-b03e6b96e1d1") &&
+            SeaWaterLevelDepthReferenceSource != null &&
+            SeaWaterLevelDepthReferenceSource.SeaWaterLevelDepthReference != null) // sea or water level (lake, river)
+        {
+            delta = (double)SeaWaterLevelDepthReferenceSource.SeaWaterLevelDepthReference;
+            val -= delta; // the SeaWaterLevelDepthReference is the depth (positive downward) to move from WGS84 to sea or water level
+        }
+        else if (id == new Guid("f1c8b6d3-74a8-471c-9087-e7e12b9550d6") &&
+                 MeanSeaLevelDepthReferenceSource != null &&
+                 MeanSeaLevelDepthReferenceSource.MeanSeaLevelDepthReference != null) // mean sea level
+        {
+            delta = (double)MeanSeaLevelDepthReferenceSource.MeanSeaLevelDepthReference;
+            val -= delta; // the MeanSeaLevelDepthReference is the depth (positive downward) to move from WGS84 to MSL
+        }
+        else if (id == new Guid("a4667d26-3bb2-40ac-b26f-9346d1441e4a") &&
+                 GroundMudLineDepthReferenceSource != null &&
+                 GroundMudLineDepthReferenceSource.GroundMudLineDepthReference != null) // ground level or mud line
+        {
+            delta = (double)GroundMudLineDepthReferenceSource.GroundMudLineDepthReference;
+            val -= delta; // the GroundMudLineDepthReference is the depth (positive downward) to move from WGS84 to ground level or the mud line
+        }
+        else if (id == new Guid("51891465-3b02-4874-bf8d-cab7d33eb908") &&
+                 WellHeadDepthReferenceSource != null &&
+                 WellHeadDepthReferenceSource.WellHeadDepthReference != null) // well-head
+        {
+            delta = (double)WellHeadDepthReferenceSource.WellHeadDepthReference;
+            val -= delta; // the WellHeadDepthReference is the depth (positive downward) to move from WGS84 to the well-head
+        }
+        return val;
+    }
+
+    private bool IsLength(string quantityName)
+    {
+        OSDC.UnitConversion.Conversion.BasePhysicalQuantity quantity = DrillingPhysicalQuantity.GetQuantity(quantityName);
+        return quantity != null &&
+               quantity.TimeDimension == 0 &&
+               quantity.MassDimension == 0 &&
+               quantity.LengthDimension == 1 &&
+               quantity.LuminousIntensityDimension == 0 &&
+               quantity.AmountSubstanceDimension == 0 &&
+               quantity.ElectricCurrentDimension == 0 &&
+               quantity.SolidAngleDimension == 0 &&
+               quantity.PlaneAngleDimension == 0;
+    }
+    #endregion
+
+    #region management of references for position
+    public string FromWGS84PositionSI(double? val, string quantityName, bool useUnitLabel, PositionDirectionType direction)
+    {
+        if (!IsLength(quantityName))
+        {
+            return "";
+        }
+        if (val == null)
+        {
+            return "";
+        }
+        if (direction == PositionDirectionType.Independent)
+        {
+            return "";
+        }
+        double delta = 0;
+        Guid id = Guid.Empty;
+        foreach (Tuple<Guid, string> tuple in positionReferences)
+        {
+            if (tuple.Item2 == positionReferenceName_)
+            {
+                id = tuple.Item1;
+                break;
+            }
+        }
+        if (id == new Guid("443ffbd3-d0ab-43a1-b41e-ac2c54976e49") &&
+            WellHeadPositionReferenceSource != null &&
+            WellHeadPositionReferenceSource.WellHeadNorthPositionReference != null &&
+            WellHeadPositionReferenceSource.WellHeadEastPositionReference != null) // well-head position reference
+        {
+            if (direction == PositionDirectionType.North)
+            {
+                delta = (double)WellHeadPositionReferenceSource.WellHeadNorthPositionReference;
+            }
+            else
+            {
+                delta = (double)WellHeadPositionReferenceSource.WellHeadEastPositionReference;
+            }
+            val += delta;
+        }
+        else if (id == new Guid("109fc958-bf9c-454d-9505-6a3c34d0a501") &&
+            ClusterPositionReferenceSource != null &&
+            ClusterPositionReferenceSource.ClusterNorthPositionReference != null &&
+            ClusterPositionReferenceSource.ClusterEastPositionReference != null) //cluster position reference
+        {
+            if (direction == PositionDirectionType.North)
+            {
+                delta = (double)ClusterPositionReferenceSource.ClusterNorthPositionReference;
+            }
+            else
+            {
+                delta = (double)ClusterPositionReferenceSource.ClusterEastPositionReference;
+            }
+            val += delta;
+        }
+        else if (id == new Guid("4bcd2794-e868-40db-aee6-4082cbba4fae") &&
+                 FieldPositionReferenceSource != null &&
+                 FieldPositionReferenceSource.FieldNorthPositionReference != null &&
+                 FieldPositionReferenceSource.FieldEastPositionReference != null) // field position reference
+        {
+            if (direction == PositionDirectionType.North)
+            {
+                delta = (double)FieldPositionReferenceSource.FieldNorthPositionReference;
+            }
+            else
+            {
+                delta = (double)FieldPositionReferenceSource.FieldEastPositionReference;
+            }
+            val += delta;
+        }
+        else if (id == new Guid("073a7b94-09ac-4c9e-a7bb-03de2684123b") &&
+                 CartographicGridPositionReferenceSource != null &&
+                 CartographicGridPositionReferenceSource.CartographicGridNorthPositionReference != null &&
+                 CartographicGridPositionReferenceSource.CartographicGridEastPositionReference != null) // cartographic position reference
+        {
+            if (direction == PositionDirectionType.North)
+            {
+                delta = (double)CartographicGridPositionReferenceSource.CartographicGridNorthPositionReference;
+            }
+            else
+            {
+                delta = (double)CartographicGridPositionReferenceSource.CartographicGridEastPositionReference;
+            }
+            val += delta;
+        }
+        string valueInUserUnit = FromSI(val, quantityName, false);
+        if (useUnitLabel)
+        {
+            return valueInUserUnit + " " + GetPositionUnitLabel(quantityName);
+        }
+        else
+        {
+            return valueInUserUnit;
+        }
+    }
+    public double? FromWGS84PositionSI(double? val, string quantityName, PositionDirectionType direction)
+    {
+        if (val == null)
+        {
+            return null;
+        }
+        else
+        {
+            return FromWGS84PositionSI((double)val, quantityName, direction);
+        }
+    }
+    public double FromWGS84PositionSI(double val, string quantityName, PositionDirectionType direction)
+    {
+        if (!IsLength(quantityName))
+        {
+            return double.NaN;
+        }
+        if (direction == PositionDirectionType.Independent)
+        {
+            return double.NaN;
+        }
+        double delta = 0;
+        Guid id = Guid.Empty;
+        foreach (Tuple<Guid, string> tuple in positionReferences)
+        {
+            if (tuple.Item2 == positionReferenceName_)
+            {
+                id = tuple.Item1;
+                break;
+            }
+        }
+        if (id == new Guid("443ffbd3-d0ab-43a1-b41e-ac2c54976e49") &&
+             WellHeadPositionReferenceSource != null &&
+             WellHeadPositionReferenceSource.WellHeadNorthPositionReference != null &&
+             WellHeadPositionReferenceSource.WellHeadEastPositionReference != null) // well-head position reference
+        {
+            if (direction == PositionDirectionType.North)
+            {
+                delta = (double)WellHeadPositionReferenceSource.WellHeadNorthPositionReference;
+            }
+            else
+            {
+                delta = (double)WellHeadPositionReferenceSource.WellHeadEastPositionReference;
+            }
+            val += delta;
+        }
+        else if (id == new Guid("109fc958-bf9c-454d-9505-6a3c34d0a501") &&
+            ClusterPositionReferenceSource != null &&
+            ClusterPositionReferenceSource.ClusterNorthPositionReference != null &&
+            ClusterPositionReferenceSource.ClusterEastPositionReference != null) //cluster position reference
+        {
+            if (direction == PositionDirectionType.North)
+            {
+                delta = (double)ClusterPositionReferenceSource.ClusterNorthPositionReference;
+            }
+            else
+            {
+                delta = (double)ClusterPositionReferenceSource.ClusterEastPositionReference;
+            }
+            val += delta;
+        }
+        else if (id == new Guid("4bcd2794-e868-40db-aee6-4082cbba4fae") &&
+                 FieldPositionReferenceSource != null &&
+                 FieldPositionReferenceSource.FieldNorthPositionReference != null &&
+                 FieldPositionReferenceSource.FieldEastPositionReference != null) // field position reference
+        {
+            if (direction == PositionDirectionType.North)
+            {
+                delta = (double)FieldPositionReferenceSource.FieldNorthPositionReference;
+            }
+            else
+            {
+                delta = (double)FieldPositionReferenceSource.FieldEastPositionReference;
+            }
+            val += delta;
+        }
+        else if (id == new Guid("073a7b94-09ac-4c9e-a7bb-03de2684123b") &&
+                 CartographicGridPositionReferenceSource != null &&
+                 CartographicGridPositionReferenceSource.CartographicGridNorthPositionReference != null &&
+                 CartographicGridPositionReferenceSource.CartographicGridEastPositionReference != null) // cartographic position reference
+        {
+            if (direction == PositionDirectionType.North)
+            {
+                delta = (double)CartographicGridPositionReferenceSource.CartographicGridNorthPositionReference;
+            }
+            else
+            {
+                delta = (double)CartographicGridPositionReferenceSource.CartographicGridEastPositionReference;
+            }
+            val += delta;
+        }
+        return FromSI(val, quantityName);
+    }
+
+    public string GetPositionUnitLabel(string quantityName)
+    {
+        if (!IsLength(quantityName))
+        {
+            return "";
+        }
+        if (baseUnitSystem_ != null)
+        {
+            string label = baseUnitSystem_.GetUnitLabel(quantityName);
+            if (!string.IsNullOrEmpty(label))
+            {
+                Guid id = Guid.Empty;
+                foreach (Tuple<Guid, string> tuple in positionReferences)
+                {
+                    if (tuple.Item2 == positionReferenceName_)
+                    {
+                        id = tuple.Item1;
+                        break;
+                    }
+                }
+                if (id == new Guid("443ffbd3-d0ab-43a1-b41e-ac2c54976e49") &&
+                    WellHeadPositionReferenceSource != null &&
+                    WellHeadPositionReferenceSource.WellHeadNorthPositionReference != null &&
+                    WellHeadPositionReferenceSource.WellHeadEastPositionReference != null) // well-head position reference
+                {
+                    return label + "WE";
+                }
+                else if (id == new Guid("109fc958-bf9c-454d-9505-6a3c34d0a501") &&
+                         ClusterPositionReferenceSource != null &&
+                         ClusterPositionReferenceSource.ClusterNorthPositionReference != null &&
+                         ClusterPositionReferenceSource.ClusterEastPositionReference != null) //cluster position reference
+                {
+                    return label + "CR";
+                }
+                else if (id == new Guid("4bcd2794-e868-40db-aee6-4082cbba4fae") &&
+                         FieldPositionReferenceSource != null &&
+                         FieldPositionReferenceSource.FieldNorthPositionReference != null &&
+                         FieldPositionReferenceSource.FieldEastPositionReference != null) // field position reference
+                {
+                    return label + "Field";
+                }
+                else if (id == new Guid("073a7b94-09ac-4c9e-a7bb-03de2684123b") &&
+                         CartographicGridPositionReferenceSource != null &&
+                         CartographicGridPositionReferenceSource.CartographicGridNorthPositionReference != null &&
+                         CartographicGridPositionReferenceSource.CartographicGridEastPositionReference != null) // cartographic position reference
+                {
+                    return label + "Grid";
+                }
+                else
+                {
+                    return label + "WGS84";
+                }
+            }
+            else
+            {
+                return label;
+            }
+        }
+        else
+        {
+            return "";
+        }
+    }
+    public double ToWGS84PositionSI(double v, string quantityName, PositionDirectionType direction)
+    {
+        if (!IsLength(quantityName))
+        {
+            return double.NaN;
+        }
+        if (direction == PositionDirectionType.Independent)
+        {
+            return double.NaN;
+        }
+        double val = ToSI(v, quantityName);
+        double delta = 0;
+        Guid id = Guid.Empty;
+        foreach (Tuple<Guid, string> tuple in positionReferences)
+        {
+            if (tuple.Item2 == positionReferenceName_)
+            {
+                id = tuple.Item1;
+                break;
+            }
+        }
+        if (id == new Guid("443ffbd3-d0ab-43a1-b41e-ac2c54976e49") &&
+            WellHeadPositionReferenceSource != null &&
+            WellHeadPositionReferenceSource.WellHeadNorthPositionReference != null &&
+            WellHeadPositionReferenceSource.WellHeadEastPositionReference != null) // well-head position reference
+        {
+            if (direction == PositionDirectionType.North)
+            {
+                delta = (double)WellHeadPositionReferenceSource.WellHeadNorthPositionReference;
+            }
+            else
+            {
+                delta = (double)WellHeadPositionReferenceSource.WellHeadEastPositionReference;
+            }
+            val -= delta;
+        }
+        else if (id == new Guid("109fc958-bf9c-454d-9505-6a3c34d0a501") &&
+            ClusterPositionReferenceSource != null &&
+            ClusterPositionReferenceSource.ClusterNorthPositionReference != null &&
+            ClusterPositionReferenceSource.ClusterEastPositionReference != null) //cluster position reference
+        {
+            if (direction == PositionDirectionType.North)
+            {
+                delta = (double)ClusterPositionReferenceSource.ClusterNorthPositionReference;
+            }
+            else
+            {
+                delta = (double)ClusterPositionReferenceSource.ClusterEastPositionReference;
+            }
+            val -= delta;
+        }
+        else if (id == new Guid("4bcd2794-e868-40db-aee6-4082cbba4fae") &&
+                 FieldPositionReferenceSource != null &&
+                 FieldPositionReferenceSource.FieldNorthPositionReference != null &&
+                 FieldPositionReferenceSource.FieldEastPositionReference != null) // field position reference
+        {
+            if (direction == PositionDirectionType.North)
+            {
+                delta = (double)FieldPositionReferenceSource.FieldNorthPositionReference;
+            }
+            else
+            {
+                delta = (double)FieldPositionReferenceSource.FieldEastPositionReference;
+            }
+            val -= delta;
+        }
+        else if (id == new Guid("073a7b94-09ac-4c9e-a7bb-03de2684123b") &&
+                 CartographicGridPositionReferenceSource != null &&
+                 CartographicGridPositionReferenceSource.CartographicGridNorthPositionReference != null &&
+                 CartographicGridPositionReferenceSource.CartographicGridEastPositionReference != null) // cartographic position reference
+        {
+            if (direction == PositionDirectionType.North)
+            {
+                delta = (double)CartographicGridPositionReferenceSource.CartographicGridNorthPositionReference;
+            }
+            else
+            {
+                delta = (double)CartographicGridPositionReferenceSource.CartographicGridEastPositionReference;
+            }
+            val -= delta;
+        }
+        return val;
+    }
+    #endregion
+
+    #region management of references for geodetic datum
+    public string FromWGS84GeodeticSI(double? val, string quantityName, bool useUnitLabel, PositionDirectionType direction)
+    {
+        if (!IsPlaneAngle(quantityName))
+        {
+            return "";
+        }
+        if (val == null)
+        {
+            return "";
+        }
+        if (direction == PositionDirectionType.Independent)
+        {
+            return "";
+        }
+        double delta = 0;
+        Guid id = Guid.Empty;
+        foreach (Tuple<Guid, string> tuple in geodeticReferences)
+        {
+            if (tuple.Item2 == geodeticReferenceName_)
+            {
+                id = tuple.Item1;
+                break;
+            }
+        }
+        if (id == new Guid("7286d40e-e3bd-4c39-87fe-101c7ef27362") &&
+            CartographicProjectionDatumGeodeticReferenceSource != null &&
+            CartographicProjectionDatumGeodeticReferenceSource.CartographicProjectionDatumLatitudeReference != null &&
+            CartographicProjectionDatumGeodeticReferenceSource.CartographicProjectionDatumLongitudeReference != null) // cartographic projection datum
+        {
+            if (direction == PositionDirectionType.North)
+            {
+                delta = (double)CartographicProjectionDatumGeodeticReferenceSource.CartographicProjectionDatumLatitudeReference;
+            }
+            else
+            {
+                delta = (double)CartographicProjectionDatumGeodeticReferenceSource.CartographicProjectionDatumLongitudeReference;
+            }
+            val += delta;
+        }
+        string valueInUserUnit = FromSI(val, quantityName, false);
+        if (useUnitLabel)
+        {
+            return valueInUserUnit + " " + GetGeodeticUnitLabel(quantityName);
+        }
+        else
+        {
+            return valueInUserUnit;
+        }
+    }
+    public double? FromWGS84GeodeticSI(double? val, string quantityName, PositionDirectionType direction)
+    {
+        if (val == null)
+        {
+            return null;
+        }
+        else
+        {
+            return FromWGS84GeodeticSI((double)val, quantityName, direction);
+        }
+    }
+    public double FromWGS84GeodeticSI(double val, string quantityName, PositionDirectionType direction)
+    {
+        if (!IsPlaneAngle(quantityName))
+        {
+            return double.NaN;
+        }
+        if (direction == PositionDirectionType.Independent)
+        {
+            return double.NaN;
+        }
+        double delta = 0;
+        Guid id = Guid.Empty;
+        foreach (Tuple<Guid, string> tuple in geodeticReferences)
+        {
+            if (tuple.Item2 == geodeticReferenceName_)
+            {
+                id = tuple.Item1;
+                break;
+            }
+        }
+        if (id == new Guid("7286d40e-e3bd-4c39-87fe-101c7ef27362") &&
+            CartographicProjectionDatumGeodeticReferenceSource != null &&
+            CartographicProjectionDatumGeodeticReferenceSource.CartographicProjectionDatumLatitudeReference != null &&
+            CartographicProjectionDatumGeodeticReferenceSource.CartographicProjectionDatumLongitudeReference != null) // cartographic projection datum
+        {
+            if (direction == PositionDirectionType.North)
+            {
+                delta = (double)CartographicProjectionDatumGeodeticReferenceSource.CartographicProjectionDatumLatitudeReference;
+            }
+            else
+            {
+                delta = (double)CartographicProjectionDatumGeodeticReferenceSource.CartographicProjectionDatumLongitudeReference;
+            }
+            val += delta;
+        }
+        return FromSI(val, quantityName);
+    }
+
+    public string GetGeodeticUnitLabel(string quantityName)
+    {
+        if (!IsPlaneAngle(quantityName))
+        {
+            return "";
+        }
+        if (baseUnitSystem_ != null)
+        {
+            string label = baseUnitSystem_.GetUnitLabel(quantityName);
+            if (!string.IsNullOrEmpty(label))
+            {
+                Guid id = Guid.Empty;
+                foreach (Tuple<Guid, string> tuple in geodeticReferences)
+                {
+                    if (tuple.Item2 == geodeticReferenceName_)
+                    {
+                        id = tuple.Item1;
+                        break;
+                    }
+                }
+                if (id == new Guid("7286d40e-e3bd-4c39-87fe-101c7ef27362") &&
+                    CartographicProjectionDatumGeodeticReferenceSource != null &&
+                    CartographicProjectionDatumGeodeticReferenceSource.CartographicProjectionDatumLatitudeReference != null &&
+                    CartographicProjectionDatumGeodeticReferenceSource.CartographicProjectionDatumLongitudeReference != null) // cartographic projection datum
+                {
+                    return label + "CPD";
+                }
+                else
+                {
+                    return label + "WGS84";
+                }
+            }
+            else
+            {
+                return label;
+            }
+        }
+        else
+        {
+            return "";
+        }
+    }
+    public double ToWGS84GeodeticSI(double v, string quantityName, PositionDirectionType direction)
+    {
+        if (!IsPlaneAngle(quantityName))
+        {
+            return double.NaN;
+        }
+        if (direction == PositionDirectionType.Independent)
+        {
+            return double.NaN;
+        }
+        double val = ToSI(v, quantityName);
+        double delta = 0;
+        Guid id = Guid.Empty;
+        foreach (Tuple<Guid, string> tuple in geodeticReferences)
+        {
+            if (tuple.Item2 == geodeticReferenceName_)
+            {
+                id = tuple.Item1;
+                break;
+            }
+        }
+        if (id == new Guid("7286d40e-e3bd-4c39-87fe-101c7ef27362") &&
+            CartographicProjectionDatumGeodeticReferenceSource != null &&
+            CartographicProjectionDatumGeodeticReferenceSource.CartographicProjectionDatumLatitudeReference != null &&
+            CartographicProjectionDatumGeodeticReferenceSource.CartographicProjectionDatumLongitudeReference != null) // cartographic projection datum
+        {
+            if (direction == PositionDirectionType.North)
+            {
+                delta = (double)CartographicProjectionDatumGeodeticReferenceSource.CartographicProjectionDatumLatitudeReference;
+            }
+            else
+            {
+                delta = (double)CartographicProjectionDatumGeodeticReferenceSource.CartographicProjectionDatumLongitudeReference;
+            }
+            val -= delta;
+        }
+        return val;
+    }
+    #endregion
+
+    private async Task PostProcessUnitSystem()
+    {
+        BaseUnitSystem? baseUnitSystem = null;
+        Guid baseUnitSystemID = Guid.Empty;
+        if (unitSystemLightList != null)
+        {
+            foreach (UnitSystemLight uSysLight in unitSystemLightList)
+            {
+                if (UnitSystemName == uSysLight.Name)
+                {
+                    baseUnitSystemID = uSysLight.ID;
+                    break;
+                }
+            }
+        }
+        if (httpClient != null)
+        {
+            try
+            {
+                var a = await httpClient.GetAsync(HttpController + baseUnitSystemID.ToString());
+                if (a.IsSuccessStatusCode)
+                {
+                    string str = await a.Content.ReadAsStringAsync();
+                    if (!string.IsNullOrEmpty(str))
+                    {
+                        baseUnitSystem = System.Text.Json.JsonSerializer.Deserialize<DrillingUnitSystem>(str);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                baseUnitSystem = null;
+                logger.LogError(ex, "Problem while managing units in PostProcessUnitSystem (first step)");
+            }
+        }
+        else
+        {
+            baseUnitSystem = DrillingUnitSystem.Get(baseUnitSystemID);
+        }
+        if (baseUnitSystem != null)
+        {
+            baseUnitSystem_ = baseUnitSystem;
+            if (unitAwareComponents_ != null)
+            {
+                foreach (IUnitAwareComponent comp in unitAwareComponents_)
+                {
+                    comp.ManageUnits();
+                }
+            }
+            if (dateTimeAwareComponents_ != null)
+            {
+                foreach (IDateTimeReferenceAwareComponent comp in dateTimeAwareComponents_)
+                {
+                    comp.ManageDateTimeReference();
+                }
+            }
+            try
+            {
+                await UnitSystemNameChanged.InvokeAsync(unitSystemName_);
+                if (!_inInitializedAsync)
+                {
+                    await InvokeAsync(() => { StateHasChanged(); });
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Problem while managing units in PostProcessUnitSystem (second step)");
+            }
+        }
+    }
+
+    private async Task PostProcessDepthReference()
+    {
+        if (unitAwareComponents_ != null)
+        {
+            foreach (IUnitAwareComponent comp in unitAwareComponents_)
+            {
+                comp.ManageUnits();
+            }
+        }
+        try
+        {
+            await DepthReferenceNameChanged.InvokeAsync(depthReferenceName_);
+            await InvokeAsync(() => { StateHasChanged(); });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem while managing depth in PostProcessDepthReference (second step)");
+        }
+    }
+
+    private async Task PostProcessPositionReference()
+    {
+        if (unitAwareComponents_ != null)
+        {
+            foreach (IUnitAwareComponent comp in unitAwareComponents_)
+            {
+                comp.ManageUnits();
+            }
+        }
+        try
+        {
+            await PositionReferenceNameChanged.InvokeAsync(positionReferenceName_);
+            await InvokeAsync(() => { StateHasChanged(); });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem while managing position in PostProcessPositionReference (second step)");
+        }
+    }
+    private async Task PostProcessGeodeticReference()
+    {
+        if (unitAwareComponents_ != null)
+        {
+            foreach (IUnitAwareComponent comp in unitAwareComponents_)
+            {
+                comp.ManageUnits();
+            }
+        }
+        try
+        {
+            await GeodeticReferenceNameChanged.InvokeAsync(geodeticReferenceName_);
+            await InvokeAsync(() => { StateHasChanged(); });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem while managing geodetic datum in PostProcessGeodeticReference (second step)");
+        }
+    }
+    private async Task PostProcessAzimuthReference()
+    {
+        if (unitAwareComponents_ != null)
+        {
+            foreach (IUnitAwareComponent comp in unitAwareComponents_)
+            {
+                comp.ManageUnits();
+            }
+        }
+        try
+        {
+            await AzimuthReferenceNameChanged.InvokeAsync(azimuthReferenceName_);
+            await InvokeAsync(() => { StateHasChanged(); });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem while managing azimuth in PostProcessAzimuthReference (second step)");
+        }
+    }
+    private async Task PostProcessPressureReference()
+    {
+        if (unitAwareComponents_ != null)
+        {
+            foreach (IUnitAwareComponent comp in unitAwareComponents_)
+            {
+                comp.ManageUnits();
+            }
+        }
+        try
+        {
+            await PressureReferenceNameChanged.InvokeAsync(pressureReferenceName_);
+            await InvokeAsync(() => { StateHasChanged(); });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem while managing pressure in PostProcessPressureReference (second step)");
+        }
+    }
+}

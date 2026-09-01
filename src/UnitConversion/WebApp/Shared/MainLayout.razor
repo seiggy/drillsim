@@ -1,0 +1,38 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider />
+<MudDialogProvider FullWidth="true"
+                   MaxWidth="MaxWidth.ExtraExtraLarge"
+                   CloseButton="true"
+                   NoHeader="false"
+                   Position="DialogPosition.Center"
+                   CloseOnEscapeKey="true" />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1" Style="background-color: #FFFFFF">
+        <MudGrid>
+            <MudItem xs="3" Style="margin-top: auto; text-align: left;">
+                <MudLink Href="https://opensourcedrilling.org/" Target="_blank">
+                    <MudImage Src="images/OSDC-Logo-1536x278.png" Width="250" Alt="Ooopen Source Drilling Community" />
+                </MudLink>
+            </MudItem>
+            <MudItem xs="6" Style="text-align: center; color: #000000">
+                <MudText Typo="Typo.h4" Class="mt-3"><strong>UNIT CONVERSION</strong></MudText>
+            </MudItem>
+            <MudItem xs="3" Style="margin-top: auto; text-align: right;">
+                <MudLink Href="https://www.norceresearch.no/en/research-group/energy-modelling-and-automation" Target="_blank">
+                    <MudImage Src="images/NORCE_Logo_Skjerm_Original.png" Height="40" Alt="NORCE" />
+                </MudLink>
+            </MudItem>
+        </MudGrid>
+    </MudAppBar>
+    <MudDrawer Open="true" ClipMode="DrawerClipMode.Always" Elevation="2">
+        <NavMenu />
+    </MudDrawer>
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>

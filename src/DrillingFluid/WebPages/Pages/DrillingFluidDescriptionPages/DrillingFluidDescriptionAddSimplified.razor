@@ -1,0 +1,197 @@
+@inject IDrillingFluidAPIUtils Api
+@inject ISnackbar Snackbar
+@inject ILogger<MudInputWithUnitAdornment> logger
+  <div hidden="@(!ShowAddPanel)">
+    <MudPaper Elevation="1" Class="py-6" Style="@($"position: {DataUtils.FLOATING_POSITION}; background:{DataUtils.FLOATING_COLOUR};")" >              
+        <MudPaper Class="mx-4 my-4">
+            <br/>
+            <MudPaper Class="my-4 mx-4" Style="@($"background:{Colors.Gray.Lighten4};")">          
+                <MudText Class="my-2 mx-1" Typo="Typo.h6"><b>Fluid Description</b></MudText>                        
+                <MudGrid Class="mx-3 pb-4"> 
+                    <MudItem xs="3" Class ="mx-2 my-2">
+                        <MudTextField @bind-Value="@drillingFluidDescriptionInstance.Name" Label="Name" ShrinkLabel/>
+                    </MudItem>
+                    <MudItem xs="5" Class ="mx-2 my-2">
+                        <MudTextField @bind-Value="@drillingFluidDescriptionInstance.Description" Label="Description" ShrinkLabel/>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>                        
+            <FluidPVTComponent ValueChanged="HandleFluidPVT"/>
+            <MudPaper Class="my-4 mx-4" Style="@($"background:{Colors.Gray.Lighten4};")">
+                <MudToolBar>
+                    <MudText Class="mx-n1 mt-2 mb-1" Typo="Typo.body1"> <b> Fluid Properties </b></MudText>
+                </MudToolBar>
+                <MudGrid Class = "mx-2 my-2">
+                    <MudItem xs="2" Class ="mx-1 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Fluid Density" QuantityName="MassDensityDrilling"
+                            SIValueNullable="@drillingFluidDescriptionInstance.FluidMassDensity.GaussianValue.Mean"
+                            SIValueNullableChanged="val => drillingFluidDescriptionInstance.FluidMassDensity.GaussianValue.Mean = val"/>
+                    </MudItem>   
+                    <MudItem xs="2" Class ="mx-1 my-2">
+                        <MudInputWithUnitAdornment VariantType="Variant.Text"
+                            QuantityLabel="Temperature" QuantityName="TemperatureDrilling"
+                            SIValueNullable="@drillingFluidDescriptionInstance.ReferenceTemperature.GaussianValue.Mean"
+                            SIValueNullableChanged="val => drillingFluidDescriptionInstance.ReferenceTemperature.GaussianValue.Mean = val"/>
+                    </MudItem>    
+                </MudGrid>
+           
+           
+            </MudPaper>
+            <FluidThemophysicalEdit FluidDescription="@drillingFluidDescriptionInstance"/>
+            <GellingPropertiesPanel GellingProperties="@gellingProperties"/>
+            <FlowCurvePanelSimplfied FlowCurve="flowCurve"/>
+            <MudToolBar>
+                <MudButton StartIcon="@Icons.Material.Outlined.Save" IconColor="@Color.Primary" 
+                    OnClick="@AddDrillingFluidDescription">Add Drilling Fluid Description</MudButton>        
+                <MudSpacer/>
+                <MudButton StartIcon="@Icons.Material.Outlined.Close" IconColor="@Color.Error" 
+                    OnClick="@CloseAddPanel">Close</MudButton>                    
+            </MudToolBar>
+        </MudPaper>
+    </MudPaper>
+</div>
+
+@code{
+    [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? Parent { get; set; }
+    [Parameter]
+    public bool ShowAddPanel {get; set;} = false;
+    [Parameter]
+    public EventCallback OnMessageSent {get; set;}   
+    //Initialize fluid description 
+    private List<Brine> availableBrine = new();
+    private List<BaseOil> availableBaseOil = new();
+    private Brine? selectedBrine = null;
+    private BaseOil? selectedBaseOil = null;
+    private double? brineMassFraction = null;
+    private double? baseOilMassFraction = null;
+    private double? waterOilRatio;
+    //WebApp GUI flow control
+    private string showCompositionIcon = Icons.Material.Filled.ExpandLess;
+    private bool showComposition = true;
+    private bool showBrineAddPanel = false;
+    private bool showBaseOilAddPanel = false;
+    //Used variables
+    private DrillingFluidDescription drillingFluidDescriptionInstance = PseudoConstructors.ConstructDrillingFluidDescription();
+    private DrillingFluidComposition currentComposition = PseudoConstructors.ConstructDrillingFluidComposition();
+    private GellingProperties gellingProperties = PseudoConstructors.ConstructGellingProperties();
+    private FlowCurve flowCurve = PseudoConstructors.ConstructFlowCurve();
+    private FluidPVTParameters? fluidPVTParameters = null;
+    private async Task SendMessage()
+    {
+        showBrineAddPanel = false;
+        showBaseOilAddPanel = false;
+        await OnMessageSent.InvokeAsync();
+    }
+    private async Task HandleFluidPVT(FluidPVTParameters? fluidPVT)
+    {
+        drillingFluidDescriptionInstance.FluidPVTParameters = fluidPVT;
+    }
+    private async Task AddDrillingFluidDescription()
+    {
+        try
+        {
+            //Check if inputs are correct            
+            if (selectedBrine != null)
+                currentComposition.BrineProperies = selectedBrine;
+            if (selectedBaseOil != null)
+                currentComposition.BaseOilProperies = selectedBaseOil;
+            
+            drillingFluidDescriptionInstance.MetaInfo = new MetaInfo{ID = Guid.NewGuid()};
+            drillingFluidDescriptionInstance.GellingProperties = gellingProperties;
+            drillingFluidDescriptionInstance.FlowCurve = flowCurve;
+            drillingFluidDescriptionInstance.DrillingFluidComposition = currentComposition;
+            await Api.ClientDrillingFluid.PostDrillingFluidDescriptionAsync(drillingFluidDescriptionInstance);
+            logger.LogInformation("Fluid description posted successfully");
+            Snackbar.Add("Fluid description posted successfully", Severity.Success);            
+            await SendMessage();
+            ShowAddPanel = false;
+            showBaseOilAddPanel = false;
+            showBrineAddPanel = false;
+            await OnInitializedAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to add a new fluid description");
+            Snackbar.Add("Impossible to add a new fluid description", Severity.Warning);
+        }
+    }
+    private async Task CloseAddPanel()
+    {
+        ShowAddPanel = false;
+        await SendMessage();
+    }
+
+    // Unit control code
+    private void ManageUnits(){}
+    private void UpdatedBrineSelection(Brine brine)
+    {
+        showBrineAddPanel = false;
+        selectedBrine = brine;
+        brineMassFraction = brine.MassFraction.GaussianValue.Mean;
+        currentComposition.BrineProperies = brine;
+    }
+    private void UpdatedBaseOilSelection(BaseOil baseOil)
+    {
+        showBaseOilAddPanel = false;
+        selectedBaseOil = baseOil;
+        baseOilMassFraction = baseOil.MassFraction.GaussianValue.Mean;
+        currentComposition.BaseOilProperies = baseOil;
+    }
+    private void UpdateWaterOilRatio(double? val)
+    {
+        waterOilRatio = val;
+        currentComposition.WaterOilRatio = ConversionsFromOSDC.DoubleToGaussian(val);
+    }
+    private void UpdateLowGravitySolid(double? val)
+    {
+    }
+    private void UpdateHighGravitySolid(double? val)
+    {
+    }
+    private void UpdateLostMaterial(double? val)
+    {
+    }
+    private string MudSelectText(Brine? brine)
+    {
+        if(brine==null)
+        {
+            return "";        
+        }
+        else
+        {
+            return $"{brine.Name}";
+        }
+    }
+    private string MudSelectText(BaseOil? baseOil)
+    {
+        if(baseOil==null)
+        {
+            return "";
+        }
+        else
+        {
+            return $"{baseOil.Name}";
+        }
+    }
+    private void UpdateBrineMassFraction(double? val)
+    {
+        if (selectedBrine != null)
+        {
+            brineMassFraction = val;
+            selectedBrine.MassDensity.GaussianValue.Mean = val;
+            currentComposition.BrineProperies = selectedBrine;
+        }
+    }
+    private void UpdateBaseOilMassFraction(double? val)
+    {
+        if (selectedBaseOil != null)
+        {
+            baseOilMassFraction = val;
+            selectedBaseOil.MassDensity.GaussianValue.Mean = val;
+            currentComposition.BaseOilProperies = selectedBaseOil;
+        }
+    }
+
+}

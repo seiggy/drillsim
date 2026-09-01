@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Version>3.4.1</Version>
+    <Authors>Gilles Pelfrene, Eric Cayeux</Authors>
+    <Company>NORCE Norwegian Research Centre</Company>
+    <Description>A package with MudBlazor components to manage unit and reference conversions.</Description>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageId>OSDC.UnitConversion.$(AssemblyName)</PackageId>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseLocalUnitConversionProjects)' != 'true'">
+    <PackageReference Include="MudBlazor" Version="8.11.0" />
+    <PackageReference Include="OSDC.DotnetLibraries.General.DataManagement" Version="2.1.0" />
+    <PackageReference Include="OSDC.UnitConversion.Conversion.UnitSystem.DrillingEngineering" Version="3.4.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseLocalUnitConversionProjects)' == 'true'">
+    <PackageReference Include="MudBlazor" Version="8.11.0" />
+    <PackageReference Include="OSDC.DotnetLibraries.General.DataManagement" Version="2.2.0" />
+    <ProjectReference Include="..\ConversionUnitSystem.DrillingEngineering\ConversionUnitSystem.DrillingEngineering.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>

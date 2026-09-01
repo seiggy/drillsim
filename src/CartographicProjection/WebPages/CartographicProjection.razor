@@ -1,0 +1,294 @@
+@page "/CartographicProjection"
+@inject ILogger<CartographicProjection> logger
+@inject ICartographicProjectionAPIUtils Api
+@inject ISnackbar Snackbar
+
+<MudUnitAndReferenceChoiceTag HttpHost=@Api.HostNameUnitConversion
+                              HttpBasePath=@Api.HostBasePathUnitConversion
+                              HttpController="UnitSystem/"
+                              UnitSystemName="@DataUtils.UnitAndReferenceParameters.UnitSystemName"
+                              UnitSystemNameChanged="@DataUtils.UpdateUnitSystemName">
+    @if (cartographicProjectionList == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <div hidden="@isHiddenMainPanel">
+            <MudDataGrid T="CartographicProjectionLight" MultiSelection="true" Items="@cartographicProjectionList" SelectedItemsChanged="@SelectedItemsChanged"
+                         EditMode="DataGridEditMode.Cell"
+                         Hover="true"  RowClick="@RowClicked"
+                         SortMode="SortMode.Multiple"  QuickFilter="@_cartographicProjectionFilter" Filterable="false"
+                         ReadOnly="false" ColumnResizeMode="ResizeMode.Column" Elevation="0">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Cartographic Projection</MudText>
+                    <MudButton OnClick="@AddCartographicProjection" Color="@Color.Success" Class="add-item-btn">Add</MudButton>
+                    <MudButton OnClick="@DeleteSelectedCartographicProjection" Color="@Color.Error" Class="add-item-btn">Delete</MudButton>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+                <Columns>
+                    <SelectColumn T="CartographicProjectionLight" />
+                    <PropertyColumn Property="x => x.Name" Title="@DataUtils.CartographicProjectionNameLabel" CellStyle="width: 30%;" Sortable="true" Editable="false" />
+                    <PropertyColumn Property="x => x.Description" Title="@DataUtils.CartographicProjectionLabel" CellStyle="width: 60%;" Sortable="true" Editable="false" />
+                    <TemplateColumn CellStyle="width: 5%;">
+                        <EditTemplate>
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" OnClick="(() => DeleteCartographicProjection(context.Item.MetaInfo.ID))" />
+                        </EditTemplate>
+                    </TemplateColumn>
+                </Columns>
+            </MudDataGrid>
+        </div>
+    }
+    @if (isHiddenMainPanel && currentCartographicProjection != null)
+    {
+        <CartographicProjectionEdit CurrentCartographicProjection="@currentCartographicProjection" CartographicProjectionTypes="@cartographicProjectionTypeList" GeodeticDatums="@geodeticDatumList" OnUpdate="@ShowMainPanel" />
+    }
+</MudUnitAndReferenceChoiceTag>
+
+@code {
+    private List<CartographicProjectionLight> cartographicProjectionList = new();
+    private List<CartographicProjectionLight> selectedCartographicProjectionList = new();
+    private List<GeodeticDatum> geodeticDatumList = new();
+    private List<CartographicProjectionType> cartographicProjectionTypeList = new();
+    private NORCE.Drilling.CartographicProjection.ModelShared.CartographicProjection? currentCartographicProjection;
+    // UI related variables
+    public bool isHiddenMainPanel;
+    public bool isHiddenEditPanel;
+    private string? _searchString;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Show main panel
+            isHiddenMainPanel = false;
+            isHiddenEditPanel = true;
+            currentCartographicProjection = null;
+
+            // Starting all loading tasks asynchronously
+            logger.LogInformation("Trying to load list of Cartographic Projections from client: " + Api.HostNameCartographicProjection);
+            var cartographicProjectionTask = Api.ClientCartographicProjection.GetAllCartographicProjectionLightAsync();
+            var cartographicProjectionTypeTask = Api.ClientCartographicProjection.GetAllCartographicProjectionTypeAsync();
+            var geodeticDatumTask = Api.ClientGeodeticDatum.GetAllGeodeticDatumAsync();
+
+            List<Task> loadingTaskList = new List<Task> { cartographicProjectionTask, cartographicProjectionTypeTask, geodeticDatumTask };
+
+            // Awaiting tasks and retrieve results as they become available
+            while (loadingTaskList.Count > 0)
+            {
+                Task finishedTask = await Task.WhenAny(loadingTaskList);
+                if (finishedTask == cartographicProjectionTask)
+                {
+                    try
+                    {
+                        cartographicProjectionList = (List<CartographicProjectionLight>)await cartographicProjectionTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (cartographicProjectionList != null)
+                        {
+                            cartographicProjectionList.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of Cartographic Projection were null on initialization");
+                            Snackbar.Add("Returned list of Cartographic Projection were null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load Cartographic Projection from client");
+                    }
+                }
+                else if (finishedTask == cartographicProjectionTypeTask)
+                {
+                    try
+                    {
+                        List<CartographicProjectionType>? cartographicProjectionTypes = (List<CartographicProjectionType>)await cartographicProjectionTypeTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (cartographicProjectionTypes != null)
+                        {
+                            cartographicProjectionTypeList = cartographicProjectionTypes;
+                            cartographicProjectionTypeList.Sort((t1, t2) => t1.Projection.CompareTo(t2.Projection));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of cartographic projection types was null on initialization");
+                            Snackbar.Add("Returned list of cartographic projection types was on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load cartographic projection types from client");
+                    }
+                }
+                else if (finishedTask == geodeticDatumTask)
+                {
+                    try
+                    {
+                        List<GeodeticDatum>? geodeticDatums = (List<GeodeticDatum>)await geodeticDatumTask; // awaiting the finished task allows to retrieve its result and throw exception if needed
+                        if (geodeticDatums != null)
+                        {
+                            geodeticDatumList = geodeticDatums;
+                            geodeticDatumList.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+                        }
+                        else
+                        {
+                            logger.LogWarning("Returned list of Geodetic Datum were null on initialization");
+                            Snackbar.Add("Returned list of Geodetic Datum were null on initialization", Severity.Warning);
+                        }
+                    }
+                    catch (ApiException ex)
+                    {
+                        logger.LogError(ex, "Impossible to load Geodetic Datum from client");
+                    }
+                }
+                loadingTaskList.Remove(finishedTask);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Problem Cartographic Projection initialization");
+        }
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    private async Task AddCartographicProjection()
+    {
+        try
+        {
+            MetaInfo metaInfo = new() { ID = Guid.NewGuid(), HttpHostName = Api.HostNameCartographicProjection, HttpHostBasePath = Api.HostBasePathCartographicProjection, HttpEndPoint = "CartographicProjection/" };
+            DateTimeOffset creationDate = DateTimeOffset.UtcNow;
+            NORCE.Drilling.CartographicProjection.ModelShared.CartographicProjection currentCartographicProjection = new()
+            {
+                MetaInfo = metaInfo,
+                Name = DataUtils.DEFAULT_NAME_CartographicProjection,
+                Description = DataUtils.DEFAULT_DESCR_CartographicProjection,
+                CreationDate = creationDate,
+                LastModificationDate = creationDate,
+
+            };
+            await Api.ClientCartographicProjection.PostCartographicProjectionAsync(currentCartographicProjection);
+            await OnInitializedAsync();
+            // Find the newly created datum in the refreshed list
+            var addedProjection = cartographicProjectionList.FirstOrDefault(d => d.MetaInfo?.ID == currentCartographicProjection.MetaInfo?.ID);
+            if (addedProjection != null)
+            {
+                logger.LogInformation("Cartographic Projection posted successfully");
+                Snackbar.Add("Cartographic Projection posted successfully", Severity.Success);
+                await RowClicked(new DataGridRowClickEventArgs<CartographicProjectionLight>(new MouseEventArgs(), addedProjection, -1));
+            }
+            else
+            {
+                
+                logger.LogError("Could not retrieve the added cartographic projection");
+                Snackbar.Add("Could not retrieve the added cartographic projection", Severity.Warning);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to add a new Cartographic Projection");
+            Snackbar.Add("Impossible to add a new Cartographic Projection", Severity.Warning);
+        }
+    }
+
+    private async Task RowClicked(DataGridRowClickEventArgs<CartographicProjectionLight> args)
+    {
+        await EditCartographicProjection(args.Item.MetaInfo.ID);
+    }
+
+    private async Task EditCartographicProjection(Guid id)
+    {
+        try
+        {
+            currentCartographicProjection = await Api.ClientCartographicProjection.GetCartographicProjectionByIdAsync(id);
+            if (currentCartographicProjection != null)
+            {
+                isHiddenMainPanel = true;
+                isHiddenEditPanel = false;
+                await InvokeAsync(() => { StateHasChanged(); });
+            }
+            else
+            {
+                logger.LogWarning("Impossible to load Cartographic Projection");
+                Snackbar.Add("Impossible to load Cartographic Projection", Severity.Warning);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to load Cartographic Projection to be edited");
+            Snackbar.Add("Impossible to load Cartographic Projection to be edited", Severity.Warning);
+        }
+    }
+
+    private async Task DeleteCartographicProjection(Guid id)
+    {
+        try
+        {
+            await Api.ClientCartographicProjection.DeleteCartographicProjectionByIdAsync(id);
+            await OnInitializedAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to delete Cartographic Projection");
+        }
+    }
+
+    private async Task DeleteSelectedCartographicProjection()
+    {
+        try
+        {
+            foreach (CartographicProjectionLight cartographicProjection in selectedCartographicProjectionList)
+            {
+                await Api.ClientCartographicProjection.DeleteCartographicProjectionByIdAsync(cartographicProjection.MetaInfo.ID);
+            }
+            await OnInitializedAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Impossible to delete all Cartographic Projection");
+        }
+
+    }
+
+    //Quick filter - filter gobally across multiple columns with the same input
+    private Func<CartographicProjectionLight, bool>
+    _cartographicProjectionFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+        if ($"{x.Name} {x.Description}".Contains(_searchString))
+            return true;
+
+        return false;
+    };
+
+    //Events
+    private void StartedEditingItem(CartographicProjection item)
+    {
+        //Activating Edit event capture with parameter StartedEditingItem="@StartedEditingItem" in MudDataGrid; arguments are specified in OnClick="@context.Actions.StartedEditingItem(...)"
+    }
+
+    private void CancelledEditingItem(CartographicProjection item)
+    {
+        //Activating Cancel event capture with parameter CancelledEditingItem = "@CancelledEditingItem" in MudDataGrid; arguments are specified in OnClick="@context.Actions.CancelledEditingItem(...)"
+    }
+
+    private void CommittedItemChanges(CartographicProjection item)
+    {
+        //Activating Commit event capture with parameter CommittedItemChanges = "@CommittedItemChanges" in MudDataGrid; arguments are specified in OnClick="@context.Actions.CommittedEditingItem(...)"
+    }
+
+    void SelectedItemsChanged(HashSet<CartographicProjectionLight>
+        items)
+    {
+        selectedCartographicProjectionList.Clear();
+        selectedCartographicProjectionList.InsertRange(0, items);
+    }
+
+    private async void ShowMainPanel()
+    {
+        isHiddenMainPanel = false;
+        isHiddenEditPanel = true;
+        await OnInitializedAsync();
+    }
+}
+

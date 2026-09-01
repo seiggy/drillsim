@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+	<AssemblyName>OSDC.Drilling.Field.WebPages</AssemblyName>
+    <RootNamespace>OSDC.Drilling.Field.WebPages</RootNamespace>
+    <PackageId>OSDC.Drilling.Field.WebPages</PackageId>
+    <Title>OSDC.Drilling.Field.WebPages</Title>
+    <Authors>Eric Cayeux</Authors>
+    <Company>NORCE</Company>
+    <Description>Reusable Razor class library containing Field management, batch backup and restore, conversion, display, and statistics pages. See the package README for setup, dependencies, and usage.</Description>
+    <PackageTags>field;drilling;blazor;razor;mudblazor</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/Open-Source-Drilling-Community/Field</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/Open-Source-Drilling-Community/Field</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MudBlazor" Version="9.9.0" />
+    <PackageReference Include="OSDC.DotnetLibraries.Drilling.WebAppUtils" Version="1.1.4" />
+    <PackageReference Include="Plotly.Blazor" Version="6.0.2" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<!-- Include generated DTO source files directly from ModelSharedOut -->
+	<ItemGroup>
+		<Compile Include="..\ModelSharedOut\FieldMergedModel.cs" Link="GeneratedDtos\%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\..\DotNetLibraries\OSDC.DotnetLibraries.General\OSDC.DotnetLibraries.General.Math\OSDC.DotnetLibraries.General.Math.csproj" />
+	</ItemGroup>
+
+</Project>

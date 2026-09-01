@@ -1,0 +1,167 @@
+@page "/Rig"
+@inject ILogger<RigMain> Logger
+@inject ISnackbar Snackbar
+@inject IRigAPIUtils Api
+@inject RigApiClient RigApiClient
+@inject FieldClusterApiClient FieldClusterApiClient
+@inject NavigationManager NavigationManager
+
+<MudUnitAndReferenceChoiceTag HttpHost="@Api.HostNameUnitConversion"
+                              HttpBasePath="@Api.HostBasePathUnitConversion"
+                              HttpController="UnitSystem/"
+                              UnitSystemName="@DataUtils.UnitAndReferenceParameters.UnitSystemName"
+                              UnitSystemNameChanged="@DataUtils.UpdateUnitSystemName"
+                              DepthReferenceName="@DataUtils.UnitAndReferenceParameters.DepthReferenceName"
+                              DepthReferenceNameChanged="@DataUtils.UpdateDepthReferenceName"
+                              RotaryTableDepthReferenceSource="@DataUtils.UnitAndReferenceParameters.RotaryTableDepthReferenceSource"
+                              GroundMudLineDepthReferenceSource="@DataUtils.UnitAndReferenceParameters.GroundMudLineDepthReferenceSource"
+                              MeanSeaLevelDepthReferenceSource="@DataUtils.UnitAndReferenceParameters.MeanSeaLevelDepthReferenceSource"
+                              SeaWaterLevelDepthReferenceSource="@DataUtils.UnitAndReferenceParameters.SeaWaterLevelDepthReferenceSource">
+    @PageContent
+</MudUnitAndReferenceChoiceTag>
+
+@code {
+    private List<RigLight> _rigs = new();
+    private Dictionary<Guid, OSDC.Drilling.Rig.ModelShared.Cluster> _clusters = new();
+    private bool _isLoading = true;
+    private string _searchText = string.Empty;
+    private RenderFragment PageContent => @<MudStack Spacing="3">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+        <MudText Typo="Typo.h4">Rig Catalog</MudText>
+        <MudStack Row="true" Spacing="2">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateRig">Create rig</MudButton>
+            <MudButton Variant="Variant.Outlined" OnClick="Reload">Refresh</MudButton>
+        </MudStack>
+    </MudStack>
+
+    <MudTextField @bind-Value="_searchText" Placeholder="Search rigs" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Variant="Variant.Outlined" Immediate="true" />
+
+@if (_isLoading)
+    {
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    }
+    else
+{
+        <MudTable Items="FilteredRigs" Hover="true" Dense="true" OnRowClick="@(EventCallback.Factory.Create<TableRowClickEventArgs<RigLight>>(this, OnRowClick))">
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Description</MudTh>
+                <MudTh>Rig Type</MudTh>
+                <MudTh>Environment</MudTh>
+                <MudTh>Mobility</MudTh>
+                <MudTh>Fixed Platform</MudTh>
+                <MudTh>Cluster</MudTh>
+                <MudTh>Last Modified</MudTh>
+                <MudTh></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd DataLabel="Description">@context.Description</MudTd>
+                <MudTd DataLabel="Rig Type">@Display(context.RigType)</MudTd>
+                <MudTd DataLabel="Environment">@Display(context.OperatingEnvironment)</MudTd>
+                <MudTd DataLabel="Mobility">@Display(context.MobilityType)</MudTd>
+                <MudTd DataLabel="Fixed Platform">@(context.IsFixedPlatform ? "Yes" : "No")</MudTd>
+                <MudTd DataLabel="Cluster">@GetClusterName(context.ClusterID)</MudTd>
+                <MudTd DataLabel="Last Modified">@context.LastModificationDate?.ToString("u")</MudTd>
+                <MudTd>
+                    <MudStack Row="true" Spacing="1">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary" OnClick="@(() => EditRig(context))" />
+                        <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small" OnClick="@(() => DeleteRig(context))">Delete</MudButton>
+                    </MudStack>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+}
+
+</MudStack>;
+
+private IEnumerable<RigLight> FilteredRigs => _rigs.Where(r => string.IsNullOrWhiteSpace(_searchText)
+    || ($"{r.Name} {r.Description} {r.MetaInfo?.ID} {r.RigType} {r.OperatingEnvironment} {r.MobilityType}".Contains(_searchText, StringComparison.OrdinalIgnoreCase)));
+
+private static string Display<T>(T? value) where T : struct, Enum =>
+    value.HasValue ? DataUtils.GetDisplayName(value.Value.ToString()) : string.Empty;
+
+protected override async Task OnInitializedAsync()
+{
+    await LoadRigs();
+}
+
+private async Task LoadRigs()
+{
+    try
+    {
+        _isLoading = true;
+        await LoadClusters();
+        _rigs = await RigApiClient.GetRigLightsAsync();
+    }
+    catch (Exception ex)
+    {
+        Logger.LogError(ex, "Failed to load rigs");
+        Snackbar.Add("Failed to load rigs from the microservice.", Severity.Error);
+    }
+    finally { _isLoading = false; }
+}
+
+private async Task Reload() => await LoadRigs();
+
+private async Task LoadClusters()
+{
+    List<OSDC.Drilling.Rig.ModelShared.Cluster> clusters = await FieldClusterApiClient.GetClustersAsync();
+    _clusters = clusters
+        .Where(cluster => cluster?.MetaInfo != null && cluster.MetaInfo.ID != Guid.Empty)
+        .ToDictionary(cluster => cluster.MetaInfo.ID, cluster => cluster);
+}
+
+private void CreateRig() => NavigationManager.NavigateTo(BuildPageUri("Rig/Edit"));
+
+private void EditRig(RigLight rig) => NavigationManager.NavigateTo(BuildPageUri($"Rig/Edit/{rig.MetaInfo?.ID}"));
+
+private async Task DeleteRig(RigLight rig)
+{
+    if (rig.MetaInfo == null)
+    {
+        return;
+    }
+
+    try
+    {
+        HttpStatusCode statusCode = await RigApiClient.DeleteRigAsync(rig.MetaInfo.ID);
+        if (statusCode == HttpStatusCode.OK)
+        {
+            Snackbar.Add("Rig deleted.", Severity.Success);
+            await LoadRigs();
+        }
+        else
+        {
+            Snackbar.Add($"Delete failed: {(int)statusCode} {statusCode}", Severity.Warning);
+        }
+    }
+    catch (Exception ex)
+    {
+        Logger.LogError(ex, "Failed to delete rig {RigId}", rig.MetaInfo.ID);
+        Snackbar.Add("Failed to delete rig.", Severity.Error);
+    }
+}
+
+private Task OnRowClick(TableRowClickEventArgs<RigLight> args)
+{
+    if (args.Item != null) EditRig(args.Item);
+    return Task.CompletedTask;
+}
+
+private string GetClusterName(Guid? clusterId)
+{
+    if (!clusterId.HasValue)
+    {
+        return string.Empty;
+    }
+
+    return _clusters.TryGetValue(clusterId.Value, out OSDC.Drilling.Rig.ModelShared.Cluster? cluster)
+        ? cluster.Name ?? clusterId.Value.ToString()
+        : clusterId.Value.ToString();
+}
+
+private string BuildPageUri(string relativePath) =>
+    new Uri(new Uri(NavigationManager.BaseUri), relativePath).ToString();
+}
+

@@ -1,0 +1,83 @@
+
+    <MudToolBar>
+        <MudText Typo="@Typo.body1"><b>@Label</b></MudText>
+        <MudIconButton Icon="@showSectionIcon" OnClick="@OnClickShow">@showSectionText</MudIconButton>
+    </MudToolBar>
+    <MudCollapse Expanded="@showSection">
+        <MudGrid>
+            <MudItem xs="3" Class ="mx-2 my-2">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                    QuantityLabel="Density" QuantityName="MassDensityDrilling"
+                    SIValueNullable="@massDensity"
+                    SIValueNullableChanged="@UpdateMassDensity"/>
+            </MudItem>   
+            <MudItem xs="3" Class ="mx-2 my-2">
+                <MudInputWithUnitAdornment VariantType="Variant.Text"
+                    QuantityLabel="Mass Fraction" QuantityName="MassDrilling"
+                    SIValueNullable="@massFraction"
+                    SIValueNullableChanged="@UpdateMassFraction"/>
+            </MudItem>   
+        </MudGrid>
+        <CompositionThemophysicalEdit SpecificHeatCapacity="@SolidMass.SpecificHeatCapacity" ThermalConductivity="@SolidMass.ThermalConductivity" />
+    </MudCollapse>
+
+@code
+{
+    [CascadingParameter]
+    private MudUnitAndReferenceChoiceTag? Parent { get; set; }
+    [Parameter]
+    public BaseCompositionProperties SolidMass {get; set;}
+    [Parameter]
+    public string Label {get; set;}
+    [Parameter]
+    public string Class {get; set;}
+    private double? massDensity;
+    private double? massFraction;
+    // Show solid mass section
+    private bool showSection = true;
+    private string showSectionText = "Hide";
+    private string showSectionIcon = @Icons.Material.Filled.ExpandLess;
+    void OnClickShow()
+    {
+        showSection = !showSection;
+        if (showSection)
+        {   
+            showSectionText = "Hide";
+            showSectionIcon = @Icons.Material.Filled.ExpandLess;
+        }
+        else
+        {
+            showSectionText = "Show";
+            showSectionIcon = @Icons.Material.Filled.ExpandMore;
+        }
+    }
+    protected override void OnInitialized()
+    {
+        if (SolidMass!=null) 
+        {
+            massDensity = SolidMass.MassDensity.GaussianValue.Mean;
+            massFraction = SolidMass.MassFraction.GaussianValue.Mean;        
+        }
+        base.OnInitialized();
+    }
+    protected override void OnParametersSet()
+    {
+        if (SolidMass!=null) 
+        {
+            massDensity = SolidMass.MassDensity.GaussianValue.Mean;
+            massFraction = SolidMass.MassFraction.GaussianValue.Mean;        
+        }
+    }
+    void UpdateMassDensity(double? val)
+    {
+        massDensity = val;
+        SolidMass.MassDensity = ConversionsFromOSDC.DoubleToGaussian(val);
+    }
+    void UpdateMassFraction(double? val)
+    {
+        massFraction = val;
+        SolidMass.MassFraction = ConversionsFromOSDC.DoubleToGaussian(val);
+    }
+
+
+}

@@ -1,0 +1,3 @@
+REST evaluation: /EarthMagneticField/api/EarthMagneticField/Evaluate
+MCP: /EarthMagneticField/api/mcp
+Swagger: /EarthMagneticField/api/swagger

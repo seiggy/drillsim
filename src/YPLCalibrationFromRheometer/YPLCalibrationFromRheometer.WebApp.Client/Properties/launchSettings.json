@@ -1,0 +1,35 @@
+{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:54949/",
+      "sslPort": 44368
+    }
+  },
+  "profiles": {
+    "YPLCalibrationFromRheometer.WebApp.Client": {
+      "commandName": "Project",
+      "launchUrl": "YPLCalibrationFromRheometer/webapp/Rheograms",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:5011;http://localhost:5012"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/YPLCalibrationFromRheometer/webapp/Rheograms",
+      "publishAllPorts": true,
+      "useSSL": true
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchUrl": "YPLCalibrationFromRheometer/webapp/Rheograms",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

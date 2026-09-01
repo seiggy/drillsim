@@ -1,0 +1,668 @@
+using System;
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+using OSDC.DotnetLibraries.General.DataManagement;
+using Microsoft.Data.Sqlite;
+using System.Text.Json;
+using System.Linq;
+using OSDC.Drilling.Field.Model;
+
+namespace OSDC.Drilling.Field.Service.Managers
+{
+    /// <summary>
+    /// A manager for Field. The manager implements the singleton pattern as defined by 
+    /// Gamma, Erich, et al. "Design patterns: Abstraction and reuse of object-oriented design." 
+    /// European Conference on Object-Oriented Programming. Springer, Berlin, Heidelberg, 1993.
+    /// </summary>
+    public class FieldManager
+    {
+        private static FieldManager? _instance = null;
+        private readonly ILogger<FieldManager> _logger;
+        private readonly SqlConnectionManager _connectionManager;
+
+        private FieldManager(ILogger<FieldManager> logger, SqlConnectionManager connectionManager)
+        {
+            _logger = logger;
+            _connectionManager = connectionManager;
+        }
+
+        public static FieldManager GetInstance(ILogger<FieldManager> logger, SqlConnectionManager connectionManager)
+        {
+            _instance ??= new FieldManager(logger, connectionManager);
+            return _instance;
+        }
+        internal static FieldManager Instance { get { return _instance!; } }
+
+        public int Count
+        {
+            get
+            {
+                int count = 0;
+                var connection = _connectionManager.GetConnection();
+                if (connection != null)
+                {
+                    var command = connection.CreateCommand();
+                    command.CommandText = "SELECT COUNT(*) FROM FieldTable";
+                    try
+                    {
+                        using SqliteDataReader reader = command.ExecuteReader();
+                        if (reader.Read())
+                        {
+                            count = (int)reader.GetInt64(0);
+                        }
+                    }
+                    catch (SqliteException ex)
+                    {
+                        _logger.LogError(ex, "Impossible to count records in the FieldTable");
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("Impossible to access the SQLite database");
+                }
+                return count;
+            }
+        }
+
+        public bool Clear()
+        {
+            var connection = _connectionManager.GetConnection();
+            if (connection != null)
+            {
+                bool success = false;
+                using var transaction = connection.BeginTransaction();
+                try
+                {
+                    //empty FieldTable
+                    var command = connection.CreateCommand();
+                    command.CommandText = "DELETE FROM FieldTable";
+                    command.ExecuteNonQuery();
+
+                    transaction.Commit();
+                    success = true;
+                }
+                catch (SqliteException ex)
+                {
+                    transaction.Rollback();
+                    _logger.LogError(ex, "Impossible to clear the FieldTable");
+                }
+                return success;
+            }
+            else
+            {
+                _logger.LogWarning("Impossible to access the SQLite database");
+                return false;
+            }
+        }
+
+        public bool Contains(Guid guid)
+        {
+            int count = 0;
+            var connection = _connectionManager.GetConnection();
+            if (connection != null)
+            {
+                var command = connection.CreateCommand();
+                command.CommandText = $"SELECT COUNT(*) FROM FieldTable WHERE ID = '{guid}'";
+                try
+                {
+                    using SqliteDataReader reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        count = (int)reader.GetInt64(0);
+                    }
+                }
+                catch (SqliteException ex)
+                {
+                    _logger.LogError(ex, "Impossible to count rows from FieldTable");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Impossible to access the SQLite database");
+            }
+            return count >= 1;
+        }
+
+        /// <summary>
+        /// Returns the list of Guid of all Field present in the microservice database 
+        /// </summary>
+        /// <returns>the list of Guid of all Field present in the microservice database</returns>
+        public List<Guid>? GetAllFieldId()
+        {
+            List<Guid> ids = [];
+            var connection = _connectionManager.GetConnection();
+            if (connection != null)
+            {
+                var command = connection.CreateCommand();
+                command.CommandText = "SELECT ID FROM FieldTable";
+                try
+                {
+                    using var reader = command.ExecuteReader();
+                    while (reader.Read() && !reader.IsDBNull(0))
+                    {
+                        Guid id = reader.GetGuid(0);
+                        ids.Add(id);
+                    }
+                    _logger.LogInformation("Returning the list of ID of existing records from FieldTable");
+                    return ids;
+                }
+                catch (SqliteException ex)
+                {
+                    _logger.LogError(ex, "Impossible to get IDs from FieldTable");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Impossible to access the SQLite database");
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the list of MetaInfo of all Field present in the microservice database 
+        /// </summary>
+        /// <returns>the list of MetaInfo of all Field present in the microservice database</returns>
+        public List<MetaInfo?>? GetAllFieldMetaInfo()
+        {
+            List<MetaInfo?> metaInfos = new();
+            var connection = _connectionManager.GetConnection();
+            if (connection != null)
+            {
+                var command = connection.CreateCommand();
+                command.CommandText = "SELECT MetaInfo FROM FieldTable";
+                try
+                {
+                    using var reader = command.ExecuteReader();
+                    while (reader.Read() && !reader.IsDBNull(0))
+                    {
+                        string mInfo = reader.GetString(0);
+                        MetaInfo? metaInfo = JsonSerializer.Deserialize<MetaInfo>(mInfo, JsonSettings.Options);
+                        metaInfos.Add(metaInfo);
+                    }
+                    _logger.LogInformation("Returning the list of MetaInfo of existing records from FieldTable");
+                    return metaInfos;
+                }
+                catch (SqliteException ex)
+                {
+                    _logger.LogError(ex, "Impossible to get IDs from FieldTable");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Impossible to access the SQLite database");
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the Field identified by its Guid from the microservice database 
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <returns>the Field identified by its Guid from the microservice database</returns>
+        public Model.Field? GetFieldById(Guid guid)
+        {
+            if (!guid.Equals(Guid.Empty))
+            {
+                var connection = _connectionManager.GetConnection();
+                if (connection != null)
+                {
+                    Model.Field? field;
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"SELECT Field FROM FieldTable WHERE ID = '{guid}'";
+                    try
+                    {
+                        using var reader = command.ExecuteReader();
+                        if (reader.Read() && !reader.IsDBNull(0))
+                        {
+                            string data = reader.GetString(0);
+                            field = JsonSerializer.Deserialize<Model.Field>(data, JsonSettings.Options);
+                            if (field != null && field.MetaInfo != null && !field.MetaInfo.ID.Equals(guid))
+                                throw new SqliteException("SQLite database corrupted: returned Field is null or has been jsonified with the wrong ID.", 1);
+                        }
+                        else
+                        {
+                            _logger.LogInformation("No Field of given ID in the database");
+                            return null;
+                        }
+                    }
+                    catch (SqliteException ex)
+                    {
+                        _logger.LogError(ex, "Impossible to get the Field with the given ID from FieldTable");
+                        return null;
+                    }
+                    _logger.LogInformation("Returning the Field of given ID from FieldTable");
+                    return field;
+                }
+                else
+                {
+                    _logger.LogWarning("Impossible to access the SQLite database");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("The given Field ID is null or empty");
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the list of all Field present in the microservice database 
+        /// </summary>
+        /// <returns>the list of all Field present in the microservice database</returns>
+        public List<Model.Field?>? GetAllField()
+        {
+            List<Model.Field?> vals = [];
+            using var connection = _connectionManager.GetConnection();
+            if (connection != null)
+            {
+                var command = connection.CreateCommand();
+                command.CommandText = "SELECT Field FROM FieldTable";
+                try
+                {
+                    using var reader = command.ExecuteReader();
+                    while (reader.Read() && !reader.IsDBNull(0))
+                    {
+                        string data = reader.GetString(0);
+                        Model.Field? field = JsonSerializer.Deserialize<Model.Field>(data, JsonSettings.Options);
+                        vals.Add(field);
+                    }
+                    _logger.LogInformation("Returning the list of existing Field from FieldTable");
+                    return vals;
+                }
+                catch (SqliteException ex)
+                {
+                    _logger.LogError(ex, "Impossible to get Field from FieldTable");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Impossible to access the SQLite database");
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Reads all complete fields for a logical backup and verifies that every
+        /// serialized field UUID matches its database row UUID. One SELECT statement
+        /// supplies the complete export snapshot.
+        /// </summary>
+        public List<Model.Field?>? GetAllFieldForExport()
+        {
+            List<Model.Field?> fields = [];
+            var connection = _connectionManager.GetConnection();
+            if (connection == null)
+            {
+                _logger.LogWarning("Impossible to access the SQLite database");
+                return null;
+            }
+
+            var command = connection.CreateCommand();
+            command.CommandText = "SELECT ID, Field FROM FieldTable ORDER BY ID";
+            try
+            {
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    if (reader.IsDBNull(0) || reader.IsDBNull(1))
+                    {
+                        _logger.LogError("A FieldTable row contains a null ID or Field document and cannot be exported");
+                        return null;
+                    }
+
+                    Guid rowId = reader.GetGuid(0);
+                    Model.Field? field = JsonSerializer.Deserialize<Model.Field>(reader.GetString(1), JsonSettings.Options);
+                    if (field?.MetaInfo?.ID != rowId)
+                    {
+                        _logger.LogError("FieldTable row {FieldId} does not match the UUID embedded in its Field document", rowId);
+                        return null;
+                    }
+                    fields.Add(field);
+                }
+                _logger.LogInformation("Returning a verified snapshot of all Field records for batch export");
+                return fields;
+            }
+            catch (Exception ex) when (ex is SqliteException or JsonException)
+            {
+                _logger.LogError(ex, "Impossible to read a verified Field snapshot for batch export");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Reads fields and all locally managed reference catalogs from one SQLite
+        /// snapshot, then produces the dependency-closed versioned export.
+        /// </summary>
+        public FieldBatchExportOutcome ExportBatch(FieldBatchExportRequest? request)
+        {
+            using SqliteConnection? connection = _connectionManager.GetConnection();
+            if (connection == null)
+            {
+                return FieldBatchExporter.StorageFailure("The field database is unavailable.");
+            }
+
+            using SqliteTransaction transaction = connection.BeginTransaction();
+            try
+            {
+                List<Model.Field?> fields = ReadDocuments<Model.Field>(connection, transaction, "FieldTable", "Field");
+                List<FieldFeatureCategory> features = ReadDocuments<FieldFeatureCategory>(connection, transaction,
+                    "FieldFeatureCategoryTable", "FieldFeatureCategory").Where(value => value != null).Cast<FieldFeatureCategory>().ToList();
+                List<FieldMembershipCategory> memberships = ReadDocuments<FieldMembershipCategory>(connection, transaction,
+                    "FieldMembershipCategoryTable", "FieldMembershipCategory").Where(value => value != null).Cast<FieldMembershipCategory>().ToList();
+                List<FieldIdentity> identities = ReadDocuments<FieldIdentity>(connection, transaction,
+                    "FieldIdentityTable", "FieldIdentity").Where(value => value != null).Cast<FieldIdentity>().ToList();
+                List<FieldDelineationLineType> lineTypes = ReadDocuments<FieldDelineationLineType>(connection, transaction,
+                    "FieldDelineationLineTypeTable", "FieldDelineationLineType").Where(value => value != null).Cast<FieldDelineationLineType>().ToList();
+
+                FieldBatchExportOutcome outcome = FieldBatchExporter.Create(request, fields, DateTimeOffset.UtcNow,
+                    features, memberships, identities, lineTypes);
+                transaction.Commit();
+                return outcome;
+            }
+            catch (Exception ex) when (ex is SqliteException or JsonException or InvalidOperationException)
+            {
+                try { transaction.Rollback(); } catch (InvalidOperationException) { }
+                _logger.LogError(ex, "Impossible to read a dependency-closed Field batch export");
+                return FieldBatchExporter.StorageFailure("The stored fields or their catalog dependencies could not be read.");
+            }
+        }
+
+        private static List<T?> ReadDocuments<T>(SqliteConnection connection, SqliteTransaction transaction,
+            string table, string documentColumn)
+        {
+            using SqliteCommand command = connection.CreateCommand();
+            command.Transaction = transaction;
+            command.CommandText = $"SELECT {documentColumn} FROM {table} ORDER BY ID";
+            using SqliteDataReader reader = command.ExecuteReader();
+            List<T?> result = [];
+            while (reader.Read())
+            {
+                if (reader.IsDBNull(0)) throw new JsonException($"{table} contains a null document.");
+                T? value = JsonSerializer.Deserialize<T>(reader.GetString(0), JsonSettings.Options);
+                if (value == null) throw new JsonException($"{table} contains an invalid document.");
+                result.Add(value);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Validates and restores all fields in the supplied backup document in one transaction.
+        /// </summary>
+        public FieldBatchRestoreOutcome RestoreBatch(FieldBatchRestoreRequest? request)
+        {
+            try
+            {
+                using SqliteConnection? connection = _connectionManager.GetConnection();
+                if (connection == null)
+                {
+                    _logger.LogWarning("Impossible to access the SQLite database for batch restore");
+                    return FieldBatchRestorer.StorageFailure("The field database is unavailable.");
+                }
+
+                FieldBatchRestoreOutcome outcome = FieldBatchRestorer.Restore(connection, request, DateTimeOffset.UtcNow);
+                if (outcome.IsSuccess)
+                {
+                    _logger.LogInformation(
+                        "Atomically restored {CreatedCount} new and {ReplacedCount} existing Field records",
+                        outcome.Response!.CreatedCount,
+                        outcome.Response.ReplacedCount);
+                }
+                return outcome;
+            }
+            catch (SqliteException ex)
+            {
+                _logger.LogError(ex, "Impossible to open the Field database for batch restore");
+                return FieldBatchRestorer.StorageFailure("The field database is unavailable.");
+            }
+        }
+
+        /// <summary>
+        /// Returns the list of all FieldLight present in the microservice database
+        /// </summary>
+        /// <returns>the list of FieldLight present in the microservice database</returns>
+        public List<Model.FieldLight>? GetAllFieldLight()
+        {
+            List<Model.FieldLight> vals = [];
+            using var connection = _connectionManager.GetConnection();
+            if (connection != null)
+            {
+                var command = connection.CreateCommand();
+                command.CommandText = "SELECT Field FROM FieldTable";
+                try
+                {
+                    using var reader = command.ExecuteReader();
+                    while (reader.Read() && !reader.IsDBNull(0))
+                    {
+                        string data = reader.GetString(0);
+                        Model.Field? field = JsonSerializer.Deserialize<Model.Field>(data, JsonSettings.Options);
+                        if (field != null)
+                        {
+                            vals.Add(new Model.FieldLight(
+                                field.MetaInfo,
+                                field.Name,
+                                field.Description,
+                                field.CreationDate,
+                                field.LastModificationDate));
+                        }
+                    }
+                    _logger.LogInformation("Returning the list of existing FieldLight from FieldTable");
+                    return vals;
+                }
+                catch (SqliteException ex)
+                {
+                    _logger.LogError(ex, "Impossible to get light data from FieldTable");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Impossible to access the SQLite database");
+            }
+            return null;
+        }
+
+
+        /// <summary>
+        /// Performs calculation on the given Field and adds it to the microservice database
+        /// </summary>
+        /// <param name="field"></param>
+        /// <returns>true if the given Field has been added successfully to the microservice database</returns>
+        internal FieldMutationResult AddField(Model.Field? field)
+        {
+            if (field?.MetaInfo == null || field.MetaInfo.ID == Guid.Empty)
+            {
+                return FieldMutationResult.Invalid("Field.MetaInfo.ID", "invalid_id", "A non-empty Field UUID is required.");
+            }
+
+            using var connection = _connectionManager.GetConnection();
+            if (connection == null)
+            {
+                return FieldMutationResult.StorageFailure();
+            }
+
+            using SqliteTransaction transaction = connection.BeginTransaction();
+            try
+            {
+                using (SqliteCommand exists = connection.CreateCommand())
+                {
+                    exists.Transaction = transaction;
+                    exists.CommandText = "SELECT COUNT(*) FROM FieldTable WHERE ID = $id";
+                    exists.Parameters.AddWithValue("$id", field.MetaInfo.ID.ToString());
+                    if (Convert.ToInt64(exists.ExecuteScalar()) != 0)
+                    {
+                        transaction.Rollback();
+                        return new FieldMutationResult(FieldMutationFailureKind.Conflict, new FieldMutationErrorEnvelope
+                        {
+                            Error = "already_exists",
+                            Message = "A Field with the supplied UUID already exists."
+                        });
+                    }
+                }
+
+                List<FieldMutationError> referenceErrors = FieldReferenceIntegrityValidator.ValidateField(connection, transaction, field);
+                if (referenceErrors.Count != 0)
+                {
+                    transaction.Rollback();
+                    return FieldMutationResult.InvalidReferences(referenceErrors);
+                }
+
+                DateTimeOffset now = DateTimeOffset.UtcNow;
+                field.CreationDate = now;
+                field.LastModificationDate = now;
+                FieldDelineationCalculator.Calculate(field);
+
+                using SqliteCommand command = connection.CreateCommand();
+                command.Transaction = transaction;
+                command.CommandText = "INSERT INTO FieldTable (ID, MetaInfo, Field) VALUES ($id, $meta, $field)";
+                command.Parameters.AddWithValue("$id", field.MetaInfo.ID.ToString());
+                command.Parameters.AddWithValue("$meta", JsonSerializer.Serialize(field.MetaInfo, JsonSettings.Options));
+                command.Parameters.AddWithValue("$field", JsonSerializer.Serialize(field, JsonSettings.Options));
+                if (command.ExecuteNonQuery() != 1)
+                {
+                    transaction.Rollback();
+                    return FieldMutationResult.StorageFailure();
+                }
+
+                transaction.Commit();
+                _logger.LogInformation("Added Field {FieldId} successfully", field.MetaInfo.ID);
+                return FieldMutationResult.Success();
+            }
+            catch (Exception ex) when (ex is SqliteException or JsonException)
+            {
+                transaction.Rollback();
+                _logger.LogError(ex, "Impossible to add Field {FieldId}", field.MetaInfo.ID);
+                return FieldMutationResult.StorageFailure();
+            }
+        }
+
+        /// <summary>
+        /// Performs calculation on the given Field and updates it in the microservice database
+        /// </summary>
+        /// <param name="field"></param>
+        /// <returns>true if the given Field has been updated successfully</returns>
+        internal FieldMutationResult UpdateFieldById(Guid guid, DateTimeOffset expectedModifiedUtc, Model.Field? field)
+        {
+            if (guid == Guid.Empty || field?.MetaInfo == null || field.MetaInfo.ID != guid)
+            {
+                return FieldMutationResult.Invalid("Field.MetaInfo.ID", "id_mismatch", "The route UUID must match Field.MetaInfo.ID.");
+            }
+
+            using var connection = _connectionManager.GetConnection();
+            if (connection == null)
+            {
+                return FieldMutationResult.StorageFailure();
+            }
+
+            using SqliteTransaction transaction = connection.BeginTransaction();
+            try
+            {
+                Model.Field? stored;
+                using (SqliteCommand read = connection.CreateCommand())
+                {
+                    read.Transaction = transaction;
+                    read.CommandText = "SELECT Field FROM FieldTable WHERE ID = $id";
+                    read.Parameters.AddWithValue("$id", guid.ToString());
+                    object? serialized = read.ExecuteScalar();
+                    stored = serialized is string json ? JsonSerializer.Deserialize<Model.Field>(json, JsonSettings.Options) : null;
+                }
+                if (stored == null)
+                {
+                    transaction.Rollback();
+                    return FieldMutationResult.NotFound("The Field does not exist.");
+                }
+                if (stored.LastModificationDate == null || !SameInstant(stored.LastModificationDate.Value, expectedModifiedUtc))
+                {
+                    transaction.Rollback();
+                    return FieldMutationResult.ConcurrencyConflict("expectedModifiedUtc",
+                        $"Expected {expectedModifiedUtc:O}, but the stored Field was modified at {stored.LastModificationDate:O}.");
+                }
+
+                List<FieldMutationError> referenceErrors = FieldReferenceIntegrityValidator.ValidateField(connection, transaction, field);
+                if (referenceErrors.Count != 0)
+                {
+                    transaction.Rollback();
+                    return FieldMutationResult.InvalidReferences(referenceErrors);
+                }
+
+                field.CreationDate = stored.CreationDate;
+                field.LastModificationDate = DateTimeOffset.UtcNow;
+                FieldDelineationCalculator.Calculate(field);
+                using SqliteCommand command = connection.CreateCommand();
+                command.Transaction = transaction;
+                command.CommandText = "UPDATE FieldTable SET MetaInfo = $meta, Field = $field WHERE ID = $id";
+                command.Parameters.AddWithValue("$id", guid.ToString());
+                command.Parameters.AddWithValue("$meta", JsonSerializer.Serialize(field.MetaInfo, JsonSettings.Options));
+                command.Parameters.AddWithValue("$field", JsonSerializer.Serialize(field, JsonSettings.Options));
+                if (command.ExecuteNonQuery() != 1)
+                {
+                    transaction.Rollback();
+                    return FieldMutationResult.StorageFailure();
+                }
+
+                transaction.Commit();
+                _logger.LogInformation("Updated Field {FieldId} successfully", guid);
+                return FieldMutationResult.Success();
+            }
+            catch (Exception ex) when (ex is SqliteException or JsonException)
+            {
+                transaction.Rollback();
+                _logger.LogError(ex, "Impossible to update Field {FieldId}", guid);
+                return FieldMutationResult.StorageFailure();
+            }
+        }
+
+        private static bool SameInstant(DateTimeOffset left, DateTimeOffset right) => left.UtcTicks == right.UtcTicks;
+
+        /// <summary>
+        /// Deletes the Field of given ID from the microservice database
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <returns>true if the Field was deleted from the microservice database</returns>
+        public bool DeleteFieldById(Guid guid)
+        {
+            if (!guid.Equals(Guid.Empty))
+            {
+                var connection = _connectionManager.GetConnection();
+                if (connection != null)
+                {
+                    using var transaction = connection.BeginTransaction();
+                    bool success = true;
+                    //delete Field from FieldTable
+                    try
+                    {
+                        var command = connection.CreateCommand();
+                        command.CommandText = $"DELETE FROM FieldTable WHERE ID = '{guid}'";
+                        int count = command.ExecuteNonQuery();
+                        if (count < 0)
+                        {
+                            _logger.LogWarning("Impossible to delete the Field of given ID from the FieldTable");
+                            success = false;
+                        }
+                    }
+                    catch (SqliteException ex)
+                    {
+                        _logger.LogError(ex, "Impossible to delete the Field of given ID from FieldTable");
+                        success = false;
+                    }
+                    if (success)
+                    {
+                        transaction.Commit();
+                        _logger.LogInformation("Removed the Field of given ID from the FieldTable successfully");
+                    }
+                    else
+                    {
+                        transaction.Rollback();
+                    }
+                    return success;
+                }
+                else
+                {
+                    _logger.LogWarning("Impossible to access the SQLite database");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("The Field ID is null or empty");
+            }
+            return false;
+        }
+    }
+}
