@@ -1,3 +1,4 @@
+using DrillSim.PublicationGate;
 using Microsoft.OpenApi;
 using System.Threading.Tasks;
 using Scalar.AspNetCore;
@@ -17,6 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration["ConnectionStrings:Sqlite"] ??=
     $"Data Source={SqlConnectionManager.HOME_DIRECTORY}{SqlConnectionManager.DATABASE_FILENAME}";
 builder.AddServiceDefaults();
+builder.AddScenarioPublicationGate();
 
 // registering the manager of SQLite connections through dependency injection
 builder.Services.AddSingleton(sp =>
@@ -27,7 +29,8 @@ builder.Services.AddSingleton(sp =>
 // registering the database cleaner service through dependency injection
 builder.Services.AddHostedService(sp => new DatabaseCleanerService(
     sp.GetRequiredService<ILogger<DatabaseCleanerService>>(),
-    sp.GetRequiredService<SqlConnectionManager>()));
+    sp.GetRequiredService<SqlConnectionManager>(),
+    sp.GetRequiredService<ScenarioPublicationGateStore>()));
 
 // serialization settings (using System.Json)
 builder.Services.AddControllers()
@@ -73,6 +76,7 @@ var basePath = "/wellborearchitecture/api";
 var scheme = "http";
 
 app.UsePathBase(basePath);
+app.UseScenarioPublicationGate();
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
@@ -114,4 +118,5 @@ app.MapControllers();
 app.MapFallbackToFile("index.html");
 app.MapDefaultEndpoints();
 
+app.MapScenarioPublicationGateEndpoints();
 app.Run();

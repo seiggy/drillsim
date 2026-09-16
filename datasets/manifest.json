@@ -1,0 +1,193 @@
+{
+  "schemaVersion": 1,
+  "datasets": [
+    {
+      "id": "force-2020",
+      "title": "FORCE 2020 well log and lithofacies dataset",
+      "redistributable": true,
+      "license": {
+        "id": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "Bormann, Peter; Aursand, Peder; Dilib, Fahad; Manral, Surrender; and Dischington, Peter (2020), FORCE 2020 Well well log and lithofacies dataset for machine learning competition, Zenodo, https://doi.org/10.5281/zenodo.4351156, CC BY 4.0. Original Norwegian government data licensed under NLOD 2.0. Changes, if any, are identified."
+      },
+      "artifacts": [
+        {
+          "path": "force-2020/LAS_files_Force_2020_all_wells_train_test_blind_hidden_final.zip",
+          "url": "https://zenodo.org/api/records/4351156/files/LAS_files_Force_2020_all_wells_train_test_blind_hidden_final.zip/content",
+          "bytes": 169785172,
+          "checksum": {
+            "algorithm": "md5",
+            "value": "da0d72d5783a780ac71779453d9fbfbf"
+          }
+        },
+        {
+          "path": "force-2020/NPD_Lithostratigraphy_member_formations_all_wells.xlsx",
+          "url": "https://zenodo.org/api/records/4351156/files/NPD_Lithostratigraphy_member_formations_all_wells.xlsx/content",
+          "bytes": 168501,
+          "checksum": {
+            "algorithm": "md5",
+            "value": "f17eb022983ec728a5e811892aeea41b"
+          }
+        },
+        {
+          "path": "force-2020/NPD_Lithostratigraphy_groups_all_wells.xlsx",
+          "url": "https://zenodo.org/api/records/4351156/files/NPD_Lithostratigraphy_groups_all_wells.xlsx/content",
+          "bytes": 80797,
+          "checksum": {
+            "algorithm": "md5",
+            "value": "5c42fbc98b446c170fd9924dfd5cf546"
+          }
+        },
+        {
+          "path": "force-2020/NPD_Casing_depth_most_wells.xlsx",
+          "url": "https://zenodo.org/api/records/4351156/files/NPD_Casing_depth_most_wells.xlsx/content",
+          "bytes": 27080,
+          "checksum": {
+            "algorithm": "md5",
+            "value": "45e291e6e5ff251056ff288978ef4ffb"
+          }
+        }
+      ]
+    },
+    {
+      "id": "kgs",
+      "title": "Kansas Geological Survey oil and gas database",
+      "redistributable": true,
+      "license": {
+        "id": "LicenseRef-KGS-Terms",
+        "url": "https://www.kgs.ku.edu/General/copyright.html",
+        "attribution": "The source of this material is the Kansas Geological Survey website at http://www.kgs.ku.edu/. All Rights Reserved."
+      },
+      "artifacts": [
+        {
+          "path": "kgs/ks_wells.zip",
+          "url": "https://www.kgs.ku.edu/PRS/Ora_Archive/ks_wells.zip"
+        },
+        {
+          "path": "kgs/ks_tops.zip",
+          "url": "https://www.kgs.ku.edu/PRS/Ora_Archive/ks_tops.zip"
+        },
+        {
+          "path": "kgs/ks_las_files.zip",
+          "url": "https://www.kgs.ku.edu/PRS/Ora_Archive/ks_las_files.zip"
+        }
+      ]
+    },
+    {
+      "id": "usgs-williston",
+      "title": "USGS Williston Basin well and formation-top data",
+      "redistributable": true,
+      "license": {
+        "id": "LicenseRef-US-Public-Domain",
+        "url": "https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits",
+        "attribution": "Gelman, S.E., and Johnson, B.G., 2023, Data release for the 3D petroleum systems model of the Williston Basin, USA: U.S. Geological Survey data release, https://doi.org/10.5066/P9N7O1OT."
+      },
+      "artifacts": [
+        {
+          "path": "usgs-williston/Williston_Basin_well_data.csv",
+          "url": "https://www.sciencebase.gov/catalog/file/get/6442dff0d34ee8d4ade8eae1?f=__disk__49%2F45%2F4f%2F49454f818ffacfec8666feca846b7ae4c87734fc",
+          "bytes": 3813507,
+          "checksum": {
+            "algorithm": "md5",
+            "value": "b84e567b676bdce910cd88e556d93b59"
+          }
+        },
+        {
+          "path": "usgs-williston/Williston_Basin_well_data_glossary.csv",
+          "url": "https://www.sciencebase.gov/catalog/file/get/6442dff0d34ee8d4ade8eae1?f=__disk__26%2Fcc%2Fca%2F26ccca589a63ddf56f737bc4caf1a67110b70c52",
+          "bytes": 11760,
+          "checksum": {
+            "algorithm": "md5",
+            "value": "7df59a2395db006a299a0868540e3bbc"
+          }
+        },
+        {
+          "path": "usgs-williston/well_data_tables.xml",
+          "url": "https://www.sciencebase.gov/catalog/file/get/6442dff0d34ee8d4ade8eae1?f=__disk__23%2Fb9%2F21%2F23b921e5a4047795e4998c36ec607aecd1acfab4",
+          "bytes": 65124,
+          "checksum": {
+            "algorithm": "sha256",
+            "value": "b667f997e0e3f6fbb17cf6cb971cbed0a83b9cebe4d7ce1b32a2d149ac3d2171"
+          },
+          "publishedMd5Mismatch": "ca2d589fa6a22470f95155fcda904104 did not match the authoritative response on 2026-09-01"
+        }
+      ]
+    },
+    {
+      "id": "sodir-force-troll",
+      "title": "SODIR FactMaps metadata for FORCE 2020 wellbores intersecting Troll",
+      "redistributable": true,
+      "license": {
+        "id": "NLOD-2.0",
+        "url": "https://data.norge.no/nlod/en/2.0",
+        "attribution": "Contains data from the Norwegian Offshore Directorate, licensed under the Norwegian Licence for Open Government Data (NLOD) 2.0."
+      },
+      "artifacts": [
+        {
+          "path": "sodir/force-troll-wellbores.json",
+          "url": "https://factmaps.sodir.no/api/rest/services/DataService/Data/MapServer/5000/query?where=wlbWellboreName%3D%2731%2F2-1%27+OR+wlbWellboreName%3D%2731%2F2-10%27+OR+wlbWellboreName%3D%2731%2F2-7%27+OR+wlbWellboreName%3D%2731%2F2-9%27+OR+wlbWellboreName%3D%2731%2F3-1%27+OR+wlbWellboreName%3D%2731%2F3-2%27+OR+wlbWellboreName%3D%2731%2F5-4+S%27+OR+wlbWellboreName%3D%2731%2F6-5%27+OR+wlbWellboreName%3D%2731%2F6-8%27&outFields=wlbWellboreName%2CwlbNpdidWellbore%2CwlbWell%2CwlbField%2CwlbEntryDate%2CwlbCompletionDate%2CwlbContent%2CwlbTotalDepth%2CwlbFinalVerticalDepth%2CwlbWaterDepth%2CwlbMaxInclation%2CwlbFormationWithHc1%2CwlbFormationWithHc2%2CwlbGeodeticDatum&returnGeometry=true&outSR=4326&f=json"
+        },
+        {
+          "path": "sodir/troll-all-wellbores.json",
+          "url": "https://factmaps.sodir.no/api/rest/services/DataService/Data/MapServer/5000/query?where=wlbField%3D%27TROLL%27&outFields=wlbWellboreName%2CwlbNpdidWellbore%2CwlbWell%2CwlbField%2CwlbEntryDate%2CwlbCompletionDate%2CwlbContent%2CwlbTotalDepth%2CwlbFinalVerticalDepth%2CwlbWaterDepth%2CwlbMaxInclation%2CwlbFormationWithHc1%2CwlbFormationWithHc2%2CwlbGeodeticDatum&returnGeometry=true&outSR=4326&resultRecordCount=2000&f=json"
+        },
+        {
+          "path": "sodir/troll-sognefjord-intervals.json",
+          "url": "https://factmaps.sodir.no/api/rest/services/DataService/Data/MapServer/2101/query?where=lsuName%3D%27SOGNEFJORD+FM%27&outFields=wlbNpdidWellbore%2CwlbName%2ClsuTopDepth%2ClsuBottomDepth%2ClsuName%2ClsuLevel%2ClsuNpdidLithoStrat&returnGeometry=false&resultRecordCount=2000&f=json"
+        }
+      ]
+    },
+    {
+      "id": "sodir-force-15-9",
+      "title": "SODIR FactMaps metadata for FORCE 2020 wells in block 15/9",
+      "redistributable": true,
+      "license": {
+        "id": "NLOD-2.0",
+        "url": "https://data.norge.no/nlod/en/2.0",
+        "attribution": "Contains data from the Norwegian Offshore Directorate, licensed under the Norwegian Licence for Open Government Data (NLOD) 2.0."
+      },
+      "artifacts": [
+        {
+          "path": "sodir/force-15-9-wellbores.json",
+          "url": "https://factmaps.sodir.no/api/rest/services/DataService/Data/MapServer/5000/query?where=wlbWellboreName%3D%2715%2F9-13%27+OR+wlbWellboreName%3D%2715%2F9-14%27+OR+wlbWellboreName%3D%2715%2F9-15%27+OR+wlbWellboreName%3D%2715%2F9-17%27+OR+wlbWellboreName%3D%2715%2F9-23%27&outFields=wlbWellboreName%2CwlbNpdidWellbore%2CwlbWell%2CwlbField%2CwlbEntryDate%2CwlbCompletionDate%2CwlbContent%2CwlbTotalDepth%2CwlbFinalVerticalDepth%2CwlbWaterDepth%2CwlbMaxInclation%2CwlbFormationWithHc1%2CwlbFormationWithHc2%2CwlbGeodeticDatum&returnGeometry=true&outSR=4326&f=json"
+        },
+        {
+          "path": "sodir/force-15-9-lithostratigraphy.json",
+          "url": "https://factmaps.sodir.no/api/rest/services/DataService/Data/MapServer/2101/query?where=%28wlbName%3D%2715%2F9-13%27+OR+wlbName%3D%2715%2F9-14%27+OR+wlbName%3D%2715%2F9-15%27+OR+wlbName%3D%2715%2F9-17%27+OR+wlbName%3D%2715%2F9-23%27%29+AND+lsuLevel%3D%27FORMATION%27&outFields=wlbName%2ClsuTopDepth%2ClsuBottomDepth%2ClsuName%2ClsuLevel%2ClsuNpdidLithoStrat&returnGeometry=false&f=json"
+        }
+      ]
+    },
+    {
+      "id": "sodir-15-9-13",
+      "title": "SODIR FactPages structured records for well 15/9-13",
+      "redistributable": true,
+      "license": {
+        "id": "NLOD-2.0",
+        "url": "https://data.norge.no/nlod/en/2.0",
+        "attribution": "Contains data from the Norwegian Offshore Directorate, licensed under the Norwegian Licence for Open Government Data (NLOD) 2.0."
+      },
+      "artifacts": [
+        {
+          "path": "sodir/15-9-13-wellbore.json",
+          "url": "https://factmaps.sodir.no/api/rest/services/DataService/Data/MapServer/5000/query?where=wlbWellboreName%3D%2715%2F9-13%27&outFields=*&returnGeometry=false&f=json",
+          "selected": false
+        },
+        {
+          "path": "sodir/15-9-13-log-labels.json",
+          "url": "https://factmaps.sodir.no/api/rest/services/DataService/Data/MapServer/5011/query?where=wlbName%3D%2715%2F9-13%27&outFields=*&returnGeometry=false&f=pjson",
+          "selected": false
+        },
+        {
+          "path": "sodir/15-9-13-lithostratigraphy.json",
+          "url": "https://factmaps.sodir.no/api/rest/services/DataService/Data/MapServer/2101/query?where=wlbName%3D%2715%2F9-13%27&outFields=*&returnGeometry=false&f=json",
+          "selected": false
+        }
+      ]
+    }
+  ],
+  "excluded": [
+    "KGS scanned TIFF/PDF logs and third-party raw LAS files",
+    "USGS proprietary source LAS, raster logs, and IHS/S&P well-header data",
+    "SODIR linked reports, core images, composite logs, and raw logs with third-party rights"
+  ]
+}

@@ -10,6 +10,82 @@
     }
   ],
   "paths": {
+    "/internal/publication/records/{entityId}/stage": {
+      "put": {
+        "tags": [
+          "Service"
+        ],
+        "parameters": [
+          {
+            "name": "entityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/System.Guid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DrillSim.PublicationGate.PublicationStageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/internal/publication/records/{entityId}": {
+      "get": {
+        "tags": [
+          "Service"
+        ],
+        "parameters": [
+          {
+            "name": "entityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/System.Guid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/internal/publication/records/{entityId}/activate": {
+      "put": {
+        "tags": [
+          "Service"
+        ],
+        "parameters": [
+          {
+            "name": "entityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/System.Guid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/GlobalAntiCollisions": {
       "get": {
         "tags": [
@@ -2945,6 +3021,59 @@
         }
       }
     },
+    "/internal/publication/Trajectory": {
+      "post": {
+        "tags": [
+          "Trajectory"
+        ],
+        "operationId": "ImportPublishedTrajectory",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.Trajectory.Model.Trajectory"
+                  }
+                ],
+                "nullable": true
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.Trajectory.Model.Trajectory"
+                  }
+                ],
+                "nullable": true
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NORCE.Drilling.Trajectory.Model.Trajectory"
+                  }
+                ],
+                "nullable": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { }
+            }
+          }
+        }
+      }
+    },
     "/TrajectoryMinimumDistanceCalculation": {
       "get": {
         "tags": [
@@ -3610,6 +3739,21 @@
   },
   "components": {
     "schemas": {
+      "DrillSim.PublicationGate.PublicationStageRequest": {
+        "required": [
+          "scenarioId",
+          "revealId"
+        ],
+        "type": "object",
+        "properties": {
+          "scenarioId": {
+            "$ref": "#/components/schemas/System.Guid"
+          },
+          "revealId": {
+            "$ref": "#/components/schemas/System.Guid"
+          }
+        }
+      },
       "NORCE.Drilling.GlobalAntiCollision.GlobalAntiCollision": {
         "type": "object",
         "properties": {
@@ -8077,6 +8221,9 @@
     }
   },
   "tags": [
+    {
+      "name": "Service"
+    },
     {
       "name": "GlobalAntiCollisions"
     },

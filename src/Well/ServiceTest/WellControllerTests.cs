@@ -4,6 +4,7 @@ using System.IO;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
 using NUnit.Framework;
+using OSDC.Drilling.Well.Model;
 using WellModel = OSDC.Drilling.Well.Model.Well;
 using OSDC.Drilling.Well.Service.Controllers;
 using OSDC.Drilling.Well.Service.Managers;
@@ -119,6 +120,57 @@ namespace OSDC.Drilling.Well.ServiceTest
             var ok = _controller.GetWellById(well.MetaInfo!.ID);
             var updated = ((Microsoft.AspNetCore.Mvc.OkObjectResult)ok.Result!).Value as WellModel;
             Assert.That(updated!.Name, Is.EqualTo("Updated"));
+        }
+
+        [Test]
+        public void PostAndPutWell_PreserveDatasetTextContainingApostrophes()
+        {
+            var artifactId = Guid.NewGuid();
+            var well = NewWell();
+            well.Name = "O'Brien 1";
+            well.Dataset = new WellDataset
+            {
+                Provenance = new WellDatasetProvenance
+                {
+                    DatasetName = "Kansas Geological Survey",
+                    Classification = WellDataClassification.Observed,
+                    SourceArtifacts =
+                    [
+                        new WellSourceArtifact
+                        {
+                            ID = artifactId,
+                            License = "KGS Terms of Use",
+                            Attribution = "Kansas Geological Survey's database",
+                            SHA256 = new string('a', 64)
+                        }
+                    ]
+                },
+                MonthlyProduction =
+                [
+                    new WellMonthlyProduction
+                    {
+                        Year = 2025,
+                        Month = 1,
+                        Oil = new WellProductionQuantity { Value = 10, Unit = "m3" },
+                        SourceArtifactID = artifactId,
+                        Classification = WellDataClassification.Observed
+                    }
+                ]
+            };
+
+            Assert.That(_controller.PostWell(well), Is.InstanceOf<Microsoft.AspNetCore.Mvc.OkResult>());
+            var created = (WellModel)((Microsoft.AspNetCore.Mvc.OkObjectResult)
+                _controller.GetWellById(well.MetaInfo!.ID).Result!).Value!;
+            Assert.That(created.Name, Is.EqualTo("O'Brien 1"));
+            Assert.That(created.Dataset!.Provenance!.SourceArtifacts![0].Attribution,
+                Is.EqualTo("Kansas Geological Survey's database"));
+
+            well.Description = "Operator's corrected record";
+            Assert.That(_controller.PutWellById(well.MetaInfo.ID, well),
+                Is.InstanceOf<Microsoft.AspNetCore.Mvc.OkResult>());
+            var updated = (WellModel)((Microsoft.AspNetCore.Mvc.OkObjectResult)
+                _controller.GetWellById(well.MetaInfo.ID).Result!).Value!;
+            Assert.That(updated.Description, Is.EqualTo("Operator's corrected record"));
         }
 
         [Test]

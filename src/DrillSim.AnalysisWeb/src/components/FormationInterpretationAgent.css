@@ -1,0 +1,8 @@
+.formation-agent { margin-block: 18px; padding: 16px; border: 1px solid var(--cp-machine-rule); border-radius: .625rem; }
+.formation-agent > h4 { margin-top: 0; }
+.formation-agent p, .formation-agent li { max-width: 75ch; }
+.formation-agent-draft { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--cp-machine-rule); }
+.formation-agent-text dt { font-weight: 650; margin-top: 16px; }
+.formation-agent-text dd { margin: 6px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.formation-agent h5 { font-size: 14px; margin-bottom: 8px; }
+.formation-agent input:focus-visible { outline: 3px solid var(--cp-step-yellow); outline-offset: 3px; }

@@ -1,0 +1,42 @@
+{
+  "name": "drillsim-analysisweb",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "test:production": "node tests/production.test.mjs",
+    "test:prediction": "node tests/prediction.test.mjs",
+    "test:prediction-binding": "node tests/prediction-binding.test.mjs",
+    "test:scenario": "node tests/scenario-creation.test.mjs",
+    "test:simulation:browser": "node tests/simulation.browser.mjs",
+    "test:reservoir": "node tests/reservoir.test.mjs",
+    "test:sequencer": "node tests/sequencer.test.mjs",
+    "test:operator": "node tests/operator.test.mjs",
+    "test:hypotheses": "node tests/hypotheses.test.mjs",
+    "test:hypotheses:browser": "node tests/hypotheses.browser.mjs",
+    "test:tutorial": "node tests/tutorial.test.mjs",
+    "test:tutorial:browser": "node tests/tutorial.browser.mjs",
+    "test:guide:browser": "node tests/guide.browser.mjs",
+    "test:provenance": "node tests/provenance.test.mjs",
+    "test:provenance:browser": "node tests/provenance.browser.mjs",
+    "test:formation-ai": "node tests/formation-interpretation.test.mjs",
+    "test:formation-ai:browser": "node tests/formation-interpretation.browser.mjs",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@vitejs/plugin-react": "^5.1.4",
+    "typescript": "~5.9.3",
+    "vite": "^7.1.7"
+  },
+  "dependencies": {
+    "@ag-ui/client": "^0.1.1-canary.beta.0",
+    "azure-maps-control": "^3.7.4",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  }
+}

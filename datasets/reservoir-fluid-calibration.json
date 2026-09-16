@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "id": "troll-sognefjord-immiscible-black-oil-v1",
+  "fieldId": "502fea8b-4d85-5d40-86a7-f5b7655d89d6",
+  "reservoirName": "SOGNEFJORD FM",
+  "classification": "ModelEstimated",
+  "coordinateReference": {
+    "frame": "Field-local Riemannian east/north",
+    "originSource": "Field.ReferencePoint",
+    "originEastingM": 193849.777149024,
+    "originNorthingM": 6740415.97400403
+  },
+  "kernel": {
+    "name": "Immiscible three-phase black-oil IMPES",
+    "limitation": "Oil, water, and free gas are immiscible. Solution gas, condensate dropout, compositional phase behavior, and laboratory-tuned PVT are not represented."
+  },
+  "provenance": {
+    "basis": [
+      "FORCE 2020 log-derived porosity, resistivity, lithofacies, and permeability proxies",
+      "SODIR Troll/Sognefjord wellbore and lithostratigraphic interval records"
+    ],
+    "missingEvidence": [
+      "field-specific laboratory PVT",
+      "special-core-analysis relative permeability",
+      "capillary-pressure measurements",
+      "measured fluid-contact pressure gradients"
+    ],
+    "reviewRule": "Every value remains ModelEstimated until replaced by a cited source or calibration run."
+  },
+  "fluidModel": {
+    "referencePressure": {
+      "value": 20000000.0,
+      "unit": "Pa"
+    },
+    "gravity": {
+      "value": 9.80665,
+      "unit": "m/s2"
+    },
+    "oil": {
+      "density": {
+        "value": 800.0,
+        "unit": "kg/m3"
+      },
+      "viscosity": {
+        "value": 0.003,
+        "unit": "Pa.s"
+      },
+      "compressibility": {
+        "value": 1e-09,
+        "unit": "1/Pa"
+      }
+    },
+    "water": {
+      "density": {
+        "value": 1000.0,
+        "unit": "kg/m3"
+      },
+      "viscosity": {
+        "value": 0.001,
+        "unit": "Pa.s"
+      },
+      "compressibility": {
+        "value": 4e-10,
+        "unit": "1/Pa"
+      }
+    },
+    "gas": {
+      "density": {
+        "value": 100.0,
+        "unit": "kg/m3"
+      },
+      "viscosity": {
+        "value": 2e-05,
+        "unit": "Pa.s"
+      },
+      "compressibility": {
+        "value": 1e-08,
+        "unit": "1/Pa"
+      }
+    },
+    "rockCompressibility": {
+      "value": 5e-10,
+      "unit": "1/Pa"
+    }
+  },
+  "relativePermeability": {
+    "model": "Three-phase normalized Corey",
+    "oil": {
+      "residualSaturation": 0.1,
+      "endPoint": 1.0,
+      "exponent": 2.0
+    },
+    "water": {
+      "residualSaturation": 0.15,
+      "endPoint": 0.7,
+      "exponent": 2.0
+    },
+    "gas": {
+      "residualSaturation": 0.05,
+      "endPoint": 0.8,
+      "exponent": 2.0
+    }
+  },
+  "contactInitialization": {
+    "method": "Pressure-gradient and saturation-transition fit from logged controls",
+    "gasOilContactDepth": null,
+    "oilWaterContactDepth": null,
+    "gasWaterContactDepth": {
+      "value": 1587.6712726739269,
+      "unit": "m TVD",
+      "statistic": "median"
+    },
+    "gasWaterControlPoints": [
+      {
+        "eastingM": -5613.5659165357065,
+        "northingM": 11854.545247394592,
+        "contactDepthTvdM": 1580.660254369486,
+        "evidenceId": "geology:1fdc0755-c8d2-552f-9da0-50fac52b9252"
+      },
+      {
+        "eastingM": 5907.212274535792,
+        "northingM": 10513.169288353063,
+        "contactDepthTvdM": 1594.6822909783677,
+        "evidenceId": "geology:28a28167-69e1-58a3-883c-5ca9255ee52d"
+      },
+      {
+        "eastingM": 667.7945611266186,
+        "northingM": -5942.772581114434,
+        "contactDepthTvdM": 1646.0826496067968,
+        "evidenceId": "geology:872c17b4-29d0-55d8-99be-1c1d10d72585"
+      },
+      {
+        "eastingM": 7813.6911618398735,
+        "northingM": -24459.508733252063,
+        "contactDepthTvdM": 1569.3023302369254,
+        "evidenceId": "geology:d0f64d25-4369-5083-9bce-2d2312047b39"
+      }
+    ],
+    "transitionThickness": {
+      "value": 12.0,
+      "unit": "m"
+    },
+    "status": "Sealed",
+    "fitVersion": "force-phase-transition-v1"
+  }
+}

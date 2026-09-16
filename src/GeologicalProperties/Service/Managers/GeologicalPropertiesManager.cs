@@ -31,7 +31,8 @@ namespace GeologicalProperties.Service.Managers
 
         public static GeologicalPropertiesManager GetInstance(ILogger<GeologicalPropertiesManager> logger, SqlConnectionManager connectionManager)
         {
-            _instance ??= new GeologicalPropertiesManager(logger, connectionManager);
+            if (_instance == null || !ReferenceEquals(_instance._connectionManager, connectionManager))
+                _instance = new GeologicalPropertiesManager(logger, connectionManager);
             return _instance;
         }
 
@@ -283,6 +284,42 @@ namespace GeologicalProperties.Service.Managers
             return null;
         }
 
+        public List<Model.GeologicalProperties?>? GetAllGeologicalPropertiesByWellBoreId(Guid wellBoreId)
+        {
+            if (wellBoreId == Guid.Empty)
+            {
+                _logger.LogWarning("The given WellBore ID is empty");
+                return null;
+            }
+
+            List<Model.GeologicalProperties?> values = [];
+            var connection = _connectionManager.GetConnection();
+            if (connection == null)
+            {
+                _logger.LogWarning("Impossible to access the SQLite database");
+                return null;
+            }
+
+            var command = connection.CreateCommand();
+            command.CommandText = "SELECT GeologicalProperties FROM GeologicalPropertiesTable WHERE WellBoreID = @wellBoreId";
+            command.Parameters.AddWithValue("@wellBoreId", wellBoreId.ToString());
+            try
+            {
+                using var reader = command.ExecuteReader();
+                while (reader.Read() && !reader.IsDBNull(0))
+                {
+                    string data = reader.GetString(0);
+                    values.Add(JsonSerializer.Deserialize<Model.GeologicalProperties>(data, JsonSettings.Options));
+                }
+                return values;
+            }
+            catch (SqliteException ex)
+            {
+                _logger.LogError(ex, "Impossible to get GeologicalProperties for WellBore {WellBoreId}", wellBoreId);
+                return null;
+            }
+        }
+
         /// <summary>
         /// Returns the list of all GeologicalPropertiesLight present in the microservice database 
         /// </summary>
@@ -348,6 +385,23 @@ namespace GeologicalProperties.Service.Managers
             return null;
         }
 
+        /// <summary>Imports an authoritative publication payload without calculation.</summary>
+        public bool ImportPublishedGeologicalProperties(Model.GeologicalProperties? geologicalProperties)
+        {
+            if (geologicalProperties?.MetaInfo == null || geologicalProperties.MetaInfo.ID == Guid.Empty ||
+                geologicalProperties.WellBoreID is null || geologicalProperties.WellBoreID == Guid.Empty ||
+                geologicalProperties.TrajectoryID == Guid.Empty)
+            {
+                _logger.LogWarning("Published geology requires a non-empty record and wellbore ID; a supplied trajectory ID must not be empty");
+                return false;
+            }
+            if (GetGeologicalPropertiesById(geologicalProperties.MetaInfo.ID) != null) return false;
+            DateTimeOffset now = DateTimeOffset.UtcNow;
+            geologicalProperties.CreationDate = now;
+            geologicalProperties.LastModificationDate = now;
+            return AddGeologicalProperties(geologicalProperties);
+        }
+
         /// <summary>
         /// Adds the given GeologicalProperties in the microservice database
         /// </summary>
@@ -379,29 +433,24 @@ namespace GeologicalProperties.Service.Managers
                                 lDate = ((DateTimeOffset)geologicalProperties.LastModificationDate).ToString(SqlConnectionManager.DATE_TIME_FORMAT);
                             string data = JsonSerializer.Serialize(geologicalProperties, JsonSettings.Options);
                             var command = connection.CreateCommand();
-                            command.CommandText = "INSERT INTO GeologicalPropertiesTable (" +
-                                "ID, " +
-                                "MetaInfo, " +
-                                "Name, " +
-                                "Description, " +
-                                "CreationDate, " +
-                                "LastModificationDate, " +
-                                "WellBoreID, " +
-                                "TrajectoryID, " +
-                                "IsPrognosed, " +
-                                "GeologicalProperties" +
-                                ") VALUES (" +
-                                $"'{geologicalProperties.MetaInfo.ID}', " +
-                                $"'{metaInfo}', " +
-                                $"'{geologicalProperties.Name}', " +
-                                $"'{geologicalProperties.Description}', " +
-                                $"'{cDate}', " +
-                                $"'{lDate}', " +
-                                $"'{geologicalProperties.WellBoreID}', " +
-                                $"'{geologicalProperties.TrajectoryID}', " +
-                                $"'{geologicalProperties.IsPrognosed}', " +
-                                $"'{data}'" +
-                                ")";
+                            command.CommandText = """
+                                INSERT INTO GeologicalPropertiesTable
+                                    (ID, MetaInfo, Name, Description, CreationDate, LastModificationDate,
+                                     WellBoreID, TrajectoryID, IsPrognosed, GeologicalProperties)
+                                VALUES
+                                    (@id, @metaInfo, @name, @description, @creationDate, @lastModificationDate,
+                                     @wellBoreId, @trajectoryId, @isPrognosed, @geologicalProperties)
+                                """;
+                            command.Parameters.AddWithValue("@id", geologicalProperties.MetaInfo.ID.ToString());
+                            command.Parameters.AddWithValue("@metaInfo", metaInfo);
+                            command.Parameters.AddWithValue("@name", geologicalProperties.Name ?? string.Empty);
+                            command.Parameters.AddWithValue("@description", geologicalProperties.Description ?? string.Empty);
+                            command.Parameters.AddWithValue("@creationDate", cDate ?? string.Empty);
+                            command.Parameters.AddWithValue("@lastModificationDate", lDate ?? string.Empty);
+                            command.Parameters.AddWithValue("@wellBoreId", geologicalProperties.WellBoreID?.ToString() ?? string.Empty);
+                            command.Parameters.AddWithValue("@trajectoryId", geologicalProperties.TrajectoryID?.ToString() ?? string.Empty);
+                            command.Parameters.AddWithValue("@isPrognosed", geologicalProperties.IsPrognosed.ToString());
+                            command.Parameters.AddWithValue("@geologicalProperties", data);
                             int count = command.ExecuteNonQuery();
                             if (count != 1)
                             {
@@ -471,17 +520,29 @@ namespace GeologicalProperties.Service.Managers
                         string? lDate = ((DateTimeOffset)geologicalProperties.LastModificationDate).ToString(SqlConnectionManager.DATE_TIME_FORMAT);
                         string data = JsonSerializer.Serialize(geologicalProperties, JsonSettings.Options);
                         var command = connection.CreateCommand();
-                        command.CommandText = $"UPDATE GeologicalPropertiesTable SET " +
-                            $"MetaInfo = '{metaInfo}', " +
-                            $"Name = '{geologicalProperties.Name}', " +
-                            $"Description = '{geologicalProperties.Description}', " +
-                            $"CreationDate = '{cDate}', " +
-                            $"LastModificationDate = '{lDate}', " +
-                            $"WellBoreID = '{geologicalProperties.WellBoreID}', " +
-                            $"TrajectoryID = '{geologicalProperties.TrajectoryID}', " +
-                            $"IsPrognosed = '{geologicalProperties.IsPrognosed}', " +
-                            $"GeologicalProperties = '{data}' " +
-                            $"WHERE ID = '{guid}'";
+                        command.CommandText = """
+                            UPDATE GeologicalPropertiesTable
+                            SET MetaInfo = @metaInfo,
+                                Name = @name,
+                                Description = @description,
+                                CreationDate = @creationDate,
+                                LastModificationDate = @lastModificationDate,
+                                WellBoreID = @wellBoreId,
+                                TrajectoryID = @trajectoryId,
+                                IsPrognosed = @isPrognosed,
+                                GeologicalProperties = @geologicalProperties
+                            WHERE ID = @id
+                            """;
+                        command.Parameters.AddWithValue("@metaInfo", metaInfo);
+                        command.Parameters.AddWithValue("@name", geologicalProperties.Name ?? string.Empty);
+                        command.Parameters.AddWithValue("@description", geologicalProperties.Description ?? string.Empty);
+                        command.Parameters.AddWithValue("@creationDate", cDate ?? string.Empty);
+                        command.Parameters.AddWithValue("@lastModificationDate", lDate ?? string.Empty);
+                        command.Parameters.AddWithValue("@wellBoreId", geologicalProperties.WellBoreID?.ToString() ?? string.Empty);
+                        command.Parameters.AddWithValue("@trajectoryId", geologicalProperties.TrajectoryID?.ToString() ?? string.Empty);
+                        command.Parameters.AddWithValue("@isPrognosed", geologicalProperties.IsPrognosed.ToString());
+                        command.Parameters.AddWithValue("@geologicalProperties", data);
+                        command.Parameters.AddWithValue("@id", guid.ToString());
                         int count = command.ExecuteNonQuery();
                         if (count != 1)
                         {

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (() => {
+        const param = new URLSearchParams(window.location.search).get("scoutTheme");
+        const theme =
+          param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", theme);
+      })();
+    </script>
+    <title>DrillSim Interpretation Desk</title>
+  </head>
+  <body>
+    <!--
+      THESIS: The portal is a playable sequence of geological hypotheses, not a dashboard with a chatbot attached.
+      OWN-WORLD: Charcoal instrument panels, sixteen tactile scenario keys, red/orange/yellow state laws, and calibrated scientific traces.
+      STORY: Select a field, step through evidence and assumptions, choose a target, then ask AI to challenge or generate alternatives in place.
+      FIRST VIEWPORT: A live field hypothesis owns the upper stage; the unbroken sixteen-step sequencer controls what the user and AI are testing below.
+      FORM: Hypothesis Sequencer, chosen challenger fused with direct field manipulation and inline AG-UI field notes; seed 58ab030f.
+    -->
+    <div id="app"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -39,4 +39,8 @@
 		<OpenApiGenerateDocumentsOptions>--document-name v1 --file-name FieldFullName --openapi-version OpenApi3_0</OpenApiGenerateDocumentsOptions>
 	</PropertyGroup>
 
+  <ItemGroup>
+    <Compile Include="..\..\DrillingOperations\PublicationGate\ScenarioPublicationGate.cs" Link="Infrastructure\ScenarioPublicationGate.cs" />
+  </ItemGroup>
+
 </Project>

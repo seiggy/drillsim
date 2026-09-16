@@ -121,6 +121,29 @@ namespace GeologicalProperties.Service.Controllers
             }
         }
 
+        [HttpGet("ByWellBoreID", Name = "GetAllGeologicalPropertiesByWellBoreId")]
+        public ActionResult<IEnumerable<Model.GeologicalProperties?>> GetAllGeologicalPropertiesByWellBoreId(Guid wellBoreId)
+        {
+            if (wellBoreId == Guid.Empty)
+                return BadRequest();
+
+            var values = _geologicalPropertiesManager.GetAllGeologicalPropertiesByWellBoreId(wellBoreId);
+            return values != null ? Ok(values) : StatusCode(StatusCodes.Status500InternalServerError);
+        }
+
+        [HttpPost("~/internal/publication/GeologicalProperties", Name = "ImportPublishedGeologicalProperties")]
+        public ActionResult ImportPublishedGeologicalProperties([FromBody] GeologicalProperties.Model.GeologicalProperties? data)
+        {
+            if (data?.MetaInfo == null || data.MetaInfo.ID == Guid.Empty ||
+                data.WellBoreID is null || data.WellBoreID == Guid.Empty || data.TrajectoryID == Guid.Empty)
+            {
+                _logger.LogWarning("Published geology requires a non-empty record and wellbore ID; a supplied trajectory ID must not be empty");
+                return BadRequest();
+            }
+            if (_geologicalPropertiesManager.GetGeologicalPropertiesById(data.MetaInfo.ID) is not null) return Conflict();
+            return _geologicalPropertiesManager.ImportPublishedGeologicalProperties(data) ? Ok() : StatusCode(StatusCodes.Status500InternalServerError);
+        }
+
         /// <summary>
         /// Performs calculation on the given GeologicalProperties and adds it to the microservice database, at the endpoint GeologicalProperties/api/GeologicalProperties
         /// </summary>

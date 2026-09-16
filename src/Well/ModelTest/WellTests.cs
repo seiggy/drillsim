@@ -21,6 +21,7 @@ namespace OSDC.Drilling.Well.ModelTest
             Assert.That(well.SlotID, Is.Null);
             Assert.That(well.ClusterID, Is.Null);
             Assert.That(well.IsSingleWell, Is.False);
+            Assert.That(well.Dataset, Is.Null);
         }
 
         [Test]
@@ -53,6 +54,55 @@ namespace OSDC.Drilling.Well.ModelTest
             Assert.That(well.SlotID, Is.EqualTo(slotId));
             Assert.That(well.ClusterID, Is.EqualTo(clusterId));
             Assert.That(well.IsSingleWell, Is.True);
+        }
+
+        [Test]
+        public void Dataset_PreservesProvenanceAndProduction()
+        {
+            var artifactId = Guid.NewGuid();
+            var validAt = new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero);
+            var firstSeenAt = validAt.AddDays(2);
+            var well = new OSDC.Drilling.Well.Model.Well
+            {
+                Dataset = new WellDataset
+                {
+                    Provenance = new WellDatasetProvenance
+                    {
+                        DatasetName = "KGS",
+                        Classification = WellDataClassification.Observed,
+                        SourceArtifacts =
+                        [
+                            new WellSourceArtifact
+                            {
+                                ID = artifactId,
+                                License = "KGS Terms of Use",
+                                Attribution = "Kansas Geological Survey"
+                            }
+                        ]
+                    },
+                    ExternalIdentifiers = [new WellExternalIdentifier { Namespace = "KGS", Value = "123" }],
+                    Temporal = new WellBitemporalTimestamps
+                    {
+                        ValidTimeStart = validAt,
+                        TransactionTimeStart = firstSeenAt
+                    },
+                    MonthlyProduction =
+                    [
+                        new WellMonthlyProduction
+                        {
+                            Year = 2025,
+                            Month = 1,
+                            Oil = new WellProductionQuantity { Value = 42, Unit = "m3" },
+                            SourceArtifactID = artifactId,
+                            Classification = WellDataClassification.Observed
+                        }
+                    ]
+                }
+            };
+
+            Assert.That(well.Dataset.Provenance.SourceArtifacts![0].Attribution, Is.EqualTo("Kansas Geological Survey"));
+            Assert.That(well.Dataset.Temporal.TransactionTimeStart, Is.EqualTo(firstSeenAt));
+            Assert.That(well.Dataset.MonthlyProduction[0].Oil!.Value, Is.EqualTo(42));
         }
     }
 }

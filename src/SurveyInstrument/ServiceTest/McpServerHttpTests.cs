@@ -81,8 +81,7 @@ public sealed class McpServerHttpTests
             new Dictionary<string, object?>(),
             cancellationToken: CancellationToken.None);
 
-        Assert.That(result.StructuredContent, Is.InstanceOf<JsonObject>());
-        var payload = (JsonObject)result.StructuredContent!;
-        Assert.That(payload["message"]?.GetValue<string>(), Is.EqualTo("pong"));
+        Assert.That(result.StructuredContent?.ValueKind, Is.EqualTo(System.Text.Json.JsonValueKind.Object));
+        Assert.That(result.StructuredContent!.Value.GetProperty("message").GetString(), Is.EqualTo("pong"));
     }
 }

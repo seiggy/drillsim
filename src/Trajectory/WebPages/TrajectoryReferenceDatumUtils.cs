@@ -82,7 +82,7 @@ public static class TrajectoryReferenceDatumUtils
         return new ReferenceLocation(
             latitude.Value,
             longitude.Value,
-            cluster?.ReferenceDepth?.GaussianValue?.Mean ?? 0.0,
+            (cluster?.GroundMudLineDepth ?? cluster?.ReferenceDepth)?.GaussianValue?.Mean ?? 0.0,
             cluster?.FieldID);
     }
 

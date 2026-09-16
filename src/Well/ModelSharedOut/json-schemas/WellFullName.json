@@ -10,6 +10,82 @@
     }
   ],
   "paths": {
+    "/internal/publication/records/{entityId}/stage": {
+      "put": {
+        "tags": [
+          "Service"
+        ],
+        "parameters": [
+          {
+            "name": "entityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/System.Guid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DrillSim.PublicationGate.PublicationStageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/internal/publication/records/{entityId}": {
+      "get": {
+        "tags": [
+          "Service"
+        ],
+        "parameters": [
+          {
+            "name": "entityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/System.Guid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/internal/publication/records/{entityId}/activate": {
+      "put": {
+        "tags": [
+          "Service"
+        ],
+        "parameters": [
+          {
+            "name": "entityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/System.Guid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/Well": {
       "get": {
         "tags": [
@@ -347,13 +423,28 @@
   },
   "components": {
     "schemas": {
+      "DrillSim.PublicationGate.PublicationStageRequest": {
+        "required": [
+          "ScenarioId",
+          "RevealId"
+        ],
+        "type": "object",
+        "properties": {
+          "ScenarioId": {
+            "$ref": "#/components/schemas/System.Guid"
+          },
+          "RevealId": {
+            "$ref": "#/components/schemas/System.Guid"
+          }
+        }
+      },
       "OSDC.DotnetLibraries.General.DataManagement.MetaInfo": {
         "type": "object",
         "properties": {
-          "id": {
+          "ID": {
             "$ref": "#/components/schemas/System.Guid"
           },
-          "httpHostName": {
+          "HttpHostName": {
             "type": "string",
             "oneOf": [
               {
@@ -362,7 +453,7 @@
             ],
             "nullable": true
           },
-          "httpHostBasePath": {
+          "HttpHostBasePath": {
             "type": "string",
             "oneOf": [
               {
@@ -371,7 +462,7 @@
             ],
             "nullable": true
           },
-          "httpEndPoint": {
+          "HttpEndPoint": {
             "type": "string",
             "oneOf": [
               {
@@ -385,10 +476,10 @@
       "OSDC.Drilling.Well.Model.CountPerDay": {
         "type": "object",
         "properties": {
-          "date": {
+          "Date": {
             "$ref": "#/components/schemas/System.DateTime"
           },
-          "count": {
+          "Count": {
             "$ref": "#/components/schemas/System.UInt64"
           }
         }
@@ -396,7 +487,7 @@
       "OSDC.Drilling.Well.Model.History": {
         "type": "object",
         "properties": {
-          "data": {
+          "Data": {
             "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Well.Model.CountPerDay, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
           }
         }
@@ -404,37 +495,37 @@
       "OSDC.Drilling.Well.Model.UsageStatisticsWell": {
         "type": "object",
         "properties": {
-          "lastSaved": {
+          "LastSaved": {
             "$ref": "#/components/schemas/System.DateTime"
           },
-          "backUpInterval": {
+          "BackUpInterval": {
             "$ref": "#/components/schemas/System.TimeSpan"
           },
-          "getAllWellIdPerDay": {
+          "GetAllWellIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.History"
           },
-          "getAllWellMetaInfoPerDay": {
+          "GetAllWellMetaInfoPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.History"
           },
-          "getWellByIdPerDay": {
+          "GetWellByIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.History"
           },
-          "getAllWellPerDay": {
+          "GetAllWellPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.History"
           },
-          "getAllWellBySlotIdPerDay": {
+          "GetAllWellBySlotIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.History"
           },
-          "getAllWellByClusterIdPerDay": {
+          "GetAllWellByClusterIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.History"
           },
-          "postWellPerDay": {
+          "PostWellPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.History"
           },
-          "putWellByIdPerDay": {
+          "PutWellByIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.History"
           },
-          "deleteWellByIdPerDay": {
+          "DeleteWellByIdPerDay": {
             "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.History"
           }
         }
@@ -442,7 +533,7 @@
       "OSDC.Drilling.Well.Model.Well": {
         "type": "object",
         "properties": {
-          "metaInfo": {
+          "MetaInfo": {
             "type": "object",
             "oneOf": [
               {
@@ -451,7 +542,7 @@
             ],
             "nullable": true
           },
-          "name": {
+          "Name": {
             "type": "string",
             "oneOf": [
               {
@@ -460,7 +551,7 @@
             ],
             "nullable": true
           },
-          "description": {
+          "Description": {
             "type": "string",
             "oneOf": [
               {
@@ -469,7 +560,7 @@
             ],
             "nullable": true
           },
-          "creationDate": {
+          "CreationDate": {
             "type": "string",
             "oneOf": [
               {
@@ -478,7 +569,7 @@
             ],
             "nullable": true
           },
-          "lastModificationDate": {
+          "LastModificationDate": {
             "type": "string",
             "oneOf": [
               {
@@ -487,7 +578,7 @@
             ],
             "nullable": true
           },
-          "slotID": {
+          "SlotID": {
             "type": "string",
             "oneOf": [
               {
@@ -496,7 +587,7 @@
             ],
             "nullable": true
           },
-          "clusterID": {
+          "ClusterID": {
             "type": "string",
             "oneOf": [
               {
@@ -505,8 +596,344 @@
             ],
             "nullable": true
           },
-          "isSingleWell": {
+          "IsSingleWell": {
             "$ref": "#/components/schemas/System.Boolean"
+          },
+          "Dataset": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.WellDataset"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "OSDC.Drilling.Well.Model.WellBitemporalTimestamps": {
+        "type": "object",
+        "properties": {
+          "ValidTimeStart": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "ValidTimeEnd": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "TransactionTimeStart": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "TransactionTimeEnd": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "OSDC.Drilling.Well.Model.WellDataset": {
+        "type": "object",
+        "properties": {
+          "Provenance": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.WellDatasetProvenance"
+              }
+            ],
+            "nullable": true
+          },
+          "ExternalIdentifiers": {
+            "type": "array",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Well.Model.WellExternalIdentifier, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          },
+          "Temporal": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.WellBitemporalTimestamps"
+              }
+            ],
+            "nullable": true
+          },
+          "LifecycleEvents": {
+            "type": "array",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Well.Model.WellLifecycleEvent, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          },
+          "MonthlyProduction": {
+            "type": "array",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Well.Model.WellMonthlyProduction, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "OSDC.Drilling.Well.Model.WellDatasetProvenance": {
+        "type": "object",
+        "properties": {
+          "DatasetName": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "DatasetVersion": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "Classification": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[OSDC.Drilling.Well.Model.WellDataClassification, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          },
+          "SourceArtifacts": {
+            "type": "array",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[OSDC.Drilling.Well.Model.WellSourceArtifact, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "OSDC.Drilling.Well.Model.WellExternalIdentifier": {
+        "type": "object",
+        "properties": {
+          "Namespace": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "Value": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "OSDC.Drilling.Well.Model.WellLifecycleEvent": {
+        "type": "object",
+        "properties": {
+          "EventType": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "EffectiveAt": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "FirstSeenAt": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "SourceArtifactID": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "OSDC.Drilling.Well.Model.WellMonthlyProduction": {
+        "type": "object",
+        "properties": {
+          "Year": {
+            "$ref": "#/components/schemas/System.Int32"
+          },
+          "Month": {
+            "$ref": "#/components/schemas/System.Int32"
+          },
+          "Oil": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.WellProductionQuantity"
+              }
+            ],
+            "nullable": true
+          },
+          "Gas": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.WellProductionQuantity"
+              }
+            ],
+            "nullable": true
+          },
+          "Water": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.WellProductionQuantity"
+              }
+            ],
+            "nullable": true
+          },
+          "DaysOnProduction": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "IsAllocated": {
+            "$ref": "#/components/schemas/System.Boolean"
+          },
+          "SourceArtifactID": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "Classification": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[OSDC.Drilling.Well.Model.WellDataClassification, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "OSDC.Drilling.Well.Model.WellProductionQuantity": {
+        "type": "object",
+        "properties": {
+          "Value": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "Unit": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "OSDC.Drilling.Well.Model.WellSourceArtifact": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "$ref": "#/components/schemas/System.Guid"
+          },
+          "Url": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "License": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "Attribution": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "SHA256": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
           }
         }
       },
@@ -537,6 +964,30 @@
           "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.CountPerDay"
         }
       },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.Well.Model.WellExternalIdentifier, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.WellExternalIdentifier"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.Well.Model.WellLifecycleEvent, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.WellLifecycleEvent"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.Well.Model.WellMonthlyProduction, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.WellMonthlyProduction"
+        }
+      },
+      "System.Collections.Generic.List`1[[OSDC.Drilling.Well.Model.WellSourceArtifact, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/OSDC.Drilling.Well.Model.WellSourceArtifact"
+        }
+      },
       "System.DateTime": {
         "type": "string",
         "format": "date-time"
@@ -545,9 +996,26 @@
         "type": "string",
         "format": "uuid"
       },
+      "System.Int32": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int32"
+      },
+      "System.Nullable`1[[OSDC.Drilling.Well.Model.WellDataClassification, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "enum": [
+          "Observed",
+          "Derived",
+          "ModelEstimated",
+          "Synthetic",
+          null
+        ]
+      },
       "System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
         "type": "string",
         "format": "date-time"
+      },
+      "System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
       },
       "System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
         "type": "string",
@@ -567,6 +1035,9 @@
     }
   },
   "tags": [
+    {
+      "name": "Service"
+    },
     {
       "name": "Well"
     },

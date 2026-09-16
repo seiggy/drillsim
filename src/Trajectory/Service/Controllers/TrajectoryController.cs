@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -148,6 +148,14 @@ namespace NORCE.Drilling.Trajectory.Service.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
+        }
+
+        [HttpPost("~/internal/publication/Trajectory", Name = "ImportPublishedTrajectory")]
+        public ActionResult ImportPublishedTrajectory([FromBody] Model.Trajectory? data)
+        {
+            if (data?.MetaInfo == null || data.MetaInfo.ID == Guid.Empty) return BadRequest();
+            if (_trajectoryManager.GetTrajectoryById(data.MetaInfo.ID, includeCalculatedStations: true) is not null) return Conflict();
+            return _trajectoryManager.ImportPublishedTrajectory(data) ? Ok() : StatusCode(StatusCodes.Status500InternalServerError);
         }
 
         /// <summary>

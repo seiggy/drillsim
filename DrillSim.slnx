@@ -4,6 +4,10 @@
     <Project Path="aspire/DrillSim.ServiceDefaults/DrillSim.ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/Services/" />
+  <Folder Name="/Services/Analysis/">
+    <Project Path="src/DrillSim.AnalysisApi/DrillSim.AnalysisApi.csproj" />
+    <Project Path="src/DrillSim.AnalysisApi/Tests/DrillSim.AnalysisApi.Tests.csproj" />
+  </Folder>
   <Folder Name="/Services/CartographicProjection/">
     <Project Path="src/CartographicProjection/Model/Model.csproj" />
     <Project Path="src/CartographicProjection/ModelSharedIn/ModelSharedIn.csproj" />
@@ -22,6 +26,10 @@
     <Project Path="src/DrillingFluid/ParticleSwarmOptimization/ParticleSwarmOptimization.csproj" />
     <Project Path="src/DrillingFluid/RheologicalModels/RheologicalModels.csproj" />
     <Project Path="src/DrillingFluid/Service/Service.csproj" />
+  </Folder>
+  <Folder Name="/Services/DrillingOperations/">
+    <Project Path="src/DrillingOperations/Service/Service.csproj" />
+    <Project Path="src/DrillingOperations/Tests/DrillingOperations.Tests.csproj" />
   </Folder>
   <Folder Name="/Services/DrillString/">
     <Project Path="src/DrillString/Model/Model.csproj" />
@@ -67,6 +75,10 @@
     <Project Path="src/Rig/Model/Model.csproj" />
     <Project Path="src/Rig/Service/Service.csproj" />
     <Project Path="src/Rig/WebPages/WebPages.csproj" />
+  </Folder>
+  <Folder Name="/Services/ReservoirSimulation/">
+    <Project Path="src/ReservoirSimulation/Service/Service.csproj" />
+    <Project Path="src/ReservoirSimulation/Tests/ReservoirSimulation.Tests.csproj" />
   </Folder>
   <Folder Name="/Services/Simulator4nDOF/">
     <Project Path="src/Simulator4nDOF/Model/Model.csproj" />

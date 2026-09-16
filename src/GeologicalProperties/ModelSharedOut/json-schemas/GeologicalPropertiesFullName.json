@@ -10,6 +10,82 @@
     }
   ],
   "paths": {
+    "/internal/publication/records/{entityId}/stage": {
+      "put": {
+        "tags": [
+          "Service"
+        ],
+        "parameters": [
+          {
+            "name": "entityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/System.Guid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DrillSim.PublicationGate.PublicationStageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/internal/publication/records/{entityId}": {
+      "get": {
+        "tags": [
+          "Service"
+        ],
+        "parameters": [
+          {
+            "name": "entityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/System.Guid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/internal/publication/records/{entityId}/activate": {
+      "put": {
+        "tags": [
+          "Service"
+        ],
+        "parameters": [
+          {
+            "name": "entityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/System.Guid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/GeologicalProperties": {
       "get": {
         "tags": [
@@ -251,6 +327,88 @@
                   "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[GeologicalProperties.Model.GeologicalProperties, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                 }
               }
+            }
+          }
+        }
+      }
+    },
+    "/GeologicalProperties/ByWellBoreID": {
+      "get": {
+        "tags": [
+          "GeologicalProperties"
+        ],
+        "operationId": "GetAllGeologicalPropertiesByWellBoreId",
+        "parameters": [
+          {
+            "name": "wellBoreId",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/System.Guid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[GeologicalProperties.Model.GeologicalProperties, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/internal/publication/GeologicalProperties": {
+      "post": {
+        "tags": [
+          "GeologicalProperties"
+        ],
+        "operationId": "ImportPublishedGeologicalProperties",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/GeologicalProperties.Model.GeologicalProperties"
+                  }
+                ],
+                "nullable": true
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/GeologicalProperties.Model.GeologicalProperties"
+                  }
+                ],
+                "nullable": true
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "object",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/GeologicalProperties.Model.GeologicalProperties"
+                  }
+                ],
+                "nullable": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { }
             }
           }
         }
@@ -505,13 +663,28 @@
   },
   "components": {
     "schemas": {
+      "DrillSim.PublicationGate.PublicationStageRequest": {
+        "required": [
+          "ScenarioId",
+          "RevealId"
+        ],
+        "type": "object",
+        "properties": {
+          "ScenarioId": {
+            "$ref": "#/components/schemas/System.Guid"
+          },
+          "RevealId": {
+            "$ref": "#/components/schemas/System.Guid"
+          }
+        }
+      },
       "GeologicalProperties.Model.ExtrapolationProperties": {
         "type": "object",
         "properties": {
-          "extrapolate": {
+          "Extrapolate": {
             "$ref": "#/components/schemas/System.Boolean"
           },
-          "extrapolationStep": {
+          "ExtrapolationStep": {
             "oneOf": [
               {
                 "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
@@ -519,7 +692,7 @@
             ],
             "nullable": true
           },
-          "usedDataRange": {
+          "UsedDataRange": {
             "oneOf": [
               {
                 "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
@@ -527,7 +700,7 @@
             ],
             "nullable": true
           },
-          "depthRange": {
+          "DepthRange": {
             "oneOf": [
               {
                 "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
@@ -540,7 +713,7 @@
       "GeologicalProperties.Model.GeologicalProperties": {
         "type": "object",
         "properties": {
-          "geologicalPropertyTable": {
+          "GeologicalPropertyTable": {
             "type": "array",
             "oneOf": [
               {
@@ -549,7 +722,16 @@
             ],
             "nullable": true
           },
-          "metaInfo": {
+          "Petrophysics": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/GeologicalProperties.Model.PetrophysicsDataset"
+              }
+            ],
+            "nullable": true
+          },
+          "MetaInfo": {
             "type": "object",
             "oneOf": [
               {
@@ -558,7 +740,7 @@
             ],
             "nullable": true
           },
-          "name": {
+          "Name": {
             "type": "string",
             "oneOf": [
               {
@@ -567,7 +749,7 @@
             ],
             "nullable": true
           },
-          "description": {
+          "Description": {
             "type": "string",
             "oneOf": [
               {
@@ -576,7 +758,7 @@
             ],
             "nullable": true
           },
-          "creationDate": {
+          "CreationDate": {
             "type": "string",
             "oneOf": [
               {
@@ -585,7 +767,7 @@
             ],
             "nullable": true
           },
-          "lastModificationDate": {
+          "LastModificationDate": {
             "type": "string",
             "oneOf": [
               {
@@ -594,7 +776,7 @@
             ],
             "nullable": true
           },
-          "wellBoreID": {
+          "WellBoreID": {
             "type": "string",
             "oneOf": [
               {
@@ -603,7 +785,7 @@
             ],
             "nullable": true
           },
-          "trajectoryID": {
+          "TrajectoryID": {
             "type": "string",
             "oneOf": [
               {
@@ -612,7 +794,7 @@
             ],
             "nullable": true
           },
-          "isPrognosed": {
+          "IsPrognosed": {
             "$ref": "#/components/schemas/System.Boolean"
           }
         }
@@ -620,7 +802,7 @@
       "GeologicalProperties.Model.GeologicalPropertiesInterpolationCase": {
         "type": "object",
         "properties": {
-          "geologicalPropertyInterpolatedTable": {
+          "GeologicalPropertyInterpolatedTable": {
             "type": "array",
             "oneOf": [
               {
@@ -629,7 +811,7 @@
             ],
             "nullable": true
           },
-          "geologicalPropertyExtrapolatedTable": {
+          "GeologicalPropertyExtrapolatedTable": {
             "type": "array",
             "oneOf": [
               {
@@ -638,7 +820,7 @@
             ],
             "nullable": true
           },
-          "interpolationProperties": {
+          "InterpolationProperties": {
             "type": "object",
             "oneOf": [
               {
@@ -647,7 +829,7 @@
             ],
             "nullable": true
           },
-          "extrapolationProperties": {
+          "ExtrapolationProperties": {
             "type": "object",
             "oneOf": [
               {
@@ -656,7 +838,7 @@
             ],
             "nullable": true
           },
-          "metaInfo": {
+          "MetaInfo": {
             "type": "object",
             "oneOf": [
               {
@@ -665,7 +847,7 @@
             ],
             "nullable": true
           },
-          "name": {
+          "Name": {
             "type": "string",
             "oneOf": [
               {
@@ -674,7 +856,7 @@
             ],
             "nullable": true
           },
-          "description": {
+          "Description": {
             "type": "string",
             "oneOf": [
               {
@@ -683,7 +865,7 @@
             ],
             "nullable": true
           },
-          "creationDate": {
+          "CreationDate": {
             "type": "string",
             "oneOf": [
               {
@@ -692,7 +874,7 @@
             ],
             "nullable": true
           },
-          "lastModificationDate": {
+          "LastModificationDate": {
             "type": "string",
             "oneOf": [
               {
@@ -701,7 +883,7 @@
             ],
             "nullable": true
           },
-          "geologicalPropertiesID": {
+          "GeologicalPropertiesID": {
             "type": "string",
             "oneOf": [
               {
@@ -715,7 +897,7 @@
       "GeologicalProperties.Model.GeologicalPropertiesInterpolationCaseLight": {
         "type": "object",
         "properties": {
-          "metaInfo": {
+          "MetaInfo": {
             "type": "object",
             "oneOf": [
               {
@@ -724,7 +906,7 @@
             ],
             "nullable": true
           },
-          "name": {
+          "Name": {
             "type": "string",
             "oneOf": [
               {
@@ -733,7 +915,7 @@
             ],
             "nullable": true
           },
-          "description": {
+          "Description": {
             "type": "string",
             "oneOf": [
               {
@@ -742,7 +924,7 @@
             ],
             "nullable": true
           },
-          "creationDate": {
+          "CreationDate": {
             "type": "string",
             "oneOf": [
               {
@@ -751,7 +933,7 @@
             ],
             "nullable": true
           },
-          "lastModificationDate": {
+          "LastModificationDate": {
             "type": "string",
             "oneOf": [
               {
@@ -760,7 +942,7 @@
             ],
             "nullable": true
           },
-          "geologicalPropertiesID": {
+          "GeologicalPropertiesID": {
             "type": "string",
             "oneOf": [
               {
@@ -774,7 +956,7 @@
       "GeologicalProperties.Model.GeologicalPropertiesLight": {
         "type": "object",
         "properties": {
-          "metaInfo": {
+          "MetaInfo": {
             "type": "object",
             "oneOf": [
               {
@@ -783,7 +965,7 @@
             ],
             "nullable": true
           },
-          "name": {
+          "Name": {
             "type": "string",
             "oneOf": [
               {
@@ -792,7 +974,7 @@
             ],
             "nullable": true
           },
-          "description": {
+          "Description": {
             "type": "string",
             "oneOf": [
               {
@@ -801,7 +983,7 @@
             ],
             "nullable": true
           },
-          "creationDate": {
+          "CreationDate": {
             "type": "string",
             "oneOf": [
               {
@@ -810,7 +992,7 @@
             ],
             "nullable": true
           },
-          "lastModificationDate": {
+          "LastModificationDate": {
             "type": "string",
             "oneOf": [
               {
@@ -819,7 +1001,7 @@
             ],
             "nullable": true
           },
-          "wellBoreID": {
+          "WellBoreID": {
             "type": "string",
             "oneOf": [
               {
@@ -828,7 +1010,7 @@
             ],
             "nullable": true
           },
-          "trajectoryID": {
+          "TrajectoryID": {
             "type": "string",
             "oneOf": [
               {
@@ -837,7 +1019,7 @@
             ],
             "nullable": true
           },
-          "isPrognosed": {
+          "IsPrognosed": {
             "$ref": "#/components/schemas/System.Boolean"
           }
         }
@@ -845,7 +1027,7 @@
       "GeologicalProperties.Model.GeologicalPropertyEntry": {
         "type": "object",
         "properties": {
-          "internalFrictionAngle": {
+          "InternalFrictionAngle": {
             "type": "object",
             "oneOf": [
               {
@@ -854,7 +1036,7 @@
             ],
             "nullable": true
           },
-          "unconfinedCompressiveStrength": {
+          "UnconfinedCompressiveStrength": {
             "type": "object",
             "oneOf": [
               {
@@ -863,7 +1045,7 @@
             ],
             "nullable": true
           },
-          "confinedCompressiveStrength": {
+          "ConfinedCompressiveStrength": {
             "type": "object",
             "oneOf": [
               {
@@ -872,7 +1054,7 @@
             ],
             "nullable": true
           },
-          "pressureDifferential": {
+          "PressureDifferential": {
             "type": "object",
             "oneOf": [
               {
@@ -881,7 +1063,7 @@
             ],
             "nullable": true
           },
-          "porosity": {
+          "Porosity": {
             "type": "object",
             "oneOf": [
               {
@@ -890,7 +1072,7 @@
             ],
             "nullable": true
           },
-          "permeability": {
+          "Permeability": {
             "type": "object",
             "oneOf": [
               {
@@ -899,7 +1081,7 @@
             ],
             "nullable": true
           },
-          "measuredDepth": {
+          "MeasuredDepth": {
             "type": "object",
             "oneOf": [
               {
@@ -908,21 +1090,25 @@
             ],
             "nullable": true
           },
-          "dataType": {
+          "DataType": {
             "$ref": "#/components/schemas/GeologicalProperties.Model.GeologicalPropertyTableOrigin"
           }
         }
       },
       "GeologicalProperties.Model.GeologicalPropertyTableOrigin": {
-        "type": "integer"
+        "enum": [
+          "Measured",
+          "Interpolated",
+          "Extrapolated"
+        ]
       },
       "GeologicalProperties.Model.InterpolationProperties": {
         "type": "object",
         "properties": {
-          "interpolate": {
+          "Interpolate": {
             "$ref": "#/components/schemas/System.Boolean"
           },
-          "interpolationStep": {
+          "InterpolationStep": {
             "oneOf": [
               {
                 "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
@@ -932,10 +1118,604 @@
           }
         }
       },
+      "GeologicalProperties.Model.PetrophysicsBitemporalTimestamps": {
+        "type": "object",
+        "properties": {
+          "ValidTimeStart": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "ValidTimeEnd": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "TransactionTimeStart": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "TransactionTimeEnd": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "GeologicalProperties.Model.PetrophysicsDataset": {
+        "type": "object",
+        "properties": {
+          "Provenance": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/GeologicalProperties.Model.PetrophysicsDatasetProvenance"
+              }
+            ],
+            "nullable": true
+          },
+          "ExternalIdentifiers": {
+            "type": "array",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[GeologicalProperties.Model.PetrophysicsExternalIdentifier, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          },
+          "Temporal": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/GeologicalProperties.Model.PetrophysicsBitemporalTimestamps"
+              }
+            ],
+            "nullable": true
+          },
+          "LogRuns": {
+            "type": "array",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[GeologicalProperties.Model.PetrophysicsLogRun, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          },
+          "FormationTops": {
+            "type": "array",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[GeologicalProperties.Model.PetrophysicsFormationTop, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          },
+          "FormationIntervals": {
+            "type": "array",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[GeologicalProperties.Model.PetrophysicsFormationInterval, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "GeologicalProperties.Model.PetrophysicsDatasetProvenance": {
+        "type": "object",
+        "properties": {
+          "DatasetName": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "DatasetVersion": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "Classification": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[GeologicalProperties.Model.PetrophysicsDataClassification, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          },
+          "SourceArtifacts": {
+            "type": "array",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[GeologicalProperties.Model.PetrophysicsSourceArtifact, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "GeologicalProperties.Model.PetrophysicsDepthAxis": {
+        "type": "object",
+        "properties": {
+          "Reference": {
+            "$ref": "#/components/schemas/GeologicalProperties.Model.PetrophysicsDepthReference"
+          },
+          "OriginalUnit": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "CanonicalUnit": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "Datum": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "PositiveDown": {
+            "$ref": "#/components/schemas/System.Boolean"
+          }
+        }
+      },
+      "GeologicalProperties.Model.PetrophysicsDepthCoordinate": {
+        "type": "object",
+        "properties": {
+          "Reference": {
+            "$ref": "#/components/schemas/GeologicalProperties.Model.PetrophysicsDepthReference"
+          },
+          "OriginalValue": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "OriginalUnit": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "Value": {
+            "$ref": "#/components/schemas/System.Double"
+          },
+          "Unit": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "Datum": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "PositiveDown": {
+            "type": "boolean",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Boolean, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "GeologicalProperties.Model.PetrophysicsDepthReference": {
+        "enum": [
+          "MeasuredDepth",
+          "TrueVerticalDepth",
+          "TrueVerticalDepthSubsea"
+        ]
+      },
+      "GeologicalProperties.Model.PetrophysicsExternalIdentifier": {
+        "type": "object",
+        "properties": {
+          "Namespace": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "Value": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "GeologicalProperties.Model.PetrophysicsFormationInterval": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "$ref": "#/components/schemas/System.Guid"
+          },
+          "FormationName": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "TopDepth": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/GeologicalProperties.Model.PetrophysicsDepthCoordinate"
+              }
+            ],
+            "nullable": true
+          },
+          "BaseDepth": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/GeologicalProperties.Model.PetrophysicsDepthCoordinate"
+              }
+            ],
+            "nullable": true
+          },
+          "Confidence": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "Method": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "SourceArtifactID": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "Classification": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[GeologicalProperties.Model.PetrophysicsDataClassification, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "GeologicalProperties.Model.PetrophysicsFormationTop": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "$ref": "#/components/schemas/System.Guid"
+          },
+          "FormationName": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "Depths": {
+            "type": "array",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[GeologicalProperties.Model.PetrophysicsDepthCoordinate, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          },
+          "Confidence": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "Method": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "SourceArtifactID": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "Classification": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[GeologicalProperties.Model.PetrophysicsDataClassification, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "GeologicalProperties.Model.PetrophysicsLogCurve": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "$ref": "#/components/schemas/System.Guid"
+          },
+          "OriginalMnemonic": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "CanonicalMnemonic": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "OriginalUnit": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "CanonicalUnit": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "Values": {
+            "type": "array",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "NullFlags": {
+            "type": "array",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Boolean, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "QualityFlags": {
+            "type": "array",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "OriginalNullValue": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "Classification": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[GeologicalProperties.Model.PetrophysicsDataClassification, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "GeologicalProperties.Model.PetrophysicsLogRun": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "$ref": "#/components/schemas/System.Guid"
+          },
+          "Name": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "Tool": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "SourceArtifactID": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "Temporal": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/GeologicalProperties.Model.PetrophysicsBitemporalTimestamps"
+              }
+            ],
+            "nullable": true
+          },
+          "DepthAxis": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/GeologicalProperties.Model.PetrophysicsDepthAxis"
+              }
+            ],
+            "nullable": true
+          },
+          "DepthValues": {
+            "type": "array",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ],
+            "nullable": true
+          },
+          "Curves": {
+            "type": "array",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.Collections.Generic.List`1[[GeologicalProperties.Model.PetrophysicsLogCurve, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "GeologicalProperties.Model.PetrophysicsSourceArtifact": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "$ref": "#/components/schemas/System.Guid"
+          },
+          "Url": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "License": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "Attribution": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          },
+          "SHA256": {
+            "type": "string",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
       "OSDC.DotnetLibraries.Drilling.DrillingProperties.GaussianDrillingProperty": {
         "type": "object",
         "properties": {
-          "gaussianValue": {
+          "GaussianValue": {
             "$ref": "#/components/schemas/OSDC.DotnetLibraries.General.Statistics.GaussianDistribution"
           }
         }
@@ -943,10 +1723,10 @@
       "OSDC.DotnetLibraries.General.DataManagement.MetaInfo": {
         "type": "object",
         "properties": {
-          "id": {
+          "ID": {
             "$ref": "#/components/schemas/System.Guid"
           },
-          "httpHostName": {
+          "HttpHostName": {
             "type": "string",
             "oneOf": [
               {
@@ -955,7 +1735,7 @@
             ],
             "nullable": true
           },
-          "httpHostBasePath": {
+          "HttpHostBasePath": {
             "type": "string",
             "oneOf": [
               {
@@ -964,7 +1744,7 @@
             ],
             "nullable": true
           },
-          "httpEndPoint": {
+          "HttpEndPoint": {
             "type": "string",
             "oneOf": [
               {
@@ -978,7 +1758,7 @@
       "OSDC.DotnetLibraries.General.Statistics.GaussianDistribution": {
         "type": "object",
         "properties": {
-          "mean": {
+          "Mean": {
             "oneOf": [
               {
                 "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
@@ -986,7 +1766,7 @@
             ],
             "nullable": true
           },
-          "standardDeviation": {
+          "StandardDeviation": {
             "oneOf": [
               {
                 "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
@@ -994,10 +1774,10 @@
             ],
             "nullable": true
           },
-          "minValue": {
+          "MinValue": {
             "$ref": "#/components/schemas/System.Double"
           },
-          "maxValue": {
+          "MaxValue": {
             "$ref": "#/components/schemas/System.Double"
           }
         }
@@ -1047,6 +1827,72 @@
           "$ref": "#/components/schemas/GeologicalProperties.Model.GeologicalPropertyEntry"
         }
       },
+      "System.Collections.Generic.List`1[[GeologicalProperties.Model.PetrophysicsDepthCoordinate, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/GeologicalProperties.Model.PetrophysicsDepthCoordinate"
+        }
+      },
+      "System.Collections.Generic.List`1[[GeologicalProperties.Model.PetrophysicsExternalIdentifier, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/GeologicalProperties.Model.PetrophysicsExternalIdentifier"
+        }
+      },
+      "System.Collections.Generic.List`1[[GeologicalProperties.Model.PetrophysicsFormationInterval, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/GeologicalProperties.Model.PetrophysicsFormationInterval"
+        }
+      },
+      "System.Collections.Generic.List`1[[GeologicalProperties.Model.PetrophysicsFormationTop, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/GeologicalProperties.Model.PetrophysicsFormationTop"
+        }
+      },
+      "System.Collections.Generic.List`1[[GeologicalProperties.Model.PetrophysicsLogCurve, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/GeologicalProperties.Model.PetrophysicsLogCurve"
+        }
+      },
+      "System.Collections.Generic.List`1[[GeologicalProperties.Model.PetrophysicsLogRun, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/GeologicalProperties.Model.PetrophysicsLogRun"
+        }
+      },
+      "System.Collections.Generic.List`1[[GeologicalProperties.Model.PetrophysicsSourceArtifact, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/GeologicalProperties.Model.PetrophysicsSourceArtifact"
+        }
+      },
+      "System.Collections.Generic.List`1[[System.Boolean, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.Boolean"
+        }
+      },
+      "System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.Double"
+        }
+      },
+      "System.Collections.Generic.List`1[[System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+        }
+      },
+      "System.Collections.Generic.List`1[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.String"
+        }
+      },
       "System.Double": {
         "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
         "format": "double"
@@ -1054,6 +1900,19 @@
       "System.Guid": {
         "type": "string",
         "format": "uuid"
+      },
+      "System.Nullable`1[[GeologicalProperties.Model.PetrophysicsDataClassification, Model, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "enum": [
+          "Observed",
+          "HumanInterpreted",
+          "Derived",
+          "ModelEstimated",
+          "Synthetic",
+          null
+        ]
+      },
+      "System.Nullable`1[[System.Boolean, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "boolean"
       },
       "System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
         "type": "string",
@@ -1073,6 +1932,9 @@
     }
   },
   "tags": [
+    {
+      "name": "Service"
+    },
     {
       "name": "GeologicalProperties"
     },

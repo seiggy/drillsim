@@ -423,19 +423,15 @@ namespace OSDC.Drilling.Well.Service.Managers
                         string metaInfo = JsonSerializer.Serialize(well.MetaInfo, JsonSettings.Options);
                         string data = JsonSerializer.Serialize(well, JsonSettings.Options);
                         var command = connection.CreateCommand();
-                        command.CommandText = "INSERT INTO WellTable (" +
-                            "ID, " +
-                            "MetaInfo, " +
-                            "ClusterID, " +
-                            "SlotID, " +
-                            "Well" +
-                            ") VALUES (" +
-                            $"'{well.MetaInfo.ID}', " +
-                            $"'{metaInfo}', " +
-                            $"'{(well.ClusterID != null ? well.ClusterID : "")}', " +
-                            $"'{(well.SlotID != null ? well.SlotID : "")}', " +
-                            $"'{data}'" +
-                            ")";
+                        command.CommandText = """
+                            INSERT INTO WellTable (ID, MetaInfo, ClusterID, SlotID, Well)
+                            VALUES (@id, @metaInfo, @clusterId, @slotId, @well)
+                            """;
+                        command.Parameters.AddWithValue("@id", well.MetaInfo.ID.ToString());
+                        command.Parameters.AddWithValue("@metaInfo", metaInfo);
+                        command.Parameters.AddWithValue("@clusterId", well.ClusterID?.ToString() ?? string.Empty);
+                        command.Parameters.AddWithValue("@slotId", well.SlotID?.ToString() ?? string.Empty);
+                        command.Parameters.AddWithValue("@well", data);
                         int count = command.ExecuteNonQuery();
                         if (count != 1)
                         {
@@ -493,12 +489,16 @@ namespace OSDC.Drilling.Well.Service.Managers
                         string metaInfo = JsonSerializer.Serialize(well.MetaInfo, JsonSettings.Options);
                         string data = JsonSerializer.Serialize(well, JsonSettings.Options);
                         var command = connection.CreateCommand();
-                        command.CommandText = $"UPDATE WellTable SET " +
-                            $"MetaInfo = '{metaInfo}', " +
-                            $"ClusterID = '{(well.ClusterID != null ? well.ClusterID : "")}', " +
-                            $"SlotID = '{(well.SlotID != null ? well.SlotID : "")}', " +
-                            $"Well = '{data}' " +
-                            $"WHERE ID = '{guid}'";
+                        command.CommandText = """
+                            UPDATE WellTable
+                            SET MetaInfo = @metaInfo, ClusterID = @clusterId, SlotID = @slotId, Well = @well
+                            WHERE ID = @id
+                            """;
+                        command.Parameters.AddWithValue("@metaInfo", metaInfo);
+                        command.Parameters.AddWithValue("@clusterId", well.ClusterID?.ToString() ?? string.Empty);
+                        command.Parameters.AddWithValue("@slotId", well.SlotID?.ToString() ?? string.Empty);
+                        command.Parameters.AddWithValue("@well", data);
+                        command.Parameters.AddWithValue("@id", guid.ToString());
                         int count = command.ExecuteNonQuery();
                         if (count != 1)
                         {

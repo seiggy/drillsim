@@ -17,6 +17,7 @@ public static class Extensions
 {
     private const string HealthEndpointPath = "/health";
     private const string AlivenessEndpointPath = "/alive";
+    private const string AgentFrameworkTelemetrySource = "Experimental.Microsoft.Agents.AI";
 
     public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder, bool addSqlite = true) where TBuilder : IHostApplicationBuilder
     {
@@ -61,11 +62,13 @@ public static class Extensions
             {
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation();
+                    .AddRuntimeInstrumentation()
+                    .AddMeter(AgentFrameworkTelemetrySource);
             })
             .WithTracing(tracing =>
             {
                 tracing.AddSource(builder.Environment.ApplicationName)
+                    .AddSource(AgentFrameworkTelemetrySource)
                     .AddAspNetCoreInstrumentation(tracing =>
                         // Exclude health check requests from tracing
                         tracing.Filter = context =>

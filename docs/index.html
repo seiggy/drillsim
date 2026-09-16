@@ -1,0 +1,1126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A field engineer and Cloud Solution Architect's guide to DrillSim: evidence, interpretation, saved decisions, blind simulation, reveal and evaluation.">
+  <title>DrillSim — Demo guide &amp; architecture</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-padding-top: 6rem; }
+    body { margin: 0; background: var(--cp-bg); color: var(--cp-text); font: 1rem/1.65 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
+    a { color: var(--cp-accent); text-underline-offset: .2em; }
+    a:hover { color: var(--cp-accent-hover); }
+    button, select { font: inherit; }
+    button, .button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: .5rem .85rem; border: 1px solid var(--cp-border-strong); border-radius: .625rem; background: var(--cp-bg-elevated); color: var(--cp-text); cursor: pointer; text-decoration: none; line-height: 1.4; }
+    button:hover, .button:hover { background: var(--cp-highlight); color: var(--cp-text); }
+    button[aria-pressed="true"], .primary { background: var(--cp-accent); border-color: var(--cp-accent); color: var(--cp-accent-fg); }
+    button[aria-pressed="true"]:hover, .primary:hover { background: var(--cp-accent-hover); color: var(--cp-accent-fg); }
+    button:disabled { cursor: default; color: var(--cp-text-soft); background: var(--cp-surface-soft); }
+    :focus-visible { outline: 3px solid var(--cp-accent); outline-offset: 4px; }
+    .skip { position: fixed; top: -6rem; left: 1rem; z-index: 10; background: var(--cp-surface); padding: .75rem; }
+    .skip:focus { top: 1rem; }
+    .topbar { position: sticky; top: 0; z-index: 5; background: var(--cp-bg-elevated); border-bottom: 1px solid var(--cp-border); }
+    .topbar-inner { max-width: 1480px; min-height: 76px; margin: auto; padding: .75rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .brand { font-weight: 700; color: var(--cp-text); text-decoration: none; font-size: 1.25rem; white-space: nowrap; }
+    .brand span { font-weight: 400; font-size: 1rem; margin-left: .75rem; color: var(--cp-text-soft); }
+    .toolbar, .actions, .flow-controls { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+    .layout { display: grid; grid-template-columns: 244px minmax(0, 1fr); gap: 4rem; max-width: 1420px; margin: auto; padding: 2.5rem 2rem 6rem; }
+    .outline { position: sticky; top: 104px; align-self: start; max-height: calc(100vh - 132px); overflow: auto; padding-right: 1rem; }
+    .outline h2 { font-size: 1rem; margin: 0 0 .75rem; }
+    .outline p { margin: 1rem 0 .25rem; font-weight: 600; color: var(--cp-text-soft); font-size: .875rem; }
+    .outline ul, .outline ol { list-style: none; padding: 0; margin: 0; }
+    .outline a { display: block; padding: .35rem .5rem; line-height: 1.5; font-size: .9375rem; color: var(--cp-text); text-decoration: none; border-radius: .625rem; }
+    .outline a:hover, .outline a[aria-current] { background: var(--cp-highlight); color: var(--cp-accent); }
+    .outline .task-link { display: grid; grid-template-columns: 1.75rem 1fr; }
+    .task-link span { font-variant-numeric: tabular-nums; color: var(--cp-text-soft); }
+    main { min-width: 0; max-width: 1020px; }
+    .chapter { margin-bottom: 4rem; padding-top: 1rem; border-top: 1px solid var(--cp-border-strong); scroll-margin-top: 1rem; }
+    .chapter:first-child { border: 0; padding-top: 0; }
+    h1, h2, h3, h4 { line-height: 1.2; text-wrap: balance; }
+    h1 { font-size: 3.25rem; font-weight: 650; letter-spacing: -.035em; margin: .25rem 0 1.5rem; max-width: 20ch; }
+    h2 { font-size: 2rem; font-weight: 650; margin: 1.25rem 0 1rem; letter-spacing: -.025em; }
+    h3 { font-size: 1.25rem; margin: 2rem 0 .75rem; }
+    h4 { font-size: 1rem; margin: 1.5rem 0 .5rem; }
+    p { max-width: 74ch; margin: .75rem 0 1rem; }
+    .lead { font-size: 1.25rem; line-height: 1.6; max-width: 64ch; }
+    .meta { font-size: .875rem; color: var(--cp-text-soft); }
+    .hero-flow { display: flex; align-items: center; gap: .65rem; flex-wrap: wrap; margin: 2rem 0; padding: 1.25rem 0; border-top: 1px solid var(--cp-border); border-bottom: 1px solid var(--cp-border); font-weight: 600; }
+    .hero-flow span[aria-hidden] { color: var(--cp-accent); }
+    .note { margin: 1.5rem 0; padding: 1.25rem 1.5rem; background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: .625rem; }
+    .note p:first-child { margin-top: 0; }
+    .note p:last-child { margin-bottom: 0; }
+    .two-column { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; }
+    .two-column h3 { margin-top: .5rem; }
+    li { margin-bottom: .5rem; }
+    li > p { margin-top: .25rem; }
+    ul, ol { padding-left: 1.5rem; }
+    code, pre { font-family: Consolas, "Courier New", Courier, monospace; font-size: .875em; }
+    code { overflow-wrap: anywhere; }
+    pre { padding: 1.25rem; background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: .625rem; overflow: auto; line-height: 1.65; }
+    pre code { font-size: 1em; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .table-scroll, .diagram-scroll { max-width: 100%; overflow-x: auto; margin: 1.25rem 0; }
+    table { width: 100%; border-collapse: collapse; font-size: .9375rem; }
+    caption { text-align: left; font-size: .875rem; color: var(--cp-text-soft); padding: 0 0 .75rem; }
+    th, td { text-align: left; vertical-align: top; padding: .85rem .75rem; border-bottom: 1px solid var(--cp-border); }
+    thead th { background: var(--cp-bg-elevated); }
+    tbody th { font-weight: 600; }
+    .task-title { display: flex; align-items: baseline; gap: 1rem; }
+    .step-number { font-size: 1.5rem; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--cp-accent); min-width: 2rem; }
+    .task-title h2 { margin-bottom: .5rem; }
+    .mission { margin-top: .75rem; font-size: 1.125rem; }
+    .task-facts { display: grid; grid-template-columns: 136px minmax(0, 1fr); margin: 1.5rem 0 0; }
+    .task-facts dt, .task-facts dd { border-top: 1px solid var(--cp-border); padding: .8rem 0; margin: 0; }
+    .task-facts dt { font-weight: 650; font-size: .8125rem; letter-spacing: .025em; padding-right: 1rem; }
+    .task-facts dd { max-width: 74ch; }
+    .task-facts dd p:first-child { margin-top: 0; }
+    .task-facts dd p:last-child { margin-bottom: 0; }
+    .task-facts .say { font-size: 1.125rem; }
+    .deep-dive summary { min-height: 44px; padding: .5rem 0; color: var(--cp-accent); cursor: pointer; font-weight: 600; }
+    .deep-dive summary:hover { color: var(--cp-accent-hover); }
+    .deep-dive[open] summary { margin-bottom: .5rem; }
+    .effect { color: var(--cp-accent); font-weight: 600; }
+    .practice { font-weight: 650; }
+    .permalink { font-size: .875rem; font-weight: 400; white-space: nowrap; margin-left: .5rem; }
+    .architecture-figure { margin: 1.5rem 0; }
+    .architecture-figure svg { display: block; width: 100%; min-width: 650px; }
+    .flow-node rect { fill: var(--cp-surface); stroke: var(--cp-border-strong); stroke-width: 1.5; }
+    .flow-node text { fill: var(--cp-text); font-size: 17px; font-weight: 600; }
+    .flow-node .sub { fill: var(--cp-text-soft); font-size: 13px; font-weight: 400; }
+    .flow-line { fill: none; stroke: var(--cp-border-strong); stroke-width: 2; }
+    .flow-arrow { fill: var(--cp-border-strong); }
+    .boundary { fill: var(--cp-bg-elevated); stroke: var(--cp-border-strong); stroke-dasharray: 6 5; }
+    .boundary-label { fill: var(--cp-text-soft); font-size: 13px; }
+    .flow-node.active rect { stroke: var(--cp-accent); fill: var(--cp-accent-soft); stroke-width: 2; }
+    figcaption { max-width: 74ch; color: var(--cp-text-soft); font-size: .9375rem; }
+    .flow-status { min-height: 3.5em; }
+    .term-list { display: grid; grid-template-columns: 150px minmax(0, 1fr); }
+    .term-list dt { font-weight: 600; }
+    .term-list dt, .term-list dd { padding: .75rem 0; border-bottom: 1px solid var(--cp-border); margin: 0; }
+    .sources li { overflow-wrap: anywhere; }
+    .page-footer { font-size: .875rem; color: var(--cp-text-soft); border-top: 1px solid var(--cp-border); padding-top: 1rem; }
+    .presenter-controls { display: none; }
+    body.presenter .chapter:not([data-current]) { display: none; }
+    body.presenter .presenter-controls { display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 6; background: var(--cp-bg-elevated); border-top: 1px solid var(--cp-border-strong); align-items: center; justify-content: center; gap: 1rem; padding: .75rem 1rem; }
+    body.presenter .page-footer { display: none; }
+    .presenter-status { font-size: .875rem; max-width: 50ch; text-align: center; }
+    .js-only[hidden] { display: none; }
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 210px minmax(0, 1fr); gap: 2rem; }
+      h1 { font-size: 2.75rem; }
+      .brand span { display: none; }
+      .two-column { grid-template-columns: 1fr; gap: .5rem; }
+    }
+    @media (max-width: 760px) {
+      html { scroll-padding-top: 1rem; }
+      .topbar { position: static; }
+      .topbar-inner { padding: 1rem; flex-direction: column; align-items: flex-start; gap: .75rem; }
+      .toolbar { width: 100%; }
+      .toolbar button { flex: 1; font-size: .875rem; padding: .5rem; }
+      .layout { display: block; padding: 1.5rem 1rem 6rem; }
+      .outline { position: static; max-height: 13rem; border-bottom: 1px solid var(--cp-border); margin-bottom: 2rem; padding-bottom: 1rem; }
+      .outline a { min-height: 44px; display: flex; align-items: center; gap: .5rem; }
+      .outline ul, .outline ol { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .outline .task-link { display: grid; }
+      h1 { font-size: 2.25rem; }
+      h2 { font-size: 1.625rem; }
+      .lead { font-size: 1.125rem; }
+      .task-facts { grid-template-columns: 1fr; }
+      .task-facts dt { padding-bottom: .25rem; color: var(--cp-text-soft); }
+      .task-facts dd { border-top: 0; padding-top: 0; }
+      .chapter { margin-bottom: 3rem; }
+      .task-title { gap: .5rem; }
+      .term-list { grid-template-columns: 1fr; }
+      .term-list dt { border-bottom: 0; padding-bottom: 0; }
+      .term-list dd { padding-top: .25rem; }
+      .note { padding: 1rem; }
+      th, td { min-width: 140px; }
+      .presenter-status { font-size: .75rem; }
+      body.presenter .outline { max-height: 9rem; }
+      body.presenter .presenter-controls { gap: .5rem; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .flow-node rect { transition: fill 180ms ease-out, stroke 180ms ease-out; }
+    }
+    @media print {
+      :root, html[data-theme="dark"] { color-scheme: light; --cp-bg: #ffffff; --cp-bg-elevated: #ffffff; --cp-surface: #ffffff; --cp-text: #242424; --cp-text-soft: #5c5c5c; --cp-border: #dedede; --cp-border-strong: #919191; --cp-accent: #b11f4b; --cp-accent-soft: rgba(177, 31, 75, 0.08); }
+      @page { margin: 16mm; }
+      body { font-size: 10pt; }
+      .topbar, .outline, .presenter-controls, .js-only, .actions, .permalink, .skip { display: none !important; }
+      .layout { display: block; padding: 0; max-width: none; }
+      main { max-width: none; }
+      body.presenter .chapter:not([data-current]) { display: block; }
+      .chapter { margin-bottom: 2rem; break-before: auto; }
+      h1 { font-size: 28pt; }
+      h2 { font-size: 19pt; break-after: avoid; }
+      h3, dt { break-after: avoid; }
+      .task-facts { display: block; }
+      .task-facts dt { padding-bottom: .15rem; }
+      .task-facts dd { border: 0; padding-top: 0; }
+      details::details-content { content-visibility: visible; }
+      .deep-dive > :not(summary) { display: block !important; }
+      .table-scroll, .diagram-scroll, pre { overflow: visible; }
+      table { font-size: 9pt; }
+      th, td { min-width: 0; }
+      tr { break-inside: avoid; }
+      .architecture-figure svg { min-width: 0; }
+      a { color: var(--cp-text); }
+      .page-footer, body.presenter .page-footer { display: block; }
+    }
+  </style>
+</head>
+<body>
+<!--
+THESIS: Teach the evidence-to-decision loop, not a product pitch or a wall of screenshots.
+OWN-WORLD: Warm Clawpilot reading ground, Segoe UI, rose active states, numbered instrument steps, unboxed prose and ruled input/output ledgers.
+STORY: A CSA can rehearse safely, explain each boundary, then hand off an explicitly approved practice exercise.
+FIRST VIEWPORT: Sticky utility bar, narrow outline at left, large guide title and evidence-to-score chain at right; route selection is the primary action.
+FORM: Brief-pinned reading manual with chapter presenter mode. No concept draw: the requested composition and product identity are fixed. All teaching remains in static HTML.
+-->
+  <a class="skip" href="#main">Skip to guide</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#start">DrillSim <span>Demo guide &amp; architecture</span></a>
+      <div class="toolbar js-only" hidden aria-label="Reading controls">
+        <button id="mode-button" type="button" aria-pressed="false">Presenter mode</button>
+        <button id="theme-button" type="button" aria-label="Switch reading color theme">Switch theme</button>
+        <button id="print-button" type="button">Print guide</button>
+      </div>
+    </div>
+  </header>
+  <div class="layout">
+    <nav class="outline" aria-labelledby="outline-title">
+      <h2 id="outline-title">In this guide</h2>
+      <ul>
+        <li><a href="#start">The demo in one sentence</a></li>
+        <li><a href="#routes">Choose your demo route</a></li>
+        <li><a href="#preflight">Preflight &amp; datasets</a></li>
+        <li><a href="#architecture">Architecture &amp; boundaries</a></li>
+        <li><a href="#working-model">How the workstation behaves</a></li>
+      </ul>
+      <p>The 19 engineering tasks</p>
+      <ol>
+        <li><a class="task-link" href="#evidence"><span>01</span>Evidence</a></li>
+        <li><a class="task-link" href="#qc"><span>02</span>Units &amp; QC</a></li>
+        <li><a class="task-link" href="#position"><span>03</span>Position</a></li>
+        <li><a class="task-link" href="#correlation"><span>04</span>Correlation</a></li>
+        <li><a class="task-link" href="#criteria"><span>05</span>Rock criteria</a></li>
+        <li><a class="task-link" href="#pay"><span>06</span>Pay intervals</a></li>
+        <li><a class="task-link" href="#search"><span>07</span>Search area</a></li>
+        <li><a class="task-link" href="#exclusions"><span>08</span>Exclusions</a></li>
+        <li><a class="task-link" href="#model"><span>09</span>Reservoir model</a></li>
+        <li><a class="task-link" href="#uncertainty"><span>10</span>Uncertainty</a></li>
+        <li><a class="task-link" href="#targets"><span>11</span>Targets</a></li>
+        <li><a class="task-link" href="#challenge"><span>12</span>Challenge</a></li>
+        <li><a class="task-link" href="#alternatives"><span>13</span>Alternatives</a></li>
+        <li><a class="task-link" href="#compare"><span>14</span>Compare hypotheses</a></li>
+        <li><a class="task-link" href="#bundle"><span>15</span>Evidence bundle</a></li>
+        <li><a class="task-link" href="#prediction"><span>16</span>Prediction</a></li>
+        <li><a class="task-link" href="#simulation"><span>17</span>Simulation</a></li>
+        <li><a class="task-link" href="#new-evidence"><span>18</span>New evidence</a></li>
+        <li><a class="task-link" href="#evaluation"><span>19</span>Evaluation</a></li>
+      </ol>
+      <p>Teach, recover, hand off</p>
+      <ul>
+        <li><a href="#tutorial">Guided tutorial</a></li>
+        <li><a href="#guided-simulation">Chapter 4 · New simulation</a></li>
+        <li><a href="#recovery">Exceptional repairs</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <li><a href="#handoff">CSA handoff &amp; readiness</a></li>
+        <li><a href="#glossary">Engineering glossary</a></li>
+        <li><a href="#sources">Source reference</a></li>
+      </ul>
+    </nav>
+    <main id="main" tabindex="-1">
+      <section class="chapter" id="start" aria-labelledby="start-title">
+        <h1 id="start-title">DrillSim demo walkthrough</h1>
+        <p class="lead">A practical DrillSim walkthrough for engineers and Cloud Solution Architects: understand the field, challenge a location, freeze a prediction, and inspect what a blind synthetic well revealed.</p>
+        <div class="hero-flow" aria-label="Demonstration sequence">
+          <span>Evidence</span><span aria-hidden="true">→</span><span>Interpretation</span><span aria-hidden="true">→</span><span>Sealed prediction</span><span aria-hidden="true">→</span><span>Reveal &amp; evaluation</span>
+        </div>
+        <p><strong>The presenter’s one sentence:</strong> “DrillSim separates what the engineer knows, what they assume, and what the simulator later reveals, so a decision can be reviewed against the evidence available at the time.”</p>
+        <div class="actions">
+          <a class="button primary" href="#routes">Choose a demo route</a>
+          <a class="button" href="#preflight">Check the environment</a>
+          <a class="button" href="http://localhost:5173">Open local app · localhost:5173</a>
+        </div>
+        <p class="meta">Guide baseline: 16 September 2026 · 19 tasks · 10-minute highlights, 35–45-minute walkthrough, or a new guided simulation. Use browser Find for any term. Presenter mode shows one chapter; Reader mode and Print retain the complete guide.</p>
+        <div class="note">
+          <p><strong>To try the demo, open your local app.</strong> GitHub Pages hosts this guide; the workstation needs the local services described in Preflight. You can read the complete walkthrough here before setting them up.</p>
+          <p><strong>Scientific boundary:</strong> this is a synthetic demonstration, not scientific calibration. “Net pay” in the ranking API is a qualifying-rock proxy, not proven hydrocarbon pay, reserves, an economic valuation, or permission to drill.</p>
+        </div>
+      </section>
+
+      <section class="chapter" id="routes" aria-labelledby="routes-title">
+        <h2 id="routes-title">Choose your demo route</h2>
+        <p>For a presentation, choose <strong>Troll</strong> tagged <strong>Original data</strong>. Later, open the completed demo in <strong>Scenario</strong>: its badge is <strong>Scored</strong>, meaning <strong>Evaluation complete</strong>. Select bores and targets, change views and read the saved results. Choose the practice route when the engineer is ready to change settings or save their own interpretation.</p>
+        <details class="deep-dive"><summary>What “zero-write presentation” means</summary><p>The route avoids deliberate source-data, hypothesis, prediction and operator writes. Ordinary reads may create cache/snapshot bookkeeping; navigation and the tutorial may retain local UI state.</p></details>
+        <div class="two-column">
+          <div>
+            <h3>10-minute highlights</h3>
+            <ol>
+              <li><strong>0:00–1:00 · Introduce the field.</strong> <a href="#preflight">Select Troll tagged Original data</a>, then SOGNEFJORD FM. Point out the 9 logged controls among the 46 known bores.</li>
+              <li><strong>1:00–3:00 · Inspect before interpreting.</strong> <a href="#qc">Units &amp; QC</a>, <a href="#pay">Pay intervals</a>, and a top-to-base section: unknown is not zero.</li>
+              <li><strong>3:00–5:00 · Explain the proposal.</strong> <a href="#targets">Targets</a> and <a href="#uncertainty">Uncertainty</a>: compare P90/P50/P10, neighbors and the screening score. Rotate the <a href="#model">3D view</a>.</li>
+              <li><strong>5:00–8:30 · Inspect the completed demo.</strong> Open <strong>Scenario</strong> and choose the latest completed demo tagged <strong>Scored</strong>. Read <a href="#prediction">Prediction</a>, <a href="#simulation">Simulation</a>, <a href="#new-evidence">New evidence</a>, then <a href="#evaluation">Evaluation</a>.</li>
+              <li><strong>8:30–10:00 · Explain the boundary.</strong> Use the <a href="#architecture">architecture diagram</a>; close with the <a href="#handoff">CSA handoff</a> and what is not calibrated.</li>
+            </ol>
+          </div>
+          <div>
+            <h3>35–45-minute full demo</h3>
+            <ol>
+              <li><strong>4 minutes:</strong> preflight, dataset identity and the public/private architecture.</li>
+              <li><strong>8 minutes:</strong> tasks 1–4, evidence coverage, units, coordinates and correlation annotations.</li>
+              <li><strong>9 minutes:</strong> tasks 5–11, cutoffs, intervals, grid, exclusions, geometry, uncertainty and ranking.</li>
+              <li><strong>7 minutes:</strong> tasks 12–15, cited challenges, branches, exact-revision comparison and export.</li>
+              <li><strong>9 minutes:</strong> tasks 16–19, sealed prediction, checkpoints, reveal and scorecard.</li>
+              <li><strong>3 minutes:</strong> handoff, limitations and questions. Total: about 40 minutes; allow 5 minutes either way for discussion.</li>
+            </ol>
+          </div>
+        </div>
+        <h3>When you want hands-on practice</h3>
+        <p>For hands-on lifecycle practice, choose <strong>Guided tutorial → 4. Run a guided simulation</strong>. <a href="#guided-simulation">Create a new scenario from the original field</a>, review editable example forecasts, and follow the separate Save, Seal, Approve, Prepare and Start actions. Leave the completed demo unchanged for presentations. The operator controls never rerun a completed scenario.</p>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Demo action safety">
+          <table>
+            <caption>Every task below distinguishes inspection from optional practice.</caption>
+            <thead><tr><th scope="col">Route</th><th scope="col">Permitted teaching actions</th><th scope="col">What to avoid</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Presentation</th><td>Select a field, scenario, bore or target; change lenses; inspect saved revisions and existing receipts; rotate/cut the view.</td><td>Do not Apply settings, save notes, ask AI, seal, approve, run, recover, publish or score.</td></tr>
+              <tr><th scope="row">Analysis practice</th><td>Explicitly Apply a setting; restore it; download a local bundle. With permission, save named demo hypotheses and branches.</td><td>Never overwrite shared human text. Do not assume a download saves a server artifact.</td></tr>
+              <tr><th scope="row">Guided lifecycle practice</th><td>Create a separate scenario. Explicitly fill editable demonstration estimates or enter your own forecasts, review them, then follow each guarded action.</td><td>Keep the completed demo unchanged. Do not present example depth, formation, fluid or production values as inferred truth or calibration.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>For a read-only demo without saved hypotheses, describe the editors and their effects; say “No saved artifact in this scope.” Do not create pretend history to fill an empty panel.</p>
+      </section>
+
+      <section class="chapter" id="preflight" aria-labelledby="preflight-title">
+        <h2 id="preflight-title">Prepare the demo</h2>
+        <h3>Prerequisites and startup</h3>
+        <p>Use .NET SDK <strong>10.0.400</strong> (or a compatible .NET 10 feature band), Aspire CLI <strong>13.5.3 or newer</strong>, Git, and Node.js/npm compatible with Vite 7 (Node 22.12+ is a suitable baseline). Python is needed only for the repository’s optional data/world setup scripts. Azure CLI is needed only for Azure Maps or AI authentication.</p>
+        <p><strong>If the owner already has Aspire running, reuse it.</strong> Do not restart, stop, or reseed the shared environment during a presentation. For a fresh checkout, the owner prepares dependencies and credentials before startup:</p>
+        <pre><code>git clone https://github.com/seiggy/drillsim.git
+Set-Location .\drillsim
+dotnet restore .\DrillSim.slnx
+dotnet build .\DrillSim.slnx --no-restore
+
+# Configure the required local service secrets below before first startup.
+aspire start</code></pre>
+        <p>Open the dashboard URL printed by Aspire. Verify <code>analysis-web</code>, <code>analysis-api</code> and their source services are healthy. The workstation’s development origin is <a href="http://localhost:5173">http://localhost:5173</a>; backend ports are dynamically assigned. Use the dashboard rather than guessing a port. Data persists in local <code>data\</code> SQLite files, not in GitHub Pages.</p>
+        <h3>Local secrets, never repository values</h3>
+        <p>Run these only as the environment owner. Replace placeholders with independently generated secrets; never paste real credentials into the guide, a hypothesis, a screenshot, or a commit. The hidden reservoir operator key is required for that service; the two Drilling Operations keys protect the internal workflow and Analysis callback.</p>
+        <pre><code>dotnet user-secrets set "Parameters:reservoir-simulation-operator-key" "&lt;random-operator-key&gt;" --project .\aspire\DrillSim.AppHost
+dotnet user-secrets set "Parameters:drilling-operations-internal-key" "&lt;random-internal-key&gt;" --project .\aspire\DrillSim.AppHost
+dotnet user-secrets set "Parameters:drilling-operations-analysis-callback-key" "&lt;random-callback-key&gt;" --project .\aspire\DrillSim.AppHost</code></pre>
+        <p>Optional Azure settings use the same AppHost user-secrets store. Sign in with Azure CLI using the intended subscription/tenant profile. Aspire forwards the selected <code>AZURE_CONFIG_DIR</code> to the Analysis API; its <code>AzureCliCredential</code> obtains tokens server-side.</p>
+        <pre><code>dotnet user-secrets set "Parameters:azure-openai-endpoint" "https://&lt;resource&gt;.openai.azure.com/" --project .\aspire\DrillSim.AppHost
+dotnet user-secrets set "Parameters:azure-openai-deployment-name" "&lt;deployment&gt;" --project .\aspire\DrillSim.AppHost
+dotnet user-secrets set "Parameters:azure-openai-subscription-id" "&lt;openai-subscription-id&gt;" --project .\aspire\DrillSim.AppHost
+dotnet user-secrets set "Parameters:azure-maps-client-id" "&lt;maps-account-client-id&gt;" --project .\aspire\DrillSim.AppHost
+dotnet user-secrets set "Parameters:azure-maps-tenant-id" "&lt;maps-tenant-id&gt;" --project .\aspire\DrillSim.AppHost
+dotnet user-secrets set "Parameters:azure-maps-subscription-id" "&lt;maps-subscription-id&gt;" --project .\aspire\DrillSim.AppHost</code></pre>
+        <p>For Maps, grant the CLI principal the appropriate Maps data access and allow <code>http://localhost:5173</code> in account CORS settings. The API brokers short-lived tokens for <code>https://atlas.microsoft.com/.default</code>; no subscription key goes to the browser. Without Maps or AI, deterministic analysis still works with the local services running. Missing credentials should produce an honest unavailable state.</p>
+        <h3>Select the Troll field</h3>
+        <p>Open the <strong>Field</strong> dropdown and choose the Troll entry tagged <strong>Original data</strong>. Then select <strong>SOGNEFJORD FM</strong> as the reservoir. The app may initially show Targets; choose Evidence when you are ready to begin.</p>
+        <p>The reference environment initially has three Troll entries. One contains the original measurements; two contain results from separate simulation runs. New published scenarios add their own results fields. The dropdown keeps the field name and uses a badge, description, date and short reference to distinguish them:</p>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Choose among the three Troll field entries">
+          <table>
+            <thead><tr><th scope="col">Badge / entry</th><th scope="col">What it contains</th><th scope="col">When to choose it</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Troll · Original data</th><td>The starting field measurements: 29 wells, 46 bores and 9 logged controls.</td><td>Choose this for the opening walkthrough and settings exercises.</td></tr>
+              <tr><th scope="row">Troll · Simulated results · latest demo</th><td>The completed demo’s added well and observations. Use the displayed run date and reference to distinguish this entry from the older results.</td><td>For the full before/after story, select the completed demo in Scenario under Troll · Original data. Look for Scored and the latest reference below.</td></tr>
+              <tr><th scope="row">Troll · Simulated results · earlier run</th><td>A separate earlier simulation’s results, retained as history.</td><td>Use only when discussing that run. Its different date/reference distinguishes it from the latest demo.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>To show the completed workflow, keep <strong>Troll · Original data</strong> selected, open <strong>Scenario</strong> and choose the completed demo tagged <strong>Scored</strong>. The helper text <strong>Evaluation complete</strong> explains that its results have already been evaluated. The latest reference scenario begins <code>8e96385c</code>; its original setup label includes <code>2026-09-11 9f64865b</code>. Dates and references distinguish runs; the badge tells you their status.</p>
+        <details class="deep-dive">
+        <summary>Reference dataset IDs and original setup labels</summary>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Reference demo datasets">
+          <table>
+            <caption>Local seeded examples, not data automatically supplied by a fresh checkout.</caption>
+            <thead><tr><th scope="col">Use</th><th scope="col">Exact identity</th><th scope="col">Expected reference inventory</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Original data</th><td><strong>TROLL FORCE-SODIR</strong><br><code>502fea8b-4d85-5d40-86a7-f5b7655d89d6</code><br>Reservoir: <strong>SOGNEFJORD FM</strong></td><td>29 parent wells, 46 wellbores; 9 logged/surveyed controls and 37 structural-only bores.</td></tr>
+              <tr><th scope="row">Completed demo · Scored</th><td>Original setup label begins <strong>AUTOMATED WORKFLOW FIXTURE 2026-09-11 9f64865b</strong><br>Scenario <code>8e96385c-84cb-8720-85cd-0e2073588b09</code></td><td>Evaluation complete. Read this scenario’s prediction, new measurements and scorecard for the full demonstration.</td></tr>
+              <tr><th scope="row">Completed demo’s simulated results</th><td><code>f109d7ac-c05f-56cc-91a4-546d2bac9e8b</code></td><td>30 wells, 47 bores; 177 published records, 60 production months and 94 published aggregate metrics. These records are kept separately from the starting measurements.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>These counts describe a specific prepared environment, not universal invariants. The earlier scenario whose ID begins <code>46c7</code> includes an old problematic survey excluded by current geometry checks. Prefer the latest completed demo above; retain the older records as history.</p>
+        </details>
+        <div class="note">
+          <p><strong>Fresh checkout with no data?</strong> Stop the live walkthrough at preflight. Review <a href="https://github.com/seiggy/drillsim/tree/main/datasets">datasets</a>, <a href="https://github.com/seiggy/drillsim/tree/main/scripts">setup scripts</a> and the <a href="https://github.com/seiggy/drillsim/blob/main/docs/simulator/implementation-plan.md">implementation plan</a> with the owner. The original field must be imported and the local operator facade configured. Once ready, use <strong>New simulation</strong> to create a scenario and <strong>Prepare simulator</strong> to prepare a supported model preset; opening the app or tutorial performs neither action.</p>
+        </div>
+        <h3>Five checks before presenting</h3>
+        <ol>
+          <li>Confirm healthy source APIs in Aspire; keep their logs available but off the projected screen if they contain sensitive environment details.</li>
+          <li>Check the selected field’s badge: Original data for the opening analysis, Simulated results when inspecting a run’s added measurements. Confirm SOGNEFJORD FM and the intended scenario/date.</li>
+          <li>Check Maps and AI status in advance; plan the honest offline narration rather than troubleshooting a login on stage.</li>
+          <li>Open the completed scenario tagged Scored and check that its prediction, new measurements, production and evaluation are available.</li>
+          <li>Agree “presentation only” or identify the separate practice scenario and permitted writes. Keep existing unsaved human text intact.</li>
+        </ol>
+      </section>
+
+      <section class="chapter" id="architecture" aria-labelledby="architecture-title">
+        <h2 id="architecture-title">Application architecture</h2>
+        <p>Engineers work from measurements they can inspect. DrillSim calculates candidate locations from those measurements and records the engineer’s prediction. A separate simulator then creates the well outcome. Only after publication can the engineer use those new observations in the next interpretation.</p>
+        <figure class="architecture-figure">
+          <div class="flow-controls js-only" hidden aria-label="Highlight an architecture path">
+            <button type="button" data-flow="read" aria-pressed="true">Inspect &amp; interpret</button>
+            <button type="button" data-flow="run" aria-pressed="false">Approve &amp; simulate</button>
+            <button type="button" data-flow="reveal" aria-pressed="false">Publish &amp; evaluate</button>
+          </div>
+          <div class="diagram-scroll" tabindex="0" role="region" aria-label="Architecture diagram; scroll horizontally on small screens">
+            <svg viewBox="0 0 890 475" role="img" aria-labelledby="flow-title flow-description">
+              <title id="flow-title">DrillSim evidence, approval and publication boundaries</title>
+              <desc id="flow-description">Source REST and MCP services feed the Analysis API and React workstation. Human approval enters a server-side operator facade. Internal Drilling Operations uses restricted Stage A reservoir truth. Two-phase reveal publishes verified evidence and advances the public ledger; hidden cells are never returned to the browser or analysis agent.</desc>
+              <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path class="flow-arrow" d="M0 0 L8 4 L0 8Z"/></marker></defs>
+              <rect class="boundary" x="15" y="163" width="860" height="305" rx="10"/>
+              <text class="boundary-label" x="31" y="187">RESTRICTED EXECUTION · no hidden cell truth in browser / agent</text>
+              <path class="flow-line" d="M264 65 H326" marker-end="url(#arrow)"/>
+              <path class="flow-line" d="M566 65 H628" marker-end="url(#arrow)"/>
+              <path class="flow-line" d="M751 103 V213" marker-end="url(#arrow)"/>
+              <path class="flow-line" d="M628 255 H566" marker-end="url(#arrow)"/>
+              <path class="flow-line" d="M326 255 H264" marker-end="url(#arrow)"/>
+              <path class="flow-line" d="M144 295 V384" marker-end="url(#arrow)"/>
+              <path class="flow-line" d="M444 295 V384" marker-end="url(#arrow)"/>
+              <path class="flow-line" d="M566 421 H600 V133 H444 V103" marker-end="url(#arrow)"/>
+              <path class="flow-line" d="M24 421 H5 V119 H296 V65 H326" marker-end="url(#arrow)"/>
+              <g class="flow-node active" data-path="read reveal">
+                <rect x="24" y="25" width="240" height="78" rx="10"/>
+                <text x="40" y="54">Public evidence services</text><text class="sub" x="40" y="78">Fields, wells, bores, surveys, logs</text>
+              </g>
+              <g class="flow-node active" data-path="read reveal">
+                <rect x="326" y="25" width="240" height="78" rx="10"/>
+                <text x="342" y="54">Analysis API + ledgers</text><text class="sub" x="342" y="78">Scope · hashes · deterministic ranking</text>
+              </g>
+              <g class="flow-node active" data-path="read run reveal">
+                <rect x="628" y="25" width="240" height="78" rx="10"/>
+                <text x="644" y="54">React workstation</text><text class="sub" x="644" y="78">19 tasks · lenses · human review</text>
+              </g>
+              <g class="flow-node" data-path="run">
+                <rect x="628" y="213" width="240" height="82" rx="10"/>
+                <text x="644" y="244">Local operator facade</text><text class="sub" x="644" y="270">Native CSRF · Origin · action keys</text>
+              </g>
+              <g class="flow-node" data-path="run reveal">
+                <rect x="326" y="213" width="240" height="82" rx="10"/>
+                <text x="342" y="244">Stage B · operations</text><text class="sub" x="342" y="270">S0–S9 checkpoints · approval gates</text>
+              </g>
+              <g class="flow-node" data-path="run">
+                <rect x="24" y="213" width="240" height="82" rx="10"/>
+                <text x="40" y="244">Stage A · hidden world</text><text class="sub" x="40" y="270">Field-local volume · 3-phase IMPES</text>
+              </g>
+              <g class="flow-node" data-path="reveal">
+                <rect x="24" y="384" width="240" height="74" rx="10"/>
+                <text x="40" y="414">Restricted truth scoring</text><text class="sub" x="40" y="438">Only aggregate metrics leave</text>
+              </g>
+              <g class="flow-node" data-path="reveal">
+                <rect x="326" y="384" width="240" height="74" rx="10"/>
+                <text x="342" y="414">Two-phase reveal</text><text class="sub" x="342" y="438">Verified evidence · receipts · clock</text>
+              </g>
+            </svg>
+          </div>
+          <figcaption id="flow-status" class="flow-status" aria-live="polite">Read path: public evidence is assembled into a fingerprinted package; deterministic analysis feeds the workstation. Optional AI receives authorized public context, not hidden simulator truth.</figcaption>
+        </figure>
+        <details class="deep-dive">
+        <summary>Technical deep dive: services, credentials, storage and APIs</summary>
+        <p>In the implementation, the starting field is called the <em>source field</em>. A scenario’s separate result field is called a <em>clone</em>: it retains the starting context and adds the published simulated observations under a different field ID. The UI labels these <strong>Original data</strong> and <strong>Simulated results</strong>. The dropdown descriptions distinguish them without renaming or deleting the stored records.</p>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Architecture components and boundaries">
+          <table>
+            <thead><tr><th scope="col">Layer</th><th scope="col">Responsibility</th><th scope="col">Boundary to explain</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Surface ontology</th><td>Field → rig/cluster → slot → well → wellbore. Geodetic datum, projection, units and Earth services establish reference context; survey instruments describe measurement behavior.</td><td>A structural record is not a logged or located reservoir control.</td></tr>
+              <tr><th scope="row">Downhole evidence</th><td>Trajectory, Geological Properties, WellBoreArchitecture, Drilling Fluid, Drill String, Geothermal Properties, YPL Calibration and Simulator4nDOF describe measurements and drilling context.</td><td>Coverage differs by service and record; missing evidence remains missing.</td></tr>
+              <tr><th scope="row">Analysis API</th><td>Assembles visible packages, applies rock screening and IDW, validates scope, stores hypotheses/predictions/receipts and serves read-only ledgers.</td><td>Package, configuration and result hashes identify exact inputs and derivations; a hash does not certify scientific validity.</td></tr>
+              <tr><th scope="row">React / AG-UI / AI</th><td>React hosts task/lens state. AG-UI carries explicit streamed agent requests to .NET Agent Framework and an optional Azure OpenAI deployment.</td><td>Agent notes are not automatically attached reviews. Configured results cannot silently use default-only AI tools.</td></tr>
+              <tr><th scope="row">Azure Maps broker</th><td>Server-side Azure CLI credentials acquire short-lived Maps tokens for WGS84 map overlays.</td><td>The client gets a scoped token, not the secret. A field-local proposed path is withheld from Maps without a supported transform.</td></tr>
+              <tr><th scope="row">Stage A: Reservoir Simulation</th><td>Conditions a deterministic hidden field-local volume and runs adaptive immiscible oil/water/gas IMPES production physics.</td><td>Hidden cell truth stays in the reservoir service. Public analysis never reads the cell arrays. Synthetic conditioning is not calibration.</td></tr>
+              <tr><th scope="row">Stage B: Drilling Operations</th><td>Internal checkpointed well plan, drilling, survey, geology, logs, completion, production, publication and scoring workflow.</td><td>Explicit owner actions and stored hashes bind stages. Internal credentials do not reach the browser; no public MCP truth tools.</td></tr>
+              <tr><th scope="row">Aspire / SQLite / OpenTelemetry</th><td>Aspire owns local resource topology, discovery and health. Each service persists to its own SQLite store. Shared defaults emit logs, traces and metrics.</td><td>Use telemetry to trace a request across services, not as evidence of geological correctness. Local single-user controls are not enterprise identity or multi-tenant authorization.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>REST and MCP are complementary</h3>
+        <p>The inspected demo topology exposed <strong>15 public MCP services and 195 discovered tools</strong>; treat this as a discovery snapshot, not a permanent coverage promise. Several services expose ping/connectivity only. Geological Properties, Trajectory, Drilling Fluid, Geothermal Properties and YPL Calibration currently use REST rather than public HTTP MCP. The hidden reservoir and internal operations service are intentionally outside public MCP discovery.</p>
+        <pre><code># Read public capabilities from the running Aspire environment:
+aspire mcp tools --non-interactive
+aspire mcp call field ping --input '{}' --non-interactive</code></pre>
+        <p>From each dynamic service URL, use <code>/swagger</code> for Scalar, <code>/swagger/v1/swagger.json</code> for OpenAPI, <code>/health</code> for readiness and <code>/alive</code> for liveness. Implemented MCP transports use <code>/mcp</code> and, where available, <code>/mcp/ws</code>. Discovery is not proof that every CRUD path is implemented.</p>
+        </details>
+      </section>
+
+      <section class="chapter" id="working-model" aria-labelledby="working-title">
+        <h2 id="working-title">Understand the workstation before clicking</h2>
+        <h3>Tasks and visualization views</h3>
+        <p>The sequencer has <strong>19 tasks</strong>. Choosing one changes the teaching workspace and usually its initial lens. <strong>Map, 2D Section, 3D Reservoir, Logs and Crossplot</strong> are synchronized views, not separate completed tasks. Selecting a bore or target updates its companion readouts. A visited step means <em>visited</em>, not QC-approved, reviewed, saved or complete. Lifecycle labels come from actual ledger state.</p>
+        <h3>Three different kinds of state</h3>
+        <ol>
+          <li><strong>Viewing state:</strong> selected task, bore, target, lens, camera or mesh radius. It can change your view without modifying the source or ranking.</li>
+          <li><strong>Draft interpretation:</strong> porosity, permeability, grid size, exclusion radius and IDW neighbor count. Editing any form leaves the previous result intact. <strong>Apply analysis settings</strong> submits all pending settings across tasks and verifies the returned package/configuration/result scope.</li>
+          <li><strong>Persisted evidence of a decision:</strong> saved hypothesis revision, challenge version, sealed prediction, operator receipt, reveal or scorecard. Each has a specific explicit write action; navigation cannot substitute for it.</li>
+        </ol>
+        <p><strong>Always check which evidence you are looking at.</strong> A result belongs to one field, formation and, when selected, scenario/date. Together these define its <em>scope</em>. Changing them changes the question. Loading a historical hypothesis opens its saved evidence separately; the map still shows the current field. The app’s visited-step markers restart when the evidence changes.</p>
+        <details class="deep-dive"><summary>How DrillSim identifies a result</summary><p>The package hash identifies the visible evidence; configuration and analysis hashes identify the settings and calculated result. A saved snapshot retains those identities. Hashes help detect changed inputs, but do not establish scientific validity.</p></details>
+        <h3>A small experiment with a visible result</h3>
+        <p class="practice">Optional analysis practice, not the zero-write route.</p>
+        <ol>
+          <li>Select <strong>Troll · Original data</strong> and establish the applied defaults: porosity <code>0.12</code>, permeability <code>9.869233e-16 m²</code> (1 mD), radius <code>500 m</code>, grid <code>15</code>, IDW neighbors <code>4</code>.</li>
+          <li>In Search area, change 15 to 9. Before Apply, point to “Previous result / pending settings”: the old output still represents the old configuration.</li>
+          <li>Select <strong>Apply analysis settings</strong>. For a valid full-grid result, 15² = <strong>225</strong> pre-screening cells becomes 9² = <strong>81</strong>. Inspect the returned hash and counts; eligible/shortlisted counts are separate.</li>
+          <li>Optionally change porosity 0.12 → 0.13, or ranking neighbors 4 → 3 in Reservoir model. Apply one controlled change at a time. Record what actually changed; targets and ordering depend on data and are not guaranteed to move.</li>
+          <li>Restore by <strong>Load defaults into form</strong>, then <strong>Apply analysis settings</strong>. Loading defaults alone is not recalculation. <strong>Restore result settings</strong> instead discards pending edits back to the currently displayed result.</li>
+        </ol>
+        <p>Apply runs the calculation directly. If it fails, the page keeps the previous result and identifies it as previous, so you can correct the settings and try again.</p>
+      </section>
+
+      <section class="chapter task" id="evidence" aria-labelledby="evidence-title">
+        <div class="task-title"><span class="step-number">01</span><h2 id="evidence-title">Evidence <a class="permalink" href="#evidence">Link</a></h2></div>
+        <p class="mission">Mission: know what is actually loaded before making a geological claim.</p>
+        <dl class="task-facts">
+          <dt>SAY</dt><dd class="say">“We know about 46 bores here, but only nine have the logs we use for this interpretation. Let’s look at one.”</dd>
+          <dt>DO</dt><dd>Choose <strong>Evidence</strong>. Read <strong>PARENT WELLS / BORES</strong> and <strong>BORES WITH CURVES</strong>, then select a logged bore in the coverage table. Open <strong>Data sources</strong> to see the datasets and processing details. Expand <strong>Affected wellbores</strong> to trace records to their sources. Shared source files and licenses appear once below; <strong>Attribution and file details</strong> contains the full credits and checksum. Use <strong>Download source metadata JSON</strong> when you need the original metadata.</dd>
+          <dt>EXPECT</dt><dd>For the original reference field, the inventory shows 29 wells / 46 bores: 9 logged controls and 37 structural-only bores. Selecting a bore brings its measurements into the lens below. Read the coverage row to see which curves are available for that bore.</dd>
+          <dt>INPUT</dt><dd>Selected field, reservoir, optional scenario and its as-of time; public service records with evidence IDs and provenance.</dd>
+          <dt>OUTPUT</dt><dd>A visible inventory of runs, curves, values, source labels, gaps and a fingerprinted package.</dd>
+          <dt>STATE EFFECT</dt><dd><span class="effect">Inspection / re-read.</span> Selection changes UI state. Refresh can bring a new visible package and analysis into scope; it is not an importer and does not create a well.</dd>
+          <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>Where the inventory comes from</summary><p><code>FieldPackageService</code> assembles the service graph. Scenario visibility and package snapshots restrict what is available at the selected clock. The package timestamp and SHA-256 identify the evidence read for this result.</p></details></dd>
+          <dt>RISKS</dt><dd>Parent wells and bores are different counts; available curves may not cover the whole formation. Check the field badge before comparing inventories: Original data and Simulated results contain different records even when the field name is the same.</dd>
+        </dl>
+      </section>
+
+      <section class="chapter task" id="qc" aria-labelledby="qc-title">
+        <div class="task-title"><span class="step-number">02</span><h2 id="qc-title">Units &amp; QC <a class="permalink" href="#qc">Link</a></h2></div>
+        <p class="mission">Mission: decide whether a number has a valid unit, depth reference and quality context.</p>
+        <dl class="task-facts">
+          <dt>SAY</dt><dd class="say">“Before trusting this curve, I want to know its units, its depth reference and how many readings are missing.”</dd>
+          <dt>DO</dt><dd>Choose <strong>Units &amp; QC</strong>. Find PHIE (porosity) and PERM (permeability) for the selected bore. Compare <strong>Source → canonical unit</strong> and <strong>Depth reference / unit / positive-down</strong>, including the datum. Read <strong>Missing / total</strong> beside <strong>Valid zeros</strong>, then expand <strong>Curve details</strong> to inspect the log run, tool and data classification. Download the original curve metadata if needed.</dd>
+          <dt>EXPECT</dt><dd>The table shows units, missing readings and valid zeros separately. A depth/value length mismatch is called out beside the curve. Porosity and saturation tracks use fractions; permeability uses m². Formation columns need positive-down measured depth in metres.</dd>
+          <dt>INPUT</dt><dd>All visible log runs, curve values, quality/null flags and source/canonical unit and depth metadata. PHIE/SW/SO/SG accept fraction or m³/m³. Non-finite, null-flagged, bad-hole and invalid readings count as missing; overlapping flags are counted once.</dd>
+          <dt>OUTPUT</dt><dd>A curve-level diagnostic table with raw metadata, evidence IDs and explicit valid-zero/missing counts.</dd>
+          <dt>STATE EFFECT</dt><dd><span class="effect">Inspection only:</span> the source record stays unchanged; corrections, conversion writes and persisted QC sign-off are outside this inspector.</dd>
+          <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>How units and missing values are inspected</summary><p>Frontend evidence inventory interprets published metadata. Source services own the records; unit/reference services provide context. An absent transform is not guessed.</p></details></dd>
+          <dt>RISKS</dt><dd>All runs are inventoried, but the current visual rock/fluid column reads the first run. Inspect that distinction if a curve exists in inventory but not in a lens. Do not silently turn unsupported units or quality gaps into rock.</dd>
+        </dl>
+      </section>
+
+      <section class="chapter task" id="position" aria-labelledby="position-title">
+        <div class="task-title"><span class="step-number">03</span><h2 id="position-title">Position <a class="permalink" href="#position">Link</a></h2></div>
+        <p class="mission">Mission: distinguish a surface marker from a defensible downhole control.</p>
+        <dl class="task-facts">
+          <dt>SAY</dt><dd class="say">“The reservoir is down here, not at the wellhead. We need a survey that reaches this formation to place it.”</dd>
+          <dt>DO</dt><dd>Choose <strong>Position</strong> and select a bore in the table. Read <strong>Validated stations</strong>, <strong>Formation midpoint E / N / TVD</strong> and <strong>Diagnostics</strong>. Expand <strong>Field coordinate reference</strong> to inspect labeled coordinates and units. Download coordinate metadata when you need the original record. With Maps available, compare the surface marker with the selected bore’s downhole position.</dd>
+          <dt>EXPECT</dt><dd>A formation midpoint appears only when a validated survey covers its MD. “No covering location” or coordinate disagreement is an honest result. No wellhead or guessed conversion replaces missing downhole evidence.</dd>
+          <dt>INPUT</dt><dd>Survey stations, field-local coordinates, source reference datum and formation top/base MD.</dd>
+          <dt>OUTPUT</dt><dd>Located midpoint, valid station count and coordinate rejection diagnostics synchronized to the selected bore.</dd>
+          <dt>STATE EFFECT</dt><dd><span class="effect">View selection only:</span> selecting a bore leaves its published survey unchanged, including any unresolved coordinate diagnostics.</dd>
+          <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>How downhole positions are calculated</summary><p>Public trajectories feed frontend geometry validation/interpolation. Azure Maps handles supported WGS84 overlays separately from field-local 2D/3D geometry.</p></details></dd>
+          <dt>RISKS</dt><dd>MD is not TVD, and neither automatically establishes a common inter-well datum. Inconsistent tie-ins and missing coverage are excluded, not patched by the demo. This is not anti-collision clearance.</dd>
+        </dl>
+      </section>
+
+      <section class="chapter task" id="correlation" aria-labelledby="correlation-title">
+        <div class="task-title"><span class="step-number">04</span><h2 id="correlation-title">Correlation <a class="permalink" href="#correlation">Link</a></h2></div>
+        <p class="mission">Mission: separate a visual formation relationship from a saved interpretive annotation.</p>
+        <dl class="task-facts">
+          <dt>SAY</dt><dd class="say">“This is our first AI step. I’ll ask the agent to compare the formation evidence, then review its interpretation and the checks it recommends.”</dd>
+          <dt>DO</dt><dd>Choose <strong>Correlation</strong> and click <strong>Draft interpretation with AI</strong>. Read the suggested name, target rationale and correlation notes. Expand <strong>Supporting evidence</strong> and check the listed limitations. Acknowledge the review and click <strong>Use this draft</strong> to fill the form. Edit it as needed, then select <strong>Save hypothesis</strong>. If AI is unavailable, write your own note or use <strong>Example correlation note</strong>.</dd>
+          <dt>EXPECT</dt><dd>The draft explains the displayed formation evidence and identifies what needs checking. Existing notes stay in place until you accept the draft. The accepted correlation notes retain an AI label, limitations and supporting evidence references.</dd>
+          <dt>INPUT</dt><dd>Server-verified field and reservoir evidence, applied analysis settings, selected target, and current engineer notes. A loaded saved revision uses its recorded evidence rather than the latest field data.</dd>
+          <dt>OUTPUT</dt><dd>An AI-generated name, rationale, correlation notes, citations and limitations, ready for review. Saving creates a separate hypothesis revision.</dd>
+          <dt>STATE EFFECT</dt><dd>Drafting calls the configured AI service and may incur usage charges. It does not edit the form or save data. <strong>Use this draft</strong> requires review before replacing notes, keeps an existing hypothesis name, and fills the local form. <strong>Save hypothesis</strong> persists the reviewed interpretation. Calculations stay unchanged.</dd>
+          <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>How the formation agent uses evidence</summary><p>The Analysis API checks package, configuration, result and saved-revision identities before calling the request-bound Agent Framework agent. The agent starts with a small brief. Read-only tools provide deterministic formation summaries, the applied screening results, record search, detailed inspection and current notes. It can request the full prepared context when broader evidence is useful. Every tool reads the same verified snapshot; hidden simulator truth and unrelated data remain unavailable. The API validates citations against the evidence actually returned. The separate general field-note actions do not automatically load saved hypothesis notes.</p><p>The hypothesis store records the accepted notes with the package, settings and target. Optimistic concurrency preserves prior revisions and reports stale saves.</p></details></dd>
+          <dt>RISKS</dt><dd>Repeated formation occurrences remain distinct. A draft is not proof of a common datum or structural continuity. If AI reports a 429 capacity limit, your notes stay unchanged and no automatic retry is made; wait for quota or capacity before requesting another draft. Preserve/download human text before resolving save conflicts.</dd>
+        </dl>
+        <details><summary>Example correlation note</summary>
+          <p>Check whether differences in formation depth reflect geological structure or different depth references. Compare wells with logs against wells with formation intervals only before choosing a drilling target.</p>
+          <p>Use this as a review question, then add your own observations. It does not assert that the formations are already correlated.</p>
+        </details>
+      </section>
+
+      <section class="chapter task" id="criteria" aria-labelledby="criteria-title">
+        <div class="task-title"><span class="step-number">05</span><h2 id="criteria-title">Rock criteria <a class="permalink" href="#criteria">Link</a></h2></div>
+        <p class="mission">Mission: make the definition of qualifying rock explicit and testable.</p>
+        <dl class="task-facts">
+          <dt>SAY</dt><dd class="say">“Let’s raise the porosity cutoff from 12% to 13% and see how much rock still qualifies.”</dd>
+          <dt>DO</dt><dd>Choose <strong>Rock criteria</strong> and inspect <strong>Crossplot</strong>. For practice, change <strong>Minimum porosity · fraction</strong> from <code>0.12</code> to <code>0.13</code>; leave permeability at <code>9.869233e-16 m²</code>. Notice that the old result remains visible, then choose <strong>Apply analysis settings</strong>. Compare Pay intervals and Targets. To reset, choose <strong>Load defaults into form</strong>, then <strong>Apply analysis settings</strong>.</dd>
+          <dt>EXPECT</dt><dd>Before Apply, the page says the displayed result still uses the previous settings. After Apply succeeds, the crossplot and interval calculations use 13% porosity. Compare the qualifying thickness and target list; the ranking may or may not change.</dd>
+          <dt>INPUT</dt><dd>Porosity fraction (0–1), strictly positive permeability in m², current visible package and reservoir. All pending settings across tasks accompany Apply.</dd>
+          <dt>OUTPUT</dt><dd>New per-record qualifying-rock calculations, grid predictions, score/uncertainty output and matching visual cutoff tracks.</dd>
+          <dt>STATE EFFECT</dt><dd><span class="effect">Draft edit → explicit deterministic recalculation.</span> Apply preserves source curves and computes a result; AI requests and hypothesis saves require their own separate actions.</dd>
+          <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>How Apply produces a new result</summary><p><code>ConfiguredAnalysisService</code> validates the versioned configuration; <code>PetrophysicsAnalysisService</code> computes the screening result. Package/configuration/result fingerprints must match the request before the client accepts the response.</p></details></dd>
+          <dt>RISKS</dt><dd>Fraction 0.13 means 13%, not 0.13%. PERM is SI, not an unlabelled mD value. A failed request preserves the old result. Read the published pressure differential rule rather than assuming every sample is classified solely by two cutoffs.</dd>
+        </dl>
+      </section>
+
+      <section class="chapter task" id="pay" aria-labelledby="pay-title">
+        <div class="task-title"><span class="step-number">06</span><h2 id="pay-title">Pay intervals <a class="permalink" href="#pay">Link</a></h2></div>
+        <p class="mission">Mission: reconcile a headline rock thickness with the intervals that support it.</p>
+        <dl class="task-facts">
+          <dt>SAY</dt><dd class="say">“Where does that thickness come from? Let’s follow the intervals from the top of the formation to its base.”</dd>
+          <dt>DO</dt><dd>Choose <strong>Pay intervals</strong> and select a logged bore. Compare <strong>Gross</strong>, <strong>Qualifying rock</strong>, <strong>Below cutoff</strong> and <strong>Unknown quality</strong>. Read the selected bore’s contributing intervals below the table, then switch to <strong>Logs</strong> or <strong>2D Section</strong> to see those intervals. Compare the fluid track with the rock-quality track.</dd>
+          <dt>EXPECT</dt><dd><strong>Gross = qualifying + below-cutoff + unknown quality.</strong> Qualifying thickness splits again into oil/gas-classified, water and unknown fluid. Bands extend over bounded formation intervals; separated occurrences and unsampled gaps stay separate.</dd>
+          <dt>INPUT</dt><dd>Formation top/base MD, first-run sample support, applied cutoffs and available phase saturation/other fluid evidence.</dd>
+          <dt>OUTPUT</dt><dd>Per-bore interval thickness accounting, independent rock/fluid tracks, interval reasons and separate API per-geology calculations.</dd>
+          <dt>STATE EFFECT</dt><dd><span class="effect">Inspection and bore selection only.</span> It does not edit formations or certify pay.</dd>
+          <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>Why the interval total can differ from the ranking proxy</summary><p>The visual column uses sample-midpoint support and leaves large gaps unknown; it is a separate calculation from the API sample-thickness method. Open <strong>API calculation by geology record</strong> to compare the methods. A parent-well aggregate is not copied onto every bore.</p></details></dd>
+          <dt>RISKS</dt><dd>Neutral diagonal stripes mean missing/invalid/unclassified evidence, not zero thickness or no rock. Below-cutoff rock may still have known fluid. Inferred contacts are model estimates, not observed contacts unless a source explicitly says so. Oil/gas classification is still not economic pay or reserves.</dd>
+        </dl>
+      </section>
+
+      <section class="chapter task" id="search" aria-labelledby="search-title">
+        <div class="task-title"><span class="step-number">07</span><h2 id="search-title">Search area <a class="permalink" href="#search">Link</a></h2></div>
+        <p class="mission">Mission: understand the complete set of candidate locations before reading the shortlist.</p>
+        <dl class="task-facts">
+          <dt>SAY</dt><dd class="say">“We tested more locations than the map shows. Here’s the full grid, including the cells that were ruled out.”</dd>
+          <dt>DO</dt><dd>Choose <strong>Search area</strong>. Read the total candidate cells and use <strong>Cell status</strong> to filter the table; use <strong>Next cells</strong> to inspect more rows. In practice, change <strong>Grid points per axis · 2–51</strong> from 15 to 9 and choose <strong>Apply analysis settings</strong>. Verify 81 cells, then <strong>Load defaults into form</strong> and Apply again to restore 225.</dd>
+          <dt>EXPECT</dt><dd>15×15 produces 225 pre-screening cells; 9×9 produces 81 for a valid populated grid. Eligible cells, excluded cells and the retained shortlist are different sets. The table shows cell coordinates, reasons, nearest control distance and available P50.</dd>
+          <dt>INPUT</dt><dd>Grid points per axis, an integer 2–51, plus the evidence-derived bounds and other applied screening settings.</dd>
+          <dt>OUTPUT</dt><dd>The full versioned candidate grid and status/reason distribution, not just map markers.</dd>
+          <dt>STATE EFFECT</dt><dd><span class="effect">Filtering is view-only; Apply recalculates.</span> Pagination and filtering do not regenerate candidates.</dd>
+          <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>How the search grid is built</summary><p>The API derives the bounded search area from located evidence; the frontend tables the complete result and maps only the retained shortlist.</p></details></dd>
+          <dt>RISKS</dt><dd>Custom extent/boundary editing is not supported here. A denser grid is not new subsurface evidence, a new lease boundary or better calibrated uncertainty. No full-grid result means “unavailable,” not permission to invent cells.</dd>
+        </dl>
+      </section>
+
+      <section class="chapter task" id="exclusions" aria-labelledby="exclusions-title">
+        <div class="task-title"><span class="step-number">08</span><h2 id="exclusions-title">Exclusions <a class="permalink" href="#exclusions">Link</a></h2></div>
+        <p class="mission">Mission: say exactly what a screening distance excludes—and what it cannot protect.</p>
+        <dl class="task-facts">
+          <dt>SAY</dt><dd class="say">“Why was this location rejected? It falls inside the distance we chose around one of our logged controls.”</dd>
+          <dt>DO</dt><dd>Choose <strong>Exclusions</strong>. Read <strong>Screening-control exclusion radius · m</strong>, then use <strong>Cell status</strong> to inspect excluded cells. Compare each cell’s distance and reason. In practice, edit the radius and choose <strong>Apply analysis settings</strong>; inspect the changed counts before loading defaults and applying again.</dd>
+          <dt>EXPECT</dt><dd>Reasons explain which cells the screen rejects. Structural-only bores do not all participate in the nearest-control calculation; 37 structural-only reference bores are not equivalent to 37 located screening controls.</dd>
+          <dt>INPUT</dt><dd>Radius in metres (0–100,000), located logged control summaries and grid locations.</dd>
+          <dt>OUTPUT</dt><dd>Screening inclusion/exclusion statuses and distances for the complete candidate grid.</dd>
+          <dt>STATE EFFECT</dt><dd><span class="effect">Draft radius until Apply.</span> A recalculation changes the screen, not the well inventory or legal constraints.</dd>
+          <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>Which wells participate in the distance calculation</summary><p>Deterministic analysis uses the located logged summaries available for ranking. General field-wide coordinate and common-datum validation remain incomplete; structural-only wells do not automatically participate.</p></details></dd>
+          <dt>RISKS</dt><dd>This is not anti-collision, lease clearance, separation from every known well or operational permission. Increasing a radius may remove useful candidates; it cannot compensate for missing surveys.</dd>
+        </dl>
+      </section>
+
+      <section class="chapter task" id="model" aria-labelledby="model-title">
+        <div class="task-title"><span class="step-number">09</span><h2 id="model-title">Reservoir model <a class="permalink" href="#model">Link</a></h2></div>
+        <p class="mission">Mission: inspect the geometry while keeping the ranking model and viewing model distinct.</p>
+        <dl class="task-facts">
+          <dt>SAY</dt><dd class="say">“Let’s turn the model and cut through it. Where do the measurements support a fluid zone, and where does the surface disappear?”</dd>
+          <dt>DO</dt><dd>Choose <strong>Reservoir model</strong>, then <strong>3D Reservoir</strong>. Use <strong>Rotation</strong>, <strong>Tilt</strong>, <strong>Cut above</strong> and <strong>Fluid</strong> to inspect the zone. Compare <strong>Mesh radius · view only</strong> at 3, 6 and 10 km, then <strong>Reset view</strong>. For a separate ranking experiment, change <strong>Ranking IDW neighbors · 1–32</strong> from 4 to 3 and choose <strong>Apply analysis settings</strong>.</dd>
+          <dt>EXPECT</dt><dd>View controls update the mesh/camera without dirtying the analytical result. The default finite radius is 10 km. Each fluid needs at least <strong>three independent, non-collinear positive controls</strong>; known non-pay can constrain geometry, unknown data is not dry rock. Unsupported fluids may have no surface.</dd>
+          <dt>INPUT</dt><dd>Validated surveys, bounded formation occurrences, independent fluid/quality classifications and mesh radius. Ranking neighbor count is a separate configuration input.</dd>
+          <dt>OUTPUT</dt><dd>Triangulated estimated gas/oil/water zones, survey trajectories, gross geometric volumes, facet counts and exclusions. Current mesh grid is 24×24×32 with a 0.5 weighted phase indicator extracted by marching tetrahedra.</dd>
+          <dt>STATE EFFECT</dt><dd><span class="effect">Mesh/camera changes are view-only; ranking neighbors require Apply.</span> Neither changes hidden truth. The displayed full-mesh volume is before depth cutting.</dd>
+          <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>Three different models: view, ranking and simulator</summary><p>Frontend <code>reservoirGeometry</code> uses finite-radius interpolation and top-to-base normalization. This is independent of the server’s IDW ranking and Stage A’s dynamic field-local volume. Mesh radius changes affect the visible interpretation, not the hidden world or ranked result.</p></details></dd>
+          <dt>RISKS</dt><dd>The indicator is not a probability; outer edges may be support limits, not geological closure. Thin beds can vanish at grid resolution. Fault geometry, common-datum guarantees and calibrated envelopes are unresolved. Gross geometry is not pore volume, recoverable volume or reserves.</dd>
+        </dl>
+      </section>
+
+      <section class="chapter task" id="uncertainty" aria-labelledby="uncertainty-title">
+        <div class="task-title"><span class="step-number">10</span><h2 id="uncertainty-title">Uncertainty <a class="permalink" href="#uncertainty">Link</a></h2></div>
+        <p class="mission">Mission: expose why a range widens without pretending it has been calibrated.</p>
+        <dl class="task-facts">
+          <dt>SAY</dt><dd class="say">“This candidate has a wider range. Let’s see whether its controls disagree more, sit farther away, or both.”</dd>
+          <dt>DO</dt><dd>Choose <strong>Uncertainty</strong> and read <strong>P90 ROCK PROXY</strong>, <strong>P50 ROCK PROXY</strong> and <strong>P10 ROCK PROXY</strong>. In the component table, compare <strong>Neighbor disagreement variance</strong> with <strong>Weighted control distance</strong>. Use <strong>RANKED TARGET</strong> to select another candidate and compare the range and components.</dd>
+          <dt>EXPECT</dt><dd>In the petroleum exceedance convention, an estimate is exceeded with nominal 90%, 50% or 10% probability respectively: <strong>P90 ≤ P50 ≤ P10</strong>. This implementation reports uncalibrated rock-screening uncertainty, not demonstrated empirical coverage.</dd>
+          <dt>INPUT</dt><dd>Applied ranking, contributing-control values/distances and the published uncertainty method.</dd>
+          <dt>OUTPUT</dt><dd>Quantiles and quantitative distance/disagreement components; missing breakdowns are explicitly unavailable.</dd>
+          <dt>STATE EFFECT</dt><dd><span class="effect">Inspection and target selection only.</span> Looking at a wider range is not running a Monte Carlo study or persisting sensitivity analysis.</dd>
+          <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>What contributes to the uncertainty range</summary><p>The deterministic analysis service publishes disagreement variance, weighted control distance, grid diagonal, distance sigma, total sigma and quantile z-score with the result’s scope and hash. These components are not empirically calibrated coverage probabilities.</p></details></dd>
+          <dt>RISKS</dt><dd>Sigma is not a calibrated geological error model. Missing-evidence effects are not separately quantified. No reserve distribution or guarantee of production follows from these ranges; revisit QC and data gaps.</dd>
+        </dl>
+      </section>
+
+      <section class="chapter task" id="targets" aria-labelledby="targets-title">
+        <div class="task-title"><span class="step-number">11</span><h2 id="targets-title">Targets <a class="permalink" href="#targets">Link</a></h2></div>
+        <p class="mission">Mission: explain the selected candidate with its actual neighbors and score contributions.</p>
+        <dl class="task-facts">
+          <dt>SAY</dt><dd class="say">“Here’s the leading candidate. I’ll show you which nearby measurements support it and why its score is higher.”</dd>
+          <dt>DO</dt><dd>Choose <strong>Targets</strong>. Use <strong>Sort shortlist</strong> to compare API rank, P50 or uncertainty, then select a candidate row. Read <strong>Score explanation</strong> and select a well under <strong>NEIGHBOR CONTROLS</strong> to inspect its measurements in the lens.</dd>
+          <dt>EXPECT</dt><dd>The readout shows P90/P50/P10, porosity, permeability and uncertainty for the selected target. The score explanation exposes P50 rock proxy × porosity, permeability mD/log factor, raw score, uncertainty divisor and final score. Sorting changes display order, not the server’s rank.</dd>
+          <dt>INPUT</dt><dd>Retained ranked candidates from the current applied analysis and their cited control summaries.</dd>
+          <dt>OUTPUT</dt><dd>A selected candidate with explicit local coordinates, screening values, score components and neighbor provenance.</dd>
+          <dt>STATE EFFECT</dt><dd><span class="effect">Selection only:</span> choosing a target updates the readout without creating a well, saved preference, forecast or prediction.</dd>
+          <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>How a selected target connects to its evidence</summary><p>API ranking feeds synchronized map/section/3D/log/crossplot views. Neighbor evidence IDs identify contributing controls. Selected-target context can later be captured in a saved hypothesis or bundle.</p></details></dd>
+          <dt>RISKS</dt><dd>The shortlist is not the full grid. Fluid economics are not modeled in the screening score. A missing target should send the engineer to grid reasons and evidence gaps, not a fabricated fallback.</dd>
+        </dl>
+      </section>
+
+      <section class="chapter task" id="challenge" aria-labelledby="challenge-title">
+        <div class="task-title"><span class="step-number">12</span><h2 id="challenge-title">Challenge <a class="permalink" href="#challenge">Link</a></h2></div>
+        <p class="mission">Mission: turn a critique into a cited, reviewable record attached to the right decision.</p>
+        <dl class="task-facts">
+          <dt>SAY</dt><dd class="say">“What would make us doubt this choice? I’ll record the objection, point to the supporting measurements and explain how we handled it.”</dd>
+          <dt>DO</dt><dd>Choose <strong>Challenge</strong> and use <strong>Load exact r…</strong> to select a saved hypothesis revision. Read an existing challenge with <strong>Open listed version …</strong>. For practice, enter a specific objection and its evidence citations, then <strong>Save challenge to exact revision</strong>. Choose a <strong>Disposition</strong>, explain it in <strong>Disposition reason</strong> and use <strong>Save disposition changes</strong>.</dd>
+          <dt>EXPECT</dt><dd>The saved challenge appears against the selected hypothesis revision. Saving a disposition creates a new challenge version, so the earlier review remains available. With no saved hypothesis, the page asks you to save one in Alternatives first.</dd>
+          <dt>INPUT</dt><dd>Exact hypothesis ID/revision/scope, objection text, visible evidence citations, human audit label and reviewed disposition reasons.</dd>
+          <dt>OUTPUT</dt><dd>Only after Save: persistent cited objections and versioned dispositions. Without AI configuration, manual review still works.</dd>
+          <dt>STATE EFFECT</dt><dd><span class="effect">Explicit AI request and explicit artifact writes are separate.</span> AI never executes because a chapter opens. The client blocks configured/stale analysis from default-only AI tools.</dd>
+          <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>Using an AI note and preserving review history</summary><p>Optional AI notes run only on explicit request against the current live/default analysis. Read the citations, then manually attach reviewed objections to the intended saved revision. A note is transient until you save its reviewed content. Configured or stale analysis is blocked from default-only AI tools.</p><p>AG-UI/.NET Agent Framework serves authorized public context; hypothesis endpoints validate references and enforce <code>If-Match</code> version checks. Notes do not access hidden cells.</p></details></dd>
+          <dt>RISKS</dt><dd>An AI note about current evidence must not be presented as analysis of a different loaded snapshot. Verify every citation against that saved revision before attaching it. A label is audit text, not authenticated expert identity. Preserve local text on conflict.</dd>
+        </dl>
+      </section>
+
+      <section class="chapter task" id="alternatives" aria-labelledby="alternatives-title">
+        <div class="task-title"><span class="step-number">13</span><h2 id="alternatives-title">Alternatives <a class="permalink" href="#alternatives">Link</a></h2></div>
+        <p class="mission">Mission: compare genuine alternative interpretations, not renamed copies of a chart.</p>
+        <dl class="task-facts">
+          <dt>SAY</dt><dd class="say">“Let’s try a stricter interpretation using the same measurements. Then we can compare the two decisions fairly.”</dd>
+          <dt>DO</dt><dd>Choose <strong>Alternatives</strong>. For practice, name the current interpretation, explain your choice and select <strong>Save hypothesis</strong>. In <strong>Branch preset</strong>, choose <strong>Conservative · higher rock cutoffs</strong> and inspect the settings. Select <strong>Reanalyze stored evidence</strong>, choose a <strong>Branch eligible target</strong>, enter the new name/rationale and select <strong>Save named alternative branch</strong>.</dd>
+          <dt>EXPECT</dt><dd>Spatial retains the source configuration and selects the farthest eligible cell from the source target after recalculation. Conservative raises porosity by 0.02 and doubles permeability within supported bounds, then selects rank 1. Custom uses your validated settings. All invoke actual stored-evidence reanalysis.</dd>
+          <dt>INPUT</dt><dd>Exact source snapshot, edited supported configuration, eligible candidate, name and rationale.</dd>
+          <dt>OUTPUT</dt><dd>A new named branch with source lineage, its frozen package/result, selected target and text. Lists are paginated; histories expose exact revisions.</dd>
+          <dt>STATE EFFECT</dt><dd><span class="effect">Reanalysis computes; Save persists.</span> Editing a preset is local until those actions. A loaded snapshot does not replace the live lens package or sealed predictions.</dd>
+          <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>How a branch keeps the source evidence fixed</summary><p>The API reanalyzes the source revision’s stored public package, not the newest live package or hidden truth. Hashes and server validation prevent relabeling output from another configuration.</p></details></dd>
+          <dt>RISKS</dt><dd>“Conservative” is a preset name, not calibrated conservatism. “Spatial” is not guaranteed geological independence. No eligible targets means no valid branch target to invent. Download local text if storage or concurrency fails.</dd>
+        </dl>
+      </section>
+
+      <section class="chapter task" id="compare" aria-labelledby="compare-title">
+        <div class="task-title"><span class="step-number">14</span><h2 id="compare-title">Compare hypotheses <a class="permalink" href="#compare">Link</a></h2></div>
+        <p class="mission">Mission: make the decision difference and the evidence difference visible at the same time.</p>
+        <dl class="task-facts">
+          <dt>SAY</dt><dd class="say">“What changed between these interpretations—and is that enough to change where we would drill?”</dd>
+          <dt>DO</dt><dd>Choose <strong>Compare hypotheses</strong>. Use <strong>Add exact revision to comparison</strong> for two saved revisions, then <strong>Compare selected exact revisions</strong>. Compare their assumptions, selected targets and ranges. For practice, choose <strong>Load for decision rationale</strong> on your preferred interpretation, explain the trade-off and save the notes as a new revision or named snapshot branch.</dd>
+          <dt>EXPECT</dt><dd>The comparison shows each chosen revision side by side. If their field, formation, scenario/date or evidence differs, it shows <strong>NOT LIKE-FOR-LIKE</strong> and tells you why. Your selections stay on those numbered revisions even if someone saves a newer one.</dd>
+          <dt>INPUT</dt><dd>2–8 unique explicit scope + hypothesis ID + revision references, including optional deliberately cross-scope comparisons.</dd>
+          <dt>OUTPUT</dt><dd>A fingerprinted exact-revision comparison and field-level differences. The preference is human reasoning in a saved rationale, not an invented flag.</dd>
+          <dt>STATE EFFECT</dt><dd><span class="effect">Comparison is read/recompute; rationale Save is a write.</span> References do not auto-advance when later revisions appear.</dd>
+          <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>How comparison references and differences are checked</summary><p>Hypothesis comparison validates the 2–8 requested references and returns stored revision snapshots. The frontend checks the returned set. Canonical baseline ordering does not express a preference. If selections change, the previous comparison stays labeled stale until Compare runs again.</p></details></dd>
+          <dt>RISKS</dt><dd>An interpretation based on the starting measurements and one using later simulated results are not like-for-like. Compare their dates and formations as well as their assumptions. Resolve save conflicts by reviewing both versions and preserving the other author’s text.</dd>
+        </dl>
+      </section>
+
+      <section class="chapter task" id="bundle" aria-labelledby="bundle-title">
+        <div class="task-title"><span class="step-number">15</span><h2 id="bundle-title">Evidence bundle <a class="permalink" href="#bundle">Link</a></h2></div>
+        <p class="mission">Mission: hand a reviewer a portable record of this exact analysis decision.</p>
+        <dl class="task-facts">
+          <dt>SAY</dt><dd class="say">“I want the next engineer to see the same evidence and understand why I chose this target. Here’s what I would send.”</dd>
+          <dt>DO</dt><dd>Choose <strong>Evidence bundle</strong>. Enter your reasoning in <strong>Decision rationale (included in JSON)</strong>. Read <strong>What the download contains</strong> and check the selected field, target and result. Choose <strong>Download evidence bundle JSON</strong> to save the file locally.</dd>
+          <dt>EXPECT</dt><dd>The downloaded file contains the chosen target, settings, cited evidence and your rationale. If it cannot be created, the page identifies the missing item—for example, a rationale or an applied result that matches the current settings.</dd>
+          <dt>INPUT</dt><dd>Matching public package and applied result, retained target and written rationale.</dd>
+          <dt>OUTPUT</dt><dd>A local <code>analysis-evidence-bundle-v1</code> JSON download.</dd>
+          <dt>STATE EFFECT</dt><dd><span class="effect">Local export only.</span> It does not save a hypothesis, seal a prediction, create a scenario, publish new evidence or send anything to another person.</dd>
+          <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>What the bundle records for reproducibility</summary><p>The browser validates scope and visible citations, then serializes version, field/reservoir/scenario/date, source counts, methodology, configuration, package/configuration/result hashes, selected target, rationale and limitations. Hidden simulator truth is excluded.</p></details></dd>
+          <dt>RISKS</dt><dd>A bundle is an evidence snapshot, not a durable server workflow receipt. Rationale is tied to current package/result/target; changing scope can leave a different local rationale context. Review content before sharing even in a public-source demo.</dd>
+        </dl>
+      </section>
+
+      <section class="chapter task" id="prediction" aria-labelledby="prediction-title">
+        <div class="task-title"><span class="step-number">16</span><h2 id="prediction-title">Prediction <a class="permalink" href="#prediction">Link</a></h2></div>
+        <p class="mission">Mission: state the expected outcome before learning the simulated answer.</p>
+        <dl class="task-facts">
+          <dt>SAY</dt><dd class="say">“Here’s what we expected before seeing the new well: the formation depths, rock thickness, fluids and production. We sealed that forecast so we could compare it fairly later.”</dd>
+          <dt>DO</dt><dd>For a read-only presentation, select the completed demo tagged <strong>Scored</strong> and inspect its ledger. For practice, choose <strong>New simulation</strong>, review the scenario name, UTC evidence cutoff and assumptions, then <strong>Create scenario</strong>. Choose <strong>Analyze frozen initial source with applied settings</strong> and an eligible target. Fill the form yourself or explicitly choose <strong>Use editable demo forecast</strong>. Review, <strong>Save draft</strong>, review the saved ledger, acknowledge and <strong>Seal reviewed revision</strong>. Enter an operator name or initials, review the exact seal and separately choose <strong>Approve reviewed prediction</strong>.</dd>
+          <dt>EXPECT</dt><dd>The completed demo shows its original saved forecast. In practice, Save returns a numbered draft; Seal makes that revision read-only. Missing depths, fluid assumptions or production forecasts are called out for the engineer to supply. The current configured handoff supports a single horizontal location, with every path station at that same east/north position.</dd>
+          <dt>INPUT</dt><dd>At least two increasing-MD path stations with explicit positive-down MD/TVD in metres; formation top/base quantiles; expected-pay quantiles; Oil/Gas/Water assumptions; optional GOC/GWC/OWC contact-depth quantiles; cumulative oil/gas/water m³ forecasts at years 1/3/5; uncertainty assumptions, visible evidence IDs and rationale. The blank template supplies only supported target/pay/context fields. The explicit demo preset fills blank forecast fields with editable demonstration estimates and labels them in the saved assumptions.</dd>
+          <dt>OUTPUT</dt><dd>A server-validated draft revision, then an immutable seal and four fingerprinted deterministic baselines. A saved/approved historical document remains readable exactly as stored even if current capabilities change.</dd>
+          <dt>STATE EFFECT</dt><dd><span class="effect">Editable local form → Save draft → Seal → Approve.</span> The example action preserves existing human values; a different target or directional path requires explicit review rather than flattening. Advanced retains manual JSON editing and binding rebuilds. Seal never approves or executes a well.</dd>
+          <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>Prepare a practice prediction: data, geometry and seal checks</summary><p>Choose <strong>Analyze frozen initial source with applied settings</strong> to calculate from the measurements available before the simulated well. Configured handoff requires at least four located controls and that frozen initial source package, never the revealed clone. Applied settings are copied exactly. Every station must retain the target’s exact XY; directional edits are blocked rather than flattened. Preparation leaves the live map/package unchanged.</p><p>The analysis binding verifies source package, analysis, configuration and candidate. The ledger uses expected revision/ETag checks and a stable seal key; native local-operator antiforgery protects sealing. Approval remains separate from the seal.</p></details></dd>
+          <dt>RISKS</dt><dd>Example MD/TVD, formation, fluid and production values are demonstration estimates, not data-derived facts. Keep that distinction when editing or presenting them. Do not remove binding metadata to bypass geometry checks. On conflict, download local JSON before explicitly loading latest. An immutable seal cannot be edited; choose New simulation for a different forecast.</dd>
+        </dl>
+        <h3>The four baselines answer different questions</h3>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Prediction baseline definitions">
+          <table>
+            <thead><tr><th scope="col">Baseline</th><th scope="col">What is frozen at seal</th><th scope="col">Interpretation</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Nearest well</th><td>The nearest located control to the proposed collar, under the applied rock criteria.</td><td>A simple local analogy; its copied rock-proxy quantiles are equal.</td></tr>
+              <tr><th scope="row">Field mean</th><td>The located-control field average and dispersion under the applied criteria.</td><td>A non-spatial reference, not a new reservoir realization.</td></tr>
+              <tr><th scope="row">Four-neighbor IDW</th><td>A separately verified calculation using <strong>exactly four unique controls</strong> at the selected point.</td><td>Still four when the main configured ranking uses three. Other configuration settings remain matched.</td></tr>
+              <tr><th scope="row">Uncertainty-aware rank 1</th><td>The highest-ranked candidate under the main configuration, with that location’s evidence and quantiles.</td><td>Can be a different location from the proposed point; do not label it a same-location comparison.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>These deterministic baselines do not forecast formation boundaries, fluids/contacts or production; unsupported values remain null. Configured v3 baselines are versioned; legacy no/null-binding v2 records retain their original bytes and behavior.</p>
+      </section>
+
+      <section class="chapter task" id="simulation" aria-labelledby="simulation-title">
+        <div class="task-title"><span class="step-number">17</span><h2 id="simulation-title">Simulation <a class="permalink" href="#simulation">Link</a></h2></div>
+        <p class="mission">Mission: understand the execution gates without starting anything by accident.</p>
+        <dl class="task-facts">
+          <dt>SAY</dt><dd class="say">“Follow what happened after the forecast was approved: drilling, survey, logs, completion and production. Each stage left a record we can inspect.”</dd>
+          <dt>DO</dt><dd>After approving a new prediction, choose <strong>Simulation</strong>. Select a model preset, <strong>Preview</strong> or <strong>Standard</strong> resolution and the realization seed. Acknowledge those settings, then choose <strong>Prepare simulator</strong>. Once ready, choose <strong>Start simulation</strong> separately. At S6, review every completion opening and acknowledge its exact fingerprint before <strong>Approve reviewed completion</strong>. Wait for production checkpoints. A completed scenario instead shows its history and result links, not blocked start or publication controls.</dd>
+          <dt>EXPECT</dt><dd>The completed demo shows its run and S0–S9 checkpoint history. An unfinished scenario may instead show missing prerequisites, a failed stage or a completion awaiting approval. Those messages identify the next owner action.</dd>
+          <dt>INPUT</dt><dd>Approved sealed prediction, a supported model preset, resolution, integer realization seed from 0 through 2147483647, and an explicit operator name or initials. Preview uses 16×16×8 cells; Standard uses 64×64×20. Model calibration and credentials stay on the server.</dd>
+          <dt>OUTPUT</dt><dd>Versioned run/stage ledger, hashed intermediate artifacts, synthetic observations, approved completion and production checkpoints.</dd>
+          <dt>STATE EFFECT</dt><dd><span class="effect">Prepare fixes model settings; Start begins the run; completion approval permits production.</span> Each is a separate command. Cancellation does not roll back evidence already published. Merely opening this task or checking a box sends no command.</dd>
+          <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>Execution authority and immutable setup</summary><p>The read-only setup endpoint offers curated presets without raw hidden-world IDs or model controls. Prepare requires the approved seal, a matching reviewed hash and no prior run. It privately generates/binds the model and is immutable thereafter, including older compatible setups without a public settings summary.</p><p>The local operator facade enforces its session, CSRF, origin and stable idempotency-key protections with server-held credentials. The operator label is a local audit annotation, not an authenticated identity. Preparation and completion approval require 1–100 visible ASCII characters. No secret belongs in a browser form.</p></details></dd>
+          <dt>RISKS</dt><dd>An uncertain command outcome needs a status refresh, explicit review and the retained same-key retry, not a fresh run or new setup. A different preset, resolution or realization seed needs a new scenario. Tutorial exercises can be skipped, but no server gate is bypassed to complete them.</dd>
+        </dl>
+        <h3>Simulation checkpoints</h3>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Drilling operations S0 to S9 checkpoints">
+          <table>
+            <thead><tr><th scope="col">Stage</th><th scope="col">What happens</th><th scope="col">What the engineer should check</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">S0 · Bind world</th><td>Verify approved seal, source package and operator world binding.</td><td>The prediction and source hashes agree; this is not a public truth read.</td></tr>
+              <tr><th scope="row">S1 · Materialize plan</th><td>Persist scenario well, bore and planned path internally.</td><td>Plan identity is pinned; it is not yet published evidence.</td></tr>
+              <tr><th scope="row">S2 · Execute drilling</th><td>Generate as-drilled path and timeline.</td><td>Stored kinematic observations/checkpoints, not a claimed physical rig.</td></tr>
+              <tr><th scope="row">S3 · Generate survey</th><td>Create noisy survey stations and covariance.</td><td>Measured/synthetic survey is distinct from the hidden exact path.</td></tr>
+              <tr><th scope="row">S4 · Sample geology</th><td>Persist restricted truth samples for internal processing.</td><td>These are not exposed to public analysis.</td></tr>
+              <tr><th scope="row">S5 · Generate logs</th><td>Produce versioned observable logs and drilling measurements.</td><td>Provenance, units, coverage and observation noise matter.</td></tr>
+              <tr><th scope="row">S6 · Design completion</th><td>Design openings from observations; bind approved connections.</td><td>Explicit human review of openings/hash, not merely “continue.”</td></tr>
+              <tr><th scope="row">S7 · Run production</th><td>Persist years 1/3/5 states and 60 monthly observations.</td><td>Simulation truth and metered observations remain distinct.</td></tr>
+              <tr><th scope="row">S8 · Publish reveal</th><td>Stage, verify and atomically expose ontology evidence.</td><td>Only a confirmed receipt and clock transition establish visibility.</td></tr>
+              <tr><th scope="row">S9 · Score</th><td>Compare sealed prediction/baselines with truth and observations.</td><td>Aggregate evaluation is separately retryable; it does not republish the well.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="chapter task" id="new-evidence" aria-labelledby="new-evidence-title">
+        <div class="task-title"><span class="step-number">18</span><h2 id="new-evidence-title">New evidence <a class="permalink" href="#new-evidence">Link</a></h2></div>
+        <p class="mission">Mission: verify exactly what became observable, and when.</p>
+        <dl class="task-facts">
+          <dt>SAY</dt><dd class="say">“Now we have another well’s measurements and five years of production. Let’s see what was added to the field.”</dd>
+          <dt>DO</dt><dd>Choose <strong>New evidence</strong> in the completed demo. Compare the starting measurements with the added simulated results, then inspect the oil/gas/water production history and its units. In an authorized new run, <strong>Publish reveal and evaluate</strong> is the action that makes the new records visible; review the ready run and acknowledgement before using it.</dd>
+          <dt>EXPECT</dt><dd>The revealed copy has 30 wells / 47 bores, compared with 29 / 46 in the original field. Its publication receipt lists 177 records, and the production history covers 60 months. The saved prediction still refers to the earlier evidence, so the new measurements can be evaluated against it.</dd>
+          <dt>INPUT</dt><dd>Completed S0–S7 artifacts, approved completion, staged ontology plan and explicit operator publication request.</dd>
+          <dt>OUTPUT</dt><dd>Published synthetic well/bore/survey/geology/architecture and associated evidence, production history, reveal receipt and advanced visibility clock.</dd>
+          <dt>STATE EFFECT</dt><dd><span class="effect">Publication adds evidence to the field.</span> Reading this page leaves the records unchanged. Publishing a ready run makes its verified records visible together and moves the scenario to the new date.</dd>
+          <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>How new evidence becomes visible</summary><p>Stage B stages destination writes. Analysis verifies the reveal, source/clone IDs and package hashes, then stores immutable public snapshots and advances the visibility clock. Prepare/finalize receipts establish the public transition; a single destination write does not. Staged, Activated and Visible publication-marked records are protected from ordinary retention cleanup.</p></details></dd>
+          <dt>RISKS</dt><dd>Check the publication receipt before treating the new measurements as available. The earlier evidence stays fixed for evaluating the prediction. Structural-only geology may legitimately lack measured detail. A failed evaluation after publication leaves the published measurements available.</dd>
+        </dl>
+      </section>
+
+      <section class="chapter task" id="evaluation" aria-labelledby="evaluation-title">
+        <div class="task-title"><span class="step-number">19</span><h2 id="evaluation-title">Evaluation <a class="permalink" href="#evaluation">Link</a></h2></div>
+        <p class="mission">Mission: compare the pre-reveal claim with both hidden outcome and observable evidence.</p>
+        <dl class="task-facts">
+          <dt>SAY</dt><dd class="say">“How close was our forecast? And how much of the difference came from what the instruments could observe?”</dd>
+          <dt>DO</dt><dd>Choose <strong>Evaluation</strong> in the completed demo. Pick a published metric and read its subject and basis: is it comparing the forecast with simulated truth, with the revealed measurements, or comparing measurements with truth? Compare the corresponding baseline where available. Read the reason on any unavailable row.</dd>
+          <dt>EXPECT</dt><dd>The reference scorecard contains 94 aggregate metrics. Truth-based and observation-based results are distinguished so you can discuss forecast error separately from measurement differences. Ranking regret and calibration remain unavailable; this result does not evaluate every ranked location.</dd>
+          <dt>INPUT</dt><dd>Immutable sealed prediction and baselines, revealed observations, restricted truth aggregates and versioned scoring definitions.</dd>
+          <dt>OUTPUT</dt><dd>A published scorecard with metric values, bounds, basis, provenance and explicit unsupported/missing outcomes.</dd>
+          <dt>STATE EFFECT</dt><dd><span class="effect">Read by default.</span> <strong>Run / retry evaluation</strong> is a separate explicit operator action after reveal. It never redrills or republishes the ontology.</dd>
+          <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>Scoring inputs, privacy and corrected history</summary><p>Internal scoring compares immutable prediction/baseline inputs with hidden and observed outcomes. Only aggregate metric artifacts enter the public Analysis ledger. Model/version and input fingerprints identify that calculation; hidden cell arrays stay private. An eligible historical correction appends a new artifact while preserving the rejected original, as described in Exceptional repairs.</p></details></dd>
+          <dt>RISKS</dt><dd>A low error on one synthetic case is not general calibration. Null unsupported baseline formation/fluid/production metrics are not zero errors. If S9 fails after successful S8, retry evaluation, not publication. Historical bound correction is an exceptional reviewed repair, not automatic model improvement.</dd>
+        </dl>
+      </section>
+
+      <section class="chapter" id="tutorial" aria-labelledby="tutorial-title">
+        <h2 id="tutorial-title">Use the in-app “Guided tutorial”</h2>
+        <p>Choose <strong>Guided tutorial</strong> near the top of the app, then pick a chapter. Use <strong>Prev / Next</strong> to move through the instructions and <strong>Go to highlighted control</strong> to reach the button or input. Choose <strong>Skip exercise</strong> if you would rather keep reading.</p>
+        <p>Start with <strong>Read a field</strong>. Choose <strong>Change an analysis</strong> to try the grid exercise. Chapter 4, <strong>Run a guided simulation</strong>, creates and runs a new scenario with editable examples. Its outline also offers <strong>Resume current scenario</strong> or <strong>Inspect this completed scenario</strong>, depending on the selected state.</p>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Four optional tutorial teaching chapters">
+          <table>
+            <thead><tr><th scope="col">Optional chapter</th><th scope="col">User-action exercise</th><th scope="col">Teaching checkpoint / skip</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">1 · Read a field</th><td>Select a logged bore, inspect a curve’s unit/depth metadata and identify an unknown interval.</td><td>Explain why structural-only is not a logged control. Skip exercise if no prepared field is available.</td></tr>
+              <tr><th scope="row">2 · Change an analysis</th><td>In approved analysis practice, manually change grid 15 → 9, observe the pending warning, explicitly Apply and verify 81 cells. Then load defaults, Apply again and verify 225 cells.</td><td>The 9×9 and restored 15×15 counts must come from matching applied output, not the form values. In presentation mode, inspect current settings and skip the write exercise.</td></tr>
+              <tr><th scope="row">3 · Compare interpretations</th><td>Inspect the 3D reservoir. Request an AI formation draft, review its evidence and limitations, then choose whether to use and save it. Load alternatives, review objections and compare saved results.</td><td>Explain the evidence and settings behind the interpretation. AI runs only when requested; accepting its draft and saving are separate steps.</td></tr>
+              <tr><th scope="row">4 · Run a guided simulation</th><td>Create a scenario from the original field, analyze earlier measurements, select a target and review editable forecasts. Save, Seal, Approve, Prepare and Start separately; approve S6 completion, wait for production, publish and inspect results.</td><td>Checks use the selected scenario’s actual prediction, setup, run, completion, publication and scorecard. Navigating never performs or completes a write. Resume skips satisfied prerequisites; Skip exercise leaves unmet gates unchanged.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The tutorial leaves the clicks to you: selecting a field, applying settings and saving work happen in the normal app controls. For the grid exercise, wait for the new result before continuing, and verify the restored 225-cell result before leaving it. If your local build lacks the tutorial entry, follow the same exercises through the 19 sequencer tasks.</p>
+      </section>
+
+      <section class="chapter" id="guided-simulation" aria-labelledby="guided-simulation-title">
+        <h2 id="guided-simulation-title">Chapter 4 · Create and run a new simulation</h2>
+        <p>This is the <strong>guided demo setup with editable examples</strong> route. Allow 15–25 minutes for review plus calculation time. Keep the original measurements and previous completed runs as history; each new scenario has its own decision and results.</p>
+        <ol>
+          <li><strong>Choose the original field.</strong> Select Troll marked Original data, SOGNEFJORD FM and Live evidence. You can also choose New simulation while viewing a completed scenario; setup still starts from the original field.</li>
+          <li><strong>Create scenario.</strong> Review its name, UTC evidence cutoff, purpose, assumptions and initial analysis settings. The name is not a secret seed. A versioned SHA-256 assumptions fingerprint is calculated in the browser. Acknowledge the review and click Create scenario.</li>
+          <li><strong>Analyze the frozen initial evidence.</strong> In Prediction, click Analyze frozen initial source with applied settings, then choose a Frozen-source eligible target. Pending settings must first be explicitly applied. A verified result preserves the exact chosen settings; it does not substitute defaults.</li>
+          <li><strong>Fill and review the forecast.</strong> Use editable demo forecast fills blank inputs only. Review every path depth, formation top/base, fluid class, optional contact, cumulative volume, uncertainty and rationale. Pay quantiles and citations are copied from verified analysis. The other examples are labeled demonstration estimates, never truth or calibration. Advanced keeps manual JSON available.</li>
+          <li><strong>Save draft.</strong> Wait for the numbered server-validated revision. Read its ledger and assumptions. Editing or filling a preset is not saving.</li>
+          <li><strong>Seal reviewed revision.</strong> Acknowledge the exact saved revision before sealing. It becomes immutable and freezes four comparison baselines. Sealing is not approval.</li>
+          <li><strong>Approve reviewed prediction.</strong> Enter your operator name or initials, or explicitly use the Demo operator label. Review the immutable seal and acknowledge it before clicking Approve reviewed prediction.</li>
+          <li><strong>Configure and Prepare simulator.</strong> Choose the curated preset, Preview (16×16×8) or Standard (64×64×20), and an integer realization seed from 0 to 2147483647. Review, acknowledge and Prepare simulator. These settings cannot be changed afterward; preparation does not start drilling.</li>
+          <li><strong>Start simulation.</strong> Use the enabled button once. Inspect the existing run’s progress. An already running or completed scenario is not a new start opportunity.</li>
+          <li><strong>Review S6 completion.</strong> Wait for the pause, inspect every opening and its full parameters, acknowledge the exact design and choose Approve reviewed completion. Changed openings require a new review.</li>
+          <li><strong>Wait for production.</strong> Inspect S7 progress and any failures. Completed production makes the run eligible for the publication review; it is not yet public evidence.</li>
+          <li><strong>Publish reveal and evaluate.</strong> In New evidence, review the ready run and acknowledge the publication action. A verified receipt advances the evidence clock and exposes the measurements in a separate results field. Evaluation is requested after publication.</li>
+          <li><strong>Inspect results.</strong> Compare initial/current evidence counts and one-, three- and five-year production. In Evaluation, inspect the new scorecard, its baselines and unavailable metrics. If evaluation failed after publication, retry evaluation when enabled; never redrill or republish to fix scoring.</li>
+        </ol>
+        <details class="deep-dive"><summary>Resume, uncertain responses and preserved history</summary>
+          <p>Opening a tutorial or lifecycle task only reads status. Next becomes available for action steps only when the matching result exists; Skip exercise never enables a mutation. Resume current scenario returns to the first unmet prerequisite. Inspect this completed scenario goes straight to results, without attempting to rewind or repeat the run.</p>
+          <p>Creation retains the exact payload, including the UTC cutoff and assumptions fingerprint, before sending. An uncertain response locks it for Retry same scenario creation; identical requests deterministically reuse the same scenario. Operator and seal actions similarly retain their exact request/revision and stable key. Refresh, inspect and explicitly retry; never replace a retained request with changed settings and assume rollback.</p>
+          <p>The protected reference scenario <code>8e96385c-84cb-8720-85cd-0e2073588b09</code> and run <code>4cd0fd6c-4e59-5de8-9bf7-efd7ab4d371c</code> remain historical examples. Use New simulation for a fresh exercise. Previously revealed field IDs, hidden model IDs and raw geological truth are not inputs to this form.</p>
+        </details>
+      </section>
+
+      <section class="chapter" id="recovery" aria-labelledby="recovery-title">
+        <h2 id="recovery-title">Recovery and correction</h2>
+        <p>Use these repair procedures only when the owner is resolving the corresponding failure. The completed demo already has published results and does not need them.</p>
+        <h3>Recover a rejected staged publication</h3>
+        <p>An eligible uncommitted S8 destination-write rejection may offer <strong>Recover staged publication</strong> in New evidence <em>after</em> the owner corrects the underlying import issue. Review the staged plan fingerprints, operation counts, local audit label and reason. Acknowledge that exact reviewed hash; a changed subject invalidates the acknowledgement.</p>
+        <p>Recovery preserves the same run, completed S0–S7 checkpoints and staged plan. It does not start another simulation or automatically publish. <strong>Publish reveal and evaluate</strong> is a separate subsequent action with a new attempt key only after recovery is confirmed. An uncertain existing request must still be retried with its saved key.</p>
+        <p>Recovery is not available for unrelated failures, changed evidence or an already activated/prepared/committed reveal. A missing previously verified record blocks recovery. Explicit restoration must review the saved immutable payload and confirm its original business hash, not regenerate something that happens to look similar.</p>
+        <p>Structural-only geology can have nullable details without becoming a measured log. Retention cleanup protects <strong>Staged / Activated / Visible</strong> publication-marked records, regardless of old simulation dates, so recovery does not lose its verified evidence.</p>
+        <h3>Append a corrected historical scorecard</h3>
+        <p>For the eligible historical absolute-error-bound defect, Evaluation offers <strong>Append corrected evaluation</strong>. Review the original/corrected fingerprints and correction reason. The reference correction retains all <strong>94 metrics</strong> and their inputs; <strong>five metric bounds change</strong>, including <strong>three previously invalid bounds</strong>. Point scores, metric meanings, prediction inputs, S0–S8 checkpoints and the publication receipt are preserved.</p>
+        <p>This is an <strong>append-only versioned artifact</strong>, not an edit to rejected history. Use <strong>Run / retry evaluation</strong> separately to publish it. There is no automatic correction or automatic publication, and no need to redrill or republish the well. A corrected bound does not imply scientific recalibration.</p>
+      </section>
+
+      <section class="chapter" id="troubleshooting" aria-labelledby="troubleshooting-title">
+        <h2 id="troubleshooting-title">Troubleshooting</h2>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Common demo failures and safe recovery">
+          <table>
+            <thead><tr><th scope="col">Symptom</th><th scope="col">What it means</th><th scope="col">Safe next step</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">No field / no formation with four controls</th><td>Source services or prepared evidence are absent, or a different field was selected.</td><td>Check Aspire health and exact field ID. Inspect data gaps. Ask the owner to prepare evidence outside the demo; do not invent controls.</td></tr>
+              <tr><th scope="row">Three Troll entries</th><td>One is Original data; two are Simulated results from separate runs.</td><td>Choose Troll tagged Original data to begin. For the completed demo, use Scenario and choose Scored. Read the date and short reference beneath similar names to distinguish the two simulation runs.</td></tr>
+              <tr><th scope="row">Map unavailable</th><td>Missing configuration, expired Azure CLI login, access or CORS failure.</td><td>Continue with tables, Logs, Section and 3D. Owner verifies Maps settings, principal access and localhost origin. Do not replace it with invented geography.</td></tr>
+              <tr><th scope="row">AI unavailable / blocked</th><td>Missing deployment/authentication, pending/stale output, or configured analysis not bound to default-only tools.</td><td>Use deterministic output and manual citations. For optional AI, deliberately restore/apply defaults and use the appropriate live context; never imply the old note covers the configured revision.</td></tr>
+              <tr><th scope="row">Previous result / pending settings</th><td>The form or evidence differs from the result.</td><td>Inspect all pending settings. Apply explicitly or Restore result settings. Loading defaults alone does not refresh the result. Do not export a stale decision.</td></tr>
+              <tr><th scope="row">No surface or covering survey</th><td>Not enough independent valid controls, inadequate radius/coverage, or rejected coordinates.</td><td>Read geometry diagnostics and radius assumptions. Unknown is not dry. Do not replace a downhole path with the wellhead.</td></tr>
+              <tr><th scope="row">Result belongs to different evidence</th><td>The saved interpretation and the current field, formation or scenario/date differ.</td><td>Check their field badges and dates. Prepare predictions from the earlier measurements and compare interpretations that use the same evidence. Keep mismatched evidence identified rather than relabeling it.</td></tr>
+              <tr><th scope="row">ETag conflict / local text recovery</th><td>A saved revision changed since this edit, or local storage failed.</td><td>Download the human text. Inspect latest deliberately and reconcile. Never silently rebase or discard someone’s rationale, objection or prediction JSON.</td></tr>
+              <tr><th scope="row">Cannot save / seal configured prediction</th><td>Capability/source/binding/geometry mismatch, fewer than four controls, unsaved changes or incomplete human inputs.</td><td>Read the blocker; analyze frozen initial source with applied settings. Rebuild explicitly only after review. Every station must use the exact point XY; do not fabricate missing forecasts.</td></tr>
+              <tr><th scope="row">Immutable prediction or prepared simulator</th><td>The forecast is sealed/approved, or the model setup is already fixed.</td><td>Read/download it as history. Choose New simulation from the original field for different inputs. There is no “unseal” or “reconfigure” shortcut.</td></tr>
+              <tr><th scope="row">Simulator preparation unavailable</th><td>The prediction is not approved, no supported preset is offered, the operator session is unavailable, or a run already exists.</td><td>Read the specific guidance. Save, Seal and Approve first; refresh operator status for available presets. Never invent a hidden-world ID or change the approved seal. A running/completed run is inspected, not started again.</td></tr>
+              <tr><th scope="row">CSRF failure or uncertain operator response</th><td>Session token expired, Origin mismatched, or server outcome not confirmed.</td><td>Refresh operator status/session, inspect the ledger, re-acknowledge the exact subject if required, then retry the <strong>same saved attempt key</strong>. Do not create a new key merely because a response was lost.</td></tr>
+              <tr><th scope="row">Definitive failed action key</th><td>The server stored a final failure; replay returns that same outcome.</td><td>After inspecting current state and fixing the cause, explicitly retire only the local retry record. A new intended attempt gets a new key. Retiring does not cancel or roll back server work.</td></tr>
+              <tr><th scope="row">Run waiting at completion</th><td>Openings need exact-hash human approval.</td><td>Read completion/opening evidence and approve only with owner authorization. Clicking Next in the tutorial cannot authorize it.</td></tr>
+              <tr><th scope="row">Reveal succeeded; score failed</th><td>S8 and S9 are independently durable/retryable.</td><td>Keep the reveal. Use Evaluation for the next scoring attempt; do not republish. Eligible historical bounds may need the separate reviewed append-only correction.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="chapter" id="handoff" aria-labelledby="handoff-title">
+        <h2 id="handoff-title">CSA handoff checklist</h2>
+        <p><strong>Close with the mechanism, not the metric count.</strong> “The system preserves a decision’s evidence, assumptions and timing, and it separates prediction from later observation. Our next work is to validate the science and operational controls beyond this reference case.”</p>
+        <h3>Leave a concrete handoff packet</h3>
+        <ol>
+          <li><strong>Environment:</strong> repository revision, .NET/Aspire/Node versions, dashboard resource health and which optional Maps/AI features were available. Share no secrets.</li>
+          <li><strong>Evidence used:</strong> field name and badge, field ID, formation, scenario/date and whether the interpretation uses starting measurements or later simulated results. Include the package fingerprint in the technical record.</li>
+          <li><strong>Decision:</strong> applied configuration and hash, analysis hash, target coordinates/ID, named hypothesis revisions, cited objections/dispositions, comparison references and written rationale.</li>
+          <li><strong>Portable artifacts:</strong> reviewed local evidence bundle and, where authorized, exact saved hypothesis/prediction JSON. A download is not publication; agree the receiving location and access separately.</li>
+          <li><strong>Lifecycle proof:</strong> seal, baseline versions, approval receipt, run/stage IDs, completion review, reveal receipt and scorecard version/basis. Distinguish an absent record from a demonstrated one.</li>
+          <li><strong>Open work:</strong> ownership of dataset preparation, coordinate validation, calibration, security/identity hardening and the next approved practice scenario.</li>
+        </ol>
+        <h3>What is working—and what is not established</h3>
+        <p>The demonstrated path covers scoped evidence, deterministic configured screening, saved/reviewed hypothesis artifacts, point-screening prediction binding, checkpointed simulation, atomic reveal and aggregate evaluation. The work-bible’s tracked checklist still contains <strong>23 remaining tasks</strong> at this guide’s baseline; that is a development snapshot, not a readiness score. The longer implementation plan has additional, differently grouped checklist entries.</p>
+        <p>Remaining scientific generalization includes broader fields and common-datum validation, fault-aware geometry, better missing-evidence/uncertainty treatment, scoring every candidate for ranking regret and empirical calibration. Do not describe the existing mesh, synthetic IMPES run, one corrected scorecard or passing tests as reserve certification. Review the current roadmap for exact status rather than extrapolating from this count.</p>
+        <h3>Deployment boundary for this guide</h3>
+        <p>The canonical documentation address is <a href="https://seiggy.github.io/drillsim/">https://seiggy.github.io/drillsim/</a>. The repository entry is <code>docs\index.html</code>; it also opens directly as a local HTML file. No build or CDN is needed for the guide. The Pages workflow publishes only <code>docs</code>, including supporting documentation—not the app, data directory, SQLite stores, backend, Azure credentials or simulator.</p>
+        <p>A repository administrator enables <strong>Settings → Pages → Build and deployment → Source: GitHub Actions</strong>. After the files are committed/pushed to main, the documentation workflow can deploy on matching changes or a manual dispatch. Review the GitHub Pages environment/deployment result before claiming the URL is live. Local application hosting remains an entirely separate setup.</p>
+      </section>
+
+      <section class="chapter" id="glossary" aria-labelledby="glossary-title">
+        <h2 id="glossary-title">Engineering glossary</h2>
+        <dl class="term-list">
+          <dt>MD</dt><dd>Measured depth: distance along a well path from its declared reference. Here path/formation inputs use metres, positive-down.</dd>
+          <dt>TVD</dt><dd>True vertical depth from a declared datum. It is not path length; matching numbers alone do not establish inter-well datum alignment.</dd>
+          <dt>RKB</dt><dd>Rotary Kelly Bushing, a rig elevation reference commonly used for well depth. Converting RKB-relative depth requires the actual reference metadata.</dd>
+          <dt>Porosity / PHIE</dt><dd>Fraction of effective connected pore space represented by the porosity curve. 0.12 means 12%, not 12 in a fraction input.</dd>
+          <dt>Permeability / PERM</dt><dd>Rock’s capacity to transmit fluid. Canonical curve/cutoff units are m²; 1 mD = 9.869233e-16 m².</dd>
+          <dt>SW / SO / SG</dt><dd>Water, oil and gas saturation fractions. Their availability and validity are independent from the rock-quality classification.</dd>
+          <dt>PVT</dt><dd>Pressure–volume–temperature fluid behavior. Simulation assumptions about fluids do not come from an unconditioned rock-screening score.</dd>
+          <dt>NTG</dt><dd>Net-to-gross: qualifying interval thickness divided by gross interval thickness under an explicit definition. It does not automatically mean hydrocarbon or economic net pay.</dd>
+          <dt>P90 / P50 / P10</dt><dd>Low / middle / high estimates under petroleum exceedance notation (nominally exceeded 90 / 50 / 10% of the time). Current screening values are uncalibrated.</dd>
+          <dt>IDW</dt><dd>Inverse-distance weighting: nearby evidence contributes more to an interpolated estimate. The ranking’s neighbor count and the fixed four-neighbor baseline are separate choices.</dd>
+          <dt>Sigma</dt><dd>A spread parameter. Here it contains distance and disagreement components, not a fully calibrated geological probability model.</dd>
+          <dt>GOC / GWC / OWC</dt><dd>Gas–oil, gas–water and oil–water contacts. Distinguish a source-observed contact from one inferred by the visual method or forecast by a human.</dd>
+          <dt>IMPES</dt><dd>Implicit pressure, explicit saturation: a numerical solution approach used by the adaptive three-phase hidden reservoir simulator.</dd>
+          <dt>Hash / SHA-256</dt><dd>A content fingerprint used to bind evidence, configuration, result or artifact bytes. It detects identity/change; it is not a scientific quality or trust certificate.</dd>
+          <dt>Provenance</dt><dd>The source, transformation and identity history that lets a reviewer distinguish observed, interpreted, derived, estimated and synthetic evidence.</dd>
+          <dt>ETag / If-Match</dt><dd>Optimistic-concurrency mechanism: a write names the version it was based on, so a conflicting newer revision is not silently overwritten.</dd>
+          <dt>Idempotency key</dt><dd>A stable action identifier. Repeating an uncertain request with the same key recovers its outcome without treating it as a new intended action.</dd>
+          <dt>Reveal / as-of</dt><dd>Reveal makes verified synthetic observations visible at an explicit scenario clock. As-of selects what was knowable at that time; immutable initial snapshots prevent hindsight leakage.</dd>
+          <dt>Observation gap</dt><dd>The distinction between what the hidden simulator generated and what the synthetic instruments/public evidence reveal. It is separate from prediction error.</dd>
+        </dl>
+      </section>
+
+      <section class="chapter" id="sources" aria-labelledby="sources-title">
+        <h2 id="sources-title">Source reference for the next engineer</h2>
+        <p>Current source wins over older screenshots, roadmap wording or the design document’s historical 16-step description. These links point to repository <code>main</code>; pair them with the commit used in your handoff. Paths are complete so a CSA can locate the implementation without local-machine knowledge.</p>
+        <ul class="sources">
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/README.md">README.md</a> — prerequisites, Aspire endpoints, optional Azure configuration and operational boundaries.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/aspire/DrillSim.AppHost/AppHost.cs">aspire/DrillSim.AppHost/AppHost.cs</a> — resources, references, secret wiring and localhost workstation origin.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/aspire/DrillSim.ServiceDefaults/Extensions.cs">aspire/DrillSim.ServiceDefaults/Extensions.cs</a> — health, discovery, resilience and telemetry defaults.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisWeb/src/sequencer.ts">src/DrillSim.AnalysisWeb/src/sequencer.ts</a> — authoritative 19 tasks, scope and lifecycle labels.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisWeb/src/App.tsx">src/DrillSim.AnalysisWeb/src/App.tsx</a> — field/scenario selection, clone scope, visited state, Apply and AI guards.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisWeb/src/components/TaskWorkspace.tsx">src/DrillSim.AnalysisWeb/src/components/TaskWorkspace.tsx</a> — inventory, QC, position, intervals, settings, grid and uncertainty teaching surfaces.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisWeb/src/components/FieldStage.tsx">src/DrillSim.AnalysisWeb/src/components/FieldStage.tsx</a> and <a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisWeb/src/components/AnalysisWorkspace.tsx">src/DrillSim.AnalysisWeb/src/components/AnalysisWorkspace.tsx</a> — shared lens/bore/target state.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisWeb/src/reservoirGeometry.ts">src/DrillSim.AnalysisWeb/src/reservoirGeometry.ts</a>, <a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisWeb/src/fluidColumn.ts">src/DrillSim.AnalysisWeb/src/fluidColumn.ts</a> and <a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisWeb/src/components/ReservoirView.tsx">src/DrillSim.AnalysisWeb/src/components/ReservoirView.tsx</a> — view-only geometry, gap/quality/fluid rules and finite-radius controls.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisWeb/src/analysisConfiguration.ts">src/DrillSim.AnalysisWeb/src/analysisConfiguration.ts</a> — exact defaults, validation, stale-output guards and bundle contract.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisWeb/src/components/HypothesisWorkbench.tsx">src/DrillSim.AnalysisWeb/src/components/HypothesisWorkbench.tsx</a>, <a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisWeb/src/components/HypothesisRevisionEditor.tsx">src/DrillSim.AnalysisWeb/src/components/HypothesisRevisionEditor.tsx</a> and <a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisWeb/src/components/HypothesisChallenges.tsx">src/DrillSim.AnalysisWeb/src/components/HypothesisChallenges.tsx</a> — revisions, real alternative reanalysis, comparisons and cited dispositions.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisWeb/src/components/PredictionPreparation.tsx">src/DrillSim.AnalysisWeb/src/components/PredictionPreparation.tsx</a>, <a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisWeb/src/components/PredictionEditor.tsx">src/DrillSim.AnalysisWeb/src/components/PredictionEditor.tsx</a> and <a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisWeb/src/predictionBinding.ts">src/DrillSim.AnalysisWeb/src/predictionBinding.ts</a> — frozen-source capabilities, point binding and human-input preservation.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisWeb/src/components/ScenarioWorkspace.tsx">src/DrillSim.AnalysisWeb/src/components/ScenarioWorkspace.tsx</a> and <a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisWeb/src/components/ProductionPane.tsx">src/DrillSim.AnalysisWeb/src/components/ProductionPane.tsx</a> — public lifecycle ledgers and observable production.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisWeb/src/components/OperatorControls.tsx">src/DrillSim.AnalysisWeb/src/components/OperatorControls.tsx</a> and <a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisWeb/src/operator.ts">src/DrillSim.AnalysisWeb/src/operator.ts</a> — guarded actions, exact reviews and durable same-key retry behavior.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisApi/Program.cs">src/DrillSim.AnalysisApi/Program.cs</a> — REST/AG-UI routes, Azure CLI credentials and Maps broker.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisApi/Services/FieldPackageService.cs">src/DrillSim.AnalysisApi/Services/FieldPackageService.cs</a>, <a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisApi/Services/PetrophysicsAnalysisService.cs">src/DrillSim.AnalysisApi/Services/PetrophysicsAnalysisService.cs</a> and <a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisApi/Services/ConfiguredAnalysisService.cs">src/DrillSim.AnalysisApi/Services/ConfiguredAnalysisService.cs</a> — evidence assembly and deterministic screening.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisApi/Services/BaselineFactory.cs">src/DrillSim.AnalysisApi/Services/BaselineFactory.cs</a>, <a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisApi/Services/ConfiguredPredictionBinding.cs">src/DrillSim.AnalysisApi/Services/ConfiguredPredictionBinding.cs</a> and <a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisApi/Services/PredictionLedgerService.cs">src/DrillSim.AnalysisApi/Services/PredictionLedgerService.cs</a> — immutable prediction and baseline semantics.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisApi/Infrastructure/SqliteScenarioStore.PackageSnapshots.cs">src/DrillSim.AnalysisApi/Infrastructure/SqliteScenarioStore.PackageSnapshots.cs</a> and <a href="https://github.com/seiggy/drillsim/blob/main/src/DrillSim.AnalysisApi/Services/RevealService.cs">src/DrillSim.AnalysisApi/Services/RevealService.cs</a> — immutable public snapshots and reveal visibility.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/src/DrillingOperations/Service/Domain.cs">src/DrillingOperations/Service/Domain.cs</a>, <a href="https://github.com/seiggy/drillsim/blob/main/src/DrillingOperations/Service/Publication.cs">src/DrillingOperations/Service/Publication.cs</a> and <a href="https://github.com/seiggy/drillsim/blob/main/src/DrillingOperations/Service/Scoring.cs">src/DrillingOperations/Service/Scoring.cs</a> — internal S0–S9 state machine, publication and aggregate scoring.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/src/DrillingOperations/Service/PublicationRecovery.cs">src/DrillingOperations/Service/PublicationRecovery.cs</a> and <a href="https://github.com/seiggy/drillsim/blob/main/src/DrillingOperations/Service/ScoreCorrection.cs">src/DrillingOperations/Service/ScoreCorrection.cs</a> — exact-plan recovery and append-only historical correction.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/src/ReservoirSimulation/Service/Domain/ReservoirWorldFactory.cs">src/ReservoirSimulation/Service/Domain/ReservoirWorldFactory.cs</a> and <a href="https://github.com/seiggy/drillsim/blob/main/src/ReservoirSimulation/Service/Simulation/ReservoirSimulator.cs">src/ReservoirSimulation/Service/Simulation/ReservoirSimulator.cs</a> — hidden world conditioning and adaptive three-phase kernel.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/docs/simulator/implementation-plan.md">docs/simulator/implementation-plan.md</a> and <a href="https://github.com/seiggy/drillsim/blob/main/docs/simulator/work-bible.html">docs/simulator/work-bible.html</a> — roadmap/history; source wins where older counts or walkthroughs differ.</li>
+          <li><a href="https://github.com/seiggy/drillsim/blob/main/.github/workflows/pages.yml">.github/workflows/pages.yml</a> — documentation-only Pages deployment.</li>
+        </ul>
+        <p>DrillSim is independently maintained by Zachary Way and is derived in part from MIT-licensed Open Source Drilling Community services. It is not maintained by, affiliated with or endorsed by OSDC. See the repository’s <a href="https://github.com/seiggy/drillsim/blob/main/LICENSE">license</a> and retained source notices.</p>
+      </section>
+      <footer class="page-footer">
+        <p>DrillSim demo guide · Read the evidence. State the assumption. Preserve the decision.<br><a href="#start">Back to the beginning</a> · <a href="https://github.com/seiggy/drillsim">Repository</a></p>
+      </footer>
+    </main>
+  </div>
+  <nav class="presenter-controls" aria-label="Presenter chapter navigation">
+    <button id="previous-button" type="button">← Previous</button>
+    <span id="presenter-status" class="presenter-status" role="status" aria-live="polite"></span>
+    <button id="next-button" type="button">Next →</button>
+  </nav>
+  <script>
+    (() => {
+      const chapters = [...document.querySelectorAll("main > .chapter")];
+      const links = [...document.querySelectorAll(".outline a")];
+      const modeButton = document.getElementById("mode-button");
+      const themeButton = document.getElementById("theme-button");
+      const previousButton = document.getElementById("previous-button");
+      const nextButton = document.getElementById("next-button");
+      const presenterStatus = document.getElementById("presenter-status");
+      let current = 0;
+      let presenting = false;
+      document.querySelectorAll(".js-only").forEach(element => { element.hidden = false; });
+      const sectionFromHash = () => {
+        let id;
+        try { id = decodeURIComponent(location.hash.slice(1)); } catch { return undefined; }
+        const target = document.getElementById(id);
+        return target?.closest(".chapter");
+      };
+      function selectChapter(chapter, moveFocus = false) {
+        if (!chapter) return;
+        current = chapters.indexOf(chapter);
+        chapters.forEach(item => item.toggleAttribute("data-current", item === chapter));
+        links.forEach(link => {
+          if (link.hash === "#" + chapter.id) link.setAttribute("aria-current", "location");
+          else link.removeAttribute("aria-current");
+        });
+        const title = chapter.querySelector("h1, h2");
+        const titleText = title.textContent.replace(/\s+Link$/, "").trim();
+        presenterStatus.textContent = `${current + 1} / ${chapters.length} · ${titleText}`;
+        previousButton.disabled = current === 0;
+        nextButton.disabled = current === chapters.length - 1;
+        if (moveFocus) {
+          title.tabIndex = -1;
+          title.focus({ preventScroll: true });
+          chapter.scrollIntoView({ block: "start", behavior: "instant" });
+        }
+      }
+      modeButton.addEventListener("click", () => {
+        presenting = !presenting;
+        document.body.classList.toggle("presenter", presenting);
+        modeButton.setAttribute("aria-pressed", String(presenting));
+        modeButton.textContent = presenting ? "Return to reader" : "Presenter mode";
+        selectChapter(chapters[current], true);
+      });
+      function navigate(offset) {
+        const target = chapters[current + offset];
+        if (!target) return;
+        selectChapter(target, true);
+        history.replaceState(null, "", "#" + target.id);
+      }
+      previousButton.addEventListener("click", () => navigate(-1));
+      nextButton.addEventListener("click", () => navigate(1));
+      document.addEventListener("click", event => {
+        const link = event.target.closest("a[href^='#']");
+        if (!link) return;
+        let target;
+        try { target = document.getElementById(decodeURIComponent(link.hash.slice(1))); } catch { return; }
+        const chapter = target?.closest(".chapter");
+        if (!chapter) return;
+        if (presenting) {
+          event.preventDefault();
+          selectChapter(chapter, true);
+          history.pushState(null, "", link.hash);
+        } else selectChapter(chapter);
+      });
+      window.addEventListener("hashchange", () => selectChapter(sectionFromHash(), presenting));
+      function updateThemeLabel() {
+        const dark = document.documentElement.dataset.theme === "dark";
+        themeButton.textContent = dark ? "Light theme" : "Dark theme";
+        themeButton.setAttribute("aria-label", `Switch to ${dark ? "light" : "dark"} reading theme`);
+      }
+      themeButton.addEventListener("click", () => {
+        const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+        document.documentElement.dataset.theme = next;
+        updateThemeLabel();
+      });
+      document.getElementById("print-button").addEventListener("click", () => window.print());
+      const flowDescriptions = {
+        read: "Read path: public evidence is assembled into a fingerprinted package; deterministic analysis feeds the workstation. Optional AI receives authorized public context, not hidden simulator truth.",
+        run: "Execution path: a human reviews an exact seal and approval gates. The server-side operator facade directs checkpointed Stage B operations; only internal calls can sample Stage A truth.",
+        reveal: "Return path: verified staged records become visible through a two-phase reveal and an advanced scenario clock. Restricted scoring returns aggregate truth/observation comparisons, never hidden cell arrays."
+      };
+      document.querySelectorAll("[data-flow]").forEach(button => {
+        button.addEventListener("click", () => {
+          const selected = button.dataset.flow;
+          document.querySelectorAll("[data-flow]").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+          document.querySelectorAll("[data-path]").forEach(node => node.classList.toggle("active", node.dataset.path.split(" ").includes(selected)));
+          document.getElementById("flow-status").textContent = flowDescriptions[selected];
+        });
+      });
+      selectChapter(sectionFromHash() || chapters[0]);
+      updateThemeLabel();
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver(entries => {
+          if (presenting) return;
+          const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+          if (visible[0]) selectChapter(visible[0].target);
+        }, { rootMargin: "-100px 0px -65% 0px", threshold: 0 });
+        chapters.forEach(chapter => observer.observe(chapter));
+      }
+    })();
+  </script>
+</body>
+</html>

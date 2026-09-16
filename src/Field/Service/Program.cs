@@ -1,3 +1,4 @@
+using DrillSim.PublicationGate;
 using System;
 using Microsoft.OpenApi;
 using System.Threading.Tasks;
@@ -20,6 +21,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration["ConnectionStrings:Sqlite"] ??=
     $"Data Source={SqlConnectionManager.HOME_DIRECTORY}{SqlConnectionManager.DATABASE_FILENAME}";
 builder.AddServiceDefaults();
+builder.AddScenarioPublicationGate();
 
 string externalConfigPath = builder.Configuration["FIELD_EXTERNAL_CONFIG"]
     ?? Path.Combine(SqlConnectionManager.HOME_DIRECTORY, "Field.Service.json");
@@ -87,6 +89,7 @@ app.Logger.LogInformation("Field database initialization and validation complete
 
 var basePath = "/field/api";
 app.UsePathBase(basePath);
+app.UseScenarioPublicationGate();
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
@@ -145,4 +148,5 @@ app.MapControllers();
 app.MapFallbackToFile("index.html");
 app.MapDefaultEndpoints();
 
+app.MapScenarioPublicationGateEndpoints();
 app.Run();

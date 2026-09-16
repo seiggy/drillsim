@@ -154,9 +154,8 @@ public sealed class McpServerHttpToolTests
             cancellationToken: CancellationToken.None).ConfigureAwait(false);
 
         Assert.That(result.StructuredContent, Is.Not.Null);
-        var payload = result.StructuredContent as JsonObject;
-        Assert.That(payload, Is.Not.Null);
-        Assert.That(payload!["message"]?.GetValue<string>(), Is.EqualTo("pong"));
+        Assert.That(result.StructuredContent!.Value.ValueKind, Is.EqualTo(JsonValueKind.Object));
+        Assert.That(result.StructuredContent.Value.GetProperty("message").GetString(), Is.EqualTo("pong"));
     }
 
     private static bool IsToolType(Type type) =>

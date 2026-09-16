@@ -1,0 +1,25 @@
+.data-sources > summary { font-weight: 650; }
+.data-sources > p { margin-top: 12px; }
+.provenance-groups { display: grid; gap: 20px; margin-block: 20px 28px; }
+.provenance-group { padding-block: 14px; border-block: 1px solid var(--cp-machine-rule); }
+.provenance-group h4 { margin: 0 0 8px; font-size: 16px; }
+.provenance-group p { max-width: 75ch; margin-block: 6px 12px; }
+.provenance-sources { margin-top: 24px; }
+.provenance-source { padding-block: 14px; border-bottom: 1px solid var(--cp-machine-rule); scroll-margin-top: 16px; }
+.provenance-source h5 { margin: 0 0 8px; font-size: 14px; overflow-wrap: anywhere; }
+.provenance-source p { max-width: 75ch; margin-block: 8px; }
+.data-sources a { color: var(--cp-step-yellow); text-underline-offset: 3px; }
+.data-sources a:focus-visible, .data-sources summary:focus-visible { outline: 3px solid var(--cp-step-yellow); outline-offset: 3px; }
+.data-sources code { overflow-wrap: anywhere; }
+.data-sources summary { cursor: pointer; }
+.data-sources details[open] > summary { margin-bottom: 12px; }
+.metadata-readout { display: grid; grid-template-columns: minmax(130px, .45fr) minmax(0, 1fr); gap: 8px 20px; margin-block: 14px; }
+.metadata-readout dt { font-weight: 600; }
+.metadata-readout dd { margin: 0; overflow-wrap: anywhere; }
+.scenario-table .metadata-readout { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+.scenario-table .metadata-readout dd { margin-bottom: 8px; }
+.task-table-scroll .curve-details-cell { min-width: 16rem; }
+@media (max-width: 620px) {
+  .metadata-readout { grid-template-columns: 1fr; gap: 4px; }
+  .metadata-readout dd { margin-bottom: 10px; }
+}

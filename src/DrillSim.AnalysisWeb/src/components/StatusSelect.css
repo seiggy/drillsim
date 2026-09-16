@@ -1,0 +1,29 @@
+.status-select { display: grid; gap: 5px; min-width: 0; }
+.status-select-label { font: 11px Consolas, "Courier New", monospace; letter-spacing: .12em; color: var(--cp-machine-muted); }
+.status-select > button {
+  display: flex; align-items: center; gap: 8px; width: 100%; min-width: 0; min-height: 42px;
+  padding: 10px 12px; border: 1px solid var(--cp-machine-rule); border-radius: .625rem;
+  color: var(--cp-machine-text); background: var(--cp-machine-deep); text-align: left; cursor: pointer;
+}
+.status-select-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.selection-badge {
+  display: inline-block; flex: 0 0 auto; padding: 2px 7px; border: 1px solid var(--cp-machine-rule);
+  border-radius: 999px; color: var(--cp-machine-text); background: var(--cp-machine-raised);
+  font: 600 11px/1.5 "Segoe UI", Aptos, Calibri, sans-serif; letter-spacing: 0; white-space: nowrap;
+}
+.selection-badge.complete { color: var(--cp-success); border-color: var(--cp-success); }
+.selection-badge.attention { color: var(--cp-step-orange); border-color: var(--cp-step-orange); }
+.status-select-options {
+  position: fixed; inset: auto; margin: 0; padding: 6px; overflow-y: auto;
+  border: 1px solid var(--cp-machine-rule); border-radius: .625rem;
+  background: var(--cp-machine-deep); color: var(--cp-machine-text);
+  box-shadow: var(--cp-shadow); font: 14px/1.45 "Segoe UI", Aptos, Calibri, sans-serif;
+}
+.status-select-options::backdrop { background: none; }
+.status-select-option { padding: 10px; border: 1px solid var(--cp-machine-deep); border-radius: 6px; cursor: pointer; }
+.status-select-option > div { display: flex; align-items: start; gap: 12px; }
+.status-select-option-name { flex: 1; min-width: 0; overflow-wrap: anywhere; font-weight: 600; }
+.status-select-option p { color: var(--cp-machine-muted); margin: 6px 0 0; overflow-wrap: anywhere; font-size: 12px; }
+.status-select-option[data-active="true"] { background: var(--cp-machine-raised); border-color: var(--cp-step-yellow); }
+.status-select-option[aria-selected="true"] .status-select-option-name::before { content: "✓ "; }
+.status-select > button:focus-visible { outline: 3px solid var(--cp-step-yellow); outline-offset: 3px; }

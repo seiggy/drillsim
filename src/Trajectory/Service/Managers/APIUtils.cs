@@ -92,12 +92,13 @@ public static class APIUtils
                         cluster.FieldID is Guid fieldId && 
                         fieldId != Guid.Empty)
                     {
+                        var referenceDepth = (cluster.GroundMudLineDepth ?? cluster.ReferenceDepth)?.GaussianValue;
                         if (slot.Latitude?.GaussianValue?.Mean is { } refLat &&
                             slot.Latitude.GaussianValue.StandardDeviation is { } refLatStd &&
                             slot.Longitude?.GaussianValue?.Mean is { } refLon &&
                             slot.Longitude.GaussianValue.StandardDeviation is { } refLonStd &&
-                            cluster.ReferenceDepth?.GaussianValue?.Mean is { } refTVD &&
-                            cluster.ReferenceDepth.GaussianValue.StandardDeviation is { } refTVDStd)
+                            referenceDepth?.Mean is { } refTVD &&
+                            referenceDepth.StandardDeviation is { } refTVDStd)
                         {
                             msg = "cluster, slot, and wellbore successfully retrieved";
                             SurveyStation surveyPoint = new SurveyStation();

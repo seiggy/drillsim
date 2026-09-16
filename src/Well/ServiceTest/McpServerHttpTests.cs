@@ -54,6 +54,6 @@ public sealed class McpServerHttpTests
     public async Task Ping_can_be_invoked_over_http()
     {
         var result = await _client.CallToolAsync("ping", new Dictionary<string, object?>(), cancellationToken: CancellationToken.None);
-        Assert.That(((JsonObject)result.StructuredContent!)["message"]?.GetValue<string>(), Is.EqualTo("pong"));
+        Assert.That(result.StructuredContent!.Value.GetProperty("message").GetString(), Is.EqualTo("pong"));
     }
 }

@@ -157,7 +157,7 @@ namespace NORCE.Drilling.Trajectory.Service.Managers
         /// </summary>
         private void ManageDataBase()
         {
-            var connection = GetConnection();
+            using var connection = GetConnection();
             if (connection != null)
             {
                 bool parseOk = true;
@@ -270,10 +270,10 @@ namespace NORCE.Drilling.Trajectory.Service.Managers
         /// <returns>true if the expected fields exactly match fields of the stored database</returns>
         private bool CheckDatabaseStructure(KeyValuePair<string, string[]> tableStructure)
         {
-            var connection = GetConnection();
+            using var connection = GetConnection();
             if (connection != null)
             {
-                var command = connection.CreateCommand();
+                using var command = connection.CreateCommand();
                 string key = tableStructure.Key;
                 StringBuilder sb = new StringBuilder();
                 sb.Append($"SELECT * FROM {key}");
@@ -317,10 +317,10 @@ namespace NORCE.Drilling.Trajectory.Service.Managers
 
         private bool CreateTable(KeyValuePair<string, string[]> tabStruct)
         {
-            var connection = GetConnection();
+            using var connection = GetConnection();
             if (connection != null)
             {
-                var command = connection.CreateCommand();
+                using var command = connection.CreateCommand();
                 string key = tabStruct.Key;
                 StringBuilder sb = new StringBuilder();
                 sb.Append($"CREATE TABLE {key} ()");
@@ -357,10 +357,10 @@ namespace NORCE.Drilling.Trajectory.Service.Managers
                 return true;
             }
 
-            var connection = GetConnection();
+            using var connection = GetConnection();
             if (connection != null)
             {
-                var command = connection.CreateCommand();
+                using var command = connection.CreateCommand();
                 foreach (string indexCommand in indexCommands)
                 {
                     command.CommandText = indexCommand;
@@ -386,10 +386,10 @@ namespace NORCE.Drilling.Trajectory.Service.Managers
 
         private bool DropTable(string dbName)
         {
-            var connection = GetConnection();
+            using var connection = GetConnection();
             if (connection != null)
             {
-                var command = connection.CreateCommand();
+                using var command = connection.CreateCommand();
                 command.CommandText =
                             $"DROP TABLE {dbName}";
                 try

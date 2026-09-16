@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DrillSim Simulator Work Bible</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+    * { box-sizing: border-box; }
+    html { min-width: 320px; background: var(--cp-bg); }
+    body {
+      margin: 0;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.45;
+    }
+    button, input, select { font: inherit; }
+    button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+      outline: 3px solid var(--cp-warning);
+      outline-offset: 2px;
+    }
+    code, .mono { font-family: Consolas, "Courier New", Courier, monospace; }
+    a { color: var(--cp-link); }
+    .shell { min-height: 100vh; display: grid; grid-template-columns: 288px minmax(0, 1fr); }
+    .rail {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 24px 20px;
+      overflow-y: auto;
+      background: var(--cp-bg-elevated);
+      border-right: 1px solid var(--cp-border);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+    .brand-mark {
+      width: 42px; height: 42px; display: grid; place-items: center;
+      border-radius: 0.625rem; background: var(--cp-accent); color: var(--cp-accent-fg);
+      font-weight: 900;
+    }
+    .brand strong, .brand span { display: block; }
+    .brand span { color: var(--cp-text-muted); font-size: 12px; }
+    .rail h2 { margin: 20px 0 8px; font-size: 13px; }
+    .rail nav { display: grid; gap: 4px; }
+    .rail nav a {
+      padding: 8px 10px; color: var(--cp-text-muted); text-decoration: none;
+      border-radius: 0.625rem;
+    }
+    .rail nav a:hover { color: var(--cp-text); background: var(--cp-surface-soft); }
+    .summary-block { padding: 12px; background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px; }
+    .summary-block strong { font-size: 26px; }
+    .summary-block span { color: var(--cp-text-muted); font-size: 12px; }
+    .progress {
+      height: 10px; margin: 10px 0 6px; overflow: hidden;
+      border-radius: 0.625rem; background: var(--cp-surface-soft); border: 1px solid var(--cp-border);
+    }
+    .progress > span {
+      display: block; width: 100%; height: 100%; transform: scaleX(0); transform-origin: left;
+      background: var(--cp-accent); transition: transform 180ms ease-out;
+    }
+    .main { min-width: 0; padding: 36px clamp(20px, 4vw, 64px) 80px; }
+    .hero { max-width: 1100px; margin: 0 auto 28px; }
+    .hero h1 { max-width: 18ch; margin: 0 0 12px; font-size: clamp(34px, 5vw, 64px); line-height: 0.98; letter-spacing: -0.04em; }
+    .hero p { max-width: 72ch; color: var(--cp-text-muted); font-size: 17px; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag { padding: 6px 9px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface); font-size: 12px; }
+    .toolbar {
+      position: sticky; top: 0; z-index: 5;
+      max-width: 1100px; margin: 0 auto 20px; padding: 10px;
+      display: grid; grid-template-columns: 1fr 180px auto auto; gap: 8px;
+      background: var(--cp-panel-strong); border: 1px solid var(--cp-border); border-radius: 16px;
+      box-shadow: var(--cp-shadow);
+    }
+    .toolbar input, .toolbar select {
+      min-width: 0; padding: 9px 10px; color: var(--cp-text);
+      background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 0.625rem;
+    }
+    .button {
+      padding: 9px 12px; border: 1px solid var(--cp-accent); border-radius: 0.625rem;
+      color: var(--cp-accent-fg); background: var(--cp-accent); cursor: pointer;
+    }
+    .button:hover { background: var(--cp-accent-hover); }
+    .button.secondary { color: var(--cp-text); background: var(--cp-surface); border-color: var(--cp-border); }
+    .content { max-width: 1100px; margin: 0 auto; display: grid; gap: 16px; }
+    .architecture, .critical-path {
+      padding: 20px; background: var(--cp-surface); border: 1px solid var(--cp-border);
+      border-radius: 16px; box-shadow: 0 0 2px var(--cp-border);
+    }
+    .architecture h2, .critical-path h2 { margin-top: 0; }
+    .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 14px; }
+    .flow div { padding: 12px; text-align: center; background: var(--cp-surface-soft); border: 1px solid var(--cp-border); border-radius: 0.625rem; }
+    .flow strong, .flow span { display: block; }
+    .flow span { color: var(--cp-text-muted); font-size: 12px; }
+    .phase {
+      background: var(--cp-surface); border: 1px solid var(--cp-border);
+      border-radius: 16px; overflow: clip; box-shadow: 0 0 2px var(--cp-border);
+    }
+    .phase[hidden] { display: none; }
+    .phase summary {
+      list-style: none; cursor: pointer; padding: 18px 20px;
+      display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; gap: 14px; align-items: center;
+    }
+    .phase summary::-webkit-details-marker { display: none; }
+    .phase summary:hover { background: var(--cp-surface-soft); }
+    .phase-code { color: var(--cp-accent); font: 800 20px Consolas, "Courier New", Courier, monospace; }
+    .phase-title strong { display: block; font-size: 18px; }
+    .phase-title span { color: var(--cp-text-muted); font-size: 13px; }
+    .phase-progress { min-width: 95px; text-align: right; }
+    .phase-progress strong { display: block; }
+    .phase-progress span { color: var(--cp-text-muted); font-size: 11px; }
+    .phase-body { padding: 0 20px 20px 88px; border-top: 1px solid var(--cp-border); }
+    .phase-body h3 { margin: 20px 0 8px; font-size: 14px; }
+    .task-list { display: grid; gap: 6px; }
+    .task {
+      display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 8px;
+      align-items: start; padding: 8px; border-radius: 0.625rem;
+    }
+    .task:hover { background: var(--cp-surface-soft); }
+    .task input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--cp-accent); }
+    .task.done span { color: var(--cp-text-muted); text-decoration: line-through; }
+    .gate { margin-top: 16px; padding: 12px; background: var(--cp-accent-soft); border: 1px solid var(--cp-accent); border-radius: 0.625rem; }
+    .gate strong { display: block; margin-bottom: 4px; }
+    .meta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+    .meta-grid div { padding: 9px; background: var(--cp-surface-soft); border-radius: 0.625rem; }
+    .meta-grid span { display: block; color: var(--cp-text-muted); font-size: 11px; }
+    .status-done { color: var(--cp-success); }
+    .status-active { color: var(--cp-warning); }
+    .status-blocked { color: var(--cp-danger); }
+    .status-pending { color: var(--cp-text-muted); }
+    .critical-path ol { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; padding: 0; list-style: none; }
+    .critical-path li { padding: 10px 4px; text-align: center; background: var(--cp-surface-soft); border: 1px solid var(--cp-border); border-radius: 0.625rem; font: 700 11px Consolas, "Courier New", Courier, monospace; }
+    .empty { padding: 28px; color: var(--cp-text-muted); text-align: center; }
+    .footer { max-width: 1100px; margin: 32px auto 0; color: var(--cp-text-muted); font-size: 12px; }
+    #importInput { display: none; }
+    @media (max-width: 900px) {
+      .shell { grid-template-columns: 1fr; }
+      .rail { position: static; width: auto; height: auto; border-right: 0; border-bottom: 1px solid var(--cp-border); }
+      .rail nav { grid-template-columns: repeat(3, 1fr); }
+      .main { padding-top: 24px; }
+      .toolbar { position: static; grid-template-columns: 1fr 1fr; }
+      .flow, .meta-grid { grid-template-columns: 1fr 1fr; }
+      .critical-path ol { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .rail nav { grid-template-columns: 1fr 1fr; }
+      .toolbar, .flow, .meta-grid { grid-template-columns: 1fr; }
+      .phase summary { grid-template-columns: 44px minmax(0, 1fr); }
+      .phase-progress { grid-column: 2; text-align: left; }
+      .phase-body { padding-left: 20px; }
+      .critical-path ol { grid-template-columns: 1fr 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail">
+      <div class="brand">
+        <div class="brand-mark">DS</div>
+        <div><strong>Simulator Work Bible</strong><span>Two-stage build tracker</span></div>
+      </div>
+      <div class="summary-block">
+        <span>Overall completion</span>
+        <strong id="overallPercent">0%</strong>
+        <div class="progress" aria-label="Overall progress"><span id="overallBar"></span></div>
+        <span id="overallCount">0 of 0 tasks</span>
+      </div>
+      <h2>Phases</h2>
+      <nav id="phaseNav" aria-label="Plan phases"></nav>
+      <h2>Documents</h2>
+      <nav><a href="./implementation-plan.md">Canonical Markdown plan</a></nav>
+    </aside>
+
+    <main class="main">
+      <header class="hero">
+        <h1>Build the blind drilling loop.</h1>
+        <p>Track the work required to turn conditioned geological truth into a sealed prediction, simulated well, controlled reveal, production history, and defensible scorecard.</p>
+        <div class="hero-meta">
+          <span class="tag">TROLL FORCE-SODIR</span>
+          <span class="tag">SOGNEFJORD FM</span>
+          <span class="tag">Adaptive 3-phase IMPES</span>
+          <span class="tag">P0-P10</span>
+        </div>
+      </header>
+
+      <div class="toolbar" aria-label="Work bible controls">
+        <input id="search" type="search" placeholder="Search tasks, gates, deliverables">
+        <select id="statusFilter" aria-label="Filter by status">
+          <option value="all">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="done">Complete</option>
+        </select>
+        <button class="button secondary" id="exportButton" type="button">Export progress</button>
+        <button class="button secondary" id="importButton" type="button">Import progress</button>
+        <input id="importInput" type="file" accept="application/json">
+      </div>
+
+      <div class="content">
+        <section class="architecture" aria-labelledby="architectureTitle">
+          <h2 id="architectureTitle">Trust boundary</h2>
+          <p>Only Drilling Operations crosses from hidden truth to observable evidence. The browser and analysis agent never receive Stage A credentials, cell arrays, unrestricted sampling, or future outcomes.</p>
+          <div class="flow">
+            <div><strong>Analysis</strong><span>as-of evidence</span></div>
+            <div><strong>Drilling Ops</strong><span>operator bridge</span></div>
+            <div><strong>Stage A</strong><span>hidden truth</span></div>
+            <div><strong>Services</strong><span>revealed evidence</span></div>
+          </div>
+        </section>
+
+        <section class="critical-path" aria-labelledby="criticalTitle">
+          <h2 id="criticalTitle">Critical path</h2>
+          <ol><li>P0-P4 foundation</li><li>P9 geometry</li><li>P10 task workflow</li><li>P5-P6 generality</li><li>P8 operation</li><li>P7 + P9 calibration</li><li>P8 acceptance</li></ol>
+        </section>
+
+        <div id="phaseList"></div>
+        <div id="emptyState" class="empty" hidden>No tasks match the current filters.</div>
+      </div>
+
+      <footer class="footer">
+        Progress is stored locally in this browser. Export progress before moving the file or changing browsers.
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    const PLAN = [
+      {
+        id: "P0", title: "Contract and decision lock", effort: "S", depends: "Current foundation",
+        purpose: "Freeze trust, identity, time, grid, authority, and version contracts.",
+        gate: "Topology proves analysis has no Stage A URL/key; one versioned contract defines every transition and default.",
+        tasks: [
+          ["p0-trust", "Record the two-stage trust boundary", true],
+          ["p0-grid", "Set the conditioned grid default to 64 × 64 × 20", true],
+          ["p0-correlation", "Set 1,200–1,500 m horizontal correlation lengths", true],
+          ["p0-clone", "Confirm field cloning per scenario", true],
+          ["p0-authority", "Confirm agent drafts and human seals/approves", true],
+          ["p0-horizon", "Set five-year horizon and 1/3/5-year checkpoints", true],
+          ["p0-sequence", "Assign existing colors to Seal, Execute, Reveal, Score", true],
+          ["p0-versions", "Define world, observation, and scoring model versions", true],
+          ["p0-state", "Freeze scenario states and legal transitions", true],
+          ["p0-topology-test", "Add trust-boundary topology test", true]
+        ]
+      },
+      {
+        id: "P1", title: "Complete Stage A", effort: "L", depends: "P0",
+        purpose: "Make hidden truth persistent, contact-equilibrated, schedulable, and safely sampleable.",
+        gate: "Reference physics pass; restart restores exact truth; approved-path sampling is the only truth export.",
+        tasks: [
+          ["p1-core", "Adaptive oil/water/free-gas IMPES kernel", true],
+          ["p1-auth", "Operator-key protection and summary-only API", true],
+          ["p1-conditioning", "Conditioned deterministic world generator", true],
+          ["p1-spec-store", "Persist canonical WorldSpec and truth checksum", true],
+          ["p1-state-store", "Persist compressed immutable dynamic states", true],
+          ["p1-regenerate", "Regenerate static truth on cache miss", true],
+          ["p1-structure", "Condition structure from all 46 Sognefjord intervals", true],
+          ["p1-facies", "Condition facies and net-to-gross", true],
+          ["p1-contacts", "Add GOC/GWC/OWC surfaces and capillary transitions", true],
+          ["p1-equilibrium", "Initialize hydrostatic phase pressure", true],
+          ["p1-pvt", "Add versioned model-estimated PVT calibration", true],
+          ["p1-peaceman", "Add Peaceman well index", true],
+          ["p1-bhp", "Add BHP/rate controls and switching", true],
+          ["p1-schedule", "Add schedule segments and state continuation", true],
+          ["p1-sampler", "Add audited approved-path truth sampler", true],
+          ["p1-thiem", "Add Thiem radial reference test", true],
+          ["p1-buckley", "Add Buckley–Leverett reference test", true],
+          ["p1-grid-convergence", "Add grid-convergence suite", true],
+          ["p1-budget", "Meet world-generation and five-year runtime budgets", true]
+        ]
+      },
+      {
+        id: "P2", title: "Scenario clock and prediction", effort: "M", depends: "P0",
+        purpose: "Create a durable blind as-of view and immutable human-approved prediction.",
+        gate: "T0 evidence remains byte-identical after reveal; sealed predictions cannot mutate.",
+        tasks: [
+          ["p2-db", "Wire analysis-api SQLite persistence", true],
+          ["p2-scenario", "Persist Scenario and ScenarioClock", true],
+          ["p2-visibility", "Persist EvidenceVisibility", true],
+          ["p2-asof-package", "Add scenarioId/asOf package filtering", true],
+          ["p2-asof-analysis", "Add scenarioId/asOf analysis filtering", true],
+          ["p2-hidden-counts", "Expose hidden counts without hidden values", true],
+          ["p2-draft", "Create prediction draft contract", true],
+          ["p2-seal", "Canonicalize and seal prediction hash", true],
+          ["p2-approval", "Require separate human approval", true],
+          ["p2-baselines", "Capture four deterministic baselines", true],
+          ["p2-compat", "Preserve no-scenario behavior", true]
+        ]
+      },
+      {
+        id: "P3", title: "Drilling Operations core", effort: "XL", depends: "P1, P2",
+        purpose: "Build the internal checkpointed execution bridge between truth and observable services.",
+        gate: "S0-S5 resume after restart; cancellation publishes nothing; publication is independently retryable.",
+        tasks: [
+          ["p3-service", "Create internal DrillingOperations service", true],
+          ["p3-store", "Persist Run, RunStage, TruthBinding and audit records", true],
+          ["p3-bind", "S0 bind scenario to hidden world", true],
+          ["p3-plan", "S1 materialize planned well and trajectory", true],
+          ["p3-drill", "S2 execute deterministic drilling path", true],
+          ["p3-survey", "S3 generate survey observations", true],
+          ["p3-sample", "S4 request approved-path truth samples", true],
+          ["p3-logs", "S5 generate observation batch", true],
+          ["p3-completion", "S6 checkpoint completion design", true],
+          ["p3-production", "S7 checkpoint production run", true],
+          ["p3-publish", "S8 checkpoint reveal publication", true],
+          ["p3-score", "S9 checkpoint scoring", true],
+          ["p3-idempotency", "Require and persist idempotency keys", true],
+          ["p3-cancel", "Add cancellation and one-active-run constraint", true],
+          ["p3-sse", "Stream stage-only progress over SSE", true],
+          ["p3-audit", "Add hash-chained audit log", true]
+        ]
+      },
+      {
+        id: "P4", title: "Observation forward models", effort: "L", depends: "P1, P3",
+        purpose: "Turn sampled truth into realistic imperfect survey, drilling, and petrophysical evidence.",
+        gate: "Independent inversion recovers φ/Sw within uncertainty; identical seeds reproduce observation hashes.",
+        tasks: [
+          ["p4-survey-bias", "Model survey bias, scale and misalignment", true],
+          ["p4-covariance", "Generate covariance and error ellipses", true],
+          ["p4-rop", "Forward-model ROP from rock and rig state", true],
+          ["p4-dynamics", "Generate torque, drag and vibration", true],
+          ["p4-hydraulics", "Generate pressure, ECD, flow and losses", true],
+          ["p4-temperature", "Generate geothermal observations", true],
+          ["p4-cuttings", "Generate lagged cuttings and facies", true],
+          ["p4-gr", "Forward-model gamma ray", true],
+          ["p4-rhob", "Forward-model bulk density", true],
+          ["p4-nphi", "Forward-model neutron response", true],
+          ["p4-resistivity", "Forward-model deep resistivity", true],
+          ["p4-caliper", "Generate caliper/washout and QC", true],
+          ["p4-mdt", "Generate MDT-like pressure points", true],
+          ["p4-noise", "Version noise, bias, resolution and missingness", true],
+          ["p4-roundtrip", "Add forward/inverse round-trip tests", true]
+        ]
+      },
+      {
+        id: "P5", title: "Publish and reveal", effort: "M", depends: "P2, P3, P4",
+        purpose: "Publish a coherent scenario field atomically without contaminating public source records.",
+        gate: "Retry creates no duplicates; failed publication changes neither visibility nor simulated time.",
+        tasks: [
+          ["p5-clone", "Clone the field graph per scenario", true],
+          ["p5-source-links", "Preserve source provenance links", true],
+          ["p5-planned", "Publish planned records before execution", false],
+          ["p5-trajectory", "Publish as-drilled and definitive trajectories", true],
+          ["p5-survey", "Publish survey run and uncertainty", false],
+          ["p5-geology", "Publish synthetic logs and geology", true],
+          ["p5-derived", "Publish derived tops, contacts and pay", true],
+          ["p5-architecture", "Publish architecture and openings", false],
+          ["p5-context", "Publish rig, string, mud and simulation edges", false],
+          ["p5-readback", "Read back and validate every UUID edge", true],
+          ["p5-manifest", "Create immutable RevealManifest", true],
+          ["p5-visibility", "Update EvidenceVisibility after verification", true],
+          ["p5-clock", "Advance clock only after complete reveal", true],
+          ["p5-internal-auth", "Protect callbacks with separate internal key", true]
+        ]
+      },
+      {
+        id: "P6", title: "Completion and production", effort: "L", depends: "P1, P3, P4, P5",
+        purpose: "Design observable-evidence completions and produce five years of multiphase outcomes.",
+        gate: "Production meets balance/finite/monotonic gates and exposes 1/3/5-year checkpoints.",
+        tasks: [
+          ["p6-select", "Select completion intervals from observed synthetic logs", true],
+          ["p6-multi-res", "Support multiple reservoirs per bore", false],
+          ["p6-multi-open", "Support multiple openings per reservoir", true],
+          ["p6-types", "Represent perforated, open-hole and isolated intervals", true],
+          ["p6-map", "Map openings to Stage A grid connections", true],
+          ["p6-skin", "Record skin and completion efficiency", true],
+          ["p6-approve", "Require human completion approval", true],
+          ["p6-controls", "Apply BHP and facility constraints", true],
+          ["p6-schedule", "Run shut-in/restart/control schedules", true],
+          ["p6-five-year", "Run five simulated years", true],
+          ["p6-states", "Persist 1/3/5-year states", true],
+          ["p6-meter", "Apply meter bias, downtime and allocation uncertainty", true],
+          ["p6-monthly", "Publish monthly oil/gas/water", true],
+          ["p6-breakthrough", "Detect water and gas breakthrough", true]
+        ]
+      },
+      {
+        id: "P7", title: "Blind scoring", effort: "M", depends: "P2, P5, P6",
+        purpose: "Compare the sealed decision against truth, observations, and deterministic baselines.",
+        gate: "Score inputs match sealed/truth hashes; scorecard unavailable before reveal; fixtures are hand-computable.",
+        tasks: [
+          ["p7-location", "Score target-location error", false],
+          ["p7-top-base", "Score formation top/base error", true],
+          ["p7-pay", "Score expected-paydirt error and coverage", true],
+          ["p7-fluid", "Score fluid classes", true],
+          ["p7-contact", "Score GOC/GWC/OWC depths", true],
+          ["p7-rate", "Score initial phase rates", true],
+          ["p7-profile", "Score monthly production RMSE", true],
+          ["p7-cumulative", "Score 1/3/5-year cumulative volumes", true],
+          ["p7-rank", "Score rank correlation", false],
+          ["p7-regret", "Make ranking regret the headline metric", false],
+          ["p7-dual", "Report truth and revealed-observation bases", true],
+          ["p7-gap", "Report observationGap", true],
+          ["p7-baselines", "Compare AI with four baselines", true],
+          ["p7-calibration", "Require 20 replays for calibration claims", false],
+          ["p7-version", "Version and hash scoring inputs", true]
+        ]
+      },
+      {
+        id: "P8", title: "UX, rig coupling and hardening", effort: "L", depends: "P1-P7",
+        purpose: "Complete the scenario experience, operational coupling, observability, recovery, and leakage proof.",
+        gate: "Blind end-to-end invariant passes; no public response, bundle, log, or trace exposes hidden truth.",
+        tasks: [
+          ["p8-clock", "Add scenario selector and simulated clock", true],
+          ["p8-evidence", "Show available/hidden/revealed evidence", true],
+          ["p8-paths", "Show planned versus as-drilled trajectory", true],
+          ["p8-prediction", "Add prediction editor and immutable seal", true],
+          ["p8-approval", "Add human approval control", true],
+          ["p8-progress", "Add run progress and cancellation", true],
+          ["p8-publication-recovery", "Recover reviewed uncommitted S8 write rejection without replacing the run", true],
+          ["p8-score-correction", "Preserve rejected scorecard and append an audited corrected evaluation", true],
+          ["p8-reveal", "Add reveal evidence diff", true],
+          ["p8-production", "Add 1/3/5-year production plots", true],
+          ["p8-scorecard", "Add dual-basis scorecard", true],
+          ["p8-assumptions", "Add assumptions and versions panel", true],
+          ["p8-replay", "Add replay/reset controls", false],
+          ["p8-sequence", "Extend sequence with Seal/Execute/Reveal/Score", true],
+          ["p8-agent", "Restrict agent to clock/package/draft tools", false],
+          ["p8-4ndof", "Couple existing Simulator4nDOF", false],
+          ["p8-otel", "Add stage spans and bounded metrics", false],
+          ["p8-faults", "Run cancellation/restart/fault injection suite", false],
+          ["p8-leakage", "Run API/bundle/log/trace leakage suite", false],
+          ["p8-e2e", "Pass blind end-to-end invariant", false],
+          ["p8-replays", "Run at least 20 calibration worlds", false]
+        ]
+      },
+      {
+        id: "P9", title: "Evidence fidelity and generality", effort: "XL", depends: "P2, P4; complements P5-P8",
+        purpose: "Turn the canonical simulator demonstration into a faithful interpretation and decision workspace.",
+        gate: "Visible evidence alone supports geometry; unknowns stay unknown; generic graphs and calibrated predictions pass independent acceptance.",
+        tasks: [
+          ["p9-coordinates", "Validate downhole positions and select definitive trajectories", true],
+          ["p9-intervals", "Separate fluid/quality tracks; preserve intervals, non-pay and unknowns", true],
+          ["p9-mesh", "Replace ellipse envelopes with bounded triangulated volumes", true],
+          ["p9-interaction", "Add rotation, depth cutting and fluid controls", true],
+          ["p9-uncertainty", "Calibrate geometry uncertainty and held-out accuracy", false],
+          ["p9-structure", "Resolve common datums and structural-only controls", false],
+          ["p9-generic", "Remove canonical publication-count assumptions", false],
+          ["p9-calibration", "Calibrate realistic production rates, PVT and schedules", false],
+          ["p9-authoring", "Add guided prediction authoring", false],
+          ["p9-shared", "Share versioned interpretation across views and ranking", false]
+        ]
+      },
+      {
+        id: "P10", title: "Actionable hypothesis workflow", effort: "XL", depends: "P2, P8, P9",
+        purpose: "Give sequence tasks real inputs, actions and outputs; keep navigation flexible and consequential actions gated.",
+        gate: "Visited is not reviewed; configuration changes affect actual results; stale/sealed evidence remains correctly bound; unsupported actions are explicit.",
+        tasks: [
+          ["p10-navigation", "Use stable grouped task IDs and merge Alternatives", true],
+          ["p10-state", "Track honest scoped visited, readiness and freshness states", true],
+          ["p10-evidence", "Add evidence inventory and provenance workspace", true],
+          ["p10-qc", "Add units, depth-reference and missingness inspector", true],
+          ["p10-position", "Link coordinate diagnostics to wells and map", true],
+          ["p10-correlation", "Add multi-bore correlation and control interpretation", true],
+          ["p10-configuration", "Apply validated fingerprinted analysis settings", true],
+          ["p10-pay", "Expose per-bore pay contributions and screening method", true],
+          ["p10-grid", "Expose full search grid and bounded resolution controls", true],
+          ["p10-exclusions", "Expose excluded candidates and screening reasons", true],
+          ["p10-uncertainty", "Show uncertainty components and calibration limits", true],
+          ["p10-targets", "Add target comparison, selection and score explanation", true],
+          ["p10-challenge", "Persist evidence-linked challenges and dispositions", true],
+          ["p10-hypotheses", "Persist named hypothesis/configuration revisions", true],
+          ["p10-compare", "Compare saved hypotheses and record preferred decision", true],
+          ["p10-bundle", "Export exact evidence, configuration and result bundle", true],
+          ["p10-seal", "Bind configured predictions/baselines without changing legacy seals", true],
+          ["p10-formation-ai", "Draft and review an evidence-bound AI formation interpretation", true]
+        ]
+      }
+    ];
+
+    const STORAGE_KEY = "drillsim-simulator-work-bible-v1";
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    const state = { completed: saved.completed || {}, notes: saved.notes || "" };
+    const phaseList = document.getElementById("phaseList");
+    const phaseNav = document.getElementById("phaseNav");
+    const search = document.getElementById("search");
+    const statusFilter = document.getElementById("statusFilter");
+
+    for (const phase of PLAN) {
+      for (const task of phase.tasks) {
+        if (task[2]) state.completed[task[0]] = true;
+        else if (!(task[0] in state.completed)) state.completed[task[0]] = false;
+      }
+    }
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function phaseStats(phase) {
+      const done = phase.tasks.filter(task => state.completed[task[0]]).length;
+      return { done, total: phase.tasks.length, percent: Math.round(done / phase.tasks.length * 100) };
+    }
+
+    function overallStats() {
+      const tasks = PLAN.flatMap(phase => phase.tasks);
+      const done = tasks.filter(task => state.completed[task[0]]).length;
+      return { done, total: tasks.length, percent: Math.round(done / tasks.length * 100) };
+    }
+
+    function renderNav() {
+      phaseNav.textContent = "";
+      for (const phase of PLAN) {
+        const stats = phaseStats(phase);
+        const link = document.createElement("a");
+        link.href = `#${phase.id}`;
+        link.textContent = `${phase.id} · ${phase.title} (${stats.percent}%)`;
+        phaseNav.append(link);
+      }
+    }
+
+    function render() {
+      const query = search.value.trim().toLowerCase();
+      const filter = statusFilter.value;
+      phaseList.textContent = "";
+      let visible = 0;
+
+      for (const phase of PLAN) {
+        const stats = phaseStats(phase);
+        const matchingTasks = phase.tasks.filter(task => {
+          const done = Boolean(state.completed[task[0]]);
+          const statusMatches = filter === "all" || (filter === "done" ? done : !done);
+          const textMatches = !query || `${phase.id} ${phase.title} ${phase.purpose} ${phase.gate} ${task[1]}`.toLowerCase().includes(query);
+          return statusMatches && textMatches;
+        });
+        if (!matchingTasks.length) continue;
+        visible++;
+
+        const details = document.createElement("details");
+        details.className = "phase";
+        details.id = phase.id;
+        details.open = query.length > 0 || filter !== "all" || phase.id === "P0" || phase.id === "P1";
+
+        const summary = document.createElement("summary");
+        summary.innerHTML = `
+          <span class="phase-code">${phase.id}</span>
+          <span class="phase-title"><strong>${phase.title}</strong><span>${phase.purpose}</span></span>
+          <span class="phase-progress"><strong>${stats.percent}%</strong><span>${stats.done}/${stats.total} · ${phase.effort}</span></span>`;
+        details.append(summary);
+
+        const body = document.createElement("div");
+        body.className = "phase-body";
+        body.innerHTML = `
+          <div class="meta-grid">
+            <div><span>Effort</span><strong>${phase.effort}</strong></div>
+            <div><span>Depends on</span><strong>${phase.depends}</strong></div>
+            <div><span>Status</span><strong class="${stats.percent === 100 ? "status-done" : stats.percent ? "status-active" : "status-pending"}">${stats.percent === 100 ? "Complete" : stats.percent ? "In progress" : "Pending"}</strong></div>
+          </div>
+          <h3>Work items</h3>`;
+        const list = document.createElement("div");
+        list.className = "task-list";
+
+        for (const task of matchingTasks) {
+          const label = document.createElement("label");
+          label.className = `task ${state.completed[task[0]] ? "done" : ""}`;
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = Boolean(state.completed[task[0]]);
+          checkbox.dataset.taskId = task[0];
+          checkbox.addEventListener("change", () => {
+            state.completed[task[0]] = checkbox.checked;
+            save();
+            render();
+          });
+          const text = document.createElement("span");
+          text.textContent = task[1];
+          label.append(checkbox, text);
+          list.append(label);
+        }
+
+        body.append(list);
+        const gate = document.createElement("div");
+        gate.className = "gate";
+        gate.innerHTML = `<strong>Acceptance gate</strong><span>${phase.gate}</span>`;
+        body.append(gate);
+        details.append(body);
+        phaseList.append(details);
+      }
+
+      document.getElementById("emptyState").hidden = visible > 0;
+      const overall = overallStats();
+      document.getElementById("overallPercent").textContent = `${overall.percent}%`;
+      document.getElementById("overallCount").textContent = `${overall.done} of ${overall.total} tasks`;
+      document.getElementById("overallBar").style.transform = `scaleX(${overall.percent / 100})`;
+      renderNav();
+    }
+
+    search.addEventListener("input", render);
+    statusFilter.addEventListener("change", render);
+
+    document.getElementById("exportButton").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify({
+        schemaVersion: 1,
+        exportedAt: new Date().toISOString(),
+        completed: state.completed
+      }, null, 2)], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "drillsim-simulator-progress.json";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    });
+
+    document.getElementById("importButton").addEventListener("click", () => {
+      document.getElementById("importInput").click();
+    });
+
+    document.getElementById("importInput").addEventListener("change", event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        const imported = JSON.parse(String(reader.result));
+        if (imported.schemaVersion !== 1 || typeof imported.completed !== "object") {
+          throw new Error("Unsupported progress file.");
+        }
+        state.completed = { ...state.completed, ...imported.completed };
+        save();
+        render();
+      });
+      reader.readAsText(file);
+      event.target.value = "";
+    });
+
+    render();
+  </script>
+</body>
+</html>

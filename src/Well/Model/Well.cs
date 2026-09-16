@@ -46,6 +46,11 @@ namespace OSDC.Drilling.Well.Model
         public bool IsSingleWell { get; set; } = false;
 
         /// <summary>
+        /// Optional imported identifiers, provenance, lifecycle, and production history.
+        /// </summary>
+        public WellDataset? Dataset { get; set; }
+
+        /// <summary>
         /// default constructor required for JSON serialization
         /// </summary>
         public Well() : base()

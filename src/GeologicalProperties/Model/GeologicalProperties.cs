@@ -14,6 +14,11 @@ namespace GeologicalProperties.Model
         public List<GeologicalPropertyEntry>? GeologicalPropertyTable { get; set; } = null;
 
         /// <summary>
+        /// Optional imported well logs, formation tops, provenance, and source timing.
+        /// </summary>
+        public PetrophysicsDataset? Petrophysics { get; set; }
+
+        /// <summary>
         /// default constructor required for JSON serialization
         /// </summary>
         public GeologicalProperties() : base()

@@ -1,0 +1,92 @@
+.simulation-form {
+  min-width: 0;
+  color: var(--cp-machine-text);
+  background: var(--cp-machine-deep);
+  overflow-wrap: anywhere;
+}
+.scenario-creation {
+  margin-block: 18px;
+  padding: 20px;
+  border: 1px solid var(--cp-machine-rule);
+  border-radius: 10px;
+}
+.simulation-form-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.simulation-form h2, .simulation-form h3 { margin: 0 0 8px; }
+.simulation-form h4 { margin: 18px 0 6px; font-size: 14px; }
+.simulation-form p { max-width: 75ch; color: var(--cp-machine-muted); line-height: 1.5; }
+.simulation-form fieldset {
+  min-width: 0;
+  margin: 20px 0;
+  padding: 16px 0 0;
+  border: 0;
+  border-top: 1px solid var(--cp-machine-rule);
+}
+.simulation-form legend { padding: 0 12px 0 0; color: var(--cp-machine-text); font-size: 15px; font-weight: 700; }
+.simulation-form label { display: grid; min-width: 0; gap: 6px; margin-block: 10px; font-size: 13px; }
+.simulation-form input:not([type="checkbox"]), .simulation-form select, .simulation-form textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px;
+  color: var(--cp-machine-text);
+  background: var(--cp-machine);
+  border: 1px solid var(--cp-machine-rule);
+  border-radius: 6px;
+  font: inherit;
+}
+.simulation-form textarea { min-height: 80px; resize: vertical; line-height: 1.5; }
+.simulation-form input[readonly] { color: var(--cp-machine-muted); background: var(--cp-machine-deep); }
+.simulation-form input[type="checkbox"] { flex: 0 0 auto; width: 18px; height: 18px; margin-top: 2px; accent-color: var(--cp-step-yellow); }
+.simulation-form .simulation-check { display: flex; align-items: start; gap: 10px; max-width: 85ch; line-height: 1.5; }
+.simulation-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 20px; }
+.simulation-form button, .simulation-journey button {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--cp-machine-rule);
+  border-radius: 6px;
+  color: var(--cp-machine-text);
+  background: var(--cp-machine-raised);
+  font: inherit;
+  cursor: pointer;
+}
+.simulation-form button:hover:not(:disabled), .simulation-journey button:hover:not(:disabled) { border-color: var(--cp-step-yellow); }
+.simulation-form button:disabled { opacity: .55; cursor: not-allowed; }
+.simulation-form button[type="submit"]:not(:disabled),
+.simulation-form [data-tutorial="prepare-simulator"]:not(:disabled),
+.prediction-actions [data-tutorial="save-prediction"]:not(:disabled) { background: var(--cp-step-yellow); color: var(--cp-machine-deep); }
+.simulation-form :is(input, select, textarea, button, summary):focus-visible { outline: 2px solid var(--cp-step-yellow); outline-offset: 3px; }
+.simulation-form .form-error { padding: 10px; color: var(--cp-machine-text); border: 1px solid var(--cp-step-red); }
+.simulation-form details { margin-block: 16px; }
+.simulation-form pre { overflow-x: auto; padding: 12px; border: 1px solid var(--cp-machine-rule); white-space: pre-wrap; }
+.simulation-form .scenario-table-wrap { max-height: none; margin-bottom: 12px; }
+.forecast-form .scenario-table input { min-width: 110px; font-variant-numeric: tabular-nums; }
+.forecast-form .scenario-table th { white-space: nowrap; }
+.forecast-quantiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.forecast-quantiles label { margin-block: 4px; color: var(--cp-machine-muted); }
+.forecast-fluids { display: flex; flex-wrap: wrap; gap: 12px 24px; }
+.forecast-formation + .forecast-formation, .forecast-contact { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--cp-machine-rule); }
+.prediction-demo { margin-block: 20px; padding-block: 16px; border-block: 1px solid var(--cp-machine-rule); }
+.prediction-demo h4 { margin: 0; font-size: 16px; }
+.prediction-demo button { margin: 0 8px 8px 0; }
+.prediction-editor .demo-estimate-label { color: var(--cp-step-yellow); font-weight: 600; }
+.prediction-advanced { margin-block: 20px; }
+.prediction-advanced textarea { margin-block: 8px 12px; }
+.simulator-setup { margin-block: 20px; padding-block: 16px; border-block: 1px solid var(--cp-machine-rule); }
+.simulation-journey { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.simulation-journey [aria-current="step"] { border-color: var(--cp-step-yellow); }
+.simulation-journey span { display: block; font-size: 11px; color: var(--cp-machine-muted); }
+.simulation-complete { margin-block: 16px; padding: 16px; border: 1px solid var(--cp-machine-rule); }
+.simulation-complete p { max-width: 75ch; }
+.simulation-complete .task-actions { margin-bottom: 0; }
+@media (max-width: 700px) {
+  .scenario-creation { padding: 14px; }
+  .simulation-form-grid { grid-template-columns: minmax(0, 1fr); }
+  .forecast-quantiles { gap: 6px; }
+  .simulation-journey { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

@@ -500,6 +500,19 @@ namespace NORCE.Drilling.Trajectory.Service.Managers
             return null;
         }
 
+        /// <summary>Imports authoritative publication stations without recalculation.</summary>
+        public bool ImportPublishedTrajectory(Model.Trajectory? trajectory)
+        {
+            if (trajectory?.MetaInfo == null || trajectory.MetaInfo.ID == Guid.Empty || trajectory.WellBoreID == Guid.Empty || trajectory.SurveyStationList is not { Count: > 1 }) return false;
+            if (GetTrajectoryById(trajectory.MetaInfo.ID, includeCalculatedStations: false) != null) return false;
+            List<SurveyStation> stations = trajectory.SurveyStationList.Select(CloneSurveyStation).ToList();
+            DateTimeOffset now = DateTimeOffset.UtcNow;
+            trajectory.CreationDate = now;
+            trajectory.LastModificationDate = now;
+            MarkCalculationState(trajectory, CalculationState.Completed, 1.0, null);
+            return InsertOrUpdateTrajectoryRecord(trajectory, false, stations);
+        }
+
         /// <summary>
         /// Performs calculation on the given Trajectory and adds it to the microservice database
         /// </summary>

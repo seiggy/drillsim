@@ -106,7 +106,7 @@ public sealed class McpToolRegistrationTests
         Assert.That(PropertyNames(well), Is.EquivalentTo(new[]
         {
             "MetaInfo", "Name", "Description", "CreationDate", "LastModificationDate",
-            "SlotID", "ClusterID", "IsSingleWell"
+            "SlotID", "ClusterID", "IsSingleWell", "Dataset"
         }));
         Assert.That(well["additionalProperties"]?.GetValue<bool>(), Is.False);
 
@@ -116,6 +116,7 @@ public sealed class McpToolRegistrationTests
         Assert.That(Property(well, "CreationDate")["format"]?.GetValue<string>(), Is.EqualTo("date-time"));
         Assert.That(Property(well, "SlotID")["format"]?.GetValue<string>(), Is.EqualTo("uuid"));
         Assert.That(Property(well, "ClusterID")["format"]?.GetValue<string>(), Is.EqualTo("uuid"));
+        Assert.That(Property(Property(well, "Dataset"), "MonthlyProduction"), Is.Not.Null);
     }
 
     [Test]

@@ -1,3 +1,4 @@
+using DrillSim.PublicationGate;
 using Microsoft.OpenApi;
 using System.Threading.Tasks;
 using Scalar.AspNetCore;
@@ -15,6 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration["ConnectionStrings:Sqlite"] ??= $"Data Source={Path.Combine("..", "home", "Trajectory.db")}";
 builder.AddServiceDefaults();
+builder.AddScenarioPublicationGate();
 
 // registering the managers of SQLite connections through dependency injection
 builder.Services.AddSingleton(sp => new SqlConnectionManagerTrajectory(
@@ -52,6 +54,7 @@ var app = builder.Build();
 var basePath = "/trajectory/api";
 
 app.UsePathBase(basePath);
+app.UseScenarioPublicationGate();
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
@@ -109,4 +112,7 @@ app.MapControllers();
 app.MapFallbackToFile("index.html");
 app.MapDefaultEndpoints();
 
+app.MapScenarioPublicationGateEndpoints();
 app.Run();
+
+public partial class Program { }

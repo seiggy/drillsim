@@ -11,25 +11,24 @@ namespace ConversionDrillingRazorMudComponentsUnitTests
         public MudUnitAndReferenceChoiceTagUnitTests() : base()
         {
             Services.AddMudServices();
+            JSInterop.Mode = JSRuntimeMode.Loose;
+            RenderComponent<MudPopoverProvider>();
         }
 
         [Fact]
-        public void Test1()
+        public void DefaultUnitSystemsConvertAngularVelocityWithoutAnExternalService()
         {
             var obj = RenderComponent<MudUnitAndReferenceChoiceTag>(parameters => parameters
-            .Add(p => p.HttpHost, "https://dev.digiwells.no/")
-            .Add(p => p.HttpBasePath, "UnitConversion/api/")
-            .Add(p => p.HttpController, "UnitSystem/")
             .Add(p => p.UnitSystemName, "SI"));
 
             obj.WaitForState(() => obj.Instance.InitializedOnce, timeout: TimeSpan.FromSeconds(5));
-            Assert.NotNull(obj.Instance);
-            double val = obj.Instance.FromSI(2.0*Math.PI, OSDC.UnitConversion.Conversion.DrillingEngineering.DrillingPhysicalQuantity.QuantityEnum.AngularVelocityDrilling);
-            //Assert.Equal(2.0*Math.PI, val);
-            obj.Instance.UnitSystemName = "Metric";
-            var label = obj.Instance.GetUnitLabel(OSDC.UnitConversion.Conversion.DrillingEngineering.DrillingPhysicalQuantity.QuantityEnum.AngularVelocityDrilling);
-            val = obj.Instance.FromSI(2.0 * Math.PI, OSDC.UnitConversion.Conversion.DrillingEngineering.DrillingPhysicalQuantity.QuantityEnum.AngularVelocityDrilling);
-            //Assert.Equal(60.0, val);
+            const OSDC.UnitConversion.Conversion.DrillingEngineering.DrillingPhysicalQuantity.QuantityEnum quantity =
+                OSDC.UnitConversion.Conversion.DrillingEngineering.DrillingPhysicalQuantity.QuantityEnum.AngularVelocityDrilling;
+            Assert.Equal(2.0 * Math.PI, obj.Instance.FromSI(2.0 * Math.PI, quantity), precision: 8);
+
+            obj.SetParametersAndRender(parameters => parameters.Add(p => p.UnitSystemName, "Metric"));
+            Assert.False(string.IsNullOrWhiteSpace(obj.Instance.GetUnitLabel(quantity)));
+            Assert.Equal(60.0, obj.Instance.FromSI(2.0 * Math.PI, quantity), precision: 8);
         }
     }
 }
