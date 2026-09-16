@@ -20,6 +20,26 @@ try {
   assert.equal(response.status(), 200)
   const guideRequests = []
   page.on('request', request => guideRequests.push(request.url()))
+  const walkthrough = page.locator('#walkthrough-validation')
+  assert.equal(await walkthrough.count(), 1)
+  assert.equal(await walkthrough.locator('.walkthrough-record tbody tr').count(), 39)
+  const screenshotUrls = await page.locator('a[href^="screenshots/"], img[src^="screenshots/"]').evaluateAll(elements =>
+    [...new Set(elements.map(element => element.href || element.src))])
+  assert.ok(screenshotUrls.length >= 39)
+  for (const url of screenshotUrls) {
+    assert.equal(new URL(url).origin, new URL(guideUrl).origin)
+    const image = await context.request.get(url)
+    assert.equal(image.status(), 200, url)
+    assert.match(image.headers()['content-type'], /^image\/png/, url)
+    const bytes = await image.body()
+    assert.equal(bytes.subarray(0, 8).toString('hex'), '89504e470d0a1a0a', url)
+  }
+  await page.locator('.walkthrough-shot img').evaluateAll(images => {
+    images.forEach(image => { image.loading = 'eager' })
+    return Promise.all(images.map(image => image.decode()))
+  })
+  assert.ok(await page.locator('.walkthrough-shot img').evaluateAll(images =>
+    images.every(image => image.naturalWidth > 0 && image.alt.trim().length > 0)))
   assert.equal(await page.locator('.chapter.task').count(), 19)
   const chapter4 = await page.locator('#guided-simulation').innerText()
   for (const action of ['Create scenario', 'Save draft', 'Seal reviewed revision', 'Approve reviewed prediction',
@@ -27,8 +47,14 @@ try {
   assert.match(chapter4, /demonstration estimates/)
   for (const id of ['evidence', 'qc', 'position', 'correlation', 'criteria', 'pay', 'search', 'exclusions', 'model',
     'uncertainty', 'targets', 'challenge', 'alternatives', 'compare', 'bundle', 'prediction', 'simulation', 'new-evidence', 'evaluation']) {
-    assert.equal(await page.locator(`#${id}.task`).count(), 1)
-    assert.deepEqual(await page.locator(`#${id} .task-facts > dt`).allTextContents(),
+    const task = page.locator(`#${id}.task`)
+    assert.equal(await task.count(), 1)
+    assert.ok(await task.locator(':scope > figure.task-shot').count() >= 1, `${id} must illustrate its own workspace inline.`)
+    assert.ok(await task.locator('figure.task-shot img').evaluateAll(images =>
+      images.every(image => image.naturalWidth > 0 && image.alt.trim().length > 0)), `${id} screenshot must render with alt text.`)
+    assert.ok((await task.locator('figure.task-shot figcaption').allTextContents()).every(caption => caption.trim().length > 30),
+      `${id} screenshot needs a useful caption, not just an image filename.`)
+    assert.deepEqual(await task.locator('.task-facts > dt').allTextContents(),
       ['SAY', 'DO', 'EXPECT', 'INPUT', 'OUTPUT', 'STATE EFFECT', 'ARCHITECTURE', 'RISKS'])
   }
   const broken = await page.locator('a[href^="#"]').evaluateAll(links =>
@@ -47,6 +73,13 @@ try {
   await flow.nth(1).click()
   assert.equal(await flow.nth(1).getAttribute('aria-pressed'), 'true')
   assert.ok(await page.locator('[data-path].active').count())
+  for (const link of await page.locator('.outline .task-link').all()) {
+    const id = (await link.getAttribute('href')).slice(1)
+    await link.click()
+    assert.equal(await page.locator(`#${id}.task`).isVisible(), true)
+    assert.ok(await page.locator(`#${id} figure.task-shot img:visible`).count() >= 1,
+      `${id} must retain its screenshot in presenter mode.`)
+  }
   const theme = page.locator('#theme-button')
   const initialTheme = await page.locator('html').getAttribute('data-theme')
   await theme.click()
@@ -56,7 +89,9 @@ try {
   await page.emulateMedia({ media: 'print' })
   assert.equal(await page.locator('main > .chapter:visible').count(), await page.locator('main > .chapter').count())
   await page.emulateMedia({ media: 'screen' })
-  assert.equal(guideRequests.length, 0, 'Reading the guide and using its controls needs no network requests.')
+  assert.ok(guideRequests.every(url => new URL(url).origin === new URL(guideUrl).origin &&
+    /\/screenshots\/[^/]+\.png$/.test(new URL(url).pathname)),
+  'Guide controls may load local screenshots but must not call APIs or external services.')
   assert.deepEqual(errors, [])
   const noJs = await browser.newContext({ javaScriptEnabled: false })
   const staticPage = await noJs.newPage()
@@ -65,5 +100,7 @@ try {
   assert.equal(await staticPage.locator('#mode-button').isVisible(), false)
   await noJs.close()
   console.log(JSON.stringify({ status: 'passed', localGuideLink: true, tasks: 19, presenterNavigation: true,
-    architectureControls: true, lightDarkMobilePrint: true, noJavaScriptReadable: true, guideNetworkRequests: 0 }))
+    architectureControls: true, lightDarkMobilePrint: true, noJavaScriptReadable: true,
+    documentedTutorialSteps: 39, illustratedEngineeringTasks: 19,
+    screenshotLinks: screenshotUrls.length, screenshotRequestsOnly: true }))
 } finally { await browser.close() }

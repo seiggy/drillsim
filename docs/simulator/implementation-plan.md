@@ -1094,7 +1094,7 @@ P5-P8 tasks remain open; they are not duplicated or silently redefined.
 - [ ] P9.6 Resolve common vertical datums and incorporate structural-only controls without fabricated trajectories.
 - [ ] P9.7 Remove canonical 29/46-to-30/47 publication-count assumptions.
 - [ ] P9.8 Establish physically defensible production-rate, PVT, and schedule calibration.
-- [ ] P9.9 Add guided prediction authoring alongside the complete JSON contract.
+- [x] P9.9 Add guided prediction authoring alongside the complete JSON contract.
 - [ ] P9.10 Share a versioned interpretation model across logs, sections, geometry, and ranking.
 
 ### First geometry slice: acceptance and limits
@@ -1349,6 +1349,38 @@ An isolated browser fixture also verifies that an unchanged completion hash
 retains acknowledgement, changed openings invalidate it, and approval submits
 the exact reviewed hash. These checks did not approve the historical scored run.
 
+### Guided Chapter 4 live acceptance
+
+On 2026-09-16, all 39 steps in tutorial Chapters 1-4 passed against the running
+application. The screenshot-backed record is in
+[`docs/index.html`](../index.html#walkthrough-validation). Chapters 1-3 exercised
+the real evidence, sensitivity, AI drafting, saved alternatives, cited review,
+comparison and export paths.
+
+Chapter 4 created scenario `b50182fd-fbba-8b08-aed7-7fd84c6fa3c0` through the GUI,
+authored the editable demonstration forecast, saved and sealed it, and separately
+approved its exact seal. Model preparation used a scoped profile, Preview
+16x16x8 resolution and seed 12345; Drilling Operations generated and bound the
+model privately without exposing world identities or conditioning controls.
+The run `41fbbd11-923c-540f-8069-b44ca4de664a` then passed drilling, survey/log
+generation, explicit completion review/approval, production, publication and
+evaluation. Its final state is Scored, with 60 production months and 94 metrics.
+All monthly/cumulative 1/3/5-year views were exercised.
+
+The guided forecast fills blank inputs with clearly labeled demonstration
+assumptions and keeps the advanced JSON contract available. It never flattens
+directional edits or infers missing physical estimates. Save, Seal, Approve,
+Prepare, Start, completion approval and publication remain separate actions.
+The approval controls refresh when the seal changes, even if the draft timestamp
+does not. Completed runs display results rather than a blocked start preflight or
+disabled publication controls.
+
+Original field records and both earlier scored scenarios matched their pre-run
+baselines afterward. The earlier sealed tutorial scenario was left unchanged.
+This completes the guided point-screening authoring slice, not scientific
+calibration, general directional forecasting, or the remaining P8 fault,
+leakage and multi-world acceptance gates.
+
 ### Implementation streams
 
 1. Frontend task workspaces and existing output/action placement.
@@ -1359,7 +1391,7 @@ the exact reviewed hash. These checks did not approve the historical scored run.
 Task workspaces, persisted interpretation/review, configured prediction
 preparation and live handoff acceptance are complete.
 Replay controls and broader operational hardening remain separate P8 work.
-The work bible records 140 of 163 tasks complete (P8 13/21, P10 18/18).
+The work bible records 141 of 163 tasks complete (P8 13/21, P9 5/10, P10 18/18).
 Completed task counts are not an estimate of effort or scientific readiness.
 
 ## 15. Delivery sequence

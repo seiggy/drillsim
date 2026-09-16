@@ -153,6 +153,14 @@
     .boundary-label { fill: var(--cp-text-soft); font-size: 13px; }
     .flow-node.active rect { stroke: var(--cp-accent); fill: var(--cp-accent-soft); stroke-width: 2; }
     figcaption { max-width: 74ch; color: var(--cp-text-soft); font-size: .9375rem; }
+    .walkthrough-shot { margin: 1.5rem 0; }
+    .walkthrough-shot a { display: block; }
+    .walkthrough-shot img { display: block; width: 100%; height: auto; border: 1px solid var(--cp-border-strong); border-radius: .625rem; background: var(--cp-surface); }
+    .walkthrough-shot figcaption { margin-top: .65rem; }
+    .walkthrough-record { margin: 1.5rem 0 2.5rem; }
+    .walkthrough-record summary { min-height: 44px; padding: .5rem 0; color: var(--cp-accent); cursor: pointer; font-weight: 600; }
+    .walkthrough-record th:first-child { width: 3.5rem; }
+    .walkthrough-record td:last-child { white-space: nowrap; }
     .flow-status { min-height: 3.5em; }
     .term-list { display: grid; grid-template-columns: 150px minmax(0, 1fr); }
     .term-list dt { font-weight: 600; }
@@ -254,6 +262,7 @@ FORM: Brief-pinned reading manual with chapter presenter mode. No concept draw: 
       <ul>
         <li><a href="#start">The demo in one sentence</a></li>
         <li><a href="#routes">Choose your demo route</a></li>
+        <li><a href="#walkthrough-validation">Validated walkthrough &amp; screenshots</a></li>
         <li><a href="#preflight">Preflight &amp; datasets</a></li>
         <li><a href="#architecture">Architecture &amp; boundaries</a></li>
         <li><a href="#working-model">How the workstation behaves</a></li>
@@ -354,6 +363,147 @@ FORM: Brief-pinned reading manual with chapter presenter mode. No concept draw: 
         <p>For a read-only demo without saved hypotheses, describe the editors and their effects; say “No saved artifact in this scope.” Do not create pretend history to fill an empty panel.</p>
       </section>
 
+      <section class="chapter" id="walkthrough-validation" aria-labelledby="walkthrough-validation-title">
+        <h2 id="walkthrough-validation-title">Validated walkthrough &amp; screenshots</h2>
+        <p>All <strong>39 steps across Chapters 1–4</strong> were exercised against the running services on <strong>16 September 2026</strong>. These are captures of the real UI and data, not mocked API responses. Each chapter’s record links to full-page screenshots; the larger previews highlight individual features. Each of the <strong>19 engineering tasks below</strong> also includes its matching UI screenshot beside the task instructions.</p>
+        <p>The run used <strong>TROLL FORCE-SODIR Field → SOGNEFJORD FM</strong>, a real Foundry-backed interpretation, and a new scenario with the guided demonstration forecasts. The original field and both previously completed scenarios were checked before and after and remained unchanged.</p>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Live walkthrough results">
+          <table>
+            <thead><tr><th scope="col">Chapter</th><th scope="col">Result</th><th scope="col">What was verified</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><a href="#walkthrough-chapter-1">1 · Read a field</a></th><td>7 / 7 steps passed</td><td>29 wells, 46 bores, provenance, units, survey support, intervals, 2D section and target estimates. No writes or AI requests.</td></tr>
+              <tr><th scope="row"><a href="#walkthrough-chapter-2">2 · Change an analysis</a></th><td>7 / 7 steps passed</td><td>A 9×9 grid returned 81 cells; changed cutoffs recalculated results; restoring defaults returned 225 cells.</td></tr>
+              <tr><th scope="row"><a href="#walkthrough-chapter-3">3 · Compare interpretations</a></th><td>7 / 7 steps passed</td><td>Reviewed AI draft, saved hypothesis and conservative branch, cited challenge, versioned disposition, exact comparison and JSON export.</td></tr>
+              <tr><th scope="row"><a href="#walkthrough-chapter-4">4 · Run a guided simulation</a></th><td>18 / 18 steps passed</td><td>Separate Create, Save, Seal, Approve, Prepare, Start, completion approval and publication actions. Finished with 60 production months and 94 evaluation metrics.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="walkthrough-chapter-1">Chapter 1 · Read a field</h3>
+        <p>Start with the original measurements. The inventory distinguishes the nine logged controls from the other known wellbores; the section keeps rock quality, fluids and missing evidence separate.</p>
+        <figure class="walkthrough-shot">
+          <a href="screenshots/showcase-map.png"><img src="screenshots/chapter-1-map.png" width="1600" height="1100" loading="lazy" decoding="async" alt="Azure Maps displaying offshore Troll well locations, ranked drilling targets, P90/P50/P10 estimates and the evidence bank."></a>
+          <figcaption>The field map connects well locations to ranked targets and their supporting measurements. Maps tiles were verified with successful authorized requests after assigning the account-scoped Data Reader role.</figcaption>
+        </figure>
+        <figure class="walkthrough-shot">
+          <a href="screenshots/chapter-1-step-06.png"><img src="screenshots/chapter-1-section.png" width="1600" height="1050" loading="lazy" decoding="async" alt="DrillSim 2D section with a selected wellbore, formation and fluid tracks, target estimates, and the guided tutorial."></a>
+          <figcaption>The 2D section links the selected wellbore to formation intervals and the nearby target. Select the image to open the full-page UI capture.</figcaption>
+        </figure>
+        <details class="walkthrough-record"><summary>Chapter 1 test record · 7 steps</summary>
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Chapter 1 step evidence"><table>
+            <thead><tr><th scope="col">Step</th><th scope="col">Action and verified result</th><th scope="col">Full UI</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">1.1</th><td>Selected Troll Original data, Sognefjord and Live evidence. The package contained 29 wells and 46 wellbores.</td><td><a href="screenshots/chapter-1-step-01.png">Screenshot 1.1</a></td></tr>
+              <tr><th scope="row">1.2</th><td>Read the inventory and expanded provenance: two data groups, four source files, affected wellbores and licenses.</td><td><a href="screenshots/chapter-1-step-02.png">Screenshot 1.2</a></td></tr>
+              <tr><th scope="row">1.3</th><td>Expanded curve details and checked MD, metres, RKB, missing values and source metadata.</td><td><a href="screenshots/chapter-1-step-03.png">Screenshot 1.3</a></td></tr>
+              <tr><th scope="row">1.4</th><td>Selected wellbore 31/2-1 and inspected validated survey support and formation-midpoint coordinates.</td><td><a href="screenshots/chapter-1-step-04.png">Screenshot 1.4</a></td></tr>
+              <tr><th scope="row">1.5</th><td>Inspected the selected bore’s contributing intervals and the distinction between qualifying, below-cutoff and unknown rock.</td><td><a href="screenshots/chapter-1-step-05.png">Screenshot 1.5</a></td></tr>
+              <tr><th scope="row">1.6</th><td>Opened 2D Section. The tutorial recognized the actual view change.</td><td><a href="screenshots/chapter-1-step-06.png">Screenshot 1.6</a></td></tr>
+              <tr><th scope="row">1.7</th><td>Compared ranked target estimates, P90/P50/P10 and nearby screening controls.</td><td><a href="screenshots/chapter-1-step-07.png">Screenshot 1.7</a></td></tr>
+            </tbody>
+          </table></div>
+        </details>
+
+        <h3 id="walkthrough-chapter-2">Chapter 2 · Change an analysis</h3>
+        <p>Entering a setting does not change the displayed result. The tutorial waits for the response to <strong>Apply analysis settings</strong>, including the actual grid size.</p>
+        <figure class="walkthrough-shot">
+          <a href="screenshots/chapter-2-step-03.png"><img src="screenshots/chapter-2-grid.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Search-area settings set to nine grid points per axis, with an 81-cell analysis and the tutorial confirming the applied result."></a>
+          <figcaption>The 9×9 exercise produces 81 candidate cells, including excluded locations. Restoring the defaults returns to a 15×15 grid.</figcaption>
+        </figure>
+        <details class="walkthrough-record"><summary>Chapter 2 test record · 7 steps</summary>
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Chapter 2 step evidence"><table>
+            <thead><tr><th scope="col">Step</th><th scope="col">Action and verified result</th><th scope="col">Full UI</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">2.1</th><td>Read the applied search settings before editing.</td><td><a href="screenshots/chapter-2-step-01.png">Screenshot 2.1</a></td></tr>
+              <tr><th scope="row">2.2</th><td>Entered grid size 9. The previous 225-cell result stayed unchanged, and the Apply step could not yet advance.</td><td><a href="screenshots/chapter-2-step-02.png">Screenshot 2.2</a></td></tr>
+              <tr><th scope="row">2.3</th><td>Applied the settings and verified 81 candidate cells in the API response.</td><td><a href="screenshots/chapter-2-step-03.png">Screenshot 2.3</a></td></tr>
+              <tr><th scope="row">2.4</th><td>Read excluded locations, screening distances and their coverage limitations.</td><td><a href="screenshots/chapter-2-step-04.png">Screenshot 2.4</a></td></tr>
+              <tr><th scope="row">2.5</th><td>Raised minimum porosity to 0.13 and explicitly recalculated.</td><td><a href="screenshots/chapter-2-step-05.png">Screenshot 2.5</a></td></tr>
+              <tr><th scope="row">2.6</th><td>Loaded and applied defaults. The response restored 225 cells, porosity 0.12 and a 500 m screening radius.</td><td><a href="screenshots/chapter-2-step-06.png">Screenshot 2.6</a></td></tr>
+              <tr><th scope="row">2.7</th><td>Read the model’s disagreement and distance uncertainty components.</td><td><a href="screenshots/chapter-2-step-07.png">Screenshot 2.7</a></td></tr>
+            </tbody>
+          </table></div>
+        </details>
+
+        <h3 id="walkthrough-chapter-3">Chapter 3 · Compare interpretations</h3>
+        <p>The AI starts with a small brief and retrieves evidence through read-only tools. Its draft stays separate from the engineer’s notes until the engineer reviews and accepts it. Saving an interpretation, creating an alternative, and recording a review are separate writes.</p>
+        <figure class="walkthrough-shot">
+          <a href="screenshots/chapter-3-step-01.png"><img src="screenshots/chapter-3-reservoir.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Interactive 3D reservoir mesh, survey trajectories, fluid controls and target estimates beside the Chapter 3 tutorial."></a>
+          <figcaption>Rotate the visible-evidence reservoir model, change the fluid or search radius, and inspect where measurements support a volume. View controls do not change the ranking.</figcaption>
+        </figure>
+        <figure class="walkthrough-shot">
+          <a href="screenshots/chapter-3-step-02.png"><img src="screenshots/chapter-3-interpretation.png" width="1600" height="1050" loading="lazy" decoding="async" alt="A real AI formation-interpretation draft with proposed notes, limitations, evidence references and an explicit review acknowledgement."></a>
+          <figcaption>The live model returned 12 verified citations. Accepting the draft preserved the existing hypothesis name; no save occurred until the next step.</figcaption>
+        </figure>
+        <details class="walkthrough-record"><summary>Chapter 3 test record · 7 steps</summary>
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Chapter 3 step evidence"><table>
+            <thead><tr><th scope="col">Step</th><th scope="col">Action and verified result</th><th scope="col">Full UI</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">3.1</th><td>Changed rotation, depth scale, fluid and mesh radius; reset the view and displayed mesh edges.</td><td><a href="screenshots/chapter-3-step-01.png">Screenshot 3.1</a></td></tr>
+              <tr><th scope="row">3.2</th><td>Generated a real cited AI draft. Notes stayed unchanged before review; Use this draft required acknowledgement and retained the chosen name.</td><td><a href="screenshots/chapter-3-step-02.png">Screenshot 3.2</a></td></tr>
+              <tr><th scope="row">3.3</th><td>Saved “Walkthrough baseline 2026-09-16” with its exact evidence, settings, target and notes.</td><td><a href="screenshots/chapter-3-step-03.png">Screenshot 3.3</a></td></tr>
+              <tr><th scope="row">3.4</th><td>Reanalyzed the saved package with the conservative preset and saved a separate named alternative.</td><td><a href="screenshots/chapter-3-step-04.png">Screenshot 3.4</a></td></tr>
+              <tr><th scope="row">3.5</th><td>Saved a geology-cited objection and then a deferred disposition with a reason. The challenge advanced to version 2.</td><td><a href="screenshots/chapter-3-step-05.png">Screenshot 3.5</a></td></tr>
+              <tr><th scope="row">3.6</th><td>Compared two exact revisions with matching evidence, verified the cutoff differences, and saved the preference as a new rationale revision.</td><td><a href="screenshots/chapter-3-step-06.png">Screenshot 3.6</a></td></tr>
+              <tr><th scope="row">3.7</th><td>Downloaded and parsed the evidence bundle; its field identity and decision rationale matched the requested export.</td><td><a href="screenshots/chapter-3-step-07.png">Screenshot 3.7</a></td></tr>
+            </tbody>
+          </table></div>
+        </details>
+
+        <h3 id="walkthrough-chapter-4">Chapter 4 · Run a guided simulation</h3>
+        <p>The documented run used target <code>candidate:04:06</code>, <strong>Preview</strong> resolution (16×16×8), realization seed <code>12345</code>, and the editable demonstration forecasts. It reached <strong>Scored</strong> through the GUI. No terminal commands, hidden-world IDs or direct database edits were needed to configure or run it.</p>
+        <figure class="walkthrough-shot">
+          <a href="screenshots/chapter-4-step-10.png"><img src="screenshots/chapter-4-setup.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Simulator setup in the GUI with a model preset, Preview resolution, realization seed and a review checkbox before Prepare simulator."></a>
+          <figcaption>Preparing a model does not start it. Once prepared, the scenario’s settings are fixed and Start simulation becomes a separate action.</figcaption>
+        </figure>
+        <figure class="walkthrough-shot">
+          <a href="screenshots/showcase-production.png"><img src="screenshots/chapter-4-production.png" width="1600" height="1100" loading="lazy" decoding="async" alt="Published synthetic oil, gas and water production charts with cumulative volume selected and a five-year window."></a>
+          <figcaption>All six combinations of monthly/cumulative display and 1/3/5-year windows were exercised, with 12/36/60 corresponding monthly rows. These workflow-model volumes are not calibrated commercial forecasts.</figcaption>
+        </figure>
+        <figure class="walkthrough-shot">
+          <a href="screenshots/chapter-4-step-17.png"><img src="screenshots/chapter-4-evaluation.png" width="1600" height="1100" loading="lazy" decoding="async" alt="Completed evaluation scorecard with expected-paydirt error, prediction bounds and aggregate truth-basis metrics."></a>
+          <figcaption>The new run published 94 metrics across hidden-truth, revealed-observation, observation-gap and baseline comparisons. Unsupported metrics remain explicitly unavailable.</figcaption>
+        </figure>
+        <details class="walkthrough-record"><summary>Chapter 4 test record · 18 steps</summary>
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Chapter 4 step evidence"><table>
+            <thead><tr><th scope="col">Step</th><th scope="col">Action and verified result</th><th scope="col">Full UI</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">4.1</th><td>Selected the original field, Sognefjord and Live evidence.</td><td><a href="screenshots/chapter-4-step-01.png">Screenshot 4.1</a></td></tr>
+              <tr><th scope="row">4.2</th><td>Reviewed the scenario name, UTC cutoff and assumptions, then created a new scenario without a forecast or run.</td><td><a href="screenshots/chapter-4-step-02.png">Screenshot 4.2</a></td></tr>
+              <tr><th scope="row">4.3</th><td>Analyzed the frozen initial evidence with the applied settings.</td><td><a href="screenshots/chapter-4-step-03.png">Screenshot 4.3</a></td></tr>
+              <tr><th scope="row">4.4</th><td>Selected the highest-ranked eligible target from that verified result.</td><td><a href="screenshots/chapter-4-step-04.png">Screenshot 4.4</a></td></tr>
+              <tr><th scope="row">4.5</th><td>Filled and reviewed the editable path, formation, fluid and production examples.</td><td><a href="screenshots/chapter-4-step-05.png">Screenshot 4.5</a></td></tr>
+              <tr><th scope="row">4.6</th><td>Saved the server-validated forecast as a draft.</td><td><a href="screenshots/chapter-4-step-06.png">Screenshot 4.6</a></td></tr>
+              <tr><th scope="row">4.7</th><td>Read the saved prediction and its uncertainty assumptions.</td><td><a href="screenshots/chapter-4-step-07.png">Screenshot 4.7</a></td></tr>
+              <tr><th scope="row">4.8</th><td>Acknowledged review and sealed the prediction and baselines. No approval or execution was implied.</td><td><a href="screenshots/chapter-4-step-08.png">Screenshot 4.8</a></td></tr>
+              <tr><th scope="row">4.9</th><td>Entered the demo operator label and explicitly approved the exact seal. The scenario reached HumanApproved.</td><td><a href="screenshots/chapter-4-step-09.png">Screenshot 4.9</a></td></tr>
+              <tr><th scope="row">4.10</th><td>Selected a model preset, Preview resolution and seed 12345; reviewed and prepared the simulator in the GUI.</td><td><a href="screenshots/chapter-4-step-10.png">Screenshot 4.10</a></td></tr>
+              <tr><th scope="row">4.11</th><td>Started the prepared simulation and received its run identity.</td><td><a href="screenshots/chapter-4-step-11.png">Screenshot 4.11</a></td></tr>
+              <tr><th scope="row">4.12</th><td>Followed drilling, surveys and logs to the separate completion-review pause.</td><td><a href="screenshots/chapter-4-step-12.png">Screenshot 4.12</a></td></tr>
+              <tr><th scope="row">4.13</th><td>Reviewed the observable openings and explicitly approved the matching completion.</td><td><a href="screenshots/chapter-4-step-13.png">Screenshot 4.13</a></td></tr>
+              <tr><th scope="row">4.14</th><td>Waited for production to finish. The resulting evidence was still unpublished.</td><td><a href="screenshots/chapter-4-step-14.png">Screenshot 4.14</a></td></tr>
+              <tr><th scope="row">4.15</th><td>Acknowledged publication, released the verified measurements and requested evaluation.</td><td><a href="screenshots/chapter-4-step-15.png">Screenshot 4.15</a></td></tr>
+              <tr><th scope="row">4.16</th><td>Inspected the new well, publication receipt and 60 production months; exercised every display/window combination.</td><td><a href="screenshots/chapter-4-step-16.png">Screenshot 4.16</a></td></tr>
+              <tr><th scope="row">4.17</th><td>Read all four scorecard bases, frozen baseline comparisons and unavailable metrics. The scenario was Scored.</td><td><a href="screenshots/chapter-4-step-17.png">Screenshot 4.17</a></td></tr>
+              <tr><th scope="row">4.18</th><td>Verified the architecture-guide link and finished the chapter. Completed runs offer result inspection instead of disabled Start/Publish controls.</td><td><a href="screenshots/chapter-4-step-18.png">Screenshot 4.18</a></td></tr>
+            </tbody>
+          </table></div>
+        </details>
+        <details class="deep-dive"><summary>Exact validation records and boundaries</summary>
+          <dl class="term-list">
+            <dt>Scenario</dt><dd><code>b50182fd-fbba-8b08-aed7-7fd84c6fa3c0</code></dd>
+            <dt>Run</dt><dd><code>41fbbd11-923c-540f-8069-b44ca4de664a</code></dd>
+            <dt>Results field</dt><dd><code>1dc98479-e536-5d78-abee-8f2fcfbc8de3</code></dd>
+            <dt>Scorecard</dt><dd><code>c44e7a66-2e6d-5488-af1b-1502a29e2219</code> · 94 metrics</dd>
+            <dt>Interpretations</dt><dd>“Walkthrough baseline 2026-09-16” r1 and “Walkthrough conservative 2026-09-16” r1 were compared; the preference was then saved as conservative r2.</dd>
+          </dl>
+          <p>The earlier sealed Chapter 4 scenario was not overwritten. The two earlier scored scenarios and original field records matched their pre-run baselines afterward. This verifies the demonstrated workflow, not calibration, all possible fault/recovery cases, or every supported dataset.</p>
+          <p>The prior approval-refresh fix was also exercised: sealing immediately enabled review of the matching operator seal even though the prediction’s draft modification timestamp did not change.</p>
+          <p>A Maps 403 was traced to missing data-plane permission, not CORS or the token broker. With the owner-approved Azure Maps Data Reader role assigned at the Maps account, five tileset and thirty tile requests returned HTTP 200. The map and relevant chapter captures were refreshed afterward.</p>
+          <p>Adding screenshots exposed a separate documentation issue: Vite did not serve or bundle sibling images referenced by the imported HTML. The screenshot directory is now explicitly allowed in development, and referenced images are packaged beside the built guide. Local, built, standalone-file, no-JavaScript, mobile and print views were checked.</p>
+        </details>
+      </section>
+
       <section class="chapter" id="preflight" aria-labelledby="preflight-title">
         <h2 id="preflight-title">Prepare the demo</h2>
         <h3>Prerequisites and startup</h3>
@@ -379,7 +529,7 @@ dotnet user-secrets set "Parameters:azure-openai-subscription-id" "&lt;openai-su
 dotnet user-secrets set "Parameters:azure-maps-client-id" "&lt;maps-account-client-id&gt;" --project .\aspire\DrillSim.AppHost
 dotnet user-secrets set "Parameters:azure-maps-tenant-id" "&lt;maps-tenant-id&gt;" --project .\aspire\DrillSim.AppHost
 dotnet user-secrets set "Parameters:azure-maps-subscription-id" "&lt;maps-subscription-id&gt;" --project .\aspire\DrillSim.AppHost</code></pre>
-        <p>For Maps, grant the CLI principal the appropriate Maps data access and allow <code>http://localhost:5173</code> in account CORS settings. The API brokers short-lived tokens for <code>https://atlas.microsoft.com/.default</code>; no subscription key goes to the browser. Without Maps or AI, deterministic analysis still works with the local services running. Missing credentials should produce an honest unavailable state.</p>
+        <p>For Maps, assign <strong>Azure Maps Data Reader</strong> on the Maps account to the CLI identity used by <code>analysis-api</code>, and allow <code>http://localhost:5173</code> in account CORS settings. Subscription Owner or User Access Administrator alone does not grant Maps data-plane access. The API brokers short-lived tokens for <code>https://atlas.microsoft.com/.default</code>; no subscription key goes to the browser. Without Maps or AI, deterministic analysis still works with the local services running.</p>
         <h3>Select the Troll field</h3>
         <p>Open the <strong>Field</strong> dropdown and choose the Troll entry tagged <strong>Original data</strong>. Then select <strong>SOGNEFJORD FM</strong> as the reservoir. The app may initially show Targets; choose Evidence when you are ready to begin.</p>
         <p>The reference environment initially has three Troll entries. One contains the original measurements; two contain results from separate simulation runs. New published scenarios add their own results fields. The dropdown keeps the field name and uses a badge, description, date and short reference to distinguish them:</p>
@@ -537,6 +687,10 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
       <section class="chapter task" id="evidence" aria-labelledby="evidence-title">
         <div class="task-title"><span class="step-number">01</span><h2 id="evidence-title">Evidence <a class="permalink" href="#evidence">Link</a></h2></div>
         <p class="mission">Mission: know what is actually loaded before making a geological claim.</p>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/chapter-1-step-02.png"><img src="screenshots/chapter-1-evidence.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Evidence workspace showing wellbore coverage, parent-well and bore counts, curve counts and usable versus missing values."></a>
+          <figcaption>Read the coverage counts, select a bore, then expand <strong>Data sources</strong> below the inventory. The full-page capture includes the provenance groups and affected wellbores.</figcaption>
+        </figure>
         <dl class="task-facts">
           <dt>SAY</dt><dd class="say">“We know about 46 bores here, but only nine have the logs we use for this interpretation. Let’s look at one.”</dd>
           <dt>DO</dt><dd>Choose <strong>Evidence</strong>. Read <strong>PARENT WELLS / BORES</strong> and <strong>BORES WITH CURVES</strong>, then select a logged bore in the coverage table. Open <strong>Data sources</strong> to see the datasets and processing details. Expand <strong>Affected wellbores</strong> to trace records to their sources. Shared source files and licenses appear once below; <strong>Attribution and file details</strong> contains the full credits and checksum. Use <strong>Download source metadata JSON</strong> when you need the original metadata.</dd>
@@ -552,6 +706,10 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
       <section class="chapter task" id="qc" aria-labelledby="qc-title">
         <div class="task-title"><span class="step-number">02</span><h2 id="qc-title">Units &amp; QC <a class="permalink" href="#qc">Link</a></h2></div>
         <p class="mission">Mission: decide whether a number has a valid unit, depth reference and quality context.</p>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/chapter-1-step-03.png"><img src="screenshots/chapter-1-quality.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Units and QC table with source and canonical units, measured-depth datum, missing-value counts and expanded curve details."></a>
+          <figcaption>Compare <strong>Missing / total</strong> with <strong>Valid zeros</strong>. <strong>Curve details</strong> identifies the source mnemonic, log run, tool and geology record without displaying raw JSON.</figcaption>
+        </figure>
         <dl class="task-facts">
           <dt>SAY</dt><dd class="say">“Before trusting this curve, I want to know its units, its depth reference and how many readings are missing.”</dd>
           <dt>DO</dt><dd>Choose <strong>Units &amp; QC</strong>. Find PHIE (porosity) and PERM (permeability) for the selected bore. Compare <strong>Source → canonical unit</strong> and <strong>Depth reference / unit / positive-down</strong>, including the datum. Read <strong>Missing / total</strong> beside <strong>Valid zeros</strong>, then expand <strong>Curve details</strong> to inspect the log run, tool and data classification. Download the original curve metadata if needed.</dd>
@@ -567,6 +725,10 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
       <section class="chapter task" id="position" aria-labelledby="position-title">
         <div class="task-title"><span class="step-number">03</span><h2 id="position-title">Position <a class="permalink" href="#position">Link</a></h2></div>
         <p class="mission">Mission: distinguish a surface marker from a defensible downhole control.</p>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/task-position-full.png"><img src="screenshots/task-position.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Position workspace with wellbore 31/2-1 selected, validated station counts, formation-midpoint coordinates and missing-survey diagnostics."></a>
+          <figcaption>Select a bore in the first column. A supported midpoint appears beside its station count; rows without a covering survey remain explicitly unlocated.</figcaption>
+        </figure>
         <dl class="task-facts">
           <dt>SAY</dt><dd class="say">“The reservoir is down here, not at the wellhead. We need a survey that reaches this formation to place it.”</dd>
           <dt>DO</dt><dd>Choose <strong>Position</strong> and select a bore in the table. Read <strong>Validated stations</strong>, <strong>Formation midpoint E / N / TVD</strong> and <strong>Diagnostics</strong>. Expand <strong>Field coordinate reference</strong> to inspect labeled coordinates and units. Download coordinate metadata when you need the original record. With Maps available, compare the surface marker with the selected bore’s downhole position.</dd>
@@ -582,6 +744,10 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
       <section class="chapter task" id="correlation" aria-labelledby="correlation-title">
         <div class="task-title"><span class="step-number">04</span><h2 id="correlation-title">Correlation <a class="permalink" href="#correlation">Link</a></h2></div>
         <p class="mission">Mission: separate a visual formation relationship from a saved interpretive annotation.</p>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/chapter-3-step-02.png"><img src="screenshots/chapter-3-interpretation.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Correlation workspace showing a generated formation interpretation, its rationale, correlation notes, evidence and review acknowledgement."></a>
+          <figcaption><strong>Draft interpretation with AI</strong> proposes notes. Review <strong>Supporting evidence</strong> and the listed checks before choosing <strong>Use this draft</strong>; saving remains separate.</figcaption>
+        </figure>
         <dl class="task-facts">
           <dt>SAY</dt><dd class="say">“This is our first AI step. I’ll ask the agent to compare the formation evidence, then review its interpretation and the checks it recommends.”</dd>
           <dt>DO</dt><dd>Choose <strong>Correlation</strong> and click <strong>Draft interpretation with AI</strong>. Read the suggested name, target rationale and correlation notes. Expand <strong>Supporting evidence</strong> and check the listed limitations. Acknowledge the review and click <strong>Use this draft</strong> to fill the form. Edit it as needed, then select <strong>Save hypothesis</strong>. If AI is unavailable, write your own note or use <strong>Example correlation note</strong>.</dd>
@@ -601,6 +767,10 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
       <section class="chapter task" id="criteria" aria-labelledby="criteria-title">
         <div class="task-title"><span class="step-number">05</span><h2 id="criteria-title">Rock criteria <a class="permalink" href="#criteria">Link</a></h2></div>
         <p class="mission">Mission: make the definition of qualifying rock explicit and testable.</p>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/task-criteria-full.png"><img src="screenshots/task-criteria.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Rock criteria workspace with porosity and permeability inputs, Apply controls and the Crossplot view."></a>
+          <figcaption>Enter porosity as a fraction and permeability in m². <strong>Apply analysis settings</strong> recalculates the screen; the Crossplot below shows the measurements against the applied criteria.</figcaption>
+        </figure>
         <dl class="task-facts">
           <dt>SAY</dt><dd class="say">“Let’s raise the porosity cutoff from 12% to 13% and see how much rock still qualifies.”</dd>
           <dt>DO</dt><dd>Choose <strong>Rock criteria</strong> and inspect <strong>Crossplot</strong>. For practice, change <strong>Minimum porosity · fraction</strong> from <code>0.12</code> to <code>0.13</code>; leave permeability at <code>9.869233e-16 m²</code>. Notice that the old result remains visible, then choose <strong>Apply analysis settings</strong>. Compare Pay intervals and Targets. To reset, choose <strong>Load defaults into form</strong>, then <strong>Apply analysis settings</strong>.</dd>
@@ -616,6 +786,10 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
       <section class="chapter task" id="pay" aria-labelledby="pay-title">
         <div class="task-title"><span class="step-number">06</span><h2 id="pay-title">Pay intervals <a class="permalink" href="#pay">Link</a></h2></div>
         <p class="mission">Mission: reconcile a headline rock thickness with the intervals that support it.</p>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/task-pay-full.png"><img src="screenshots/task-pay.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Pay intervals workspace comparing gross, qualifying, below-cutoff and unknown thickness, with contributing intervals for the selected bore."></a>
+          <figcaption>The upper table compares all bores. Selecting one reveals its contributing intervals, with rock quality and fluid classification kept separate.</figcaption>
+        </figure>
         <dl class="task-facts">
           <dt>SAY</dt><dd class="say">“Where does that thickness come from? Let’s follow the intervals from the top of the formation to its base.”</dd>
           <dt>DO</dt><dd>Choose <strong>Pay intervals</strong> and select a logged bore. Compare <strong>Gross</strong>, <strong>Qualifying rock</strong>, <strong>Below cutoff</strong> and <strong>Unknown quality</strong>. Read the selected bore’s contributing intervals below the table, then switch to <strong>Logs</strong> or <strong>2D Section</strong> to see those intervals. Compare the fluid track with the rock-quality track.</dd>
@@ -631,6 +805,10 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
       <section class="chapter task" id="search" aria-labelledby="search-title">
         <div class="task-title"><span class="step-number">07</span><h2 id="search-title">Search area <a class="permalink" href="#search">Link</a></h2></div>
         <p class="mission">Mission: understand the complete set of candidate locations before reading the shortlist.</p>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/chapter-2-step-03.png"><img src="screenshots/chapter-2-grid.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Search area workspace with a nine-by-nine grid, the applied 81-cell result and candidate-status controls."></a>
+          <figcaption>This applied 9×9 result contains 81 cells. Use <strong>Cell status</strong> and the table pages to inspect the full search—not only the map’s shortlist.</figcaption>
+        </figure>
         <dl class="task-facts">
           <dt>SAY</dt><dd class="say">“We tested more locations than the map shows. Here’s the full grid, including the cells that were ruled out.”</dd>
           <dt>DO</dt><dd>Choose <strong>Search area</strong>. Read the total candidate cells and use <strong>Cell status</strong> to filter the table; use <strong>Next cells</strong> to inspect more rows. In practice, change <strong>Grid points per axis · 2–51</strong> from 15 to 9 and choose <strong>Apply analysis settings</strong>. Verify 81 cells, then <strong>Load defaults into form</strong> and Apply again to restore 225.</dd>
@@ -646,6 +824,10 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
       <section class="chapter task" id="exclusions" aria-labelledby="exclusions-title">
         <div class="task-title"><span class="step-number">08</span><h2 id="exclusions-title">Exclusions <a class="permalink" href="#exclusions">Link</a></h2></div>
         <p class="mission">Mission: say exactly what a screening distance excludes—and what it cannot protect.</p>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/task-exclusions-full.png"><img src="screenshots/task-exclusions.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Exclusions workspace showing the screening radius and a candidate grid filtered to excluded locations and their reasons."></a>
+          <figcaption><strong>Cell status</strong> is filtered to excluded cells here. Read each reason and nearest-control distance before changing the screening radius.</figcaption>
+        </figure>
         <dl class="task-facts">
           <dt>SAY</dt><dd class="say">“Why was this location rejected? It falls inside the distance we chose around one of our logged controls.”</dd>
           <dt>DO</dt><dd>Choose <strong>Exclusions</strong>. Read <strong>Screening-control exclusion radius · m</strong>, then use <strong>Cell status</strong> to inspect excluded cells. Compare each cell’s distance and reason. In practice, edit the radius and choose <strong>Apply analysis settings</strong>; inspect the changed counts before loading defaults and applying again.</dd>
@@ -661,6 +843,10 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
       <section class="chapter task" id="model" aria-labelledby="model-title">
         <div class="task-title"><span class="step-number">09</span><h2 id="model-title">Reservoir model <a class="permalink" href="#model">Link</a></h2></div>
         <p class="mission">Mission: inspect the geometry while keeping the ranking model and viewing model distinct.</p>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/chapter-3-step-01.png"><img src="screenshots/chapter-3-reservoir.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Reservoir model with estimated fluid-zone meshes, surveyed well trajectories and rotation, tilt, depth-scale, fluid and mesh-radius controls."></a>
+          <figcaption>The controls above the 3D scene change its view and geometric support. <strong>Ranking IDW neighbors</strong> is a separate analysis setting and takes effect only after Apply.</figcaption>
+        </figure>
         <dl class="task-facts">
           <dt>SAY</dt><dd class="say">“Let’s turn the model and cut through it. Where do the measurements support a fluid zone, and where does the surface disappear?”</dd>
           <dt>DO</dt><dd>Choose <strong>Reservoir model</strong>, then <strong>3D Reservoir</strong>. Use <strong>Rotation</strong>, <strong>Tilt</strong>, <strong>Cut above</strong> and <strong>Fluid</strong> to inspect the zone. Compare <strong>Mesh radius · view only</strong> at 3, 6 and 10 km, then <strong>Reset view</strong>. For a separate ranking experiment, change <strong>Ranking IDW neighbors · 1–32</strong> from 4 to 3 and choose <strong>Apply analysis settings</strong>.</dd>
@@ -676,6 +862,10 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
       <section class="chapter task" id="uncertainty" aria-labelledby="uncertainty-title">
         <div class="task-title"><span class="step-number">10</span><h2 id="uncertainty-title">Uncertainty <a class="permalink" href="#uncertainty">Link</a></h2></div>
         <p class="mission">Mission: expose why a range widens without pretending it has been calibrated.</p>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/chapter-2-step-07.png"><img src="screenshots/chapter-2-uncertainty.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Uncertainty workspace with P90, P50 and P10 rock-proxy estimates and distance and disagreement components."></a>
+          <figcaption>Read the quantiles together with the component table. Selecting another target changes the displayed breakdown, not the underlying measurements.</figcaption>
+        </figure>
         <dl class="task-facts">
           <dt>SAY</dt><dd class="say">“This candidate has a wider range. Let’s see whether its controls disagree more, sit farther away, or both.”</dd>
           <dt>DO</dt><dd>Choose <strong>Uncertainty</strong> and read <strong>P90 ROCK PROXY</strong>, <strong>P50 ROCK PROXY</strong> and <strong>P10 ROCK PROXY</strong>. In the component table, compare <strong>Neighbor disagreement variance</strong> with <strong>Weighted control distance</strong>. Use <strong>RANKED TARGET</strong> to select another candidate and compare the range and components.</dd>
@@ -691,6 +881,10 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
       <section class="chapter task" id="targets" aria-labelledby="targets-title">
         <div class="task-title"><span class="step-number">11</span><h2 id="targets-title">Targets <a class="permalink" href="#targets">Link</a></h2></div>
         <p class="mission">Mission: explain the selected candidate with its actual neighbors and score contributions.</p>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/task-targets-full.png"><img src="screenshots/task-targets.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Targets workspace with shortlist sorting, candidate quantiles, control distances, uncertainty and the selected target's score calculation."></a>
+          <figcaption><strong>Sort shortlist</strong> changes the table order. The API rank stays attached to each candidate, and <strong>Score explanation</strong> shows how the selected result was calculated.</figcaption>
+        </figure>
         <dl class="task-facts">
           <dt>SAY</dt><dd class="say">“Here’s the leading candidate. I’ll show you which nearby measurements support it and why its score is higher.”</dd>
           <dt>DO</dt><dd>Choose <strong>Targets</strong>. Use <strong>Sort shortlist</strong> to compare API rank, P50 or uncertainty, then select a candidate row. Read <strong>Score explanation</strong> and select a well under <strong>NEIGHBOR CONTROLS</strong> to inspect its measurements in the lens.</dd>
@@ -706,6 +900,10 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
       <section class="chapter task" id="challenge" aria-labelledby="challenge-title">
         <div class="task-title"><span class="step-number">12</span><h2 id="challenge-title">Challenge <a class="permalink" href="#challenge">Link</a></h2></div>
         <p class="mission">Mission: turn a critique into a cited, reviewable record attached to the right decision.</p>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/task-challenge-full.png"><img src="screenshots/task-challenge.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Saved challenge disposition review showing the cited objection, deferred state, reviewer and recorded reason for an exact hypothesis revision."></a>
+          <figcaption>This saved challenge is at version 2 with a <strong>deferred</strong> objection. Use <strong>Disposition</strong> and <strong>Disposition reason</strong> to record a reviewed change without replacing the earlier version.</figcaption>
+        </figure>
         <dl class="task-facts">
           <dt>SAY</dt><dd class="say">“What would make us doubt this choice? I’ll record the objection, point to the supporting measurements and explain how we handled it.”</dd>
           <dt>DO</dt><dd>Choose <strong>Challenge</strong> and use <strong>Load exact r…</strong> to select a saved hypothesis revision. Read an existing challenge with <strong>Open listed version …</strong>. For practice, enter a specific objection and its evidence citations, then <strong>Save challenge to exact revision</strong>. Choose a <strong>Disposition</strong>, explain it in <strong>Disposition reason</strong> and use <strong>Save disposition changes</strong>.</dd>
@@ -721,6 +919,10 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
       <section class="chapter task" id="alternatives" aria-labelledby="alternatives-title">
         <div class="task-title"><span class="step-number">13</span><h2 id="alternatives-title">Alternatives <a class="permalink" href="#alternatives">Link</a></h2></div>
         <p class="mission">Mission: compare genuine alternative interpretations, not renamed copies of a chart.</p>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/task-alternatives-full.png"><img src="screenshots/task-alternatives.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Alternative-branch editor showing the conservative preset, editable cutoffs, stored-evidence reanalysis, eligible target and draft branch name and rationale."></a>
+          <figcaption>The conservative preset has been reanalyzed against the saved package. The name and rationale shown here are still local draft inputs; <strong>Save named alternative branch</strong> is the separate persistence step.</figcaption>
+        </figure>
         <dl class="task-facts">
           <dt>SAY</dt><dd class="say">“Let’s try a stricter interpretation using the same measurements. Then we can compare the two decisions fairly.”</dd>
           <dt>DO</dt><dd>Choose <strong>Alternatives</strong>. For practice, name the current interpretation, explain your choice and select <strong>Save hypothesis</strong>. In <strong>Branch preset</strong>, choose <strong>Conservative · higher rock cutoffs</strong> and inspect the settings. Select <strong>Reanalyze stored evidence</strong>, choose a <strong>Branch eligible target</strong>, enter the new name/rationale and select <strong>Save named alternative branch</strong>.</dd>
@@ -736,6 +938,10 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
       <section class="chapter task" id="compare" aria-labelledby="compare-title">
         <div class="task-title"><span class="step-number">14</span><h2 id="compare-title">Compare hypotheses <a class="permalink" href="#compare">Link</a></h2></div>
         <p class="mission">Mission: make the decision difference and the evidence difference visible at the same time.</p>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/chapter-3-step-06.png"><img src="screenshots/chapter-3-comparison.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Exact hypothesis comparison showing matching evidence scopes, different cutoffs, target estimates, rationales and correlation notes."></a>
+          <figcaption>Compare the evidence-scope column before interpreting the differences. <strong>Load for decision rationale</strong> opens the chosen revision so you can explain and save a preference.</figcaption>
+        </figure>
         <dl class="task-facts">
           <dt>SAY</dt><dd class="say">“What changed between these interpretations—and is that enough to change where we would drill?”</dd>
           <dt>DO</dt><dd>Choose <strong>Compare hypotheses</strong>. Use <strong>Add exact revision to comparison</strong> for two saved revisions, then <strong>Compare selected exact revisions</strong>. Compare their assumptions, selected targets and ranges. For practice, choose <strong>Load for decision rationale</strong> on your preferred interpretation, explain the trade-off and save the notes as a new revision or named snapshot branch.</dd>
@@ -751,6 +957,10 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
       <section class="chapter task" id="bundle" aria-labelledby="bundle-title">
         <div class="task-title"><span class="step-number">15</span><h2 id="bundle-title">Evidence bundle <a class="permalink" href="#bundle">Link</a></h2></div>
         <p class="mission">Mission: hand a reviewer a portable record of this exact analysis decision.</p>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/task-bundle-full.png"><img src="screenshots/task-bundle.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Evidence bundle workspace with the decision-rationale field, JSON download action and a summary of the exported evidence, configuration and target."></a>
+          <figcaption>Enter <strong>Decision rationale (included in JSON)</strong>, review the bundle contents, and download the file. This action exports the analysis without saving a hypothesis or publishing evidence.</figcaption>
+        </figure>
         <dl class="task-facts">
           <dt>SAY</dt><dd class="say">“I want the next engineer to see the same evidence and understand why I chose this target. Here’s what I would send.”</dd>
           <dt>DO</dt><dd>Choose <strong>Evidence bundle</strong>. Enter your reasoning in <strong>Decision rationale (included in JSON)</strong>. Read <strong>What the download contains</strong> and check the selected field, target and result. Choose <strong>Download evidence bundle JSON</strong> to save the file locally.</dd>
@@ -766,6 +976,10 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
       <section class="chapter task" id="prediction" aria-labelledby="prediction-title">
         <div class="task-title"><span class="step-number">16</span><h2 id="prediction-title">Prediction <a class="permalink" href="#prediction">Link</a></h2></div>
         <p class="mission">Mission: state the expected outcome before learning the simulated answer.</p>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/chapter-4-step-05.png"><img src="screenshots/chapter-4-forecast.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Guided prediction form with editable demonstration path depths, formation forecasts, fluids and cumulative production inputs."></a>
+          <figcaption><strong>Use editable demo forecast</strong> fills blank inputs with labeled examples. Review the form, Save, inspect the ledger, Seal, and then Approve; none of those actions starts the simulator.</figcaption>
+        </figure>
         <dl class="task-facts">
           <dt>SAY</dt><dd class="say">“Here’s what we expected before seeing the new well: the formation depths, rock thickness, fluids and production. We sealed that forecast so we could compare it fairly later.”</dd>
           <dt>DO</dt><dd>For a read-only presentation, select the completed demo tagged <strong>Scored</strong> and inspect its ledger. For practice, choose <strong>New simulation</strong>, review the scenario name, UTC evidence cutoff and assumptions, then <strong>Create scenario</strong>. Choose <strong>Analyze frozen initial source with applied settings</strong> and an eligible target. Fill the form yourself or explicitly choose <strong>Use editable demo forecast</strong>. Review, <strong>Save draft</strong>, review the saved ledger, acknowledge and <strong>Seal reviewed revision</strong>. Enter an operator name or initials, review the exact seal and separately choose <strong>Approve reviewed prediction</strong>.</dd>
@@ -794,6 +1008,10 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
       <section class="chapter task" id="simulation" aria-labelledby="simulation-title">
         <div class="task-title"><span class="step-number">17</span><h2 id="simulation-title">Simulation <a class="permalink" href="#simulation">Link</a></h2></div>
         <p class="mission">Mission: understand the execution gates without starting anything by accident.</p>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/chapter-4-step-10.png"><img src="screenshots/chapter-4-setup.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Simulation workspace with a model preset, Preview resolution, realization seed and a review acknowledgement before preparation."></a>
+          <figcaption>Choose and review the model settings, then <strong>Prepare simulator</strong>. <strong>Start simulation</strong> becomes available after preparation and remains a separate command.</figcaption>
+        </figure>
         <dl class="task-facts">
           <dt>SAY</dt><dd class="say">“Follow what happened after the forecast was approved: drilling, survey, logs, completion and production. Each stage left a record we can inspect.”</dd>
           <dt>DO</dt><dd>After approving a new prediction, choose <strong>Simulation</strong>. Select a model preset, <strong>Preview</strong> or <strong>Standard</strong> resolution and the realization seed. Acknowledge those settings, then choose <strong>Prepare simulator</strong>. Once ready, choose <strong>Start simulation</strong> separately. At S6, review every completion opening and acknowledge its exact fingerprint before <strong>Approve reviewed completion</strong>. Wait for production checkpoints. A completed scenario instead shows its history and result links, not blocked start or publication controls.</dd>
@@ -804,6 +1022,10 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
           <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>Execution authority and immutable setup</summary><p>The read-only setup endpoint offers curated presets without raw hidden-world IDs or model controls. Prepare requires the approved seal, a matching reviewed hash and no prior run. It privately generates/binds the model and is immutable thereafter, including older compatible setups without a public settings summary.</p><p>The local operator facade enforces its session, CSRF, origin and stable idempotency-key protections with server-held credentials. The operator label is a local audit annotation, not an authenticated identity. Preparation and completion approval require 1–100 visible ASCII characters. No secret belongs in a browser form.</p></details></dd>
           <dt>RISKS</dt><dd>An uncertain command outcome needs a status refresh, explicit review and the retained same-key retry, not a fresh run or new setup. A different preset, resolution or realization seed needs a new scenario. Tutorial exercises can be skipped, but no server gate is bypassed to complete them.</dd>
         </dl>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/chapter-4-step-13.png"><img src="screenshots/chapter-4-completion.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Simulation paused for completion review, showing proposed openings and the explicit approval control before production."></a>
+          <figcaption>At S6 the run pauses for review of the observable completion openings. <strong>Approve reviewed completion</strong> records approval of that exact design and allows production to continue.</figcaption>
+        </figure>
         <h3>Simulation checkpoints</h3>
         <div class="table-scroll" tabindex="0" role="region" aria-label="Drilling operations S0 to S9 checkpoints">
           <table>
@@ -827,6 +1049,10 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
       <section class="chapter task" id="new-evidence" aria-labelledby="new-evidence-title">
         <div class="task-title"><span class="step-number">18</span><h2 id="new-evidence-title">New evidence <a class="permalink" href="#new-evidence">Link</a></h2></div>
         <p class="mission">Mission: verify exactly what became observable, and when.</p>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/task-new-evidence-full.png"><img src="screenshots/task-new-evidence.png" width="1600" height="1050" loading="lazy" decoding="async" alt="New evidence workspace showing starting and current visibility counts, the publication receipt and the separate simulated-results field."></a>
+          <figcaption>The receipt confirms which records were released and the new evidence date. The results field is separate from the original measurements and the sealed forecast.</figcaption>
+        </figure>
         <dl class="task-facts">
           <dt>SAY</dt><dd class="say">“Now we have another well’s measurements and five years of production. Let’s see what was added to the field.”</dd>
           <dt>DO</dt><dd>Choose <strong>New evidence</strong> in the completed demo. Compare the starting measurements with the added simulated results, then inspect the oil/gas/water production history and its units. In an authorized new run, <strong>Publish reveal and evaluate</strong> is the action that makes the new records visible; review the ready run and acknowledgement before using it.</dd>
@@ -837,11 +1063,19 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
           <dt>ARCHITECTURE</dt><dd><details class="deep-dive"><summary>How new evidence becomes visible</summary><p>Stage B stages destination writes. Analysis verifies the reveal, source/clone IDs and package hashes, then stores immutable public snapshots and advances the visibility clock. Prepare/finalize receipts establish the public transition; a single destination write does not. Staged, Activated and Visible publication-marked records are protected from ordinary retention cleanup.</p></details></dd>
           <dt>RISKS</dt><dd>Check the publication receipt before treating the new measurements as available. The earlier evidence stays fixed for evaluating the prediction. Structural-only geology may legitimately lack measured detail. A failed evaluation after publication leaves the published measurements available.</dd>
         </dl>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/showcase-production.png"><img src="screenshots/chapter-4-production.png" width="1600" height="1100" loading="lazy" decoding="async" alt="Published oil, gas and water production with Display set to cumulative volume and Window set to five years."></a>
+          <figcaption>Use <strong>Display</strong> to switch monthly/cumulative volumes and <strong>Window</strong> to inspect 1, 3 or 5 years. Exact readings and cumulative checkpoints follow the charts.</figcaption>
+        </figure>
       </section>
 
       <section class="chapter task" id="evaluation" aria-labelledby="evaluation-title">
         <div class="task-title"><span class="step-number">19</span><h2 id="evaluation-title">Evaluation <a class="permalink" href="#evaluation">Link</a></h2></div>
         <p class="mission">Mission: compare the pre-reveal claim with both hidden outcome and observable evidence.</p>
+        <figure class="walkthrough-shot task-shot">
+          <a href="screenshots/chapter-4-step-17.png"><img src="screenshots/chapter-4-evaluation.png" width="1600" height="1100" loading="lazy" decoding="async" alt="Evaluation workspace showing the completed aggregate scorecard, expected-paydirt absolute error, uncertainty bounds and unavailable metrics."></a>
+          <figcaption>Read the metric’s comparison basis, value and bounds together. The completed scorecard separates hidden-truth, revealed-observation, observation-gap and baseline results.</figcaption>
+        </figure>
         <dl class="task-facts">
           <dt>SAY</dt><dd class="say">“How close was our forecast? And how much of the difference came from what the instruments could observe?”</dd>
           <dt>DO</dt><dd>Choose <strong>Evaluation</strong> in the completed demo. Pick a published metric and read its subject and basis: is it comparing the forecast with simulated truth, with the revealed measurements, or comparing measurements with truth? Compare the corresponding baseline where available. Read the reason on any unavailable row.</dd>
@@ -919,6 +1153,7 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
               <tr><th scope="row">No field / no formation with four controls</th><td>Source services or prepared evidence are absent, or a different field was selected.</td><td>Check Aspire health and exact field ID. Inspect data gaps. Ask the owner to prepare evidence outside the demo; do not invent controls.</td></tr>
               <tr><th scope="row">Three Troll entries</th><td>One is Original data; two are Simulated results from separate runs.</td><td>Choose Troll tagged Original data to begin. For the completed demo, use Scenario and choose Scored. Read the date and short reference beneath similar names to distinguish the two simulation runs.</td></tr>
               <tr><th scope="row">Map unavailable</th><td>Missing configuration, expired Azure CLI login, access or CORS failure.</td><td>Continue with tables, Logs, Section and 3D. Owner verifies Maps settings, principal access and localhost origin. Do not replace it with invented geography.</td></tr>
+              <tr><th scope="row">Maps token succeeds, tiles return 403</th><td>The token can be valid while its identity lacks Maps data-plane access.</td><td>Verify the account client ID and tenant, then the <strong>Azure Maps Data Reader</strong> assignment on that account. Allow permission propagation and reload. Owner permission alone is insufficient; verify the request's CORS response separately.</td></tr>
               <tr><th scope="row">AI unavailable / blocked</th><td>Missing deployment/authentication, pending/stale output, or configured analysis not bound to default-only tools.</td><td>Use deterministic output and manual citations. For optional AI, deliberately restore/apply defaults and use the appropriate live context; never imply the old note covers the configured revision.</td></tr>
               <tr><th scope="row">Previous result / pending settings</th><td>The form or evidence differs from the result.</td><td>Inspect all pending settings. Apply explicitly or Restore result settings. Loading defaults alone does not refresh the result. Do not export a stale decision.</td></tr>
               <tr><th scope="row">No surface or covering survey</th><td>Not enough independent valid controls, inadequate radius/coverage, or rejected coordinates.</td><td>Read geometry diagnostics and radius assumptions. Unknown is not dry. Do not replace a downhole path with the wellhead.</td></tr>

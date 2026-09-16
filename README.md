@@ -19,6 +19,45 @@ be built, launched, observed, and managed together.
 - OpenAPI documents with Scalar API reference pages
 - Model Context Protocol (MCP) endpoints
 
+## See the workflow
+
+The [illustrated demo guide](docs/index.html#walkthrough-validation) records a
+live end-to-end walkthrough of **all 39 steps in Chapters 1–4**, with a full-page
+UI screenshot for each step. The September 16, 2026 run used the real services
+and AI model, then completed a new simulation with **60 production months and
+94 evaluation metrics**. Existing field records and completed scenarios remained
+unchanged.
+
+**Locate the next prospect.** Azure Maps places the offshore field's wells and
+ranked targets alongside P90/P50/P10 estimates, nearby controls and evidence
+coverage.
+
+[![Azure Maps field view with well locations, ranked targets, paydirt estimates and the evidence bank](docs/screenshots/chapter-1-map.png)](docs/screenshots/showcase-map.png)
+
+**Explore the reservoir.** Inspect formation intervals, fluid estimates, survey
+trajectories and nearby drilling targets. Camera and mesh controls are separate
+from the applied ranking settings.
+
+[![DrillSim 3D reservoir, survey trajectories, target estimates and guided tutorial](docs/screenshots/chapter-3-reservoir.png)](docs/screenshots/showcase-reservoir.png)
+
+**Draft and compare interpretations.** A local Agent Framework agent retrieves
+evidence with read-only tools. Review its citations before accepting the notes;
+save and compare exact hypothesis revisions separately.
+
+[![Cited AI formation interpretation with review controls and engineer notes](docs/screenshots/chapter-3-interpretation.png)](docs/screenshots/chapter-3-step-02.png)
+
+**Run a simulation from the GUI.** Create a scenario, review the editable
+forecast, save, seal and approve it. Choose the model preset and resolution,
+prepare and start the simulator, approve completion, then publish and evaluate.
+The example forecasts and resulting production are synthetic workflow data,
+not calibrated commercial predictions.
+
+[![Completed simulation evaluation with expected-paydirt error, bounds and aggregate metrics](docs/screenshots/chapter-4-evaluation.png)](docs/screenshots/showcase-evaluation.png)
+
+Select an image to open its full-page capture. The guide also includes
+[production charts](docs/screenshots/showcase-production.png), per-step actions
+and expected results, and the application architecture.
+
 ## Prerequisites
 
 - [.NET SDK 10.0.400](https://dotnet.microsoft.com/download/dotnet/10.0)
@@ -207,6 +246,12 @@ Aspire from the intended AzEnv profile so its `AZURE_CONFIG_DIR` is forwarded
 to the analysis API. Credentials are never sent to the browser. The analysis
 API brokers short-lived Azure Maps tokens for
 `https://atlas.microsoft.com/.default`.
+
+Assign **Azure Maps Data Reader** on the Maps account to the Azure CLI identity
+used by `analysis-api`, and allow `http://localhost:5173` in that account's CORS
+settings. Subscription **Owner** or **User Access Administrator** alone does not
+grant Maps data-plane access. If token acquisition succeeds but map requests
+return 403, check that role assignment as well as the configured account client ID.
 
 For an uncommitted S8 publication rejected by a destination service, **New
 evidence** can offer **Recover staged publication** after the underlying import
