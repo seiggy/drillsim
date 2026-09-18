@@ -31,7 +31,8 @@ public sealed class RunOrchestrator(DrillingOperationsStore store, IRunCheckpoin
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { throw; }
             catch (RunStageFailureException exception)
             {
-                logger.LogWarning(exception, "Run stage validation failed for run {RunId}.", runId);
+                logger.LogWarning(exception, "Run stage validation failed for run {RunId}: {DiagnosticCode}.",
+                    runId, exception.DiagnosticCode);
                 await store.MarkRunFailedAsync(runId, exception.DiagnosticCode, cancellationToken);
             }
             catch (Exception exception)

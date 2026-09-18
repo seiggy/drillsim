@@ -497,7 +497,7 @@ The browser and analysis agent receive neither.
 |---|---|---|
 | S0 | Bind world | World and source-package binding |
 | S1 | Materialize plan | Scenario well, bore, planned trajectory |
-| S2 | Execute drilling | As-drilled path and drilling timeline |
+| S2 | Execute drilling | Validated planned-path binding, as-drilled path and drilling timeline |
 | S3 | Generate survey | Noisy survey stations and covariance |
 | S4 | Sample geology | Restricted truth samples |
 | S5 | Generate logs | Synthetic instrument observations |
@@ -508,8 +508,11 @@ The browser and analysis agent receive neither.
 
 S0 now verifies the human-approved seal, source package, scenario field/reservoir,
 world model, and calibration against Analysis API and Stage A before persisting
-an immutable binding. S1-S2 persist the approved plan and calibrated kinematic
-as-drilled path internally. S3 produces an immutable noisy survey, and S4
+an immutable binding. S1 persists the approved plan. S2 first registers that
+Planned path with Stage A, rejecting incompatible coverage before creating
+drilling artifacts; transient Stage A failures pause S2 as a dependency.
+It then persists the calibrated kinematic as-drilled path internally.
+S3 produces an immutable noisy survey, and S4
 registers the as-drilled path with Stage A and stores its restricted truth sample
 batch internally. S5 persists versioned observable petrophysics, MDT-like evidence, ROP,
 torque/drag/vibration, hydraulics/ECD/losses, temperature, and lagged cuttings. S6
@@ -517,6 +520,12 @@ selects/approves log-derived completion openings that Stage A maps to opaque
 Peaceman connections, and S7 persists pinned 1/3/5-year states plus 60 noisy
 monthly observations. S8 publishes 176 verified ontology records atomically, and
 S9 publishes the aggregate dual-basis scorecard.
+
+Reservoir problem responses log field-level validation errors on the request
+trace. Planned and as-drilled coverage failures have separate run diagnostic
+codes mapped to safe remediation text in the operator facade. Unknown backend
+text and private model bounds are not forwarded. Existing failed runs keep
+their original diagnostics; no model expansion or historical rewrite is performed.
 
 Each stage stores:
 
@@ -1271,10 +1280,12 @@ including 34,550 cache hits; output was 2,419 tokens. This reduces fresh input a
 peak context, but is not a reduction in total input tokens for that run. Both the
 targeted and full-context paths are covered by native function-invocation tests.
 
-Formation drafting uses a local Agent Framework agent over the Responses API so
-reasoning and function tools can work together. Response storage and background
-execution are disabled; reasoning continuation stays in the local request.
-Development telemetry captures agent, model-request and tool spans, including
+Formation drafting and both AG-UI field-note agents use the Responses API so
+reasoning and function tools can work together. All three use the same stateless
+transport options: response storage and background execution are disabled, and
+encrypted reasoning continuation stays in the local request. The scenario agent
+retains its clock-bound tools rather than the unrestricted field tools.
+Formation drafting's Development telemetry captures agent, model-request and tool spans, including
 messages actually exchanged. Message capture is disabled outside Development. Aspire retains ownership
 of OTLP endpoint/exporter configuration. Provider exceptions remain available in
 structured logs, while browser errors stay sanitized.
@@ -1353,7 +1364,7 @@ the exact reviewed hash. These checks did not approve the historical scored run.
 
 On 2026-09-16, all 39 steps in tutorial Chapters 1-4 passed against the running
 application. The screenshot-backed record is in
-[`docs/index.html`](../index.html#walkthrough-validation). Chapters 1-3 exercised
+[`docs/index.html`](../index.html#tutorial). Chapters 1-3 exercised
 the real evidence, sensitivity, AI drafting, saved alternatives, cited review,
 comparison and export paths.
 

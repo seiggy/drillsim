@@ -35,8 +35,99 @@ public sealed class StageASamplingException(int status,string diagnostic,string 
 
 public sealed class ReservoirSamplingClient(HttpClient client)
 {
- public async Task<TruthSamplingEnvelope> SampleAsync(TruthBindingResponse binding,DrillingExecutionArtifact execution,TruthSamplingOptions options,CancellationToken ct){options.Validate();if(!Guid.TryParse(binding.ScenarioId,out Guid scenario)||!Guid.TryParse(execution.RunId,out Guid run))throw new StageASamplingException(409,"SamplingIdentityMismatch","Stored IDs are invalid.");var bindingRequest=new{scenarioId=scenario,runId=run,pathKind="AsDrilled",approvedSealedPredictionSha256=binding.ApprovedSealedPredictionHash,stations=execution.Stations.Select(x=>new{x.MeasuredDepthM,x.EastingM,x.NorthingM,x.TrueVerticalDepthM})};string stageCanonical=System.Text.Json.JsonSerializer.Serialize(new{worldId=binding.WorldId,scenarioId=scenario,runId=run,pathKind=1,approvedSealedPredictionSha256=binding.ApprovedSealedPredictionHash,stations=execution.Stations.Select(x=>new{x.MeasuredDepthM,x.EastingM,x.NorthingM,x.TrueVerticalDepthM})},new System.Text.Json.JsonSerializerOptions{PropertyNamingPolicy=System.Text.Json.JsonNamingPolicy.CamelCase});string requestHash=DeterministicIdentity.Sha256(stageCanonical);string expectedBindingId="rpb_"+DeterministicIdentity.Sha256("approved-path-binding-v1\n"+stageCanonical);StageAPathBindingDto metadata=await Post<StageAPathBindingDto>($"reservoirsimulation/api/worlds/{Uri.EscapeDataString(binding.WorldId)}/path-bindings",bindingRequest,ct);if(metadata.BindingId!=expectedBindingId||metadata.CanonicalHash!=requestHash||metadata.WorldId!=binding.WorldId||metadata.ScenarioId!=scenario||metadata.RunId!=run||metadata.PathKind!="AsDrilled"||metadata.ApprovedSealedPredictionSha256!=binding.ApprovedSealedPredictionHash||metadata.StationCount!=execution.Stations.Count)Mismatch("Path binding metadata mismatch.");var samplingRequest=new{bindingId=metadata.BindingId,maximumSpacingM=options.MaximumSpacingM,maximumSamples=options.MaximumSamples,propertySetVersion=options.PropertySetVersion,callerLabel=options.CallerLabel};StageATruthResultDto result=await Post<StageATruthResultDto>($"reservoirsimulation/api/worlds/{Uri.EscapeDataString(binding.WorldId)}/samples",samplingRequest,ct);Validate(result,metadata,binding,execution,options);string samplingOptionsJson=CanonicalJson.Serialize(options);return new(metadata,result,stageCanonical,requestHash,samplingOptionsJson,DeterministicIdentity.Sha256(samplingOptionsJson));}
- private async Task<T> Post<T>(string path,object body,CancellationToken ct){try{using HttpResponseMessage response=await client.PostAsJsonAsync(path,body,CanonicalJson.SerializerOptions,ct);if(!response.IsSuccessStatusCode){int s=(int)response.StatusCode;throw new StageASamplingException(s>=500?502:409,s>=500?"StageAUnavailable":"StageADataMismatch","Stage A rejected sampling.");}return await response.Content.ReadFromJsonAsync<T>(CanonicalJson.SerializerOptions,ct)??throw new StageASamplingException(502,"StageAMalformedResponse","Stage A returned empty JSON.");}catch(StageASamplingException){throw;}catch(OperationCanceledException)when(!ct.IsCancellationRequested){throw new StageASamplingException(503,"StageATimeout","Stage A timed out.");}catch(System.Text.Json.JsonException){throw new StageASamplingException(409,"StageAMalformedResponse","Stage A returned malformed JSON.");}catch(HttpRequestException){throw new StageASamplingException(503,"StageAUnavailable","Stage A is unavailable.");}}
+ public async Task BindPlannedPathAsync(TruthBindingResponse binding, MaterializedPlan plan, CancellationToken ct)
+ {
+     if (plan.ScenarioId != binding.ScenarioId || plan.BindingId != binding.BindingId ||
+         plan.SourcePredictionSealSha256 != binding.ApprovedSealedPredictionHash)
+         Mismatch("The materialized plan does not match its approved binding.");
+     _ = await BindPathAsync(binding, plan.RunId, true, plan.Stations.Select(x =>
+         new PathStation(x.MeasuredDepthM, x.EastingM, x.NorthingM, x.TrueVerticalDepthM)).ToArray(), ct);
+ }
+
+ public async Task<TruthSamplingEnvelope> SampleAsync(
+     TruthBindingResponse binding, DrillingExecutionArtifact execution, TruthSamplingOptions options, CancellationToken ct)
+ {
+     options.Validate();
+     var (metadata, stageCanonical, requestHash) = await BindPathAsync(binding, execution.RunId, false,
+         execution.Stations.Select(x => new PathStation(
+             x.MeasuredDepthM, x.EastingM, x.NorthingM, x.TrueVerticalDepthM)).ToArray(), ct);
+     var samplingRequest = new
+     {
+         bindingId = metadata.BindingId, maximumSpacingM = options.MaximumSpacingM,
+         maximumSamples = options.MaximumSamples, propertySetVersion = options.PropertySetVersion, callerLabel = options.CallerLabel
+     };
+     StageATruthResultDto result = await Post<StageATruthResultDto>(
+         $"reservoirsimulation/api/worlds/{Uri.EscapeDataString(binding.WorldId)}/samples", samplingRequest, false, ct);
+     Validate(result, metadata, binding, execution, options);
+     string samplingOptionsJson = CanonicalJson.Serialize(options);
+     return new(metadata, result, stageCanonical, requestHash, samplingOptionsJson, DeterministicIdentity.Sha256(samplingOptionsJson));
+ }
+
+ private async Task<(StageAPathBindingDto Metadata, string CanonicalRequest, string RequestHash)> BindPathAsync(
+     TruthBindingResponse binding, string runId, bool planned, IReadOnlyList<PathStation> stations, CancellationToken ct)
+ {
+     if (!Guid.TryParse(binding.ScenarioId, out Guid scenario) || !Guid.TryParse(runId, out Guid run))
+         throw new StageASamplingException(409, "SamplingIdentityMismatch", "Stored IDs are invalid.");
+     string pathKind = planned ? "Planned" : "AsDrilled";
+     var request = new
+     {
+         scenarioId = scenario, runId = run, pathKind,
+         approvedSealedPredictionSha256 = binding.ApprovedSealedPredictionHash, stations
+     };
+     string canonical = System.Text.Json.JsonSerializer.Serialize(new
+     {
+         worldId = binding.WorldId, scenarioId = scenario, runId = run, pathKind = planned ? 0 : 1,
+         approvedSealedPredictionSha256 = binding.ApprovedSealedPredictionHash, stations
+     }, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
+     string requestHash = DeterministicIdentity.Sha256(canonical);
+     string expectedBindingId = "rpb_" + DeterministicIdentity.Sha256("approved-path-binding-v1\n" + canonical);
+     StageAPathBindingDto metadata = await Post<StageAPathBindingDto>(
+         $"reservoirsimulation/api/worlds/{Uri.EscapeDataString(binding.WorldId)}/path-bindings", request, planned, ct);
+     if (metadata.BindingId != expectedBindingId || metadata.CanonicalHash != requestHash ||
+         metadata.WorldId != binding.WorldId || metadata.ScenarioId != scenario || metadata.RunId != run ||
+         metadata.PathKind != pathKind || metadata.ApprovedSealedPredictionSha256 != binding.ApprovedSealedPredictionHash ||
+         metadata.StationCount != stations.Count)
+         Mismatch("Path binding metadata mismatch.");
+     return (metadata, canonical, requestHash);
+ }
+
+ private async Task<T> Post<T>(string path, object body, bool planned, CancellationToken ct)
+ {
+     try
+     {
+         using HttpResponseMessage response = await client.PostAsJsonAsync(path, body, CanonicalJson.SerializerOptions, ct);
+         if (!response.IsSuccessStatusCode)
+         {
+             int status = (int)response.StatusCode;
+             if (status == 400 && response.Content.Headers.ContentType?.MediaType is "application/problem+json" or "application/json")
+             {
+                 await response.Content.LoadIntoBufferAsync(1024 * 1024, ct);
+                 ReservoirProblem? problem = await response.Content.ReadFromJsonAsync<ReservoirProblem>(CanonicalJson.SerializerOptions, ct);
+                 if (problem?.DiagnosticCode == "PathOutsideModelCoverage")
+                     throw new StageASamplingException(409,
+                         planned ? "PlannedPathOutsideModelCoverage" : "AsDrilledPathOutsideModelCoverage",
+                         planned ? "The approved well path is outside the prepared model's coverage. Drilling has not started."
+                             : "The as-drilled path is outside the prepared model's coverage; geology cannot be sampled along that path.");
+             }
+             throw new StageASamplingException(status >= 500 ? 502 : 409,
+                 status >= 500 ? "StageAUnavailable" : "StageADataMismatch",
+                 $"The reservoir service rejected {(path.EndsWith("/path-bindings", StringComparison.Ordinal) ? "path binding" : "geology sampling")} " +
+                 $"with HTTP {status}. Inspect its ReservoirRequestRejected log for validation details.");
+         }
+         return await response.Content.ReadFromJsonAsync<T>(CanonicalJson.SerializerOptions, ct)
+             ?? throw new StageASamplingException(502, "StageAMalformedResponse", "Stage A returned empty JSON.");
+     }
+     catch (StageASamplingException) { throw; }
+     catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+     { throw new StageASamplingException(503, "StageATimeout", "Stage A timed out."); }
+     catch (System.Text.Json.JsonException)
+     { throw new StageASamplingException(409, "StageAMalformedResponse", "Stage A returned malformed JSON."); }
+     catch (HttpRequestException)
+     { throw new StageASamplingException(503, "StageAUnavailable", "Stage A is unavailable."); }
+ }
+
+ private sealed record PathStation(double MeasuredDepthM, double EastingM, double NorthingM, double TrueVerticalDepthM);
+ private sealed record ReservoirProblem(string? DiagnosticCode);
  private static void Validate(StageATruthResultDto r,StageAPathBindingDto m,TruthBindingResponse b,DrillingExecutionArtifact e,TruthSamplingOptions o){if(r.BindingId!=m.BindingId||r.WorldId!=b.WorldId||r.ScenarioId.ToString("D")!=b.ScenarioId||r.RunId.ToString("D")!=e.RunId||r.PropertySetVersion!=o.PropertySetVersion||r.SampleCount!=r.Samples?.Count||r.SampleCount<1||r.SampleCount>o.MaximumSamples)Mismatch("Truth result identity, property set, or count mismatch.");double prior=-1;foreach(TruthSampleDto x in r.Samples!){if(!IsPhysicallyValid(x)||x.MeasuredDepthM<0||x.MeasuredDepthM<=prior)Mismatch("Truth sample values are invalid.");DrilledPathStation expected=Interpolate(e.Stations,x.MeasuredDepthM);if(Math.Abs(expected.EastingM-x.EastingM)>1e-4||Math.Abs(expected.NorthingM-x.NorthingM)>1e-4||Math.Abs(expected.TrueVerticalDepthM-x.TrueVerticalDepthM)>1e-4)Mismatch("Truth sample coordinates are outside the approved path.");prior=x.MeasuredDepthM;}}
  internal static bool IsPhysicallyValid(TruthSampleDto x)=>AllFinite(x)&&x.Porosity is >=0 and <=1&&x.NetToGross is >=0 and <=1&&x.PermeabilityM2>0&&x.PressurePa>0&&x.ReservoirTopDepthM<x.ReservoirBaseDepthM&&x.TrueVerticalDepthM>=x.ReservoirTopDepthM-1e-6&&x.TrueVerticalDepthM<=x.ReservoirBaseDepthM+1e-6&&x.OilSaturation is >=0 and <=1&&x.WaterSaturation is >=0 and <=1&&x.GasSaturation is >=0 and <=1&&Math.Abs(x.OilSaturation+x.WaterSaturation+x.GasSaturation-1)<=1e-6;
  private static bool ValidHash(string x)=>x.Length==64&&x.All(c=>(c>=48&&c<=57)||(c>=97&&c<=102)); private static bool ValidToken(string x,int max)=>!string.IsNullOrWhiteSpace(x)&&x.Length<=max;
@@ -44,7 +135,6 @@ public sealed class ReservoirSamplingClient(HttpClient client)
  private static DrilledPathStation Interpolate(IReadOnlyList<DrilledPathStation> p,double md){if(md<p[0].MeasuredDepthM-1e-8||md>p[^1].MeasuredDepthM+1e-8)Mismatch("Sample MD is outside path.");int i=1;while(i<p.Count&&p[i].MeasuredDepthM<md)i++;if(i==p.Count)return p[^1];var a=p[i-1];var z=p[i];double f=(md-a.MeasuredDepthM)/(z.MeasuredDepthM-a.MeasuredDepthM);return new(md,a.TrueVerticalDepthM+(z.TrueVerticalDepthM-a.TrueVerticalDepthM)*f,a.EastingM+(z.EastingM-a.EastingM)*f,a.NorthingM+(z.NorthingM-a.NorthingM)*f);}
  private static void Mismatch(string m)=>throw new StageASamplingException(409,"StageADataMismatch",m);
 }
-
 
 
 

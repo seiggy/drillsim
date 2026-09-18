@@ -255,7 +255,7 @@ public sealed partial class OperatorBackendClient(IHttpClientFactory clients, Op
 
     internal sealed record Binding(
         Guid ScenarioId, string ApprovedSealedPredictionHash, string SourcePackageSha256, string WorldModelVersion);
-    internal sealed record Run(Guid RunId, Guid ScenarioId, string Status, string? CurrentStage);
+    internal sealed record Run(Guid RunId, Guid ScenarioId, string Status, string? CurrentStage, string? DiagnosticCode = null);
     internal sealed record Completion(
         Guid RunId, Guid ScenarioId, string Status, string OpeningsHash, IReadOnlyList<OperatorOpening> Openings);
     private sealed record AuditEntry(Guid ScenarioId, long Sequence, string Action, string SubjectId);

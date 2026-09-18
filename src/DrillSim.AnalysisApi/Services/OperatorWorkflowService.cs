@@ -329,6 +329,18 @@ public sealed partial class OperatorWorkflowService(IOperatorLedger ledger, Oper
 
     private static string? FailureReason(OperatorBackendClient.Run run) => run.Status switch
     {
+        "Failed" when run.DiagnosticCode == "PlannedPathOutsideModelCoverage" =>
+            "The approved well path is outside the prepared model's coverage. Drilling did not start. " +
+            "Create a new scenario with a target and path inside the modeled area and depth range, or ask the operator for a model covering that location. " +
+            "Changing the seed or Preview/Standard resolution does not expand coverage.",
+        "Failed" when run.DiagnosticCode == "AsDrilledPathOutsideModelCoverage" =>
+            "The simulated drill path left the prepared model's coverage. This was detected when sampling geology; " +
+            "it is a path/model mismatch, not a geology calculation failure. Create a new scenario with more room for steering " +
+            "inside the model area, or ask the operator for a model covering that path.",
+        "Failed" when run.DiagnosticCode == "StageADataMismatch" =>
+            "The reservoir service rejected the path or geology-sampling request. Check its ReservoirRequestRejected log " +
+            "on the failing request trace for the invalid fields. A terminal run cannot resume; correct the identified " +
+            "path/model or sampling-settings mismatch before creating a new scenario.",
         "Failed" => "Simulation failed. Internal diagnostics remain operator-local; a terminal run is not automatically retried.",
         "PublishFailed" => "Publication did not complete. Inspect the existing evidence state before an explicit retry.",
         "AwaitingDependency" => "The current checkpoint is waiting for a dependency. Only its permitted retry action is enabled.",

@@ -306,6 +306,43 @@ public sealed class OperatorWorkflowTests
         AssertSafeJson(await response.Content.ReadAsStringAsync());
     }
 
+    [TestCase("PlannedPathOutsideModelCoverage", "S2ExecuteDrilling", "Drilling did not start")]
+    [TestCase("AsDrilledPathOutsideModelCoverage", "S4SampleGeology", "not a geology calculation failure")]
+    [TestCase("StageADataMismatch", "S4SampleGeology", "ReservoirRequestRejected")]
+    public async Task RejectedPath_ShowsSafeReasonAndRemediationWithoutHiddenDetails(string code, string stage, string expected)
+    {
+        await using Fixture fixture = await Fixture.StartAsync();
+        fixture.Backend.HasRun = true;
+        fixture.Backend.Status = "Failed";
+        fixture.Backend.Stage = stage;
+        fixture.Backend.DiagnosticCode = code;
+        using HttpResponseMessage response = await fixture.Client.GetAsync(ScenarioRoute);
+        string json = await response.Content.ReadAsStringAsync();
+        OperatorScenarioView view = JsonSerializer.Deserialize<OperatorScenarioView>(json, new JsonSerializerOptions(JsonSerializerDefaults.Web))!;
+        Assert.Multiple(() =>
+        {
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(view.Run!.FailureReason, Does.Contain(expected).And.Contain("new scenario"));
+            Assert.That(view.Actions.Resume.Enabled, Is.False);
+            Assert.That(fixture.Backend.Requests.All(item => item.Method == HttpMethod.Get), Is.True);
+        });
+        AssertSafeJson(json);
+    }
+
+    [Test]
+    public async Task UnknownFailureDiagnostic_IsNotForwardedToBrowser()
+    {
+        await using Fixture fixture = await Fixture.StartAsync();
+        fixture.Backend.HasRun = true;
+        fixture.Backend.Status = "Failed";
+        fixture.Backend.Stage = "S4SampleGeology";
+        fixture.Backend.DiagnosticCode = $"{Hidden} {Secret}";
+        using HttpResponseMessage response = await fixture.Client.GetAsync(ScenarioRoute);
+        string json = await response.Content.ReadAsStringAsync();
+        Assert.That(json, Does.Contain("Simulation failed."));
+        AssertSafeJson(json);
+    }
+
     [TestCase("cancel")]
     [TestCase("resume")]
     [TestCase("publish")]
@@ -1178,6 +1215,7 @@ public sealed class OperatorWorkflowTests
         public Guid AuditScenario { get; set; } = ScenarioId;
         public string Status { get; set; } = "Queued";
         public string? Stage { get; set; }
+        public string? DiagnosticCode { get; set; }
         public HttpStatusCode PublishResponse { get; set; } = HttpStatusCode.OK;
         public HttpStatusCode ScoreResponse { get; set; } = HttpStatusCode.OK;
         public HttpStatusCode CompletionApprovalResponse { get; set; } = HttpStatusCode.Accepted;
@@ -1313,7 +1351,7 @@ public sealed class OperatorWorkflowTests
 
         private HttpResponseMessage RunResponse() => Json(HttpStatusCode.OK, new
         {
-            runId = RunId, scenarioId = RunScenario, status = Status, currentStage = Stage,
+            runId = RunId, scenarioId = RunScenario, status = Status, currentStage = Stage, diagnosticCode = DiagnosticCode,
             bindingMetadata = new { worldId = Hidden }, stageAUrl = "http://localhost:43112", publicationKey = Secret
         });
         private static HttpResponseMessage Json(HttpStatusCode status, object value) =>

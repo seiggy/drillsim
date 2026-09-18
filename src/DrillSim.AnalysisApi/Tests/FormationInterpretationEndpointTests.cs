@@ -212,7 +212,7 @@ public sealed class FormationInterpretationEndpointTests
             Assert.That(program, Does.Contain("builder.Services.AddFormationInterpretation(")
                 .And.Contain("formationResponsesClient, deploymentName, enableSensitiveData: builder.Environment.IsDevelopment()")
                 .And.Contain(".GetResponsesClient()"));
-            Assert.That(program[program.IndexOf("ChatClient? chatClient", StringComparison.Ordinal)
+            Assert.That(program[program.IndexOf("ResponsesClient? responsesClient", StringComparison.Ordinal)
                 ..program.IndexOf("ResponsesClient? formationResponsesClient", StringComparison.Ordinal)], Does.Not.Contain("RetryPolicy"));
             Assert.That(endpoints, Does.Contain("responseClient.AsAIAgent(options, model: deploymentName,")
                 .And.Contain("clientFactory: client => client.AsBuilder()")

@@ -7,7 +7,6 @@ using DrillSim.AnalysisApi.Infrastructure;
 using DrillSim.AnalysisApi.Models;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
-using OpenAI.Responses;
 
 namespace DrillSim.AnalysisApi.Services;
 
@@ -69,27 +68,16 @@ public sealed partial class FormationInterpretationAgent(
             throw new ScenarioApiException(503, "Formation interpretation AI unavailable", Status.Reason!);
         ct.ThrowIfCancellationRequested();
         var tools = new FormationInterpretationTools(evidence);
-#pragma warning disable OPENAI001 // Keep Responses requests stateless without disabling reasoning.
+        ChatOptions chatOptions = AgentResponsesOptions.Create(Instructions, tools.CreateFunctions());
+        chatOptions.MaxOutputTokens = 4000;
+        chatOptions.ResponseFormat = ChatResponseFormat.ForJsonSchema<FormationInterpretationDraft>(JsonOptions);
         var options = new ChatClientAgentOptions
         {
             Name = "DrillSimFormationInterpretation",
             // The factory supplies bounded function invocation and chat telemetry.
             UseProvidedChatClientAsIs = true,
-            ChatOptions = new ChatOptions
-            {
-                Instructions = Instructions,
-                MaxOutputTokens = 4000,
-                ResponseFormat = ChatResponseFormat.ForJsonSchema<FormationInterpretationDraft>(JsonOptions),
-                RawRepresentationFactory = _ => new CreateResponseOptions
-                {
-                    StoredOutputEnabled = false,
-                    BackgroundModeEnabled = false,
-                    IncludedProperties = { IncludedResponseProperty.ReasoningEncryptedContent }
-                },
-                Tools = tools.CreateFunctions()
-            }
+            ChatOptions = chatOptions
         };
-#pragma warning restore OPENAI001
         AIAgent agent = createAgent(options).AsBuilder()
             .UseOpenTelemetry(sourceName: TelemetrySourceName,
                 configure: telemetry => telemetry.EnableSensitiveData = enableSensitiveData)

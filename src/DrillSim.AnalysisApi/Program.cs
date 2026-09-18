@@ -9,7 +9,6 @@ using Microsoft.Agents.AI.Hosting;
 using Microsoft.Agents.AI.Hosting.AGUI.AspNetCore;
 using Microsoft.Extensions.AI;
 using OpenAI;
-using OpenAI.Chat;
 using OpenAI.Responses;
 using System.ClientModel.Primitives;
 
@@ -85,11 +84,11 @@ string scenarioInstructions =
     "scorecard may be read only as aggregate statistics; a HiddenTruth basis never grants access to raw truth values.";
 
 #pragma warning disable OPENAI001
-ChatClient? chatClient = agentConfigured
+ResponsesClient? responsesClient = agentConfigured
     ? new OpenAIClient(
         new BearerTokenPolicy(agentCredential!, "https://cognitiveservices.azure.com/.default"),
         new OpenAIClientOptions { Endpoint = new Uri(endpointValue!, UriKind.Absolute) })
-        .GetChatClient(deploymentName!)
+        .GetResponsesClient()
     : null;
 ResponsesClient? formationResponsesClient = agentConfigured
     ? new OpenAIClient(
@@ -360,10 +359,14 @@ if (agentConfigured)
         "candidate, and package SHA-256 IDs. Explicitly label each statement as observed, human-interpreted, derived, " +
         "model-estimated, or synthetic. Call net pay expected paydirt. Never describe expected paydirt as reserves and " +
         "never make a reserves claim. Explain missing evidence and deterministic assumptions without inventing values.";
-    var legacyAgent = chatClient!.AsAIAgent(
-        instructions: legacyInstructions,
-        name: "DrillSimPetrophysicsAnalyst",
-        tools: [packageTool, analysisTool])
+#pragma warning disable OPENAI001
+    var legacyAgent = responsesClient!.AsAIAgent(
+        new ChatClientAgentOptions
+        {
+            Name = "DrillSimPetrophysicsAnalyst",
+            ChatOptions = AgentResponsesOptions.Create(legacyInstructions, [packageTool, analysisTool])
+        },
+        model: deploymentName)
         .AsBuilder()
         .UseOpenTelemetry()
         .Build();
@@ -371,13 +374,17 @@ if (agentConfigured)
         app.Services.GetRequiredService<IHttpContextAccessor>(),
         app.Services.GetRequiredService<ScenarioService>(),
         app.Services.GetRequiredService<IPetrophysicsAnalysisService>());
-    var scenarioAgent = chatClient!.AsAIAgent(
-        instructions: scenarioInstructions,
-        name: ScenarioAgentScope.AgentName,
-        tools: scenarioTools)
+    var scenarioAgent = responsesClient!.AsAIAgent(
+        new ChatClientAgentOptions
+        {
+            Name = ScenarioAgentScope.AgentName,
+            ChatOptions = AgentResponsesOptions.Create(scenarioInstructions, [.. scenarioTools])
+        },
+        model: deploymentName)
         .AsBuilder()
         .UseOpenTelemetry()
         .Build();
+#pragma warning restore OPENAI001
     app.MapAGUIServer("/agui", legacyAgent);
     app.MapAGUIServer("/agui/scenario", scenarioAgent);
 }

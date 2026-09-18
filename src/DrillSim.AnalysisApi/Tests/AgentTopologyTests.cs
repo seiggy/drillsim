@@ -23,6 +23,10 @@ public sealed class AgentTopologyTests
             Assert.That(source, Does.Contain(
                 "ScenarioAgentScopeBinding.IsScenarioEndpoint(context.Request.Path)"));
             Assert.That(source, Does.Contain("ScenarioAgentTools.Create("));
+            Assert.That(source, Does.Contain("AgentResponsesOptions.Create(scenarioInstructions, [.. scenarioTools])"));
+            Assert.That(source, Does.Not.Contain("GetChatClient("));
+            Assert.That(Regex.Matches(source, @"responsesClient!\.AsAIAgent\("), Has.Count.EqualTo(2));
+            Assert.That(Regex.Matches(source, @"model: deploymentName\)"), Has.Count.EqualTo(2));
             Assert.That(source, Does.Contain(
                 "app.Services.GetRequiredService<IHttpContextAccessor>()"));
             Assert.That(source, Does.Not.Contain("builder.Services.AddAIAgent("));
@@ -128,9 +132,9 @@ public sealed class AgentTopologyTests
     {
         string registration = SourceBetween(
             source,
-            $"var {agentVariable} = chatClient!.AsAIAgent(",
+            $"var {agentVariable} = responsesClient!.AsAIAgent(",
             ".AsBuilder()");
-        Match match = Regex.Match(registration, @"tools:\s*\[(?<tools>[^\]]*)\]");
+        Match match = Regex.Match(registration, @"AgentResponsesOptions\.Create\([^,]*,\s*\[(?<tools>[^\]]*)\]");
         Assert.That(match.Success, Is.True, $"Could not find tool registration for {agentVariable}.");
         return match.Groups["tools"].Value
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);

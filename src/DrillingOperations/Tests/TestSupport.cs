@@ -54,7 +54,7 @@ internal static class TestData
     { Content = new StringContent(CanonicalJson.Serialize(body), Encoding.UTF8, "application/json") };
 }
 
-internal sealed class StageASamplingHandler(Func<HttpRequestMessage, HttpResponseMessage> fallback, Func<HttpRequestMessage, HttpResponseMessage>? completionResponder = null, Func<HttpRequestMessage, HttpResponseMessage>? productionResponder = null) : HttpMessageHandler
+internal sealed class StageASamplingHandler(Func<HttpRequestMessage, HttpResponseMessage> fallback, Func<HttpRequestMessage, HttpResponseMessage>? completionResponder = null, Func<HttpRequestMessage, HttpResponseMessage>? productionResponder = null, Func<HttpRequestMessage, HttpResponseMessage>? pathBindingResponder = null) : HttpMessageHandler
 {
     private JsonElement[] stations = []; private Guid runId; private string bindingId = string.Empty;
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -62,9 +62,11 @@ internal sealed class StageASamplingHandler(Func<HttpRequestMessage, HttpRespons
         string path = request.RequestUri!.AbsolutePath;
         if (path.EndsWith("/path-bindings", StringComparison.Ordinal))
         {
+            if (pathBindingResponder is not null) return pathBindingResponder(request);
             using JsonDocument d = JsonDocument.Parse(await request.Content!.ReadAsStringAsync(cancellationToken));
             JsonElement root = d.RootElement; runId=root.GetProperty("runId").GetGuid(); stations = root.GetProperty("stations").EnumerateArray().Select(x => x.Clone()).ToArray();
-            var canonicalStations=stations.Select(x=>new{measuredDepthM=x.GetProperty("measuredDepthM").GetDouble(),eastingM=x.GetProperty("eastingM").GetDouble(),northingM=x.GetProperty("northingM").GetDouble(),trueVerticalDepthM=x.GetProperty("trueVerticalDepthM").GetDouble()});string approvedHash=root.GetProperty("approvedSealedPredictionSha256").GetString()!;string canonical=JsonSerializer.Serialize(new{worldId="world-opaque-17",scenarioId=root.GetProperty("scenarioId").GetGuid(),runId,pathKind=1,approvedSealedPredictionSha256=approvedHash,stations=canonicalStations},new JsonSerializerOptions{PropertyNamingPolicy=JsonNamingPolicy.CamelCase});string hash=DeterministicIdentity.Sha256(canonical);bindingId="rpb_"+DeterministicIdentity.Sha256("approved-path-binding-v1\n"+canonical);return TestData.Json(HttpStatusCode.OK, new { bindingId, worldId="world-opaque-17", scenarioId=root.GetProperty("scenarioId").GetGuid(), runId, pathKind="AsDrilled", approvedSealedPredictionSha256=approvedHash, canonicalHash=hash, stationCount=stations.Length });
+            string pathKind = root.GetProperty("pathKind").GetString()!;
+            var canonicalStations=stations.Select(x=>new{measuredDepthM=x.GetProperty("measuredDepthM").GetDouble(),eastingM=x.GetProperty("eastingM").GetDouble(),northingM=x.GetProperty("northingM").GetDouble(),trueVerticalDepthM=x.GetProperty("trueVerticalDepthM").GetDouble()});string approvedHash=root.GetProperty("approvedSealedPredictionSha256").GetString()!;string canonical=JsonSerializer.Serialize(new{worldId="world-opaque-17",scenarioId=root.GetProperty("scenarioId").GetGuid(),runId,pathKind=pathKind=="Planned"?0:1,approvedSealedPredictionSha256=approvedHash,stations=canonicalStations},new JsonSerializerOptions{PropertyNamingPolicy=JsonNamingPolicy.CamelCase});string hash=DeterministicIdentity.Sha256(canonical);bindingId="rpb_"+DeterministicIdentity.Sha256("approved-path-binding-v1\n"+canonical);return TestData.Json(HttpStatusCode.OK, new { bindingId, worldId="world-opaque-17", scenarioId=root.GetProperty("scenarioId").GetGuid(), runId, pathKind, approvedSealedPredictionSha256=approvedHash, canonicalHash=hash, stationCount=stations.Length });
         }
         if (path.EndsWith("/production-runs", StringComparison.Ordinal))
         {
@@ -93,7 +95,7 @@ internal sealed class DelegateHandler(Func<HttpRequestMessage, HttpResponseMessa
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) => Task.FromResult(responder(request));
 }
 
-internal sealed class ApiFactory(Func<HttpRequestMessage, HttpResponseMessage>? responder = null, IDependencyCapabilityProbe? capability = null, Func<HttpRequestMessage, HttpResponseMessage>? completionResponder = null, Func<HttpRequestMessage, HttpResponseMessage>? productionResponder = null, PublicationFakeHandler? publication = null) : WebApplicationFactory<global::Program>
+internal sealed class ApiFactory(Func<HttpRequestMessage, HttpResponseMessage>? responder = null, IDependencyCapabilityProbe? capability = null, Func<HttpRequestMessage, HttpResponseMessage>? completionResponder = null, Func<HttpRequestMessage, HttpResponseMessage>? productionResponder = null, PublicationFakeHandler? publication = null, Func<HttpRequestMessage, HttpResponseMessage>? pathBindingResponder = null) : WebApplicationFactory<global::Program>
 {
     internal const string InternalKey = "drilling-integration-internal-key";
     internal string DatabasePath { get; } = Path.Combine(Path.GetTempPath(), $"drillsim-drilling-{Guid.NewGuid():N}.db");
@@ -121,7 +123,7 @@ internal sealed class ApiFactory(Func<HttpRequestMessage, HttpResponseMessage>? 
             stageClient.DefaultRequestHeaders.Add("X-DrillSim-Operator-Key", "stage-a-test-key");
             services.AddSingleton(new ReservoirVerificationClient(stageClient));
             services.AddSingleton(new ReservoirSetupClient(stageClient));
-            var stageHandler = new StageASamplingHandler(_responder, completionResponder, productionResponder);
+            var stageHandler = new StageASamplingHandler(_responder, completionResponder, productionResponder, pathBindingResponder);
             services.AddSingleton(new ReservoirSamplingClient(new HttpClient(stageHandler) { BaseAddress = new Uri("http://reservoir.test/") }));
             services.AddSingleton(new ReservoirCompletionClient(new HttpClient(stageHandler) { BaseAddress = new Uri("http://reservoir.test/") }));
             services.AddSingleton(new ReservoirProductionClient(new HttpClient(stageHandler) { BaseAddress = new Uri("http://reservoir.test/") }));            if (publication is not null)
@@ -169,7 +171,6 @@ internal sealed class ToggleCapability(bool available = false) : IDependencyCapa
     internal bool Available { get; set; } = available;
     public bool IsAvailable(RunStageKind stage) => Available && stage is RunStageKind.S1MaterializePlan;
 }
-
 
 
 

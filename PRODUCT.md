@@ -14,10 +14,15 @@ demonstration audiences are secondary users.
 
 ## Product Purpose
 
-DrillSim assembles drilling, well, trajectory, petrophysical, geological, and
-provenance data into a coherent field graph. It helps a user inspect the
-evidence, compare exploratory targets, estimate net pay with uncertainty, and
-prepare a bounded data package for agent-assisted reasoning.
+DrillSim demonstrates how traditional analytics and LLM reasoning can help
+engineers make informed decisions faster. It assembles drilling, well, trajectory,
+petrophysical, geological, and provenance data into a coherent field graph,
+reducing the manual effort needed to organize and interpret that data.
+
+Analytics and AI explain patterns, support predictions, and help users weigh
+potential reward against uncertainty when comparing exploratory targets.
+The synthetic simulator provides a controlled way to test those predictions;
+it supports the decision-making demonstration.
 
 The workspace must also surface transparent calculations that are not stored
 directly—such as reservoir top/base, fluid classes and contacts, qualifying

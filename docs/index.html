@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A field engineer and Cloud Solution Architect's guide to DrillSim: evidence, interpretation, saved decisions, blind simulation, reveal and evaluation.">
+  <meta name="description" content="Learn how DrillSim combines complex field data, traditional analytics and AI to explain patterns, predict outcomes and support faster, better-informed engineering decisions.">
   <title>DrillSim — Demo guide &amp; architecture</title>
   <script>
     (() => {
@@ -262,7 +262,6 @@ FORM: Brief-pinned reading manual with chapter presenter mode. No concept draw: 
       <ul>
         <li><a href="#start">The demo in one sentence</a></li>
         <li><a href="#routes">Choose your demo route</a></li>
-        <li><a href="#walkthrough-validation">Validated walkthrough &amp; screenshots</a></li>
         <li><a href="#preflight">Preflight &amp; datasets</a></li>
         <li><a href="#architecture">Architecture &amp; boundaries</a></li>
         <li><a href="#working-model">How the workstation behaves</a></li>
@@ -303,27 +302,28 @@ FORM: Brief-pinned reading manual with chapter presenter mode. No concept draw: 
     <main id="main" tabindex="-1">
       <section class="chapter" id="start" aria-labelledby="start-title">
         <h1 id="start-title">DrillSim demo walkthrough</h1>
-        <p class="lead">A practical DrillSim walkthrough for engineers and Cloud Solution Architects: understand the field, challenge a location, freeze a prediction, and inspect what a blind synthetic well revealed.</p>
-        <div class="hero-flow" aria-label="Demonstration sequence">
-          <span>Evidence</span><span aria-hidden="true">→</span><span>Interpretation</span><span aria-hidden="true">→</span><span>Sealed prediction</span><span aria-hidden="true">→</span><span>Reveal &amp; evaluation</span>
+        <p class="lead">A practical walkthrough for engineers and Cloud Solution Architects: bring complex field data together, use traditional analytics and AI to explain patterns and predict outcomes, and weigh potential reward against uncertainty to make informed decisions faster.</p>
+        <div class="hero-flow" aria-label="Decision-support workflow">
+          <span>Connected data</span><span aria-hidden="true">→</span><span>Analytics &amp; AI</span><span aria-hidden="true">→</span><span>Predictions &amp; uncertainty</span><span aria-hidden="true">→</span><span>Informed decisions</span>
         </div>
-        <p><strong>The presenter’s one sentence:</strong> “DrillSim separates what the engineer knows, what they assume, and what the simulator later reveals, so a decision can be reviewed against the evidence available at the time.”</p>
+        <p><strong>The presenter’s one sentence:</strong> “DrillSim brings scattered engineering data together and combines analytics with AI to explain what it means, compare opportunities and uncertainty, and help engineers decide where to investigate next.”</p>
+        <p>The app handles data assembly and routine calculations so engineers can focus on the evidence, trade-offs and decision. The synthetic simulator provides a controlled way to test their predictions and learn from the results.</p>
         <div class="actions">
           <a class="button primary" href="#routes">Choose a demo route</a>
           <a class="button" href="#preflight">Check the environment</a>
           <a class="button" href="http://localhost:5173">Open local app · localhost:5173</a>
         </div>
-        <p class="meta">Guide baseline: 16 September 2026 · 19 tasks · 10-minute highlights, 35–45-minute walkthrough, or a new guided simulation. Use browser Find for any term. Presenter mode shows one chapter; Reader mode and Print retain the complete guide.</p>
         <div class="note">
           <p><strong>To try the demo, open your local app.</strong> GitHub Pages hosts this guide; the workstation needs the local services described in Preflight. You can read the complete walkthrough here before setting them up.</p>
-          <p><strong>Scientific boundary:</strong> this is a synthetic demonstration, not scientific calibration. “Net pay” in the ranking API is a qualifying-rock proxy, not proven hydrocarbon pay, reserves, an economic valuation, or permission to drill.</p>
+          <p><strong>Using this demo:</strong> Present DrillSim as a synthetic demonstration. When adapting it for a customer, involve a geoscientist to check that the data, assumptions and analysis fit the customer’s workflow and expectations.</p>
+          <p><strong>What “net pay” means here:</strong> It estimates the thickness of rock that meets the selected quality criteria. Water-bearing rock can meet those criteria too, so this number alone does not tell you how much oil or gas a well could produce.</p>
         </div>
       </section>
 
       <section class="chapter" id="routes" aria-labelledby="routes-title">
         <h2 id="routes-title">Choose your demo route</h2>
-        <p>For a presentation, choose <strong>Troll</strong> tagged <strong>Original data</strong>. Later, open the completed demo in <strong>Scenario</strong>: its badge is <strong>Scored</strong>, meaning <strong>Evaluation complete</strong>. Select bores and targets, change views and read the saved results. Choose the practice route when the engineer is ready to change settings or save their own interpretation.</p>
-        <details class="deep-dive"><summary>What “zero-write presentation” means</summary><p>The route avoids deliberate source-data, hypothesis, prediction and operator writes. Ordinary reads may create cache/snapshot bookkeeping; navigation and the tutorial may retain local UI state.</p></details>
+        <p>Start with the <strong>Troll</strong> field labeled <strong>Original data</strong> to explore the evidence and compare drilling targets. Then choose a completed simulation, labeled <strong>Scored</strong>, from the <strong>Scenario</strong> menu to compare its predictions with the results. For a hands-on session, follow the practice route below to adjust analysis settings and save your own interpretations.</p>
+        <details class="deep-dive"><summary>What happens when you browse</summary><p>This presentation route uses existing data and results. It does not require you to edit field data, save interpretations or predictions, or run a simulation. The app may still store copies of the data it loads and remember which views you visit.</p></details>
         <div class="two-column">
           <div>
             <h3>10-minute highlights</h3>
@@ -348,227 +348,168 @@ FORM: Brief-pinned reading manual with chapter presenter mode. No concept draw: 
           </div>
         </div>
         <h3>When you want hands-on practice</h3>
-        <p>For hands-on lifecycle practice, choose <strong>Guided tutorial → 4. Run a guided simulation</strong>. <a href="#guided-simulation">Create a new scenario from the original field</a>, review editable example forecasts, and follow the separate Save, Seal, Approve, Prepare and Start actions. Leave the completed demo unchanged for presentations. The operator controls never rerun a completed scenario.</p>
-        <div class="table-scroll" tabindex="0" role="region" aria-label="Demo action safety">
-          <table>
-            <caption>Every task below distinguishes inspection from optional practice.</caption>
-            <thead><tr><th scope="col">Route</th><th scope="col">Permitted teaching actions</th><th scope="col">What to avoid</th></tr></thead>
-            <tbody>
-              <tr><th scope="row">Presentation</th><td>Select a field, scenario, bore or target; change lenses; inspect saved revisions and existing receipts; rotate/cut the view.</td><td>Do not Apply settings, save notes, ask AI, seal, approve, run, recover, publish or score.</td></tr>
-              <tr><th scope="row">Analysis practice</th><td>Explicitly Apply a setting; restore it; download a local bundle. With permission, save named demo hypotheses and branches.</td><td>Never overwrite shared human text. Do not assume a download saves a server artifact.</td></tr>
-              <tr><th scope="row">Guided lifecycle practice</th><td>Create a separate scenario. Explicitly fill editable demonstration estimates or enter your own forecasts, review them, then follow each guarded action.</td><td>Keep the completed demo unchanged. Do not present example depth, formation, fluid or production values as inferred truth or calibration.</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p>For a read-only demo without saved hypotheses, describe the editors and their effects; say “No saved artifact in this scope.” Do not create pretend history to fill an empty panel.</p>
-      </section>
-
-      <section class="chapter" id="walkthrough-validation" aria-labelledby="walkthrough-validation-title">
-        <h2 id="walkthrough-validation-title">Validated walkthrough &amp; screenshots</h2>
-        <p>All <strong>39 steps across Chapters 1–4</strong> were exercised against the running services on <strong>16 September 2026</strong>. These are captures of the real UI and data, not mocked API responses. Each chapter’s record links to full-page screenshots; the larger previews highlight individual features. Each of the <strong>19 engineering tasks below</strong> also includes its matching UI screenshot beside the task instructions.</p>
-        <p>The run used <strong>TROLL FORCE-SODIR Field → SOGNEFJORD FM</strong>, a real Foundry-backed interpretation, and a new scenario with the guided demonstration forecasts. The original field and both previously completed scenarios were checked before and after and remained unchanged.</p>
-        <div class="table-scroll" tabindex="0" role="region" aria-label="Live walkthrough results">
-          <table>
-            <thead><tr><th scope="col">Chapter</th><th scope="col">Result</th><th scope="col">What was verified</th></tr></thead>
-            <tbody>
-              <tr><th scope="row"><a href="#walkthrough-chapter-1">1 · Read a field</a></th><td>7 / 7 steps passed</td><td>29 wells, 46 bores, provenance, units, survey support, intervals, 2D section and target estimates. No writes or AI requests.</td></tr>
-              <tr><th scope="row"><a href="#walkthrough-chapter-2">2 · Change an analysis</a></th><td>7 / 7 steps passed</td><td>A 9×9 grid returned 81 cells; changed cutoffs recalculated results; restoring defaults returned 225 cells.</td></tr>
-              <tr><th scope="row"><a href="#walkthrough-chapter-3">3 · Compare interpretations</a></th><td>7 / 7 steps passed</td><td>Reviewed AI draft, saved hypothesis and conservative branch, cited challenge, versioned disposition, exact comparison and JSON export.</td></tr>
-              <tr><th scope="row"><a href="#walkthrough-chapter-4">4 · Run a guided simulation</a></th><td>18 / 18 steps passed</td><td>Separate Create, Save, Seal, Approve, Prepare, Start, completion approval and publication actions. Finished with 60 production months and 94 evaluation metrics.</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3 id="walkthrough-chapter-1">Chapter 1 · Read a field</h3>
-        <p>Start with the original measurements. The inventory distinguishes the nine logged controls from the other known wellbores; the section keeps rock quality, fluids and missing evidence separate.</p>
-        <figure class="walkthrough-shot">
-          <a href="screenshots/showcase-map.png"><img src="screenshots/chapter-1-map.png" width="1600" height="1100" loading="lazy" decoding="async" alt="Azure Maps displaying offshore Troll well locations, ranked drilling targets, P90/P50/P10 estimates and the evidence bank."></a>
-          <figcaption>The field map connects well locations to ranked targets and their supporting measurements. Maps tiles were verified with successful authorized requests after assigning the account-scoped Data Reader role.</figcaption>
-        </figure>
-        <figure class="walkthrough-shot">
-          <a href="screenshots/chapter-1-step-06.png"><img src="screenshots/chapter-1-section.png" width="1600" height="1050" loading="lazy" decoding="async" alt="DrillSim 2D section with a selected wellbore, formation and fluid tracks, target estimates, and the guided tutorial."></a>
-          <figcaption>The 2D section links the selected wellbore to formation intervals and the nearby target. Select the image to open the full-page UI capture.</figcaption>
-        </figure>
-        <details class="walkthrough-record"><summary>Chapter 1 test record · 7 steps</summary>
-          <div class="table-scroll" tabindex="0" role="region" aria-label="Chapter 1 step evidence"><table>
-            <thead><tr><th scope="col">Step</th><th scope="col">Action and verified result</th><th scope="col">Full UI</th></tr></thead>
-            <tbody>
-              <tr><th scope="row">1.1</th><td>Selected Troll Original data, Sognefjord and Live evidence. The package contained 29 wells and 46 wellbores.</td><td><a href="screenshots/chapter-1-step-01.png">Screenshot 1.1</a></td></tr>
-              <tr><th scope="row">1.2</th><td>Read the inventory and expanded provenance: two data groups, four source files, affected wellbores and licenses.</td><td><a href="screenshots/chapter-1-step-02.png">Screenshot 1.2</a></td></tr>
-              <tr><th scope="row">1.3</th><td>Expanded curve details and checked MD, metres, RKB, missing values and source metadata.</td><td><a href="screenshots/chapter-1-step-03.png">Screenshot 1.3</a></td></tr>
-              <tr><th scope="row">1.4</th><td>Selected wellbore 31/2-1 and inspected validated survey support and formation-midpoint coordinates.</td><td><a href="screenshots/chapter-1-step-04.png">Screenshot 1.4</a></td></tr>
-              <tr><th scope="row">1.5</th><td>Inspected the selected bore’s contributing intervals and the distinction between qualifying, below-cutoff and unknown rock.</td><td><a href="screenshots/chapter-1-step-05.png">Screenshot 1.5</a></td></tr>
-              <tr><th scope="row">1.6</th><td>Opened 2D Section. The tutorial recognized the actual view change.</td><td><a href="screenshots/chapter-1-step-06.png">Screenshot 1.6</a></td></tr>
-              <tr><th scope="row">1.7</th><td>Compared ranked target estimates, P90/P50/P10 and nearby screening controls.</td><td><a href="screenshots/chapter-1-step-07.png">Screenshot 1.7</a></td></tr>
-            </tbody>
-          </table></div>
-        </details>
-
-        <h3 id="walkthrough-chapter-2">Chapter 2 · Change an analysis</h3>
-        <p>Entering a setting does not change the displayed result. The tutorial waits for the response to <strong>Apply analysis settings</strong>, including the actual grid size.</p>
-        <figure class="walkthrough-shot">
-          <a href="screenshots/chapter-2-step-03.png"><img src="screenshots/chapter-2-grid.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Search-area settings set to nine grid points per axis, with an 81-cell analysis and the tutorial confirming the applied result."></a>
-          <figcaption>The 9×9 exercise produces 81 candidate cells, including excluded locations. Restoring the defaults returns to a 15×15 grid.</figcaption>
-        </figure>
-        <details class="walkthrough-record"><summary>Chapter 2 test record · 7 steps</summary>
-          <div class="table-scroll" tabindex="0" role="region" aria-label="Chapter 2 step evidence"><table>
-            <thead><tr><th scope="col">Step</th><th scope="col">Action and verified result</th><th scope="col">Full UI</th></tr></thead>
-            <tbody>
-              <tr><th scope="row">2.1</th><td>Read the applied search settings before editing.</td><td><a href="screenshots/chapter-2-step-01.png">Screenshot 2.1</a></td></tr>
-              <tr><th scope="row">2.2</th><td>Entered grid size 9. The previous 225-cell result stayed unchanged, and the Apply step could not yet advance.</td><td><a href="screenshots/chapter-2-step-02.png">Screenshot 2.2</a></td></tr>
-              <tr><th scope="row">2.3</th><td>Applied the settings and verified 81 candidate cells in the API response.</td><td><a href="screenshots/chapter-2-step-03.png">Screenshot 2.3</a></td></tr>
-              <tr><th scope="row">2.4</th><td>Read excluded locations, screening distances and their coverage limitations.</td><td><a href="screenshots/chapter-2-step-04.png">Screenshot 2.4</a></td></tr>
-              <tr><th scope="row">2.5</th><td>Raised minimum porosity to 0.13 and explicitly recalculated.</td><td><a href="screenshots/chapter-2-step-05.png">Screenshot 2.5</a></td></tr>
-              <tr><th scope="row">2.6</th><td>Loaded and applied defaults. The response restored 225 cells, porosity 0.12 and a 500 m screening radius.</td><td><a href="screenshots/chapter-2-step-06.png">Screenshot 2.6</a></td></tr>
-              <tr><th scope="row">2.7</th><td>Read the model’s disagreement and distance uncertainty components.</td><td><a href="screenshots/chapter-2-step-07.png">Screenshot 2.7</a></td></tr>
-            </tbody>
-          </table></div>
-        </details>
-
-        <h3 id="walkthrough-chapter-3">Chapter 3 · Compare interpretations</h3>
-        <p>The AI starts with a small brief and retrieves evidence through read-only tools. Its draft stays separate from the engineer’s notes until the engineer reviews and accepts it. Saving an interpretation, creating an alternative, and recording a review are separate writes.</p>
-        <figure class="walkthrough-shot">
-          <a href="screenshots/chapter-3-step-01.png"><img src="screenshots/chapter-3-reservoir.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Interactive 3D reservoir mesh, survey trajectories, fluid controls and target estimates beside the Chapter 3 tutorial."></a>
-          <figcaption>Rotate the visible-evidence reservoir model, change the fluid or search radius, and inspect where measurements support a volume. View controls do not change the ranking.</figcaption>
-        </figure>
-        <figure class="walkthrough-shot">
-          <a href="screenshots/chapter-3-step-02.png"><img src="screenshots/chapter-3-interpretation.png" width="1600" height="1050" loading="lazy" decoding="async" alt="A real AI formation-interpretation draft with proposed notes, limitations, evidence references and an explicit review acknowledgement."></a>
-          <figcaption>The live model returned 12 verified citations. Accepting the draft preserved the existing hypothesis name; no save occurred until the next step.</figcaption>
-        </figure>
-        <details class="walkthrough-record"><summary>Chapter 3 test record · 7 steps</summary>
-          <div class="table-scroll" tabindex="0" role="region" aria-label="Chapter 3 step evidence"><table>
-            <thead><tr><th scope="col">Step</th><th scope="col">Action and verified result</th><th scope="col">Full UI</th></tr></thead>
-            <tbody>
-              <tr><th scope="row">3.1</th><td>Changed rotation, depth scale, fluid and mesh radius; reset the view and displayed mesh edges.</td><td><a href="screenshots/chapter-3-step-01.png">Screenshot 3.1</a></td></tr>
-              <tr><th scope="row">3.2</th><td>Generated a real cited AI draft. Notes stayed unchanged before review; Use this draft required acknowledgement and retained the chosen name.</td><td><a href="screenshots/chapter-3-step-02.png">Screenshot 3.2</a></td></tr>
-              <tr><th scope="row">3.3</th><td>Saved “Walkthrough baseline 2026-09-16” with its exact evidence, settings, target and notes.</td><td><a href="screenshots/chapter-3-step-03.png">Screenshot 3.3</a></td></tr>
-              <tr><th scope="row">3.4</th><td>Reanalyzed the saved package with the conservative preset and saved a separate named alternative.</td><td><a href="screenshots/chapter-3-step-04.png">Screenshot 3.4</a></td></tr>
-              <tr><th scope="row">3.5</th><td>Saved a geology-cited objection and then a deferred disposition with a reason. The challenge advanced to version 2.</td><td><a href="screenshots/chapter-3-step-05.png">Screenshot 3.5</a></td></tr>
-              <tr><th scope="row">3.6</th><td>Compared two exact revisions with matching evidence, verified the cutoff differences, and saved the preference as a new rationale revision.</td><td><a href="screenshots/chapter-3-step-06.png">Screenshot 3.6</a></td></tr>
-              <tr><th scope="row">3.7</th><td>Downloaded and parsed the evidence bundle; its field identity and decision rationale matched the requested export.</td><td><a href="screenshots/chapter-3-step-07.png">Screenshot 3.7</a></td></tr>
-            </tbody>
-          </table></div>
-        </details>
-
-        <h3 id="walkthrough-chapter-4">Chapter 4 · Run a guided simulation</h3>
-        <p>The documented run used target <code>candidate:04:06</code>, <strong>Preview</strong> resolution (16×16×8), realization seed <code>12345</code>, and the editable demonstration forecasts. It reached <strong>Scored</strong> through the GUI. No terminal commands, hidden-world IDs or direct database edits were needed to configure or run it.</p>
-        <figure class="walkthrough-shot">
-          <a href="screenshots/chapter-4-step-10.png"><img src="screenshots/chapter-4-setup.png" width="1600" height="1050" loading="lazy" decoding="async" alt="Simulator setup in the GUI with a model preset, Preview resolution, realization seed and a review checkbox before Prepare simulator."></a>
-          <figcaption>Preparing a model does not start it. Once prepared, the scenario’s settings are fixed and Start simulation becomes a separate action.</figcaption>
-        </figure>
-        <figure class="walkthrough-shot">
-          <a href="screenshots/showcase-production.png"><img src="screenshots/chapter-4-production.png" width="1600" height="1100" loading="lazy" decoding="async" alt="Published synthetic oil, gas and water production charts with cumulative volume selected and a five-year window."></a>
-          <figcaption>All six combinations of monthly/cumulative display and 1/3/5-year windows were exercised, with 12/36/60 corresponding monthly rows. These workflow-model volumes are not calibrated commercial forecasts.</figcaption>
-        </figure>
-        <figure class="walkthrough-shot">
-          <a href="screenshots/chapter-4-step-17.png"><img src="screenshots/chapter-4-evaluation.png" width="1600" height="1100" loading="lazy" decoding="async" alt="Completed evaluation scorecard with expected-paydirt error, prediction bounds and aggregate truth-basis metrics."></a>
-          <figcaption>The new run published 94 metrics across hidden-truth, revealed-observation, observation-gap and baseline comparisons. Unsupported metrics remain explicitly unavailable.</figcaption>
-        </figure>
-        <details class="walkthrough-record"><summary>Chapter 4 test record · 18 steps</summary>
-          <div class="table-scroll" tabindex="0" role="region" aria-label="Chapter 4 step evidence"><table>
-            <thead><tr><th scope="col">Step</th><th scope="col">Action and verified result</th><th scope="col">Full UI</th></tr></thead>
-            <tbody>
-              <tr><th scope="row">4.1</th><td>Selected the original field, Sognefjord and Live evidence.</td><td><a href="screenshots/chapter-4-step-01.png">Screenshot 4.1</a></td></tr>
-              <tr><th scope="row">4.2</th><td>Reviewed the scenario name, UTC cutoff and assumptions, then created a new scenario without a forecast or run.</td><td><a href="screenshots/chapter-4-step-02.png">Screenshot 4.2</a></td></tr>
-              <tr><th scope="row">4.3</th><td>Analyzed the frozen initial evidence with the applied settings.</td><td><a href="screenshots/chapter-4-step-03.png">Screenshot 4.3</a></td></tr>
-              <tr><th scope="row">4.4</th><td>Selected the highest-ranked eligible target from that verified result.</td><td><a href="screenshots/chapter-4-step-04.png">Screenshot 4.4</a></td></tr>
-              <tr><th scope="row">4.5</th><td>Filled and reviewed the editable path, formation, fluid and production examples.</td><td><a href="screenshots/chapter-4-step-05.png">Screenshot 4.5</a></td></tr>
-              <tr><th scope="row">4.6</th><td>Saved the server-validated forecast as a draft.</td><td><a href="screenshots/chapter-4-step-06.png">Screenshot 4.6</a></td></tr>
-              <tr><th scope="row">4.7</th><td>Read the saved prediction and its uncertainty assumptions.</td><td><a href="screenshots/chapter-4-step-07.png">Screenshot 4.7</a></td></tr>
-              <tr><th scope="row">4.8</th><td>Acknowledged review and sealed the prediction and baselines. No approval or execution was implied.</td><td><a href="screenshots/chapter-4-step-08.png">Screenshot 4.8</a></td></tr>
-              <tr><th scope="row">4.9</th><td>Entered the demo operator label and explicitly approved the exact seal. The scenario reached HumanApproved.</td><td><a href="screenshots/chapter-4-step-09.png">Screenshot 4.9</a></td></tr>
-              <tr><th scope="row">4.10</th><td>Selected a model preset, Preview resolution and seed 12345; reviewed and prepared the simulator in the GUI.</td><td><a href="screenshots/chapter-4-step-10.png">Screenshot 4.10</a></td></tr>
-              <tr><th scope="row">4.11</th><td>Started the prepared simulation and received its run identity.</td><td><a href="screenshots/chapter-4-step-11.png">Screenshot 4.11</a></td></tr>
-              <tr><th scope="row">4.12</th><td>Followed drilling, surveys and logs to the separate completion-review pause.</td><td><a href="screenshots/chapter-4-step-12.png">Screenshot 4.12</a></td></tr>
-              <tr><th scope="row">4.13</th><td>Reviewed the observable openings and explicitly approved the matching completion.</td><td><a href="screenshots/chapter-4-step-13.png">Screenshot 4.13</a></td></tr>
-              <tr><th scope="row">4.14</th><td>Waited for production to finish. The resulting evidence was still unpublished.</td><td><a href="screenshots/chapter-4-step-14.png">Screenshot 4.14</a></td></tr>
-              <tr><th scope="row">4.15</th><td>Acknowledged publication, released the verified measurements and requested evaluation.</td><td><a href="screenshots/chapter-4-step-15.png">Screenshot 4.15</a></td></tr>
-              <tr><th scope="row">4.16</th><td>Inspected the new well, publication receipt and 60 production months; exercised every display/window combination.</td><td><a href="screenshots/chapter-4-step-16.png">Screenshot 4.16</a></td></tr>
-              <tr><th scope="row">4.17</th><td>Read all four scorecard bases, frozen baseline comparisons and unavailable metrics. The scenario was Scored.</td><td><a href="screenshots/chapter-4-step-17.png">Screenshot 4.17</a></td></tr>
-              <tr><th scope="row">4.18</th><td>Verified the architecture-guide link and finished the chapter. Completed runs offer result inspection instead of disabled Start/Publish controls.</td><td><a href="screenshots/chapter-4-step-18.png">Screenshot 4.18</a></td></tr>
-            </tbody>
-          </table></div>
-        </details>
-        <details class="deep-dive"><summary>Exact validation records and boundaries</summary>
-          <dl class="term-list">
-            <dt>Scenario</dt><dd><code>b50182fd-fbba-8b08-aed7-7fd84c6fa3c0</code></dd>
-            <dt>Run</dt><dd><code>41fbbd11-923c-540f-8069-b44ca4de664a</code></dd>
-            <dt>Results field</dt><dd><code>1dc98479-e536-5d78-abee-8f2fcfbc8de3</code></dd>
-            <dt>Scorecard</dt><dd><code>c44e7a66-2e6d-5488-af1b-1502a29e2219</code> · 94 metrics</dd>
-            <dt>Interpretations</dt><dd>“Walkthrough baseline 2026-09-16” r1 and “Walkthrough conservative 2026-09-16” r1 were compared; the preference was then saved as conservative r2.</dd>
-          </dl>
-          <p>The earlier sealed Chapter 4 scenario was not overwritten. The two earlier scored scenarios and original field records matched their pre-run baselines afterward. This verifies the demonstrated workflow, not calibration, all possible fault/recovery cases, or every supported dataset.</p>
-          <p>The prior approval-refresh fix was also exercised: sealing immediately enabled review of the matching operator seal even though the prediction’s draft modification timestamp did not change.</p>
-          <p>A Maps 403 was traced to missing data-plane permission, not CORS or the token broker. With the owner-approved Azure Maps Data Reader role assigned at the Maps account, five tileset and thirty tile requests returned HTTP 200. The map and relevant chapter captures were refreshed afterward.</p>
-          <p>Adding screenshots exposed a separate documentation issue: Vite did not serve or bundle sibling images referenced by the imported HTML. The screenshot directory is now explicitly allowed in development, and referenced images are packaged beside the built guide. Local, built, standalone-file, no-JavaScript, mobile and print views were checked.</p>
-        </details>
+        <p>For hands-on lifecycle practice, choose <strong>Guided tutorial → 4. Run a guided simulation</strong>. <a href="#guided-simulation">Create a new scenario from the original field</a>, review editable example forecasts, and follow the separate Save, Seal, Approve, Prepare and Start actions.</p>
       </section>
 
       <section class="chapter" id="preflight" aria-labelledby="preflight-title">
-        <h2 id="preflight-title">Prepare the demo</h2>
-        <h3>Prerequisites and startup</h3>
-        <p>Use .NET SDK <strong>10.0.400</strong> (or a compatible .NET 10 feature band), Aspire CLI <strong>13.5.3 or newer</strong>, Git, and Node.js/npm compatible with Vite 7 (Node 22.12+ is a suitable baseline). Python is needed only for the repository’s optional data/world setup scripts. Azure CLI is needed only for Azure Maps or AI authentication.</p>
-        <p><strong>If the owner already has Aspire running, reuse it.</strong> Do not restart, stop, or reseed the shared environment during a presentation. For a fresh checkout, the owner prepares dependencies and credentials before startup:</p>
+        <h2 id="preflight-title">Preflight &amp; datasets</h2>
+        <p>Use this section to prepare a local copy of DrillSim, load a dataset and start again when you want a clean environment. Run the PowerShell commands from the repository root unless a step says otherwise.</p>
+
+        <h3 id="preflight-tools">Check your tools</h3>
+        <ul>
+          <li><strong>PowerShell 7 and Git</strong> for the commands below.</li>
+          <li><strong>.NET SDK 10.0.400 or a compatible .NET 10 feature band</strong>, as specified in <code>global.json</code>.</li>
+          <li><strong>Aspire CLI 13.5.3 or newer</strong> to build and run the application services.</li>
+          <li><strong>Node.js 22.12+ or 24 LTS, with npm</strong>, for the React workstation.</li>
+          <li><strong>Python 3.10+</strong> for downloading, staging and loading the sample data. These scripts use the Python standard library; no pip packages are required.</li>
+          <li><strong>Azure CLI and a development subscription</strong> for Maps and AI. Your signed-in user needs permission to create resources and assign access roles, plus access and quota for the model. An offline option is described below.</li>
+        </ul>
+        <p>For a fresh checkout, download the repository and restore its dependencies:</p>
         <pre><code>git clone https://github.com/seiggy/drillsim.git
 Set-Location .\drillsim
 dotnet restore .\DrillSim.slnx
-dotnet build .\DrillSim.slnx --no-restore
+npm ci --prefix .\src\DrillSim.AnalysisWeb
+aspire certs trust</code></pre>
 
-# Configure the required local service secrets below before first startup.
-aspire start</code></pre>
-        <p>Open the dashboard URL printed by Aspire. Verify <code>analysis-web</code>, <code>analysis-api</code> and their source services are healthy. The workstation’s development origin is <a href="http://localhost:5173">http://localhost:5173</a>; backend ports are dynamically assigned. Use the dashboard rather than guessing a port. Data persists in local <code>data\</code> SQLite files, not in GitHub Pages.</p>
-        <h3>Local secrets, never repository values</h3>
-        <p>Run these only as the environment owner. Replace placeholders with independently generated secrets; never paste real credentials into the guide, a hypothesis, a screenshot, or a commit. The hidden reservoir operator key is required for that service; the two Drilling Operations keys protect the internal workflow and Analysis callback.</p>
-        <pre><code>dotnet user-secrets set "Parameters:reservoir-simulation-operator-key" "&lt;random-operator-key&gt;" --project .\aspire\DrillSim.AppHost
-dotnet user-secrets set "Parameters:drilling-operations-internal-key" "&lt;random-internal-key&gt;" --project .\aspire\DrillSim.AppHost
-dotnet user-secrets set "Parameters:drilling-operations-analysis-callback-key" "&lt;random-callback-key&gt;" --project .\aspire\DrillSim.AppHost</code></pre>
-        <p>Optional Azure settings use the same AppHost user-secrets store. Sign in with Azure CLI using the intended subscription/tenant profile. Aspire forwards the selected <code>AZURE_CONFIG_DIR</code> to the Analysis API; its <code>AzureCliCredential</code> obtains tokens server-side.</p>
-        <pre><code>dotnet user-secrets set "Parameters:azure-openai-endpoint" "https://&lt;resource&gt;.openai.azure.com/" --project .\aspire\DrillSim.AppHost
-dotnet user-secrets set "Parameters:azure-openai-deployment-name" "&lt;deployment&gt;" --project .\aspire\DrillSim.AppHost
-dotnet user-secrets set "Parameters:azure-openai-subscription-id" "&lt;openai-subscription-id&gt;" --project .\aspire\DrillSim.AppHost
-dotnet user-secrets set "Parameters:azure-maps-client-id" "&lt;maps-account-client-id&gt;" --project .\aspire\DrillSim.AppHost
-dotnet user-secrets set "Parameters:azure-maps-tenant-id" "&lt;maps-tenant-id&gt;" --project .\aspire\DrillSim.AppHost
-dotnet user-secrets set "Parameters:azure-maps-subscription-id" "&lt;maps-subscription-id&gt;" --project .\aspire\DrillSim.AppHost</code></pre>
-        <p>For Maps, assign <strong>Azure Maps Data Reader</strong> on the Maps account to the CLI identity used by <code>analysis-api</code>, and allow <code>http://localhost:5173</code> in account CORS settings. Subscription Owner or User Access Administrator alone does not grant Maps data-plane access. The API brokers short-lived tokens for <code>https://atlas.microsoft.com/.default</code>; no subscription key goes to the browser. Without Maps or AI, deterministic analysis still works with the local services running.</p>
-        <h3>Select the Troll field</h3>
-        <p>Open the <strong>Field</strong> dropdown and choose the Troll entry tagged <strong>Original data</strong>. Then select <strong>SOGNEFJORD FM</strong> as the reservoir. The app may initially show Targets; choose Evidence when you are ready to begin.</p>
-        <p>The reference environment initially has three Troll entries. One contains the original measurements; two contain results from separate simulation runs. New published scenarios add their own results fields. The dropdown keeps the field name and uses a badge, description, date and short reference to distinguish them:</p>
-        <div class="table-scroll" tabindex="0" role="region" aria-label="Choose among the three Troll field entries">
-          <table>
-            <thead><tr><th scope="col">Badge / entry</th><th scope="col">What it contains</th><th scope="col">When to choose it</th></tr></thead>
-            <tbody>
-              <tr><th scope="row">Troll · Original data</th><td>The starting field measurements: 29 wells, 46 bores and 9 logged controls.</td><td>Choose this for the opening walkthrough and settings exercises.</td></tr>
-              <tr><th scope="row">Troll · Simulated results · latest demo</th><td>The completed demo’s added well and observations. Use the displayed run date and reference to distinguish this entry from the older results.</td><td>For the full before/after story, select the completed demo in Scenario under Troll · Original data. Look for Scored and the latest reference below.</td></tr>
-              <tr><th scope="row">Troll · Simulated results · earlier run</th><td>A separate earlier simulation’s results, retained as history.</td><td>Use only when discussing that run. Its different date/reference distinguishes it from the latest demo.</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p>To show the completed workflow, keep <strong>Troll · Original data</strong> selected, open <strong>Scenario</strong> and choose the completed demo tagged <strong>Scored</strong>. The helper text <strong>Evaluation complete</strong> explains that its results have already been evaluated. The latest reference scenario begins <code>8e96385c</code>; its original setup label includes <code>2026-09-11 9f64865b</code>. Dates and references distinguish runs; the badge tells you their status.</p>
-        <details class="deep-dive">
-        <summary>Reference dataset IDs and original setup labels</summary>
-        <div class="table-scroll" tabindex="0" role="region" aria-label="Reference demo datasets">
-          <table>
-            <caption>Local seeded examples, not data automatically supplied by a fresh checkout.</caption>
-            <thead><tr><th scope="col">Use</th><th scope="col">Exact identity</th><th scope="col">Expected reference inventory</th></tr></thead>
-            <tbody>
-              <tr><th scope="row">Original data</th><td><strong>TROLL FORCE-SODIR</strong><br><code>502fea8b-4d85-5d40-86a7-f5b7655d89d6</code><br>Reservoir: <strong>SOGNEFJORD FM</strong></td><td>29 parent wells, 46 wellbores; 9 logged/surveyed controls and 37 structural-only bores.</td></tr>
-              <tr><th scope="row">Completed demo · Scored</th><td>Original setup label begins <strong>AUTOMATED WORKFLOW FIXTURE 2026-09-11 9f64865b</strong><br>Scenario <code>8e96385c-84cb-8720-85cd-0e2073588b09</code></td><td>Evaluation complete. Read this scenario’s prediction, new measurements and scorecard for the full demonstration.</td></tr>
-              <tr><th scope="row">Completed demo’s simulated results</th><td><code>f109d7ac-c05f-56cc-91a4-546d2bac9e8b</code></td><td>30 wells, 47 bores; 177 published records, 60 production months and 94 published aggregate metrics. These records are kept separately from the starting measurements.</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p>These counts describe a specific prepared environment, not universal invariants. The earlier scenario whose ID begins <code>46c7</code> includes an old problematic survey excluded by current geometry checks. Prefer the latest completed demo above; retain the older records as history.</p>
+        <h3 id="preflight-secrets">Local service keys are generated automatically</h3>
+        <p>Start the AppHost and Aspire generates any missing local service keys, saving them in the AppHost's .NET user-secrets store. Existing configured values are reused. The keys survive restarts and dataset resets, so there is no manual key-generation step.</p>
+        <details class="deep-dive"><summary>Which keys Aspire manages</summary>
+          <p>The four secret parameters are <code>reservoir-simulation-operator-key</code>, <code>drilling-operations-internal-key</code>, <code>drilling-operations-analysis-callback-key</code> and <code>publication-import-key</code>. Generated keys contain 64 letters and digits; the services receive them through the existing AppHost references.</p>
+          <p>The AppHost uses Aspire's generated parameter defaults with persistence enabled. Its tests cover missing and empty values, independent keys, reuse across launches, and preservation of configured values.</p>
         </details>
-        <div class="note">
-          <p><strong>Fresh checkout with no data?</strong> Stop the live walkthrough at preflight. Review <a href="https://github.com/seiggy/drillsim/tree/main/datasets">datasets</a>, <a href="https://github.com/seiggy/drillsim/tree/main/scripts">setup scripts</a> and the <a href="https://github.com/seiggy/drillsim/blob/main/docs/simulator/implementation-plan.md">implementation plan</a> with the owner. The original field must be imported and the local operator facade configured. Once ready, use <strong>New simulation</strong> to create a scenario and <strong>Prepare simulator</strong> to prepare a supported model preset; opening the app or tutorial performs neither action.</p>
+
+        <h3 id="preflight-azure">Sign in; Aspire sets up Maps and AI</h3>
+        <p>Sign in with your Azure user account, then start Aspire as shown in the next section. No portal setup or copied connection values are needed for a new installation.</p>
+        <pre id="preflight-azure-login"><code>az login</code></pre>
+        <p>Aspire asks for any missing tenant, subscription, resource group and location choices, then saves them for later launches. The AppHost defaults to <code>eastus2</code> and a resource group name beginning with <code>rg-drillsim</code>. Use a development subscription where you can create resources and assign access roles.</p>
+        <p>The native Foundry integration creates the account and <code>drillsim-chat</code> model deployment. An Aspire-managed Bicep module creates Azure Maps, allows <code>http://localhost:5173</code> through CORS, and grants the signed-in user <strong>Azure Maps Data Reader</strong> on that account. Foundry receives the matching <strong>Cognitive Services OpenAI User</strong> assignment. Aspire supplies the endpoints, account identifiers and deployment name to the Analysis API; authentication uses Azure CLI rather than API keys.</p>
+        <p>The default model is <code>gpt-6-astra</code>, version <code>2026-09-03</code>, with GlobalStandard capacity <code>100</code>. Your subscription must support that model and capacity in the selected region. Aspire cannot grant model access or additional quota. Initial provisioning can take several minutes and creates Azure resources that incur charges. The services, agents, simulator and databases still run locally.</p>
+        <p>If you use AzEnv, initialize your chosen profile before both sign-in and startup. Aspire and the Analysis API use that profile's <code>AZURE_CONFIG_DIR</code>; otherwise they use Azure CLI's normal <code>.azure</code> directory. There is no extra environment-variable setup for a standard installation.</p>
+        <details class="deep-dive"><summary>Use existing resources or change the model</summary>
+          <p>Complete existing connection settings in the AppHost's user-secrets store are reused. Maps and AI are handled independently, so Aspire creates only the missing service. It does not change permissions or CORS on externally configured resources.</p>
+          <ul>
+            <li><strong>AI:</strong> <code>Parameters:azure-openai-endpoint</code>, <code>Parameters:azure-openai-deployment-name</code> and <code>Parameters:azure-openai-subscription-id</code>. The endpoint must include <code>/openai/v1/</code>. The CLI user needs Cognitive Services OpenAI User access to that resource.</li>
+            <li><strong>Maps:</strong> <code>Parameters:azure-maps-client-id</code>, <code>Parameters:azure-maps-tenant-id</code> and <code>Parameters:azure-maps-subscription-id</code>. Use the Maps account client ID. The CLI user needs Azure Maps Data Reader access, and the account must allow <code>http://localhost:5173</code> through CORS.</li>
+          </ul>
+          <p>Provide every value in a group or remove that group to use Aspire provisioning. Partial groups stop startup with an explanatory error rather than creating an unexpected replacement.</p>
+          <p>For a different managed model, set <code>AzureResources:ModelName</code> and <code>AzureResources:ModelVersion</code> together in the AppHost's user secrets. Set <code>AzureResources:ModelCapacity</code> to change capacity. Choose an OpenAI model that supports structured responses, the Responses API and function tools; DrillSim does not silently substitute a different model.</p>
+        </details>
+        <details class="deep-dive"><summary>Run without provisioning Azure resources</summary>
+          <pre><code>dotnet user-secrets set "AzureResources:Provision" "false" --project .\aspire\DrillSim.AppHost</code></pre>
+          <p>This disables new Azure provisioning. Complete existing connections still work. Without them, Maps and AI are unavailable, but the data tables, deterministic analysis and local simulator remain usable. Set the value back to <code>true</code> to enable provisioning again.</p>
+        </details>
+        <details class="deep-dive"><summary>If Windows account sign-in fails</summary>
+          <p>Azure CLI can sign in through a browser without adding another work account to Windows. Run this in the same Azure profile, then complete the device-code sign-in:</p>
+          <pre><code>az config set core.enable_broker_on_windows=false core.login_experience_v2=off
+az login --tenant "&lt;tenant-id&gt;" --use-device-code</code></pre>
+        </details>
+
+        <h3 id="preflight-start">Start the services</h3>
+        <p>Aspire builds the projects, provisions any missing Azure dependencies and starts the APIs and workstation. Port 5173 must be available for DrillSim's frontend. Use an interactive first launch so you can answer Aspire's setup prompts, and leave this terminal open:</p>
+        <pre id="preflight-start-command"><code>aspire run --apphost .\aspire\DrillSim.AppHost\DrillSim.AppHost.csproj</code></pre>
+        <p>Open the dashboard URL printed by Aspire. Wait for Azure provisioning to finish before checking the local services. From another terminal, run:</p>
+        <pre><code>aspire wait analysis-api --timeout 180 --non-interactive
+aspire wait analysis-web --timeout 180 --non-interactive
+aspire wait drilling-operations --timeout 180 --non-interactive
+aspire wait reservoir-simulation --timeout 180 --non-interactive
+aspire describe --non-interactive</code></pre>
+        <p>Open the workstation at <a href="http://localhost:5173">http://localhost:5173</a>. Backend ports are assigned at startup; the import scripts discover them through Aspire. Later launches can use <code>aspire start</code> to run in the background. After changing keys or Azure settings, stop and start the AppHost to load the new values.</p>
+
+        <h3 id="preflight-datasets">Choose and populate a dataset</h3>
+        <p><strong>Troll / Sognefjord is the recommended dataset for all four tutorial chapters.</strong> The import combines public FORCE logs with SODIR well and formation records. Derived porosity, permeability and fluid estimates are labeled separately from source measurements.</p>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Available demonstration datasets">
+          <table>
+            <thead><tr><th scope="col">Dataset</th><th scope="col">Contents</th><th scope="col">Best use</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Troll / Sognefjord</th><td>29 parent wells and 46 wellbores, with nine logged/surveyed controls and 37 structural-only bores in the reference data.</td><td>The full analysis and guided simulation walkthrough.</td></tr>
+              <tr><th scope="row">FORCE-SODIR 15/9</th><td>A smaller five-well public-data pilot with logs, formation picks, architecture and calculated trajectories.</td><td>A compact example of joining data from different sources.</td></tr>
+              <tr><th scope="row">Synthetic Northstar</th><td>Six fictional wells with a generated surface and downhole graph.</td><td>A synthetic example that does not require public dataset downloads.</td></tr>
+              <tr><th scope="row">KGS / USGS Williston</th><td>Well locations, metadata and formation-top records, with different coverage and depth references.</td><td>Data-import and evidence-quality exercises; they do not provide the complete Troll simulation setup.</td></tr>
+            </tbody>
+          </table>
         </div>
-        <h3>Five checks before presenting</h3>
+        <p>Load Troll in three stages: download the source files, prepare DrillSim records, then import them into the running services. The FORCE archive is about 170 MB. Cached downloads are reused after verification.</p>
+        <pre id="preflight-load-troll"><code>python .\scripts\fetch_datasets.py check
+python .\scripts\fetch_datasets.py fetch --dataset force-2020 --dataset sodir-force-troll
+python .\scripts\stage_datasets.py force-sodir-troll
+
+# Inspect the import counts without changing service records.
+python .\scripts\load_staged.py .\data\staged\force-sodir-troll\records.jsonl --limit 46 --dry-run
+
+# Import the complete reference set.
+python .\scripts\load_staged.py .\data\staged\force-sodir-troll\records.jsonl --limit 46</code></pre>
+        <p>The reference import contains one field, 29 clusters, 29 wells, 46 bores, nine trajectories, nine architecture records and 46 geology records. <code>--limit 46</code> matters: the loader's default is ten records. Record IDs are deterministic; rerunning the loader refreshes matching imported records rather than creating another copy of each well.</p>
+        <p>The files stay in <code>data\raw</code> and <code>data\staged</code>; loading writes to the service databases. After loading, refresh the app and select <strong>TROLL FORCE-SODIR Field · Original data</strong>, <strong>SOGNEFJORD FM</strong> and <strong>Live evidence</strong>. Chapters 1–3 are then ready.</p>
+        <details class="deep-dive"><summary>Populate the other sample datasets</summary>
+          <p>Run the relevant commands below while Aspire is running. The limits for KGS and USGS create small import examples; increase them when you want more records.</p>
+          <pre><code># Entirely synthetic six-well example.
+python .\scripts\seed_northstar.py
+
+# Smaller FORCE-SODIR pilot.
+python .\scripts\fetch_datasets.py fetch --dataset force-2020 --dataset sodir-force-15-9
+python .\scripts\stage_datasets.py force-sodir-15-9
+python .\scripts\load_staged.py .\data\staged\force-sodir-15-9\records.jsonl --limit 5
+
+# Location and formation-top examples.
+python .\scripts\fetch_datasets.py fetch --dataset kgs --dataset usgs-williston
+python .\scripts\stage_datasets.py kgs --limit 250
+python .\scripts\stage_datasets.py usgs-williston --limit 250
+python .\scripts\load_staged.py .\data\staged\kgs-ellis-11s-16w\records.jsonl --limit 5
+python .\scripts\load_staged.py .\data\staged\usgs-williston\records.jsonl --limit 5</code></pre>
+          <p><a href="https://github.com/seiggy/drillsim/blob/main/datasets/manifest.json">The dataset manifest</a> records source URLs, checksums and permitted artifacts. Keep the original attribution when sharing derived material. <a href="https://github.com/seiggy/drillsim/tree/main/datasets">Dataset notes</a> describe the source limitations and model-estimated curves.</p>
+        </details>
+
+        <h3 id="preflight-model">Prepare the model for Chapter 4</h3>
+        <p>After importing Troll, seed its reservoir model once. This uses the included <code>datasets\reservoir-fluid-calibration.json</code> and registers a model preset for the GUI. It does not create a scenario or run drilling/production.</p>
+        <pre id="preflight-seed-model"><code>$settingsJson = dotnet user-secrets list --json `
+    --project .\aspire\DrillSim.AppHost\DrillSim.AppHost.csproj | Out-String
+if ($LASTEXITCODE -ne 0) { throw 'Could not read the AppHost settings.' }
+$settings = $settingsJson.Substring($settingsJson.IndexOf('{')) | ConvertFrom-Json
+$env:RESERVOIR_SIMULATION_OPERATOR_KEY = $settings.'Parameters:reservoir-simulation-operator-key'
+try {
+    python .\scripts\seed_reservoir_world.py
+    if ($LASTEXITCODE -ne 0) { throw 'Reservoir model setup failed.' }
+} finally {
+    Remove-Item Env:\RESERVOIR_SIMULATION_OPERATOR_KEY -ErrorAction SilentlyContinue
+    Remove-Variable settings, settingsJson
+}</code></pre>
+        <p>The supplied model and calibration belong to Troll / Sognefjord. Other fields need an appropriate model and calibration before they can use the full simulation flow. The seeder checks the field, reservoir, logged controls and contact definitions; a mismatch is reported rather than replaced with a guessed model.</p>
+        <p>In <strong>Guided tutorial → 4. Run a guided simulation</strong>, create your scenario, review and approve the forecast, then select the preset in <strong>Simulation</strong>. Choose Preview or Standard resolution, prepare the simulator and start it. Follow completion approval, production, publication and evaluation.</p>
+        <p>A fresh import has original field data but no completed scenarios. The <strong>Scored</strong> examples in the screenshots were created by running Chapter 4. Your own runs will appear in the Scenario menu; publishing adds a separate field entry labeled <strong>Simulated results</strong>.</p>
+
+        <h3 id="preflight-reset">Reset the demo</h3>
+        <p><strong>To try a different forecast or model:</strong> choose <strong>New simulation</strong> in the app. This keeps the loaded field and gives you a new scenario with its own prediction and results.</p>
+        <p><strong>To start with empty local data:</strong> stop Aspire and move the complete database set into a backup folder. Restarting Aspire alone preserves these files; the SQLite resources currently have no dashboard reset command. The following reset keeps downloaded and staged files, plus your Azure configuration and .NET user secrets. It does not delete the provisioned Azure resources.</p>
+        <pre id="preflight-reset-data"><code>$ErrorActionPreference = 'Stop'
+aspire stop --apphost .\aspire\DrillSim.AppHost\DrillSim.AppHost.csproj --non-interactive
+if ($LASTEXITCODE -ne 0) { throw 'Aspire did not stop. No database files were moved.' }
+
+$backup = Join-Path $HOME ('DrillSim-backups\' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff'))
+New-Item -ItemType Directory -Path $backup | Out-Null
+Get-ChildItem -LiteralPath .\data -File |
+    Where-Object { $_.Name -match '\.db(?:-wal|-shm|-journal)?$' } |
+    Move-Item -Destination $backup
+Write-Host "Database backup: $backup"
+
+aspire start --apphost .\aspire\DrillSim.AppHost\DrillSim.AppHost.csproj --non-interactive
+if ($LASTEXITCODE -ne 0) { throw 'Aspire did not restart. The database backup is retained.' }</code></pre>
+        <p>This clears the loaded datasets, saved interpretations, scenarios, predictions and simulator runs from the new working database set. Move the databases together, including files such as <code>Field.db.publication-gate.db</code> and any SQLite journal files, because the services share record references.</p>
         <ol>
-          <li>Confirm healthy source APIs in Aspire; keep their logs available but off the projected screen if they contain sensitive environment details.</li>
-          <li>Check the selected field’s badge: Original data for the opening analysis, Simulated results when inspecting a run’s added measurements. Confirm SOGNEFJORD FM and the intended scenario/date.</li>
-          <li>Check Maps and AI status in advance; plan the honest offline narration rather than troubleshooting a login on stage.</li>
-          <li>Open the completed scenario tagged Scored and check that its prediction, new measurements, production and evaluation are available.</li>
-          <li>Agree “presentation only” or identify the separate practice scenario and permitted writes. Keep existing unsaved human text intact.</li>
+          <li>Wait for the services using the startup checks above.</li>
+          <li>Run the <a href="#preflight-load-troll">Troll import</a> again. If <code>data\staged\force-sodir-troll\records.jsonl</code> is already available, you can skip downloading and staging and run the loader directly.</li>
+          <li>Run <a href="#preflight-seed-model">reservoir model setup</a> again if you want Chapter 4.</li>
+          <li>Open the app in a new private browser window to start without old local drafts or retry records. Alternatively, clear the site data for the DrillSim origin in your browser before reloading.</li>
+        </ol>
+        <p><strong>To restore a backup:</strong> repeat the stop-and-backup portion of the reset commands, leaving out the final <code>aspire start</code>. With Aspire still stopped, copy the complete earlier backup into <code>data\</code>. Then start Aspire and open a fresh browser session. Use one backup set rather than mixing databases from different runs.</p>
+
+        <h3 id="preflight-checklist">Final checks before the walkthrough</h3>
+        <ol>
+          <li><strong>Services:</strong> the dashboard shows the workstation, Analysis API, source APIs and both simulator services running and healthy.</li>
+          <li><strong>Data:</strong> Troll Original data / Sognefjord shows 29 wells, 46 bores and nine logged controls for the reference import. Check Data sources for provenance and any load errors.</li>
+          <li><strong>Analysis:</strong> the default grid has 225 cells and a ranked shortlist. You can open a well’s logs, 2D section and 3D reservoir view.</li>
+          <li><strong>Maps:</strong> imagery and well markers actually load. A configured status alone does not confirm token permissions or CORS.</li>
+          <li><strong>AI:</strong> request an interpretation and confirm a cited draft returns. A 429 is a deployment rate/capacity issue; the structured log contains the provider’s details.</li>
+          <li><strong>Simulation:</strong> a matching model preset is available. Use a new scenario for hands-on execution, or open a Scored scenario to review completed results. A completed run should have its prediction, publication receipt, production history and scorecard.</li>
         </ol>
       </section>
 
@@ -1033,9 +974,9 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
             <tbody>
               <tr><th scope="row">S0 · Bind world</th><td>Verify approved seal, source package and operator world binding.</td><td>The prediction and source hashes agree; this is not a public truth read.</td></tr>
               <tr><th scope="row">S1 · Materialize plan</th><td>Persist scenario well, bore and planned path internally.</td><td>Plan identity is pinned; it is not yet published evidence.</td></tr>
-              <tr><th scope="row">S2 · Execute drilling</th><td>Generate as-drilled path and timeline.</td><td>Stored kinematic observations/checkpoints, not a claimed physical rig.</td></tr>
+              <tr><th scope="row">S2 · Execute drilling</th><td>Check the approved path against the prepared model, then generate the as-drilled path and timeline.</td><td>New runs stop here before drilling if the plan is outside coverage. The stored result is synthetic kinematic output, not a physical rig.</td></tr>
               <tr><th scope="row">S3 · Generate survey</th><td>Create noisy survey stations and covariance.</td><td>Measured/synthetic survey is distinct from the hidden exact path.</td></tr>
-              <tr><th scope="row">S4 · Sample geology</th><td>Persist restricted truth samples for internal processing.</td><td>These are not exposed to public analysis.</td></tr>
+              <tr><th scope="row">S4 · Sample geology</th><td>Check the as-drilled path and persist restricted samples for internal processing.</td><td>Steering can leave the model even when the approved plan fits. A coverage rejection is a path/model mismatch, not a geology calculation failure.</td></tr>
               <tr><th scope="row">S5 · Generate logs</th><td>Produce versioned observable logs and drilling measurements.</td><td>Provenance, units, coverage and observation noise matter.</td></tr>
               <tr><th scope="row">S6 · Design completion</th><td>Design openings from observations; bind approved connections.</td><td>Explicit human review of openings/hash, not merely “continue.”</td></tr>
               <tr><th scope="row">S7 · Run production</th><td>Persist years 1/3/5 states and 60 monthly observations.</td><td>Simulation truth and metered observations remain distinct.</td></tr>
@@ -1162,6 +1103,8 @@ aspire mcp call field ping --input '{}' --non-interactive</code></pre>
               <tr><th scope="row">Cannot save / seal configured prediction</th><td>Capability/source/binding/geometry mismatch, fewer than four controls, unsaved changes or incomplete human inputs.</td><td>Read the blocker; analyze frozen initial source with applied settings. Rebuild explicitly only after review. Every station must use the exact point XY; do not fabricate missing forecasts.</td></tr>
               <tr><th scope="row">Immutable prediction or prepared simulator</th><td>The forecast is sealed/approved, or the model setup is already fixed.</td><td>Read/download it as history. Choose New simulation from the original field for different inputs. There is no “unseal” or “reconfigure” shortcut.</td></tr>
               <tr><th scope="row">Simulator preparation unavailable</th><td>The prediction is not approved, no supported preset is offered, the operator session is unavailable, or a run already exists.</td><td>Read the specific guidance. Save, Seal and Approve first; refresh operator status for available presets. Never invent a hidden-world ID or change the approved seal. A running/completed run is inspected, not started again.</td></tr>
+              <tr><th scope="row">Path outside model coverage</th><td>The approved path, or the later as-drilled path, leaves the prepared model's area or depth envelope. New runs check the plan before drilling at S2; S4 checks any simulated steering deviation.</td><td>Create a new scenario with a compatible target/path and room for steering, or ask the operator for a model covering that location. A different seed or Preview/Standard resolution does not expand coverage. The failed run remains as history.</td></tr>
+              <tr><th scope="row">Reservoir request returns 400</th><td>The reservoir service rejected one or more request fields.</td><td>Open the failed request trace in Aspire and find <code>ReservoirRequestRejected</code> for the field names and reasons, or <code>ReservoirRequestMalformed</code> for a parse failure. The Simulation panel shows safe guidance for recognized errors. Older traces may lack details because the earlier code did not log them.</td></tr>
               <tr><th scope="row">CSRF failure or uncertain operator response</th><td>Session token expired, Origin mismatched, or server outcome not confirmed.</td><td>Refresh operator status/session, inspect the ledger, re-acknowledge the exact subject if required, then retry the <strong>same saved attempt key</strong>. Do not create a new key merely because a response was lost.</td></tr>
               <tr><th scope="row">Definitive failed action key</th><td>The server stored a final failure; replay returns that same outcome.</td><td>After inspecting current state and fixing the cause, explicitly retire only the local retry record. A new intended attempt gets a new key. Retiring does not cancel or roll back server work.</td></tr>
               <tr><th scope="row">Run waiting at completion</th><td>Openings need exact-hash human approval.</td><td>Read completion/opening evidence and approve only with owner authorization. Clicking Next in the tutorial cannot authorize it.</td></tr>

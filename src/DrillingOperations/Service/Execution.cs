@@ -110,7 +110,18 @@ public sealed class RunStageExecutor(
             }
         }
         if (next is RunStageKind.S2ExecuteDrilling)
+        {
+            TruthBindingResponse binding = await store.GetBindingAsync(run.ScenarioId, cancellationToken)
+                ?? throw new RunStageFailureException("BindingMissing", "Binding missing.");
+            MaterializedPlan plan = await store.GetMaterializedPlanAsync(runId, cancellationToken)
+                ?? throw new RunStageFailureException("MaterializedPlanMissing", "Plan missing.");
+            try { await samplingClient.BindPlannedPathAsync(binding, plan, cancellationToken); }
+            catch (StageASamplingException exception) when (exception.StatusCode is 502 or 503)
+            { return await store.SetAwaitingDependencyAsync(runId, next.Value, exception.DiagnosticCode, cancellationToken); }
+            catch (StageASamplingException exception)
+            { throw new RunStageFailureException(exception.DiagnosticCode, exception.Message); }
             return await store.ExecuteDeterministicDrillingAsync(runId, options.Value, cancellationToken);
+        }
         if (next is RunStageKind.S3GenerateSurvey)
             return await store.GenerateSurveyAsync(runId, surveyOptions.Value, cancellationToken);
         if (next is RunStageKind.S4SampleGeology)
@@ -257,7 +268,6 @@ public static class DeterministicDrillingModel
     private static (double X, double Y, double Z) Vector(DrilledPathStation a, DrilledPathStation b) => (b.EastingM - a.EastingM, b.NorthingM - a.NorthingM, b.TrueVerticalDepthM - a.TrueVerticalDepthM);
     private static double Length((double X, double Y, double Z) value) => Math.Sqrt(value.X * value.X + value.Y * value.Y + value.Z * value.Z);
 }
-
 
 
 

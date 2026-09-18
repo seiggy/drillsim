@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting" Version="13.5.3" />
+    <PackageReference Include="Aspire.Hosting.Foundry" Version="13.5.3-preview.1.26425.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.0" />
+    <PackageReference Include="NUnit" Version="4.3.2" />
+    <PackageReference Include="NUnit.Analyzers" Version="4.7.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="5.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="NUnit.Framework" />
+    <Compile Include="..\DrillSim.AppHost\ServiceKeyParameters.cs" Link="ServiceKeyParameters.cs" />
+    <Compile Include="..\DrillSim.AppHost\FoundryResources.cs" Link="FoundryResources.cs" />
+    <Compile Include="..\DrillSim.AppHost\AzureResources.cs" Link="AzureResources.cs" />
+    <None Include="..\DrillSim.AppHost\Infrastructure\azure-maps.bicep" Link="Infrastructure\azure-maps.bicep" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\DrillSim.AppHost\AppHost.cs" Link="AppHost.cs.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

@@ -2,10 +2,11 @@ using ReservoirSimulation.Contracts;
 
 namespace ReservoirSimulation.Domain;
 
-internal sealed class ReservoirValidationException(Dictionary<string, string[]> errors)
+internal sealed class ReservoirValidationException(Dictionary<string, string[]> errors, string? diagnosticCode = null)
     : ArgumentException("One or more reservoir simulation values are invalid.")
 {
     internal Dictionary<string, string[]> Errors { get; } = errors;
+    internal string? DiagnosticCode { get; } = diagnosticCode;
 }
 
 internal sealed class ValidationErrors
@@ -25,7 +26,7 @@ internal sealed class ValidationErrors
             Add(key, "Value must be finite.");
     }
 
-    internal void ThrowIfAny()
+    internal void ThrowIfAny(string? diagnosticCode = null)
     {
         if (_errors.Count == 0)
             return;
@@ -33,7 +34,7 @@ internal sealed class ValidationErrors
         throw new ReservoirValidationException(_errors.ToDictionary(
             pair => pair.Key,
             pair => pair.Value.ToArray(),
-            StringComparer.Ordinal));
+            StringComparer.Ordinal), diagnosticCode);
     }
 }
 

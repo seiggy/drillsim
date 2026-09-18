@@ -204,6 +204,7 @@ internal sealed class RestrictedTruthSamplingService(
         double reservoirBase = world.BaseDepthM.Max();
         double verticalTolerance = Math.Max(1_000, reservoirBase - reservoirTop);
         double previousMd = -1;
+        bool outsideCoverage = false;
         for (int index = 0; index < request.Stations.Count; index++)
         {
             ApprovedPathStation? station = request.Stations[index];
@@ -218,15 +219,23 @@ internal sealed class RestrictedTruthSamplingService(
             if (index > 0 && !(station.MeasuredDepthM > previousMd))
                 errors.Add($"{key}.measuredDepthM", "Measured depth must be strictly increasing.");
             if (!double.IsFinite(station.EastingM) || station.EastingM < minimumEasting || station.EastingM > maximumEasting)
+            {
                 errors.Add($"{key}.eastingM", "Path station is outside the hidden world easting extent.");
+                outsideCoverage |= double.IsFinite(station.EastingM);
+            }
             if (!double.IsFinite(station.NorthingM) || station.NorthingM < minimumNorthing || station.NorthingM > maximumNorthing)
+            {
                 errors.Add($"{key}.northingM", "Path station is outside the hidden world northing extent.");
+                outsideCoverage |= double.IsFinite(station.NorthingM);
+            }
             if (!double.IsFinite(station.TrueVerticalDepthM) || station.TrueVerticalDepthM < 0 ||
                 station.TrueVerticalDepthM > reservoirBase + verticalTolerance)
                 errors.Add($"{key}.trueVerticalDepthM", "TVD must be finite, nonnegative, and within the bounded deep reservoir envelope.");
+            outsideCoverage |= double.IsFinite(station.TrueVerticalDepthM) &&
+                station.TrueVerticalDepthM > reservoirBase + verticalTolerance;
             previousMd = station.MeasuredDepthM;
         }
-        errors.ThrowIfAny();
+        errors.ThrowIfAny(outsideCoverage ? "PathOutsideModelCoverage" : null);
     }
 
     private static void ValidateSamplingRequest(TruthSamplingRequest request)

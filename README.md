@@ -21,12 +21,15 @@ be built, launched, observed, and managed together.
 
 ## See the workflow
 
-The [illustrated demo guide](docs/index.html#walkthrough-validation) records a
-live end-to-end walkthrough of **all 39 steps in Chapters 1–4**, with a full-page
-UI screenshot for each step. The September 16, 2026 run used the real services
+The [illustrated demo guide](docs/index.html) explains all **19 engineering
+tasks** with inline UI screenshots. Its **39 tutorial steps in Chapters 1–4**
+were validated end to end. The September 16, 2026 run used the real services
 and AI model, then completed a new simulation with **60 production months and
 94 evaluation metrics**. Existing field records and completed scenarios remained
 unchanged.
+
+See [Preflight & datasets](docs/index.html#preflight) for the complete local
+setup, sample-data imports, simulator model preparation and backup/reset steps.
 
 **Locate the next prospect.** Azure Maps places the offshore field's wells and
 ranked targets alongside P90/P50/P10 estimates, nearby controls and evidence
@@ -63,6 +66,10 @@ and expected results, and the application architecture.
 - [.NET SDK 10.0.400](https://dotnet.microsoft.com/download/dotnet/10.0)
   or a compatible .NET 10 feature-band SDK
 - [Aspire CLI 13.5.3](https://aspire.dev/get-started/install-cli/) or newer
+- Node.js 22.12+ or 24 LTS with npm, and PowerShell 7 for the commands below
+- Azure CLI and a development subscription with resource-creation and
+  role-assignment permissions, plus access and quota for the configured model
+- Python 3.10+ for sample-data imports
 
 ## Get started
 
@@ -72,10 +79,24 @@ Set-Location .\drillsim
 
 dotnet restore .\DrillSim.slnx
 dotnet build .\DrillSim.slnx --no-restore
-aspire start
+npm ci --prefix .\src\DrillSim.AnalysisWeb
+aspire certs trust
+az login
+aspire run
 ```
 
-Open the Aspire dashboard URL printed by `aspire start`. The dashboard provides
+On first launch, answer Aspire's Azure setup prompts for any missing tenant,
+subscription, resource group and location settings. Aspire creates Azure Maps,
+Foundry and the model deployment, configures access and passes their connection
+information to the Analysis API. The rest of the application stays local.
+Provisioning can take several minutes and creates billable Azure resources;
+later launches reuse the saved setup. See [Azure dependencies](#azure-dependencies)
+for existing resources, model options and an offline mode.
+
+If you use AzEnv, initialize the intended profile before `az login` and `aspire run`.
+Otherwise, Azure CLI's default profile works without additional configuration.
+
+Open the Aspire dashboard URL printed by `aspire run`. The dashboard provides
 the dynamically assigned endpoints for the Cluster UI, service APIs, logs,
 traces, health status, and SQLite resources.
 
@@ -86,6 +107,8 @@ aspire stop
 ```
 
 SQLite files are persisted under `data\` and are excluded from source control.
+After the first setup, `aspire start` can launch the app in the background.
+Stopping the AppHost or resetting local data does not delete its Azure resources.
 
 ## Validation
 
@@ -96,7 +119,7 @@ dotnet test .\DrillSim.slnx -c Release --nologo
 .\scripts\test_service_contracts.ps1
 ```
 
-The solution includes the Analysis API, Drilling Operations, and Reservoir
+The solution includes AppHost parameter tests, the Analysis API, Drilling Operations, and Reservoir
 Simulation test projects; it does not include every legacy test project.
 The second command runs twelve additional self-contained service-contract
 projects, including in-process Earth-service HTTP/MCP tests, isolated controller
@@ -182,11 +205,14 @@ In Aspire's `analysis-api` structured logs, `FormationInterpretationFailure`
 `ProviderStatusCode`, correlated with the HTTP request trace and span. Browser
 errors remain sanitized.
 
-Formation drafting runs a local Microsoft Agent Framework agent, not a
-Foundry-hosted agent. It uses the Responses API for reasoning-capable function
-tools, with response storage and background execution disabled. Encrypted
-reasoning continuation stays within the request's local tool loop.
-Its `invoke_agent` span contains a child model span for
+All three analysis agents run locally in Microsoft Agent Framework: field notes
+(`/agui`), scenario-scoped notes (`/agui/scenario`) and formation drafting.
+They use the Responses API so Astra can reason while calling tools.
+Response storage and background execution are disabled, and encrypted reasoning
+continuation stays within each request's local tool loop. Scenario notes retain
+their clock-bound evidence tools; they cannot access unrestricted field evidence.
+
+The formation agent's `invoke_agent` span contains a child model span for
 the model request. In **Development**, both spans capture input/output messages,
 including notes and field evidence; treat trace exports accordingly. Message
 capture is off outside Development. The chat span records token usage when the
@@ -222,36 +248,89 @@ $env:DRILLSIM_PLAYWRIGHT_MODULE = "<absolute-path-to-playwright>\index.mjs"
 npm run test:tutorial:browser
 ```
 
-Configure the AppHost parameters with its existing user-secrets store:
+Aspire automatically generates missing internal service keys and persists them
+in the AppHost's user-secrets store. Existing values are reused; neither a
+restart nor a dataset reset requires generating new keys.
+
+### Azure dependencies
+
+The AppHost uses `Aspire.Hosting.Foundry` to provision an Entra-only Foundry
+account and the `drillsim-chat` model deployment. Its custom
+[`azure-maps.bicep`](aspire/DrillSim.AppHost/Infrastructure/azure-maps.bicep)
+module provisions an Entra-only Azure Maps account with CORS for
+`http://localhost:5173`. Aspire assigns **Cognitive Services OpenAI User** and
+**Azure Maps Data Reader** to the local developer identity at their respective
+account scopes. No keys, endpoint copying or manual role assignments are needed
+for newly provisioned resources.
+
+The defaults are `eastus2`, a resource group prefix of `rg-drillsim`, and
+`gpt-6-astra` version `2026-09-03`, using GlobalStandard capacity `100`.
+Use an Azure subscription and region with the required model access and quota;
+Aspire cannot grant either. Standard `Azure:SubscriptionId`, `Azure:TenantId`,
+`Azure:ResourceGroup` and `Azure:Location` settings control the deployment target.
+Local provisioning uses `Azure:CredentialSource=AzureCli`, matching the Analysis API.
+
+To change the managed model, set `AzureResources:ModelName` and
+`AzureResources:ModelVersion` together in the AppHost's user-secrets store.
+`AzureResources:ModelCapacity` controls deployment capacity. The replacement
+must support structured responses, the Responses API and function tools;
+there is no automatic model substitution.
+
+**Existing connections are preserved.** Complete groups of the following
+AppHost parameters bypass provisioning for that service independently:
+
+| Connection | Required `Parameters:` values |
+| --- | --- |
+| AI | `azure-openai-endpoint`, `azure-openai-deployment-name`, `azure-openai-subscription-id` |
+| Maps | `azure-maps-client-id`, `azure-maps-tenant-id`, `azure-maps-subscription-id` |
+
+The AI endpoint must end in `/openai/v1/`. Maps needs the account's client ID,
+not a subscription key or app-registration ID. Existing resources must already
+have the corresponding data-plane roles and Maps CORS setting; the AppHost does
+not change externally configured accounts. Partial groups fail with an
+explanatory error. Remove a complete group to switch that service to Aspire
+provisioning on the next launch.
+
+**Without Azure**, disable new provisioning before startup:
 
 ```powershell
-dotnet user-secrets set "Parameters:azure-openai-endpoint" "https://<resource>.openai.azure.com/" --project .\aspire\DrillSim.AppHost
-dotnet user-secrets set "Parameters:azure-openai-deployment-name" "<deployment>" --project .\aspire\DrillSim.AppHost
-dotnet user-secrets set "Parameters:azure-openai-subscription-id" "<openai-subscription-id>" --project .\aspire\DrillSim.AppHost
-dotnet user-secrets set "Parameters:azure-maps-client-id" "<azure-maps-account-client-id>" --project .\aspire\DrillSim.AppHost
-dotnet user-secrets set "Parameters:azure-maps-tenant-id" "<maps-tenant-id>" --project .\aspire\DrillSim.AppHost
-dotnet user-secrets set "Parameters:azure-maps-subscription-id" "<maps-subscription-id>" --project .\aspire\DrillSim.AppHost
-dotnet user-secrets set "Parameters:reservoir-simulation-operator-key" "<random-operator-key>" --project .\aspire\DrillSim.AppHost
-dotnet user-secrets set "Parameters:drilling-operations-internal-key" "<random-internal-key>" --project .\aspire\DrillSim.AppHost
-dotnet user-secrets set "Parameters:drilling-operations-analysis-callback-key" "<random-callback-key>" --project .\aspire\DrillSim.AppHost
+dotnet user-secrets set "AzureResources:Provision" "false" --project .\aspire\DrillSim.AppHost
 ```
 
-Azure parameters remain optional so the portal still starts offline. The
-reservoir-simulation operator key is required and is not referenced by the
+Complete existing connections are still used. Without them, Maps and AI are
+unavailable, but the portal's deterministic analysis and local simulator work.
+Set the value to `true` to enable provisioning again.
+
+Azure authentication uses `AzureCliCredential`. An existing `AZURE_CONFIG_DIR`
+is forwarded to the Analysis API; otherwise the AppHost uses the default
+`.azure` directory under the user's home. Credentials are never sent to the
+browser. The API brokers short-lived Azure Maps tokens for
+`https://atlas.microsoft.com/.default`. A Maps 403 after token acquisition calls
+for checking the account client ID and its Data Reader assignment.
+
+### Internal simulation access
+
+The reservoir-simulation operator key is generated when missing and is not referenced by the
 analysis API or browser. Drilling Operations is internal-only and receives the
 Stage A operator key plus its own internal and future Analysis API callback
-credentials; none are forwarded to the browser. Azure authentication uses
-`AzureCliCredential`; start
-Aspire from the intended AzEnv profile so its `AZURE_CONFIG_DIR` is forwarded
-to the analysis API. Credentials are never sent to the browser. The analysis
-API brokers short-lived Azure Maps tokens for
-`https://atlas.microsoft.com/.default`.
+credentials; none are forwarded to the browser.
 
-Assign **Azure Maps Data Reader** on the Maps account to the Azure CLI identity
-used by `analysis-api`, and allow `http://localhost:5173` in that account's CORS
-settings. Subscription **Owner** or **User Access Administrator** alone does not
-grant Maps data-plane access. If token acquisition succeeds but map requests
-return 403, check that role assignment as well as the configured account client ID.
+Before S2 generates a drilling path, it registers the approved **Planned** path
+with the reservoir service. A path outside the prepared model's coverage is
+rejected before drilling or survey artifacts are created. S4 still checks the
+**AsDrilled** path, because steering can leave the model even when the plan fits.
+The Simulation panel explains which path was rejected and how to proceed:
+create a new scenario with a compatible target/path, or have the operator provide
+a model covering that location. Changing the seed or Preview/Standard resolution
+does not expand the model's area; existing approved paths and failed runs are not rewritten.
+
+In Aspire, the reservoir service logs `ReservoirRequestRejected` (event 8400)
+with the HTTP status, diagnostic code and field-by-field validation errors on
+the failing request trace. Malformed requests log `ReservoirRequestMalformed`
+(8401) with the parse exception. Browser failure messages use known diagnostic
+codes rather than forwarding private model details or arbitrary backend text.
+Older runs recorded only as `StageADataMismatch` retain that original code;
+their missing validation detail cannot be recovered from the old trace.
 
 For an uncommitted S8 publication rejected by a destination service, **New
 evidence** can offer **Recover staged publication** after the underlying import

@@ -27,7 +27,8 @@ public static class RunStateMachine
 public sealed record BindWorldRequest(string ScenarioId, string ApprovedSealedPredictionHash, string SourcePackageSha256, string WorldId, string WorldModelVersion, string CalibrationArtifactId, string CalibrationArtifactSha256);
 public sealed record TruthBindingResponse(string BindingId, string ScenarioId, string ApprovedSealedPredictionHash, string SourcePackageSha256, string WorldId, string WorldModelVersion, string CalibrationArtifactId, string CalibrationArtifactSha256, DateTimeOffset CreatedUtc);
 public sealed record CreateRunRequest(string ScenarioId, string ApprovedSealedPredictionHash, string PlanArtifactId, string PlanArtifactSha256);
-public sealed record RunResponse(string RunId, string ScenarioId, RunStatus Status, RunStageKind? CurrentStage, DateTimeOffset CreatedUtc, DateTimeOffset UpdatedUtc, DateTimeOffset? EndedUtc);
+public sealed record RunResponse(string RunId, string ScenarioId, RunStatus Status, RunStageKind? CurrentStage, DateTimeOffset CreatedUtc, DateTimeOffset UpdatedUtc, DateTimeOffset? EndedUtc,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? DiagnosticCode = null);
 public sealed record StageResponse(RunStageKind Stage, string Name, StageStatus Status, int AttemptCount, DateTimeOffset? StartedUtc, DateTimeOffset? EndedUtc, string? DiagnosticCode);
 public sealed record AuditResponse(string AuditId, string ScenarioId, long Sequence, string Action, string SubjectId, string DataHash, string PreviousHash, string EntryHash, DateTimeOffset CreatedUtc);
 public sealed record ServiceStatus(string Service, string Status, string Scope);
@@ -128,4 +129,3 @@ public static class RequestValidation
         if (string.IsNullOrWhiteSpace(value) || value.Length > maximum || value.Any(static c => !(char.IsAsciiLetterOrDigit(c) || "-_.:".Contains(c)))) errors[name] = [$"Value must be a nonempty identifier of at most {maximum} safe characters."];
     }
 }
-

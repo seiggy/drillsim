@@ -309,7 +309,7 @@ public sealed partial class DrillingOperationsStore(string connectionString, Tim
             await UpdateRunAsync(connection, transaction, runId, RunStatus.Queued, previousStage, now, null, null, ct);
             await AppendAuditAsync(connection, transaction, run.ScenarioId, "run.resumed", runId,
                 CanonicalJson.Serialize(new { stage = blockedStage.ToString() }), ct);
-            return Json(202, run with { Status = RunStatus.Queued, CurrentStage = previousStage, UpdatedUtc = now },
+            return Json(202, run with { Status = RunStatus.Queued, CurrentStage = previousStage, UpdatedUtc = now, DiagnosticCode = null },
                 $"/drillingoperations/api/runs/{runId}");
         }, cancellationToken);
 
@@ -363,7 +363,7 @@ public sealed partial class DrillingOperationsStore(string connectionString, Tim
                     now, "OperatorCancelled", now, ct);
                 await AppendAuditAsync(connection, transaction, run.ScenarioId, "run.cancelled", runId,
                     CanonicalJson.Serialize(new { publicationCount = 0, clockAdvanceCount = 0 }), ct);
-                run = run with { Status = RunStatus.Cancelled, UpdatedUtc = now, EndedUtc = now };
+                run = run with { Status = RunStatus.Cancelled, UpdatedUtc = now, EndedUtc = now, DiagnosticCode = "OperatorCancelled" };
             }
             return Json(202, run, $"/drillingoperations/api/runs/{runId}");
         }, cancellationToken);
@@ -622,7 +622,7 @@ public sealed partial class DrillingOperationsStore(string connectionString, Tim
         SqliteTransaction? transaction, string runId, CancellationToken cancellationToken)
     {
         await using SqliteCommand command = Command(connection, transaction, """
-            SELECT RunId, ScenarioId, Status, CurrentStage, CreatedUtc, UpdatedUtc, EndedUtc
+            SELECT RunId, ScenarioId, Status, CurrentStage, CreatedUtc, UpdatedUtc, EndedUtc, DiagnosticCode
             FROM Runs WHERE RunId = $runId;
             """);
         Add(command, "$runId", runId);
@@ -632,7 +632,8 @@ public sealed partial class DrillingOperationsStore(string connectionString, Tim
             Enum.Parse<RunStatus>(reader.GetString(2)),
             reader.IsDBNull(3) ? null : (RunStageKind)reader.GetInt32(3),
             Parse(reader.GetString(4)), Parse(reader.GetString(5)),
-            reader.IsDBNull(6) ? null : Parse(reader.GetString(6)));
+            reader.IsDBNull(6) ? null : Parse(reader.GetString(6)),
+            reader.IsDBNull(7) ? null : reader.GetString(7));
     }
 
     private static async Task<IReadOnlyList<StageResponse>> ReadStagesAsync(SqliteConnection connection,
@@ -881,8 +882,6 @@ public sealed partial class DrillingOperationsStore(string connectionString, Tim
         );
         """;
 }
-
-
 
 
 

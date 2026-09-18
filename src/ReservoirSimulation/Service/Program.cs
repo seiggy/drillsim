@@ -74,7 +74,8 @@ api.MapGet("/status", () => Results.Ok(new ServiceStatus(
     KernelMetadata.Limitation,
     "Conditioning controls and cell truth remain private; Stage B internal orchestration is the sole intended world-route recipient.")));
 
-RouteGroupBuilder worlds = api.MapGroup("/worlds");
+RouteGroupBuilder worlds = api.MapGroup("/worlds")
+    .AddEndpointFilter<ReservoirProblemLoggingFilter>();
 
 worlds.MapGet("/setup-profiles", async Task<IResult> (
     string fieldId,
@@ -364,7 +365,11 @@ worlds.MapPost("/{worldId}/path-bindings", async Task<IResult> (
     }
     catch (ReservoirValidationException exception)
     {
-        return Results.ValidationProblem(exception.Errors);
+        return Results.ValidationProblem(exception.Errors, extensions:
+            exception.DiagnosticCode is null ? null : new Dictionary<string, object?>
+            {
+                ["diagnosticCode"] = exception.DiagnosticCode
+            });
     }
     catch (PersistenceIntegrityException exception)
     {

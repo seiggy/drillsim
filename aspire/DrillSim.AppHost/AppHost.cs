@@ -1,51 +1,15 @@
+using DrillSim.AppHost;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
-string azureConfigDirectory = Environment.GetEnvironmentVariable("AZURE_CONFIG_DIR")
-    ?? throw new InvalidOperationException(
-        "AZURE_CONFIG_DIR is required. Start Aspire from the intended AzEnv profile.");
-var azureOpenAiEndpoint = builder.AddParameter(
-    "azure-openai-endpoint",
-    builder.Configuration["Parameters:azure-openai-endpoint"] ?? string.Empty)
-    .WithDescription("Azure OpenAI or Foundry model endpoint.");
-var azureOpenAiDeploymentName = builder.AddParameter(
-    "azure-openai-deployment-name",
-    builder.Configuration["Parameters:azure-openai-deployment-name"] ?? string.Empty)
-    .WithDescription("Azure OpenAI model deployment name.");
-var azureOpenAiSubscriptionId = builder.AddParameter(
-    "azure-openai-subscription-id",
-    builder.Configuration["Parameters:azure-openai-subscription-id"] ?? string.Empty)
-    .WithDescription("Azure subscription containing the OpenAI resource.");
-var azureMapsClientId = builder.AddParameter(
-    "azure-maps-client-id",
-    builder.Configuration["Parameters:azure-maps-client-id"] ?? string.Empty)
-    .WithDescription("Azure Maps account client ID.");
-var azureMapsTenantId = builder.AddParameter(
-    "azure-maps-tenant-id",
-    builder.Configuration["Parameters:azure-maps-tenant-id"] ?? string.Empty)
-    .WithDescription("Microsoft Entra tenant used to authenticate to Azure Maps.");
-var azureMapsSubscriptionId = builder.AddParameter(
-    "azure-maps-subscription-id",
-    builder.Configuration["Parameters:azure-maps-subscription-id"] ?? string.Empty)
-    .WithDescription("Azure subscription containing the Maps account.");
-var reservoirSimulationOperatorKey = builder.AddParameter(
-    "reservoir-simulation-operator-key",
-    builder.Configuration["Parameters:reservoir-simulation-operator-key"] ?? string.Empty,
-    secret: true)
+string azureConfigDirectory = AzureResources.AzureConfigDirectory(Environment.GetEnvironmentVariable("AZURE_CONFIG_DIR"));
+var reservoirSimulationOperatorKey = builder.AddServiceKey("reservoir-simulation-operator-key")
     .WithDescription("Operator-only key for hidden reservoir world generation and simulation.");
-var drillingOperationsInternalKey = builder.AddParameter(
-    "drilling-operations-internal-key",
-    builder.Configuration["Parameters:drilling-operations-internal-key"] ?? string.Empty,
-    secret: true)
+var drillingOperationsInternalKey = builder.AddServiceKey("drilling-operations-internal-key")
     .WithDescription("Internal-only key for Drilling Operations operator routes.");
-var drillingOperationsAnalysisCallbackKey = builder.AddParameter(
-    "drilling-operations-analysis-callback-key",
-    builder.Configuration["Parameters:drilling-operations-analysis-callback-key"] ?? string.Empty,
-    secret: true)
+var drillingOperationsAnalysisCallbackKey = builder.AddServiceKey("drilling-operations-analysis-callback-key")
     .WithDescription("Drilling Operations credential for Analysis API callbacks.");
-var publicationImportKey = builder.AddParameter(
-    "publication-import-key",
-    builder.Configuration["Parameters:publication-import-key"] ?? string.Empty,
-    secret: true)
+var publicationImportKey = builder.AddServiceKey("publication-import-key")
     .WithDescription("Internal credential for staged ontology publication.");
 
 var databaseDirectory = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, "..", "..", "data"));
@@ -129,12 +93,6 @@ var analysisApi = builder
     .WithEnvironment("TrajectoryServiceUrl", trajectory.GetEndpoint("http"))
     .WithEnvironment("GeologicalPropertiesServiceUrl", geologicalProperties.GetEndpoint("http"))
     .WithEnvironment("DRILLING_OPERATIONS_CALLBACK_KEY", drillingOperationsAnalysisCallbackKey)
-    .WithEnvironment("AZURE_OPENAI_ENDPOINT", azureOpenAiEndpoint)
-    .WithEnvironment("AZURE_OPENAI_DEPLOYMENT_NAME", azureOpenAiDeploymentName)
-    .WithEnvironment("AZURE_OPENAI_SUBSCRIPTION_ID", azureOpenAiSubscriptionId)
-    .WithEnvironment("AZURE_MAPS_CLIENT_ID", azureMapsClientId)
-    .WithEnvironment("AZURE_MAPS_TENANT_ID", azureMapsTenantId)
-    .WithEnvironment("AZURE_MAPS_SUBSCRIPTION_ID", azureMapsSubscriptionId)
     .WithEnvironment("AZURE_CONFIG_DIR", azureConfigDirectory)
     .WithHttpEndpoint()
     .WithHttpsEndpoint()
@@ -146,9 +104,10 @@ var analysisApi = builder
     .WaitFor(wellBoreArchitecture)
     .WaitFor(trajectory)
     .WaitFor(geologicalProperties);
+builder.ConfigureAzureResources(analysisApi);
 var analysisWeb = builder
     .AddViteApp("analysis-web", "../../src/DrillSim.AnalysisWeb")
-    .WithEndpoint("http", static endpoint => endpoint.Port = 5173)
+    .WithEndpoint("http", static endpoint => endpoint.Port = AzureResources.WebPort)
     .WithReference(analysisApi)
     .WithEnvironment("ANALYSIS_API_URL", analysisApi.GetEndpoint("http"))
     .WithEnvironment("BROWSER", "none")

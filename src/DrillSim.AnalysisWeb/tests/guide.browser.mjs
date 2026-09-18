@@ -20,12 +20,39 @@ try {
   assert.equal(response.status(), 200)
   const guideRequests = []
   page.on('request', request => guideRequests.push(request.url()))
-  const walkthrough = page.locator('#walkthrough-validation')
-  assert.equal(await walkthrough.count(), 1)
-  assert.equal(await walkthrough.locator('.walkthrough-record tbody tr').count(), 39)
+  const preflight = page.locator('#preflight')
+  assert.equal(await preflight.locator('h2').innerText(), await page.locator('.outline a[href="#preflight"]').innerText())
+  for (const id of ['tools', 'secrets', 'azure', 'start', 'datasets', 'model', 'reset', 'checklist'])
+    assert.equal(await preflight.locator(`#preflight-${id}`).count(), 1)
+  const preflightText = await preflight.textContent()
+  for (const setting of ['reservoir-simulation-operator-key', 'drilling-operations-internal-key',
+    'drilling-operations-analysis-callback-key', 'publication-import-key', 'AZURE_CONFIG_DIR', '/openai/v1/',
+    'Azure Maps Data Reader', 'Cognitive Services OpenAI User', 'AzureResources:Provision',
+    'AzureResources:ModelName', 'AzureResources:ModelVersion', 'AzureResources:ModelCapacity'])
+    assert.ok(preflightText.includes(setting), `Preflight must cover ${setting}.`)
+  assert.match(preflightText, /Aspire generates any missing local service keys/)
+  assert.ok(!preflightText.includes('$keyNames'), 'Key generation belongs in the AppHost, not a pasted setup script.')
+  assert.equal((await preflight.locator('#preflight-azure-login').innerText()).trim(), 'az login')
+  const firstStart = await preflight.locator('#preflight-start-command').innerText()
+  assert.match(firstStart, /aspire run --apphost/)
+  assert.ok(!firstStart.includes('--non-interactive'), 'First-time Azure setup must allow Aspire prompts.')
+  assert.match(preflightText, /Aspire asks for any missing tenant, subscription, resource group and location choices/)
+  assert.match(preflightText, /Complete existing connection settings.*are reused/)
+  assert.match(preflightText, /does not delete the provisioned Azure resources/)
+  assert.ok(!preflightText.includes('dotnet user-secrets set "Parameters:azure-'),
+    'Azure connection values must be supplied by Aspire rather than a mandatory manual setup block.')
+  const importCommands = await preflight.locator('#preflight-load-troll').innerText()
+  assert.match(importCommands, /--dataset force-2020 --dataset sodir-force-troll/)
+  assert.match(importCommands, /--limit 46 --dry-run/)
+  assert.match(await preflight.locator('#preflight-seed-model').innerText(), /seed_reservoir_world\.py/)
+  const resetCommands = await preflight.locator('#preflight-reset-data').innerText()
+  assert.ok(resetCommands.indexOf('aspire stop') < resetCommands.indexOf('Move-Item'))
+  assert.ok(resetCommands.indexOf('Move-Item') < resetCommands.indexOf('aspire start'))
+  assert.match(resetCommands, /-wal\|-shm\|-journal/)
+  assert.ok(!resetCommands.includes('Remove-Item'), 'The documented reset must archive, not delete, the database set.')
   const screenshotUrls = await page.locator('a[href^="screenshots/"], img[src^="screenshots/"]').evaluateAll(elements =>
     [...new Set(elements.map(element => element.href || element.src))])
-  assert.ok(screenshotUrls.length >= 39)
+  assert.ok(screenshotUrls.length >= 19)
   for (const url of screenshotUrls) {
     assert.equal(new URL(url).origin, new URL(guideUrl).origin)
     const image = await context.request.get(url)
@@ -101,6 +128,6 @@ try {
   await noJs.close()
   console.log(JSON.stringify({ status: 'passed', localGuideLink: true, tasks: 19, presenterNavigation: true,
     architectureControls: true, lightDarkMobilePrint: true, noJavaScriptReadable: true,
-    documentedTutorialSteps: 39, illustratedEngineeringTasks: 19,
+    preflightAndDatasetSetup: true, illustratedEngineeringTasks: 19,
     screenshotLinks: screenshotUrls.length, screenshotRequestsOnly: true }))
 } finally { await browser.close() }
