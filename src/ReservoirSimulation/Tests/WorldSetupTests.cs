@@ -140,6 +140,38 @@ public sealed class WorldSetupTests
         });
     }
 
+    [Test]
+    public async Task Catalog_ListsNewestConditioningFirst_SoItIsTheDefault_AndKeepsOlderProfilesSelectable()
+    {
+        WorldGenerationRequest original = FullTemplate();
+        WorldGenerationRequest reconditioned = original with
+        {
+            StructuralConditioningPoints =
+            [
+                original.StructuralConditioningPoints[0] with { ReservoirBaseDepthM = original.StructuralConditioningPoints[0].ReservoirBaseDepthM - 1 },
+                original.StructuralConditioningPoints[1]
+            ]
+        };
+        await _store.Manager.CreateAsync(original);
+        WorldSetupProfile older = (await Catalog(original)).Profiles.Single();
+        await Task.Delay(20);
+        await _store.Manager.CreateAsync(reconditioned);
+        await Task.Delay(20);
+        await _store.Manager.CreateAsync(original with { Seed = original.Seed + 3 });
+
+        WorldSetupProfileCatalog catalog = await Catalog(original);
+        WorldSetupProfileCatalog restarted = await _store.NewManager().GetSetupProfilesAsync(
+            original.FieldId, original.ReservoirName);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(catalog.Profiles, Has.Count.EqualTo(2));
+            Assert.That(catalog.Profiles[^1], Is.EqualTo(older));
+            Assert.That(catalog.Profiles[0].ProfileId, Is.Not.EqualTo(older.ProfileId));
+            Assert.That(restarted.Profiles, Is.EqualTo(catalog.Profiles));
+        });
+    }
+
     [TestCase(false)]
     [TestCase(true)]
     public async Task Setup_ChangesOnlySeedAndGridCounts_AndIsByteIdenticalOnRetryAndRestart(bool oilRim)

@@ -135,13 +135,30 @@ public sealed class ConfiguredPredictionTests
             "result" => f.Body with { AnalysisBinding = binding with { AnalysisSha256 = new string('a', 64) } },
             "candidate" => f.Body with { CandidateId = "configured:not-real" },
             "geometry" => f.Body with { ProposedWellPath = [f.Body.ProposedWellPath[0], f.Body.ProposedWellPath[1] with { EastingM = f.Candidate.EastingM + 1 }] },
-            "quantiles" => f.Body with { ExpectedPaydirtM = new(0, 0, 0) },
+            "quantiles" => f.Body with { AnalysisBinding = binding with { Target = binding.Target! with { ExpectedPaydirtM = new(0, 0, 0) } } },
             _ => f.Body with { CitedEvidenceIds = [$"well:{Guid.NewGuid():D}"] }
         };
         Assert.ThrowsAsync<ScenarioApiException>(() => f.Ledger.PutDraftAsync(f.Scenario.ScenarioId, invalid));
         await f.Ledger.PutDraftAsync(f.Scenario.ScenarioId, f.Body);
         await f.SetDraftAsync(invalid);
         Assert.ThrowsAsync<ScenarioApiException>(() => f.Ledger.SealAsync(f.Scenario.ScenarioId));
+    }
+
+    [Test]
+    public async Task ForecastPay_MayDifferFromScreening_WhileBindingAndBaselinesKeepScreeningValue()
+    {
+        using var f = await ConfiguredPredictionFixture.CreateAsync(AnalysisConfiguration.Default with { GridPointsPerAxis = 9 });
+        var adjusted = new QuantileValues(1, 2, 3);
+        await f.Ledger.PutDraftAsync(f.Scenario.ScenarioId, f.Body with { ExpectedPaydirtM = adjusted });
+        PredictionRecord sealedPrediction = await f.Ledger.SealAsync(f.Scenario.ScenarioId);
+        Assert.Multiple(() =>
+        {
+            Assert.That(sealedPrediction.Body.ExpectedPaydirtM, Is.EqualTo(adjusted));
+            Assert.That(sealedPrediction.Body.AnalysisBinding!.Target!.ExpectedPaydirtM,
+                Is.EqualTo(new QuantileValues(f.Candidate.P90NetPayM, f.Candidate.P50NetPayM, f.Candidate.P10NetPayM)));
+            Assert.That(sealedPrediction.Baselines.Single(item => item.Kind == BaselineKind.UncertaintyAwareRank1).ExpectedPaydirtM,
+                Is.Not.EqualTo(adjusted));
+        });
     }
 
     [Test]

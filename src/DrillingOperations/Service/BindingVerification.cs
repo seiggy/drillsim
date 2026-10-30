@@ -115,7 +115,7 @@ public sealed class BindingVerificationService(AnalysisVerificationClient analys
     private static void Mismatch(string message) => throw new BindingVerificationException(409, message);
 }
 
-public sealed record AnalysisScenarioDto(Guid ScenarioId, Guid SourceFieldId, string ReservoirName, string WorldModelVersion, string Status, DateTimeOffset? InitialAsOfUtc = null, string? ObservationModelVersion = null);
+public sealed record AnalysisScenarioDto(Guid ScenarioId, Guid SourceFieldId, string ReservoirName, string WorldModelVersion, string Status, DateTimeOffset? InitialAsOfUtc = null, string? ObservationModelVersion = null, string? ScoringModelVersion = null);
 public sealed record AnalysisPredictionDto(Guid ScenarioId, AnalysisPredictionBodyDto? Body, int Revision, AnalysisSealDto? Seal, AnalysisApprovalDto? Approval, IReadOnlyList<AnalysisBaselineDto>? Baselines = null);
 [JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public sealed record AnalysisPredictionBodyDto(

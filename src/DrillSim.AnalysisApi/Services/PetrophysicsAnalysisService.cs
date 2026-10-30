@@ -14,7 +14,7 @@ public interface IPetrophysicsAnalysisService
     NetPayResult CalculateNetPay(string evidenceId, IEnumerable<PetrophysicsSample> samples);
 }
 
-public sealed class PetrophysicsAnalysisService : IPetrophysicsAnalysisService
+public sealed partial class PetrophysicsAnalysisService : IPetrophysicsAnalysisService
 {
     private const double EarthRadiusM = 6_378_137.0;
     public const double PorosityCutoff = 0.12;
@@ -66,7 +66,10 @@ public sealed class PetrophysicsAnalysisService : IPetrophysicsAnalysisService
         var gaps = new List<string>(package.DataGaps);
         GeographicOrigin? origin = ReadGeographicOrigin(package.Field);
         IReadOnlyList<WellPaySummary> summaries = BuildWellSummaries(package, gaps, origin, reservoirName, configuration);
-        var (grid, bounds) = BuildCandidateGrid(package, summaries, gaps, origin, configuration);
+        Func<double, double, double>? fluidFraction = TargetFluidFraction(package, reservoirName, configuration);
+        if (configuration.TargetFluid is not null && fluidFraction is null)
+            gaps.Add($"No reservoir model could be built, so {configuration.TargetFluid.ToLowerInvariant()} pay at candidates is not separated from other fluids.");
+        var (grid, bounds) = BuildCandidateGrid(package, summaries, gaps, origin, configuration, fluidFraction);
         RankedCandidate[] ranking = grid
             .Where(point => point.Status == "eligible" && point.Prediction is not null)
             .Select(point => point.Prediction!)
@@ -81,7 +84,9 @@ public sealed class PetrophysicsAnalysisService : IPetrophysicsAnalysisService
             : point).ToArray();
 
         var methodology = new AnalysisMethodology(
-            "Deterministic expected paydirt screening; derived, not reserves",
+            configuration.TargetFluid is null
+                ? "Deterministic expected paydirt screening; derived, not reserves"
+                : $"Deterministic expected {configuration.TargetFluid.ToLowerInvariant()} paydirt screening: well pay counts only good-rock log readings dominated by {configuration.TargetFluid.ToLowerInvariant()}, and candidate pay is rock pay times the reservoir model's {configuration.TargetFluid.ToLowerInvariant()} share at the point; derived, not reserves",
             configuration.PorosityCutoff,
             configuration.PermeabilityCutoffM2,
             "mean must be greater than zero",
@@ -149,7 +154,8 @@ public sealed class PetrophysicsAnalysisService : IPetrophysicsAnalysisService
         Dictionary<Guid, Coordinate> trajectoryLocations = BuildTrajectoryLocations(package.Trajectories, origin);
 
         var calculationsByWell = new Dictionary<Guid, List<NetPayResult>>();
-        int recordsWithoutSamples = 0;
+        int recordsWithoutSamples = 0, recordsWithoutFluid = 0;
+        var rockPay = new Dictionary<string, double>(StringComparer.Ordinal);
         foreach (JsonNode geology in package.GeologicalProperties)
         {
             Guid? wellBoreId = JsonAccess.Guid(geology, "WellBoreID");
@@ -168,12 +174,29 @@ public sealed class PetrophysicsAnalysisService : IPetrophysicsAnalysisService
             }
 
             NetPayResult calculation = CalculateNetPay(evidenceId, samples, configuration);
+            rockPay[evidenceId] = calculation.NetPayThicknessM;
+            if (configuration.TargetFluid is string fluid)
+            {
+                (double Top, double Base) interval = ReadFormationInterval(geology, reservoirName) ?? (double.NegativeInfinity, double.PositiveInfinity);
+                string[] fluids = ReadModelSamples(geology, reservoirName ?? "", interval.Top, interval.Base, configuration)
+                    .Where(sample => sample.Fluid is not null).Select(sample => sample.Fluid!).ToArray();
+                if (fluids.Length == 0)
+                    recordsWithoutFluid++;
+                else
+                    calculation = calculation with
+                    {
+                        NetPayThicknessM = calculation.NetPayThicknessM *
+                            fluids.Count(item => item.Equals(fluid, StringComparison.OrdinalIgnoreCase)) / fluids.Length
+                    };
+            }
             if (!calculationsByWell.TryGetValue(wellId, out List<NetPayResult>? calculations))
                 calculationsByWell[wellId] = calculations = [];
             calculations.Add(calculation);
         }
         if (recordsWithoutSamples > 0)
             gaps.Add($"{recordsWithoutSamples} reservoir intersection(s) have formation geometry but no complete petrophysics samples.");
+        if (recordsWithoutFluid > 0)
+            gaps.Add($"{recordsWithoutFluid} well record(s) have no fluid-saturation log; their full rock pay is counted as {configuration.TargetFluid?.ToLowerInvariant()} pay.");
 
         var summaries = new List<WellPaySummary>();
         foreach (var (wellId, calculations) in calculationsByWell.OrderBy(item => item.Key))
@@ -205,7 +228,10 @@ public sealed class PetrophysicsAnalysisService : IPetrophysicsAnalysisService
                 totalSamples == 0 ? 0 : calculations.Sum(item => item.MeanPayPorosity * item.QualifyingSampleCount) / totalSamples,
                 totalSamples == 0 ? 0 : calculations.Sum(item => item.MeanPayPermeabilityM2 * item.QualifyingSampleCount) / totalSamples,
                 location.Value.Easting,
-                location.Value.Northing));
+                location.Value.Northing)
+            {
+                RockNetPayThicknessM = configuration.TargetFluid is null ? null : calculations.Average(item => rockPay[item.EvidenceId])
+            });
         }
 
         if (summaries.Count < configuration.IdwNeighborCount)
@@ -218,8 +244,11 @@ public sealed class PetrophysicsAnalysisService : IPetrophysicsAnalysisService
         IReadOnlyList<WellPaySummary> wells,
         List<string> gaps,
         GeographicOrigin? origin,
-        AnalysisConfiguration configuration)
+        AnalysisConfiguration configuration,
+        Func<double, double, double>? fluidFraction = null)
     {
+        // With a model share, interpolate rock pay and apply the share once; otherwise use the wells' (fluid) pay.
+        double Pay(WellPaySummary well) => fluidFraction is null ? well.NetPayThicknessM : well.RockNetPayThicknessM ?? well.NetPayThicknessM;
         List<Coordinate> boundsPoints = ReadBoundsPoints(package, origin)
             .Where(point => double.IsFinite(point.Easting) && double.IsFinite(point.Northing)).ToList();
         if (boundsPoints.Count < 2)
@@ -282,13 +311,16 @@ public sealed class PetrophysicsAnalysisService : IPetrophysicsAnalysisService
 
                 double[] weights = nearest.Select(item => 1.0 / Math.Pow(Math.Max(item.Distance, 1), 2)).ToArray();
                 double weightSum = weights.Sum();
-                double p50 = WeightedAverage(nearest.Select(item => item.Well.NetPayThicknessM).ToArray(), weights, weightSum);
+                double p50 = WeightedAverage(nearest.Select(item => Pay(item.Well)).ToArray(), weights, weightSum);
                 double porosity = WeightedAverage(nearest.Select(item => item.Well.MeanPayPorosity).ToArray(), weights, weightSum);
                 double permeabilityM2 = WeightedAverage(nearest.Select(item => item.Well.MeanPayPermeabilityM2).ToArray(), weights, weightSum);
-                double disagreementVariance = nearest.Select((item, index) => weights[index] * Math.Pow(item.Well.NetPayThicknessM - p50, 2)).Sum() / weightSum;
+                double disagreementVariance = nearest.Select((item, index) => weights[index] * Math.Pow(Pay(item.Well) - p50, 2)).Sum() / weightSum;
                 double weightedDistance = nearest.Select((item, index) => weights[index] * item.Distance).Sum() / weightSum;
                 double distanceSigma = p50 * 0.15 * Math.Min(1, weightedDistance / diagonal);
                 double sigma = Math.Sqrt(disagreementVariance + distanceSigma * distanceSigma);
+                double? fraction = fluidFraction?.Invoke(east, north);
+                p50 *= fraction ?? 1;
+                sigma *= fraction ?? 1;
                 double relativeUncertainty = sigma / Math.Max(p50, 1e-12);
                 double permeabilityMd = permeabilityM2 / PermeabilityCutoffM2;
                 double score = p50 * porosity * Math.Log10(1 + permeabilityMd) / (1 + relativeUncertainty);
@@ -321,7 +353,8 @@ public sealed class PetrophysicsAnalysisService : IPetrophysicsAnalysisService
                     ScoreComponents = new(p50, porosity, permeabilityMd, Math.Log10(1 + permeabilityMd),
                         p50 * porosity * Math.Log10(1 + permeabilityMd), 1 + relativeUncertainty),
                     UncertaintyComponents = new(disagreementVariance, weightedDistance, diagonal,
-                        distanceSigma, sigma, QuantileZScore, false)
+                        distanceSigma, sigma, QuantileZScore, false),
+                    TargetFluidFraction = fraction
                 };
                 grid.Add(new(candidateId, east, north, geographic.LongitudeDegrees, geographic.LatitudeDegrees,
                     "eligible", [], nearestDistance, candidate));
@@ -486,6 +519,215 @@ public sealed class PetrophysicsAnalysisService : IPetrophysicsAnalysisService
                 JsonAccess.Number(point, "RiemannianEast") ?? JsonAccess.Number(point, "Y"),
                 JsonAccess.Number(point, "RiemannianNorth") ?? JsonAccess.Number(point, "X"))
             : null;
+    }
+
+    public const string StructureEstimateMethod = "formation-structure-idw-v1";
+    internal const double StructuralSlopeSigma = 0.02;
+
+    /// <summary>
+    /// Inverse-distance (power 2) estimate of visible formation top/base TVD at a target, in the candidate-grid frame.
+    /// Controls are selected by <see cref="ReadStructuralControls"/> (survey TVD, or inlier assumed-vertical picks).
+    /// </summary>
+    public static FormationStructureEstimate EstimateFormationStructure(
+        AnalysisPackage package, string reservoirName, double targetEasting, double targetNorthing, int neighborCount)
+    {
+        (IReadOnlyList<FormationStructureControl> located, int unsurveyed, int excluded) = ReadStructuralControls(package, reservoirName);
+        List<FormationStructureControl> controls = located.Select(c => c with
+        {
+            DistanceM = Distance(targetEasting, targetNorthing, c.EastingM, c.NorthingM)
+        }).ToList();
+
+        var limitations = new List<string>
+        {
+            "Inverse-distance interpolation of visible picks only; no faults, dip model, seismic or hidden truth.",
+            FormattableString.Invariant($"P90/P10 spread = neighbour disagreement plus {StructuralSlopeSigma:0.##} x weighted distance; uncalibrated.")
+        };
+        if (unsurveyed > 0)
+            limitations.Add($"{unsurveyed} control(s) lack survey TVD; their reported depths are treated as TVD.");
+        if (excluded > 0)
+            limitations.Add($"{excluded} unsurveyed control(s) excluded under {StructuralControlRule}: a surveyed pick exists for the same well, or the reported MD top/thickness is an outlier versus surveyed picks.");
+        // Sidetracks at the same location would otherwise be over-weighted.
+        FormationStructureControl[] nearest = controls
+            .GroupBy(c => (Math.Round(c.EastingM), Math.Round(c.NorthingM)))
+            .Select(group => group.OrderBy(c => c.GeologyEvidenceId, StringComparer.Ordinal).First() with
+            {
+                TopTrueVerticalDepthM = group.Average(c => c.TopTrueVerticalDepthM),
+                BaseTrueVerticalDepthM = group.Average(c => c.BaseTrueVerticalDepthM)
+            })
+            .OrderBy(c => c.DistanceM).ThenBy(c => c.GeologyEvidenceId, StringComparer.Ordinal)
+            .Take(Math.Max(1, neighborCount))
+            .ToArray();
+        if (nearest.Length < neighborCount)
+            limitations.Add($"Only {nearest.Length} located control(s) carry the selected formation; {neighborCount} were requested.");
+        if (nearest.Length == 0)
+            return new(StructureEstimateMethod, targetEasting, targetNorthing, 0, null, null, null, [], limitations);
+
+        double[] weights = nearest.Select(c => 1.0 / Math.Pow(Math.Max(c.DistanceM, 1), 2)).ToArray();
+        double weightSum = weights.Sum();
+        double topP50 = WeightedAverage(nearest.Select(c => c.TopTrueVerticalDepthM).ToArray(), weights, weightSum);
+        double thickness = WeightedAverage(nearest.Select(c => c.BaseTrueVerticalDepthM - c.TopTrueVerticalDepthM).ToArray(), weights, weightSum);
+        double variance = nearest.Select((c, i) => weights[i] * Math.Pow(c.TopTrueVerticalDepthM - topP50, 2)).Sum() / weightSum;
+        double weightedDistance = nearest.Select((c, i) => weights[i] * c.DistanceM).Sum() / weightSum;
+        double sigma = Math.Sqrt(variance + Math.Pow(StructuralSlopeSigma * weightedDistance, 2));
+        var (p90, p50, p10) = BuildQuantiles(topP50, sigma);
+        return new(StructureEstimateMethod, targetEasting, targetNorthing, nearest.Length,
+            new(p90, p50, p10), new(p90 + thickness, p50 + thickness, p10 + thickness), thickness, nearest, limitations);
+    }
+
+    public const string SimulatorCoverageMethod = "simulator-coverage-v1";
+    // scripts/seed_reservoir_world.py pads the hidden world's grid by horizontalPaddingM = 2000 around the same
+    // structural controls; 500 m is held back for coordinate-frame differences between the seed and this grid.
+    internal const double SeedHorizontalPaddingM = 2000;
+    internal const double CoverageFrameSafetyM = 500;
+    internal const double CoverageMarginM = SeedHorizontalPaddingM - CoverageFrameSafetyM;
+    // RestrictedTruthSamplingService accepts station TVD up to world base + max(1000, base - top).
+    internal const double SimulatorMinimumVerticalToleranceM = 1000;
+    internal const double CoverageDepthSafetyM = 100;
+
+    /// <summary>
+    /// Conservative estimate of the blind simulator's hidden-world extent, in the candidate-grid frame, from the
+    /// structural controls the world seed is conditioned on. Returns null when no located control carries the formation.
+    /// </summary>
+    public static SimulatorCoverage? EstimateSimulatorCoverage(AnalysisPackage package, string reservoirName)
+    {
+        IReadOnlyList<FormationStructureControl> controls = ReadStructuralControls(package, reservoirName).Controls;
+        if (controls.Count == 0) return null;
+        double minTop = controls.Min(c => c.TopTrueVerticalDepthM);
+        double maxBase = controls.Max(c => c.BaseTrueVerticalDepthM);
+        return new(SimulatorCoverageMethod,
+            controls.Min(c => c.EastingM) - CoverageMarginM, controls.Max(c => c.EastingM) + CoverageMarginM,
+            controls.Min(c => c.NorthingM) - CoverageMarginM, controls.Max(c => c.NorthingM) + CoverageMarginM,
+            maxBase + Math.Max(SimulatorMinimumVerticalToleranceM, maxBase - minTop) - CoverageDepthSafetyM,
+            controls.Count, CoverageMarginM,
+            FormattableString.Invariant($"Approximate blind-simulator model extent: the bounding box of {controls.Count} visible formation control(s) plus {CoverageMarginM:0} m, and its deep TVD envelope. Targets or well depths outside it cannot be drilled in the simulator. Not a geological boundary."));
+    }
+
+    /// <summary>
+    /// Located visible picks of the formation (DistanceM is zero). Interval MD is converted with the bore's own
+    /// survey-station TVD when it covers the interval. Unsurveyed picks follow <see cref="StructuralControlRule"/>
+    /// (mirrored by scripts/seed_reservoir_world.py): with at least four surveyed picks, an unsurveyed pick is kept as
+    /// assumed-vertical only if its well has no surveyed pick and its MD top and thickness lie inside the Tukey
+    /// far-out fences of the surveyed picks; otherwise it is excluded. With fewer surveyed picks all are kept.
+    /// </summary>
+    internal static (IReadOnlyList<FormationStructureControl> Controls, int Unsurveyed, int Excluded) ReadStructuralControls(
+        AnalysisPackage package, string reservoirName)
+    {
+        var (picks, unsurveyed, excluded) = ReadStructuralPicks(package, reservoirName);
+        return (picks.Select(pick => pick.Control).ToArray(), unsurveyed, excluded);
+    }
+
+    private sealed record StructuralPick(
+        FormationStructureControl Control, bool Surveyed, Guid? WellId, JsonNode Geology,
+        (double Md, double Tvd)[] TvdStations, double TopMd, double BaseMd);
+
+    private static (IReadOnlyList<StructuralPick> Picks, int Unsurveyed, int Excluded) ReadStructuralPicks(
+        AnalysisPackage package, string reservoirName)
+    {
+        GeographicOrigin? origin = ReadGeographicOrigin(package.Field);
+        var boreToWell = package.WellBores
+            .Select(bore => (Id: JsonAccess.MetaId(bore), WellId: JsonAccess.Guid(bore, "WellID")))
+            .Where(item => item.Id.HasValue && item.WellId.HasValue)
+            .ToDictionary(item => item.Id!.Value, item => item.WellId!.Value);
+        var wellToCluster = package.Wells
+            .Select(well => (Id: JsonAccess.MetaId(well), ClusterId: JsonAccess.Guid(well, "ClusterID")))
+            .Where(item => item.Id.HasValue && item.ClusterId.HasValue)
+            .ToDictionary(item => item.Id!.Value, item => item.ClusterId!.Value);
+        var clusters = package.Clusters
+            .Select(cluster => (Id: JsonAccess.MetaId(cluster), Node: cluster))
+            .Where(item => item.Id.HasValue)
+            .ToDictionary(item => item.Id!.Value, item => item.Node);
+        var trajectoryByBore = new Dictionary<Guid, JsonNode>();
+        var trajectoryByWell = new Dictionary<Guid, JsonNode>();
+        foreach (JsonNode trajectory in package.Trajectories)
+        {
+            if (JsonAccess.Guid(trajectory, "WellBoreID") is Guid boreId) trajectoryByBore.TryAdd(boreId, trajectory);
+            if (JsonAccess.Guid(trajectory, "WellID") is Guid wellId) trajectoryByWell.TryAdd(wellId, trajectory);
+        }
+
+        var candidates = new List<StructuralPick>();
+        foreach (JsonNode geology in package.GeologicalProperties)
+        {
+            if (ReadFormationInterval(geology, reservoirName) is not (double top, double @base) ||
+                !double.IsFinite(top) || !double.IsFinite(@base) || JsonAccess.Guid(geology, "WellBoreID") is not Guid boreId)
+                continue;
+            Guid? wellId = boreToWell.TryGetValue(boreId, out Guid linked) ? linked : null;
+            JsonNode? trajectory = trajectoryByBore.GetValueOrDefault(boreId) ??
+                (wellId is Guid id ? trajectoryByWell.GetValueOrDefault(id) : null);
+            var stations = (JsonAccess.Get(trajectory, "SurveyStationList") as JsonArray ?? new JsonArray())
+                .Select(station => (Md: JsonAccess.Number(station, "MD"), Tvd: JsonAccess.Number(station, "TVD"),
+                    Point: ReadPoint(station, origin)))
+                .Where(station => station.Md is double md && double.IsFinite(md))
+                .OrderBy(station => station.Md)
+                .ToArray();
+            var tvdStations = stations.Where(s => s.Tvd is double v && double.IsFinite(v)).Select(s => (s.Md!.Value, s.Tvd!.Value)).ToArray();
+            var pointStations = stations.Where(s => s.Point.HasValue).ToArray();
+            double middle = (top + @base) / 2;
+            Coordinate? location = pointStations.Length > 0
+                ? new Coordinate(
+                    Interpolate(pointStations.Select(s => (s.Md!.Value, s.Point!.Value.Easting)).ToArray(), middle),
+                    Interpolate(pointStations.Select(s => (s.Md!.Value, s.Point!.Value.Northing)).ToArray(), middle))
+                : ReadPoint(JsonAccess.Get(trajectory, "TieInPoint"), origin);
+            if (location is null && wellId is Guid well && wellToCluster.TryGetValue(well, out Guid clusterId) &&
+                clusters.TryGetValue(clusterId, out JsonNode? cluster))
+                location = ReadPoint(JsonAccess.Get(cluster, "ReferencePoint"), origin);
+            if (location is not Coordinate point || !double.IsFinite(point.Easting) || !double.IsFinite(point.Northing))
+                continue;
+            bool ownSurvey = JsonAccess.Guid(trajectory, "WellBoreID") is not Guid surveyBore || surveyBore == boreId;
+            bool surveyed = ownSurvey && tvdStations.Length > 0 &&
+                tvdStations[0].Item1 <= Math.Min(top, @base) && Math.Max(top, @base) <= tvdStations[^1].Item1;
+            double topTvd = surveyed ? Interpolate(tvdStations, top) : top;
+            double baseTvd = surveyed ? Interpolate(tvdStations, @base) : @base;
+            candidates.Add(new(new(
+                $"geology:{JsonAccess.MetaId(geology)?.ToString() ?? boreId.ToString()}",
+                wellId is Guid w ? $"well:{w}" : null,
+                point.Easting, point.Northing, 0,
+                Math.Min(topTvd, baseTvd), Math.Max(topTvd, baseTvd),
+                surveyed ? "survey-interpolated TVD" : "reported interval depth; no survey, assumed vertical"),
+                surveyed, wellId, geology, surveyed ? tvdStations : [], Math.Min(top, @base), Math.Max(top, @base)));
+        }
+        var surveyedControls = candidates.Where(c => c.Surveyed).Select(c => c.Control).ToArray();
+        if (surveyedControls.Length < MinimumSurveyedStructuralControls)
+            return (candidates, candidates.Count(c => !c.Surveyed), 0);
+        (double Low, double High) topFences = FarOutFences(surveyedControls.Select(c => c.TopTrueVerticalDepthM));
+        (double Low, double High) thicknessFences = FarOutFences(
+            surveyedControls.Select(c => c.BaseTrueVerticalDepthM - c.TopTrueVerticalDepthM));
+        var surveyedWells = candidates.Where(c => c.Surveyed && c.WellId.HasValue).Select(c => c.WellId!.Value).ToHashSet();
+        StructuralPick[] kept = candidates.Where(c => c.Surveyed ||
+                !(c.WellId is Guid parent && surveyedWells.Contains(parent)) &&
+                c.Control.TopTrueVerticalDepthM >= topFences.Low && c.Control.TopTrueVerticalDepthM <= topFences.High &&
+                c.Control.BaseTrueVerticalDepthM - c.Control.TopTrueVerticalDepthM >= thicknessFences.Low &&
+                c.Control.BaseTrueVerticalDepthM - c.Control.TopTrueVerticalDepthM <= thicknessFences.High)
+            .ToArray();
+        return (kept, kept.Length - surveyedControls.Length, candidates.Count - kept.Length);
+    }
+
+    public const string StructuralControlRule = "structural-controls-surveyed-or-inlier-v1";
+    internal const int MinimumSurveyedStructuralControls = 4;
+    internal const double StructuralInlierFenceIqr = 3;
+
+    private static (double Low, double High) FarOutFences(IEnumerable<double> values)
+    {
+        double[] ordered = values.Order().ToArray();
+        double q1 = LinearQuantile(ordered, .25), q3 = LinearQuantile(ordered, .75);
+        double spread = StructuralInlierFenceIqr * (q3 - q1);
+        return (q1 - spread, q3 + spread);
+
+        static double LinearQuantile(double[] sorted, double fraction)
+        {
+            double position = (sorted.Length - 1) * fraction;
+            int lower = (int)Math.Floor(position), upper = Math.Min(lower + 1, sorted.Length - 1);
+            return sorted[lower] + (position - lower) * (sorted[upper] - sorted[lower]);
+        }
+    }
+
+    private static double Interpolate(IReadOnlyList<(double Md, double Value)> stations, double md)
+    {
+        if (md <= stations[0].Md) return stations[0].Value;
+        for (int i = 1; i < stations.Count; i++)
+            if (md <= stations[i].Md)
+                return stations[i - 1].Value + (md - stations[i - 1].Md) /
+                    Math.Max(stations[i].Md - stations[i - 1].Md, 1e-12) * (stations[i].Value - stations[i - 1].Value);
+        return stations[^1].Value;
     }
 
     private static bool Qualifies(PetrophysicsSample sample, AnalysisConfiguration configuration) =>

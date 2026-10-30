@@ -8,8 +8,8 @@ import { createServer } from 'vite'
 const server = await createServer({ root: fileURLToPath(new URL('..', import.meta.url)), server: { middlewareMode: true }, appType: 'custom' })
 try {
   const { buildWellViews } = await server.ssrLoadModule('/src/components/AnalysisWorkspace.tsx')
-  const { buildReservoirMeshes, positionAtMd, sampleClass, cutAtDepth } = await server.ssrLoadModule('/src/reservoirGeometry.ts')
-  const { ReservoirView } = await server.ssrLoadModule('/src/components/ReservoirView.tsx')
+  const { positionAtMd, sampleClass } = await server.ssrLoadModule('/src/reservoirGeometry.ts')
+  const { ReservoirView, modelGeometry } = await server.ssrLoadModule('/src/components/ReservoirView.tsx')
   const { buildFormationColumn } = await server.ssrLoadModule('/src/fluidColumn.ts')
   const { AnalysisWorkspace } = await server.ssrLoadModule('/src/components/AnalysisWorkspace.tsx')
   const entity = (id, rest = {}) => ({ MetaInfo: { ID: id }, ...rest })
@@ -62,7 +62,7 @@ try {
   assert.equal(zoned[0].contacts.length, 0, 'Do not invent a fluid contact across non-pay.')
   assert.equal(sampleClass(zoned[0].samples[50]), 'nonpay')
   assert.deepEqual(zoned[0].column.bounds, { top: 100, base: 200 })
-  assert.equal(zoned[0].column.fluids.length, 1, 'Fluid remains continuous through low-quality rock when the phase is known.')
+  assert.deepEqual(zoned[0].column.fluids.map(b => b.value), ['gas', 'tight', 'gas'], 'Tight rock is not reservoir: its bound-water reading is not a fluid zone.')
   assert.equal(zoned[0].column.fluids[0].value, 'gas')
   assert.equal(zoned[0].column.quality.length, 3)
   assert.equal(zoned[0].column.quality[1].value, 'below-cutoff')
@@ -74,7 +74,6 @@ try {
   assert.equal(sampleClass(views(unknown)[0].samples[0]), undefined)
   assert.equal(views(unknown)[0].column.fluids[0].value, 'unknown')
   assert.equal(views(unknown)[0].column.quality[0].value, 'qualifying', 'Unknown fluid is independent of known rock quality.')
-  assert.equal(buildReservoirMeshes(views(unknown), 2000, 12).meshes.length, 0, 'Missing phases never create water.')
   const masked = fixture()
   masked.geologicalProperties[0].Petrophysics.LogRuns[0].Curves[0].NullFlags[50] = true
   assert.equal(sampleClass(views(masked)[0].samples[50]), undefined)
@@ -91,9 +90,11 @@ try {
   assert.ok(sparse.fluids.some(b => b.value === 'unknown' && b.top < 150 && b.base > 150 && b.reason === 'unobserved'))
   assert.equal(sparse.contacts.length, 0, 'No contacts across unsampled intervals.')
   const transitioning = structuredClone(wells[0].samples)
-  transitioning.forEach(s => { if (s.depth >= 150) { s.water = .9; s.gas = .1; s.porosity = .01 } })
+  transitioning.forEach(s => { if (s.depth >= 150) { s.water = .9; s.gas = .1 } })
   const transition = buildFormationColumn(transitioning, [{ top: 100, base: 200 }])
-  assert.deepEqual(transition.contacts, [{ type: 'GasWaterContact', depth: 149.5 }], 'Known fluid transitions can occur in below-cutoff rock.')
+  assert.deepEqual(transition.contacts, [{ type: 'GasWaterContact', depth: 149.5 }])
+  const shaleWater = structuredClone(transitioning).map(s => s.depth >= 150 ? { ...s, porosity: .01 } : s)
+  assert.equal(buildFormationColumn(shaleWater, [{ top: 100, base: 200 }]).contacts.length, 0, 'Water readings in tight rock never make a contact.')
   const unclassified = transitioning.map(s => s.depth === 150 ? { ...s, fluidKnown: false } : s)
   assert.equal(buildFormationColumn(unclassified, [{ top: 100, base: 200 }]).contacts.length, 0)
   const empty = buildFormationColumn([], [{ top: 100, base: 200 }])
@@ -128,7 +129,7 @@ try {
   assert.doesNotMatch(sectionHtml, /resolved contacts|NaN|Infinity/)
   const missingSurvey = fixture()
   missingSurvey.trajectories = []
-  assert.equal(buildReservoirMeshes(views(missingSurvey), 2000, 12).excludedBores, 4)
+  assert.equal(views(missingSurvey)[0].stations.length, 0)
   const contradictory = fixture()
   contradictory.trajectories[0].SurveyStationList.forEach(s => { s.RiemannianEast -= origin.east; s.RiemannianNorth -= origin.north })
   assert.equal(views(contradictory)[0].stations.length, 0)
@@ -147,56 +148,37 @@ try {
   const wrongCurveUnit = fixture()
   wrongCurveUnit.geologicalProperties[0].Petrophysics.LogRuns[0].Curves.find(c => c.CanonicalMnemonic === 'PERM').CanonicalUnit = 'mD'
   assert.equal(sampleClass(views(wrongCurveUnit)[0].samples[0]), undefined)
-  const mesh = buildReservoirMeshes(wells, 2000, 12)
-  assert.equal(mesh.meshes.length, 1)
-  assert.equal(mesh.meshes[0].fluid, 'gas')
-  assert.ok(mesh.meshes[0].volumeM3 > 0)
-  assert.deepEqual(buildReservoirMeshes([...wells].reverse(), 2000, 12), mesh, 'Deterministic order-independent model.')
-  const gas = mesh.meshes[0]
-  const edgeCounts = new Map()
-  for (const [a, b, c] of gas.triangles) {
-    for (const [i, j] of [[a, b], [b, c], [c, a]]) {
-      const edge = i < j ? `${i}:${j}` : `${j}:${i}`
-      edgeCounts.set(edge, (edgeCounts.get(edge) ?? 0) + 1)
-    }
+  const grid = (values) => Array.from({ length: 9 }, (_, i) => values(i % 3, Math.floor(i / 3)))
+  const model = {
+    method: 'contact-static-model-v1', fieldId: 'field', reservoirName: 'Target', packageSha256: 'x', configurationSha256: 'y',
+    grid: { minEastingM: 0, minNorthingM: 0, cellSizeM: 500, columns: 3, rows: 3, layers: 20, paddingM: 1000,
+      topTvdM: grid((x) => 100 + x * 40), baseTvdM: grid((x) => 200 + x * 40), netRockM: grid(() => 100),
+      gasM: grid((x) => Math.max(0, 150 - (100 + x * 40))), oilM: grid(() => 0), waterM: grid((x) => 100 - Math.max(0, 150 - (100 + x * 40))),
+      porosity: grid(() => .2) },
+    contacts: [{ type: 'GasWaterContact', trueVerticalDepthM: 150, deepestAboveTvdM: 148, shallowestBelowTvdM: 152, supportingSamples: 40, misclassifiedSamples: 2, wells: 4 }],
+    volumes: { grossRockM3: 1e11, netRockM3: 1e11, gasNetRockM3: 3e10, oilNetRockM3: 0, hydrocarbonPoreVolumeM3: 6e9 },
+    inputs: { structuralControls: 4, propertyWells: 4, fluidWells: 4, classifiedSamples: 42, medianGrossM: 100, hydrocarbon: 'gas' },
+    wells: [{ wellBoreId: 'bore-0', wellId: 'well-0', name: 'Bore 0', control: true, logged: true,
+      path: [[0, 0, 0], [0, 0, 120], [0, 0, 250]], topTvdM: 100, baseTvdM: 200, pickEastingM: 0, pickNorthingM: 0 }],
+    targets: [{ id: 'candidate:01:01', eastingM: 500, northingM: 500, insideModel: true, topTvdM: 140, baseTvdM: 240, grossM: 100, netRockM: 100,
+      gasM: 10, oilM: 0, waterM: 90, netToGross: 1, porosity: .2, permeabilityMd: 200, fluidAtTop: 'gas', nearestControlM: 700,
+      nearestPropertyWellM: 700, propertyEvidenceIds: ['geology:geology-0'] }],
+    limitations: ['Structure: test.'],
   }
-  assert.ok([...edgeCounts.values()].every(n => n === 2), 'The full extracted surface must be closed.')
-  assert.ok(gas.vertices.every(p => Object.values(p).every(Number.isFinite)))
-  const negative = structuredClone(wells[0])
-  negative.id = 'negative-control'
-  negative.stations.forEach(p => { p.east += 500; p.north += 500 })
-  negative.samples.forEach(s => { s.porosity = .01 })
-  const constrained = buildReservoirMeshes([...wells, negative], 2000, 12).meshes[0]
-  assert.ok(constrained.volumeM3 < gas.volumeM3, 'Observed non-pay must constrain the gas region.')
-  negative.samples.forEach(s => { s.rockKnown = false; s.fluidKnown = false })
-  const unconstrained = buildReservoirMeshes([...wells, negative], 2000, 12).meshes[0]
-  assert.ok(Math.abs(unconstrained.volumeM3 / gas.volumeM3 - 1) < 1e-10, 'An unknown control must not behave like non-pay.')
-  const collinear = structuredClone(wells)
-  collinear.forEach((w, i) => w.stations.forEach(p => { p.north = 0; p.east += i * 1000 }))
-  assert.equal(buildReservoirMeshes(collinear, 5000, 12).meshes.length, 0, 'Collinear controls do not constrain a footprint.')
-  const separated = buildReservoirMeshes(zoned, 2000, 12).meshes[0]
-  assert.ok(separated.volumeM3 < gas.volumeM3)
-  assert.ok(separated.triangles.every(t => !t.some(i => separated.vertices[i].tvd < 140) || !t.some(i => separated.vertices[i].tvd > 160)), 'No facets bridge the non-pay gap.')
-  assert.equal(buildReservoirMeshes(wells.slice(0, 2), 2000, 12).meshes.length, 0)
-  assert.throws(() => buildReservoirMeshes(wells, NaN), /Geometry supports/)
-  const clipped = cutAtDepth([{ east: 0, north: 0, tvd: 0 }, { east: 10, north: 0, tvd: 20 }, { east: 0, north: 10, tvd: 20 }], 10)
-  assert.equal(clipped.length, 4)
-  assert.ok(clipped.every(p => p.tvd >= 10))
-  assert.deepEqual(cutAtDepth(clipped, 30), [])
-  const html = renderToStaticMarkup(createElement(ReservoirView, { wells, selectedWellId: wells[0].id, onWell: () => {} }))
-  assert.match(html, /reservoir-mesh gas/)
-  assert.doesNotMatch(html, /<ellipse|NaN|Infinity|confidence:|% support/)
-  assert.match(html, /not a probability/)
-  assert.match(html, /Cut above/)
-  for (const [, d] of html.matchAll(/class="reservoir-mesh gas[^"]*" d="([^"]+)"/g)) {
-    for (const face of d.split('Z').filter(Boolean)) {
-      const points = [...face.matchAll(/[ML](-?[\d.]+),(-?[\d.]+)/g)].map((m) => [Number(m[1]), Number(m[2])])
-      const area = points.reduce((sum, p, i) => {
-        const q = points[(i + 1) % points.length]
-        return sum + p[0] * q[1] - q[0] * p[1]
-      }, 0)
-      assert.ok(area >= -.1, 'Batched SVG faces must not cancel each other through opposite winding.')
-    }
-  }
-  console.log(`Reservoir checks passed: interval/unknown semantics, actual downhole coordinates, definitive surveys, closed mesh (${gas.triangles.length} facets), separated zones, determinism and cuts.`)
-} finally { await server.close() }
+  const geometry = modelGeometry(model)
+  assert.deepEqual(geometry.bands(100, 200), [{ fluid: 'gas', from: 100, to: 150 }, { fluid: 'water', from: 150, to: 200 }], 'Gas above the contact, water below.')
+  assert.deepEqual(geometry.bands(180, 280), [{ fluid: 'water', from: 180, to: 280 }], 'A reservoir top below the contact is all water.')
+  assert.deepEqual(geometry.bands(100, 200).map(b => b.fluid), ['gas', 'water'])
+  assert.deepEqual(modelGeometry({ ...model, contacts: [] }).bands(100, 200), [{ fluid: 'gas', from: 100, to: 200 }], 'No observed contact: hydrocarbons down to the base, as the model states.')
+  const html = renderToStaticMarkup(createElement(ReservoirView, { model, selectedWellId: 'bore-0', onWell: () => {},
+    target: { eastingM: 500, northingM: 500, label: '#1 · drill here' }, targetColumn: model.targets[0] }))
+  assert.match(html, /class="rm-top gas l\d"/)
+  assert.match(html, /class="rm-wall water"/)
+  assert.match(html, /class="rm-contact"/)
+  assert.match(html, /rm-well selected/)
+  assert.match(html, /#1 · drill here/)
+  assert.match(html, /Gas–water contact \(GWC\) at 150 m/)
+  assert.match(html, /Rock volume, not reserves/)
+  assert.doesNotMatch(html, /NaN|Infinity|undefined/)
+  assert.match(renderToStaticMarkup(createElement(ReservoirView, { loading: true, selectedWellId: '', onWell: () => {} })), /Building the reservoir model/)
+  console.log('Reservoir checks passed: interval/unknown semantics, actual downhole coordinates, definitive surveys, contact-based model bands and 3D rendering.')} finally { await server.close() }

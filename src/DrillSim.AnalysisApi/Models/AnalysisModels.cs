@@ -47,7 +47,12 @@ public sealed record WellPaySummary(
     double MeanPayPorosity,
     double MeanPayPermeabilityM2,
     double EastingM,
-    double NorthingM);
+    double NorthingM)
+{
+    /// <summary>Rock-quality net pay before the target-fluid share; candidates interpolate this, then apply the model share.</summary>
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public double? RockNetPayThicknessM { get; init; }
+}
 
 public sealed record RankedCandidate(
     int Rank,
@@ -69,6 +74,9 @@ public sealed record RankedCandidate(
 {
     public CandidateScoreComponents? ScoreComponents { get; init; }
     public CandidateUncertaintyComponents? UncertaintyComponents { get; init; }
+    /// <summary>Share of the reservoir model's good rock holding the configured target fluid; pay quantiles are scaled by it.</summary>
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public double? TargetFluidFraction { get; init; }
 }
 
 public sealed record CandidateScoreComponents(
@@ -93,6 +101,21 @@ public sealed record CandidateGridBounds(
     double MaxEastingM,
     double MinNorthingM,
     double MaxNorthingM);
+
+public sealed record SimulatorCoverage(
+    string Method,
+    double MinEastingM,
+    double MaxEastingM,
+    double MinNorthingM,
+    double MaxNorthingM,
+    double MaxTrueVerticalDepthM,
+    int ControlCount,
+    double MarginM,
+    string Limitation)
+{
+    public bool Contains(double eastingM, double northingM) =>
+        eastingM >= MinEastingM && eastingM <= MaxEastingM && northingM >= MinNorthingM && northingM <= MaxNorthingM;
+}
 
 public sealed record CandidateGridPoint(
     string CandidateId,

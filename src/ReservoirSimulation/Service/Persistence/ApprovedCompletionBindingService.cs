@@ -244,10 +244,19 @@ internal sealed class ApprovedCompletionBindingService(
         foreach (ApprovedCompletionOpening opening in openings.Where(
             opening => opening.Type != CompletionOpeningType.Isolated))
         {
-            MappedCell[] mappedCells = CellsAlongOpening(world, path, opening, spacing, ref probes)
-                .Where(mapped => !isolatedCells.Contains(mapped.Cell))
+            MappedCell[] openingCells = CellsAlongOpening(world, path, opening, spacing, ref probes)
                 .DistinctBy(mapped => mapped.Cell)
                 .ToArray();
+            MappedCell[] mappedCells = openingCells
+                .Where(mapped => !isolatedCells.Contains(mapped.Cell))
+                .ToArray();
+            // A coarse cell can hold both a short producing interval and part of an MD-disjoint isolation interval.
+            // Isolation still wins in shared cells, except where that would leave the producing opening with no
+            // connection at all; such designs were previously rejected, so no persisted mapping changes.
+            if (mappedCells.Length == 0 && !openings.Any(other => other.Type == CompletionOpeningType.Isolated &&
+                    other.TopMeasuredDepthM < opening.BaseMeasuredDepthM &&
+                    opening.TopMeasuredDepthM < other.BaseMeasuredDepthM))
+                mappedCells = openingCells;
             if (mappedCells.Length == 0)
                 throw Validation("openings",
                     $"Producing opening {opening.OpeningId} maps no active reservoir cell after isolation exclusions.");

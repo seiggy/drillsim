@@ -206,6 +206,32 @@ public sealed class ScorecardTests
     }
 
     [Test]
+    public async Task Scorecard_UsesTheScenarioFrozenScoringModel_LegacyV1ScenariosStayV1()
+    {
+        ScorecardFixture current = await CreateRevealedFixtureAsync();
+        ScorecardFixture legacy = await CreateRevealedFixtureAsync(ScenarioModelVersions.LegacyScoring);
+        ScenarioApiException v1OnV2 = Assert.ThrowsAsync<ScenarioApiException>(() => current.Scorecards.PublishAsync(
+            current.ScenarioId,
+            CreateScorecard(Guid.NewGuid(), current.RunId, current.RevealId) with { ScoringModelVersion = ScenarioModelVersions.LegacyScoring }))!;
+        ScenarioApiException v2OnV1 = Assert.ThrowsAsync<ScenarioApiException>(() => legacy.Scorecards.PublishAsync(
+            legacy.ScenarioId, CreateScorecard(Guid.NewGuid(), legacy.RunId, legacy.RevealId)))!;
+        PublicScorecard v2 = await current.Scorecards.PublishAsync(
+            current.ScenarioId, CreateScorecard(Guid.NewGuid(), current.RunId, current.RevealId));
+        PublicScorecard v1 = await legacy.Scorecards.PublishAsync(
+            legacy.ScenarioId,
+            CreateScorecard(Guid.NewGuid(), legacy.RunId, legacy.RevealId) with { ScoringModelVersion = ScenarioModelVersions.LegacyScoring });
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(ScenarioModelVersions.Scoring, Is.EqualTo("scoring-model-v2"));
+            Assert.That(v1OnV2.StatusCode, Is.EqualTo(409));
+            Assert.That(v2OnV1.StatusCode, Is.EqualTo(409));
+            Assert.That(v2.ScoringModelVersion, Is.EqualTo(ScenarioModelVersions.Scoring));
+            Assert.That(v1.ScoringModelVersion, Is.EqualTo(ScenarioModelVersions.LegacyScoring));
+        });
+    }
+
+    [Test]
     public async Task Scorecard_PublicationIsAtomicAndAdvancesScenarioToScored()
     {
         ScorecardFixture fixture = await CreateRevealedFixtureAsync();
@@ -379,7 +405,7 @@ public sealed class ScorecardTests
     [Test]
     public async Task VersionedCorrectionPublishesThroughAuthenticatedCallbackAndSurvivesRestart()
     {
-        ScorecardFixture fixture = await CreateRevealedFixtureAsync();
+        ScorecardFixture fixture = await CreateRevealedFixtureAsync(ScenarioModelVersions.LegacyScoring);
         var (original, corrected) = CorrectionArtifacts(fixture.ScenarioId, fixture.RunId, fixture.RevealId);
         const string secret = "correction-callback-key";
         var validator = new InternalCallbackKeyValidator(secret);
@@ -487,7 +513,7 @@ public sealed class ScorecardTests
         return (original, Core.ScoreCorrection.Create(original, original, recalculated));
     }
 
-    private async Task<ScorecardFixture> CreateRevealedFixtureAsync()
+    private async Task<ScorecardFixture> CreateRevealedFixtureAsync(string scoringModelVersion = ScenarioModelVersions.Scoring)
     {
         var store = new SqliteScenarioStore(_connectionString);
         Guid sourceId = Guid.NewGuid();
@@ -505,7 +531,7 @@ public sealed class ScorecardTests
             "scorecard-tests",
             ScenarioModelVersions.World,
             ScenarioModelVersions.Observation,
-            ScenarioModelVersions.Scoring,
+            scoringModelVersion,
             ScenarioStatus.HumanApproved,
             new string('a', 64),
             T0,

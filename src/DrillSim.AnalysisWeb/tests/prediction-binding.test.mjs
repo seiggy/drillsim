@@ -1,7 +1,5 @@
 import assert from 'node:assert/strict'
 import { fileURLToPath } from 'node:url'
-import { createElement } from 'react'
-import { renderToStaticMarkup } from 'react-dom/server'
 import { createServer } from 'vite'
 
 const server = await createServer({ root: fileURLToPath(new URL('..', import.meta.url)), server: { middlewareMode: true }, appType: 'custom' })
@@ -10,12 +8,10 @@ const storage = new Map()
 globalThis.sessionStorage = { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) }
 try {
   const bindingApi = await server.ssrLoadModule('/src/predictionBinding.ts')
-  const { predictionTemplate, predictionText, parsePrediction, predictionDraftKey } = await server.ssrLoadModule('/src/prediction.ts')
+  const { predictionTemplate, predictionText, parsePrediction } = await server.ssrLoadModule('/src/prediction.ts')
   const { getPredictionCapabilities } = await server.ssrLoadModule('/src/api.ts')
-  const { fillDemoForecast, demoForecastAssumption, readPredictionForm } = await server.ssrLoadModule('/src/predictionExamples.ts')
+  const { fillDemoForecast, fillFromReservoirModel, reservoirModelAssumption, demoForecastAssumption, readPredictionForm } = await server.ssrLoadModule('/src/predictionExamples.ts')
   const { defaultConfiguration } = await server.ssrLoadModule('/src/analysisConfiguration.ts')
-  const { PredictionEditor } = await server.ssrLoadModule('/src/components/PredictionEditor.tsx')
-  const { PredictionPane } = await server.ssrLoadModule('/src/components/ScenarioWorkspace.tsx')
   const capabilities = {
     version: 'prediction-handoff-capabilities-v1', configuredSaveSupported: true, configuredSealSupported: true,
     bindingVersion: 'prediction-analysis-binding-v1', analysisModelVersion: 'petrophysics-screening-v1',
@@ -90,6 +86,22 @@ try {
   assert.equal(retained.proposedWellPath[1].measuredDepthM, 2600)
   assert.deepEqual(retained.productionForecasts, personalized.productionForecasts, 'Explicit zero and edited cumulative forecasts are retained.')
   assert.equal(readPredictionForm('invalid-json'), undefined)
+  const readout = { method: 'contact-static-model-v1', packageSha256: pkg.sha256, inputs: {}, limitations: [],
+    contacts: [{ type: 'GasWaterContact', trueVerticalDepthM: 1580, deepestAboveTvdM: 1578, shallowestBelowTvdM: 1582, supportingSamples: 30, misclassifiedSamples: 2, wells: 4 }],
+    columns: [{ id: candidate.candidateId, eastingM: candidate.eastingM, northingM: candidate.northingM, insideModel: true, topTvdM: 1550, baseTvdM: 1690,
+      grossM: 140, netRockM: 80, gasM: 26, oilM: 0, waterM: 54, netToGross: .57, porosity: .29, permeabilityMd: 115, fluidAtTop: 'gas',
+      nearestControlM: 1000, nearestPropertyWellM: 1000, propertyEvidenceIds: ['well:well-3'] }] }
+  const modelled = parsePrediction(fillFromReservoirModel(beforeExamples, context, readout, 1700))
+  assert.equal(modelled.expectedPaydirtM.p50, 80)
+  assert.ok(modelled.expectedPaydirtM.p90 < 80 && modelled.expectedPaydirtM.p10 > 80)
+  assert.equal(modelled.formations[0].topTrueVerticalDepthM.p50, 1550)
+  assert.deepEqual(modelled.fluidClasses, ['Gas', 'Water'])
+  assert.deepEqual(modelled.contactPredictions.map(c => [c.contactType, c.trueVerticalDepthM.p50]), [['GWC', 1580]])
+  assert.equal(modelled.proposedWellPath.at(-1).trueVerticalDepthM, 1700, 'Total depth is capped at the simulator limit.')
+  assert.ok(modelled.citedEvidenceIds.includes('well:well-3'))
+  assert.ok(modelled.uncertaintyAssumptions.includes(reservoirModelAssumption))
+  bindingApi.validatePredictionSource(modelled, context, 'seal')
+  assert.throws(() => fillFromReservoirModel(beforeExamples, context, { ...readout, columns: [] }), /no reading/)
   assert.throws(() => fillDemoForecast(exampleText, { ...context, capabilities: undefined }), /capabilities/)
   assert.throws(() => predictionTemplate(scenario, pkg, { ...candidate, eastingM: 4 }, binding), /differs/)
   for (const changed of [
@@ -155,51 +167,8 @@ try {
   globalThis.fetch = async () => new Response(JSON.stringify(capabilities))
   assert.deepEqual(await getPredictionCapabilities(), capabilities)
 
-  const saved = { scenarioId: scenario.scenarioId, body, revision: 3, createdUtc: pkg.generatedAt, modifiedUtc: pkg.generatedAt, baselines: [] }
-  const props = { scenario, fieldPackage: pkg, candidate, prediction: saved, sourceContext: context, onSaved: () => {} }
-  const html = renderToStaticMarkup(createElement(PredictionEditor, props))
-  assert.doesNotMatch(html, /<textarea id="prediction-json"[^>]*readOnly=""/)
-  assert.match(html, /Advanced · prediction JSON and binding/)
-  assert.match(html, /Use editable demo forecast/)
-  assert.match(html, /Station 1 measured depth/)
-  assert.doesNotMatch(html, /disabled=""[^>]*>Save draft/)
-  assert.match(html, /disabled=""[^>]*>Seal reviewed revision/, 'Explicit saved-revision acknowledgement is still required')
-  const noCapability = renderToStaticMarkup(createElement(PredictionEditor, { ...props, sourceContext: { ...context, capabilities: undefined } }))
-  assert.match(noCapability, /capabilities are unavailable/)
-  assert.match(noCapability, /disabled=""[^>]*>Save draft/)
-  const old = renderToStaticMarkup(createElement(PredictionEditor, { ...props, prediction: { ...saved, body: unversioned } }))
-  assert.match(old, /readOnly=""/)
-  assert.match(old, /explicit rebuild/)
-  assert.doesNotMatch(old, /disabled=""[^>]*>Rebuild binding from selected frozen target/)
-  const edited = renderToStaticMarkup(createElement(PredictionEditor, { ...props, prediction: { ...saved, body: directional } }))
-  assert.match(edited, /disabled=""[^>]*>Save draft/)
-  assert.match(edited, /not flattened/)
-  storage.set(predictionDraftKey(scenario.scenarioId), JSON.stringify({ text: '{"rationale":"LOCAL UNSAVED CONTENT"}', baseRevision: 1 }))
-  const immutable = { ...saved, seal: { sha256: 'f'.repeat(64), baselinesSha256: '9'.repeat(64), sealedUtc: pkg.generatedAt } }
-  const historical = renderToStaticMarkup(createElement(PredictionEditor, {
-    ...props, scenario: { ...scenario, status: 'Scored' }, prediction: immutable,
-    sourceContext: { ...context, capabilities: undefined, fieldPackage: { ...pkg, fieldId: 'clone' } },
-  }))
-  assert.doesNotMatch(historical, /<textarea/)
-  assert.match(historical, /Saved revision 3 · Sealed/)
-  assert.match(historical, /Download immutable saved JSON/)
-  assert.ok(historical.includes(immutable.seal.sha256))
-  assert.doesNotMatch(historical, /LOCAL UNSAVED CONTENT/)
-  assert.doesNotMatch(historical, />Save draft|>Seal reviewed revision|>Rebuild binding/)
-  assert.ok(storage.get(predictionDraftKey(scenario.scenarioId)).includes('LOCAL UNSAVED CONTENT'), 'Historical viewing preserves the separate local backup')
-  const baselines = [
-    { baselineId: 'old', kind: 'NearestWell', modelVersion: 'baseline-nearest-well-v2', candidateId: 'legacy', contributingEvidenceIds: [], limitation: 'Original legacy baseline' },
-    { baselineId: 'new', kind: 'FourNeighborIdw', modelVersion: 'baseline-four-neighbor-idw-v3', candidateId: candidate.candidateId,
-      contributingEvidenceIds: [], limitation: 'Configured four-control baseline', analysisBinding: {
-        version: 'baseline-analysis-binding-v1', configuration: { ...configuration, idwNeighborCount: 4 }, configurationSha256: 'b'.repeat(64),
-      } },
-  ]
-  const ledger = renderToStaticMarkup(createElement(PredictionPane, { scenario, prediction: { ...immutable, baselines } }))
-  assert.match(ledger, /baseline-nearest-well-v2/)
-  assert.match(ledger, /baseline-four-neighbor-idw-v3/)
-  assert.match(ledger, /configuration IDW setting: 4/)
   assert.equal(configuration.idwNeighborCount, 7)
-  console.log('Configured prediction checks passed: capabilities absent/failure, frozen T0 source scope, eligible full-grid targets, exact binding/templates, explicit old-draft rebuild, directional edits rejected without mutation, immutable historical display and baseline versions.')
+  console.log('Configured prediction checks passed: capabilities absent/failure, frozen T0 source scope, eligible full-grid targets, exact binding/templates, explicit old-draft rebuild, directional edits rejected without mutation and no configuration mutation.')
 } finally {
   globalThis.fetch = originalFetch
   delete globalThis.sessionStorage

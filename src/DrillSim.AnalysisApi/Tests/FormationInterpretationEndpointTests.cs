@@ -267,10 +267,18 @@ internal sealed class FormationInterpretationHttpFixture(
         builder.Services.AddHypotheses(builder.Configuration);
         builder.Services.AddSingleton(aiConfigured ? data.Agent : new FormationInterpretationAgent(null));
         builder.Services.AddSingleton<FormationInterpretationService>();
+        builder.Services.AddSingleton<ForecastDraftService>();
+        builder.Services.AddSingleton<ProspectBriefService>();
         builder.Services.AddProblemDetails();
+        builder.Services.AddExceptionHandler<ApiExceptionHandler>();
+        builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter(allowIntegerValues: false)));
         WebApplication app = builder.Build();
+        app.UseExceptionHandler();
         app.MapLocalOperatorWorkflow();
         app.MapFormationInterpretation();
+        app.MapForecastDrafts();
+        app.MapProspectBriefs();
+        app.MapSimulatorCoverage();
         await app.StartAsync();
         var client = new HttpClient(new HttpClientHandler { CookieContainer = new CookieContainer(), UseProxy = false })
         {
@@ -283,10 +291,14 @@ internal sealed class FormationInterpretationHttpFixture(
         SendAsync(JsonContent.Create(body), invalid);
     public Task<HttpResponseMessage> PostRawAsync(string json) =>
         SendAsync(new StringContent(json, Encoding.UTF8, "application/json"), null);
+    public Task<HttpResponseMessage> PostForecastAsync(object body, string? invalid = null) =>
+        SendAsync(JsonContent.Create(body, options: ForecastDraftAgent.JsonOptions), invalid, "/api/forecast-drafts");
+    public Task<HttpResponseMessage> PostProspectBriefAsync(object body, string? invalid = null) =>
+        SendAsync(JsonContent.Create(body, options: ProspectBriefAgent.JsonOptions), invalid, "/api/prospect-briefs");
 
-    private async Task<HttpResponseMessage> SendAsync(HttpContent content, string? invalid)
+    private async Task<HttpResponseMessage> SendAsync(HttpContent content, string? invalid, string path = "/api/formation-interpretation")
     {
-        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/formation-interpretation") { Content = content };
+        using var request = new HttpRequestMessage(HttpMethod.Post, path) { Content = content };
         if (invalid != "missing-origin") request.Headers.Add("Origin",
             invalid == "foreign-origin" ? "http://foreign.invalid" : Client.BaseAddress!.GetLeftPart(UriPartial.Authority));
         if (invalid != "missing-key") request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString("N"));

@@ -186,7 +186,7 @@ public sealed class ScorecardService
             return null;
         }
         if (correction.CorrectionVersion != ScoringCorrectionVersions.Correction ||
-            correction.OriginalScoringModelVersion != ScenarioModelVersions.Scoring ||
+            correction.OriginalScoringModelVersion != ScenarioModelVersions.LegacyScoring ||
             request.ScoringModelVersion != ScoringCorrectionVersions.ScoringModel)
             throw Invalid("correction", "must identify the supported original model and exact correction version.");
         Guid originalId = CanonicalGuid(correction.SupersedesScorecardId, "correction.supersedesScorecardId");

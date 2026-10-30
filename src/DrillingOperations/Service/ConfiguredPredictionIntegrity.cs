@@ -11,7 +11,8 @@ public sealed record AnalysisConfigurationDto(
     [property: JsonRequired] double PermeabilityCutoffM2,
     [property: JsonRequired] double WellExclusionRadiusM,
     [property: JsonRequired] int GridPointsPerAxis,
-    [property: JsonRequired] int IdwNeighborCount);
+    [property: JsonRequired] int IdwNeighborCount,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? TargetFluid = null);
 
 [JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 [JsonNumberHandling(JsonNumberHandling.Strict)]
@@ -81,7 +82,7 @@ public static class ConfiguredPredictionIntegrity
             target.CandidateId != body.CandidateId || string.IsNullOrWhiteSpace(body.CandidateId) || body.CandidateId.Length > 200 ||
             !double.IsFinite(target.EastingM) || !double.IsFinite(target.NorthingM) ||
             Math.Abs(target.EastingM) > 1e9 || Math.Abs(target.NorthingM) > 1e9 ||
-            target.ExpectedPaydirtM != body.ExpectedPaydirtM || !ValidQuantiles(target.ExpectedPaydirtM) ||
+            !ValidQuantiles(target.ExpectedPaydirtM) || body.ExpectedPaydirtM is null || !ValidQuantiles(body.ExpectedPaydirtM) ||
             body.ProposedWellPath is not { Count: >= 2 and <= 2000 } ||
             body.Formations is null || !body.Formations.Any(item => item is not null && item.FormationName == binding.ReservoirName))
             throw Invalid("Configured prediction version, scope, target or quantiles are invalid.");
@@ -158,6 +159,7 @@ public static class ConfiguredPredictionIntegrity
             !double.IsFinite(configuration.PermeabilityCutoffM2) || configuration.PermeabilityCutoffM2 is <= 0 or > 1e-8 ||
             !double.IsFinite(configuration.WellExclusionRadiusM) || configuration.WellExclusionRadiusM is < 0 or > 100_000 ||
             configuration.GridPointsPerAxis is < 2 or > 51 || configuration.IdwNeighborCount is < 1 or > 32 ||
+            configuration.TargetFluid is not (null or "Oil" or "Gas") ||
             !AnalysisScorecardClient.LowerHash(hash) || DeterministicIdentity.Sha256(CanonicalJson.Serialize(configuration)) != hash)
             throw Invalid("Unsupported, invalid or changed analysis configuration.");
     }

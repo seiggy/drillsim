@@ -88,6 +88,20 @@ public sealed class ScenarioService
             "Scenario not found",
             $"Scenario {scenarioId:D} does not exist.");
 
+    /// <summary>Scenario scopes are bound to the scenario reservoir; a conflicting explicit reservoir is rejected.</summary>
+    public async Task<string?> ResolveReservoirAsync(Guid? scenarioId, string? reservoir, CancellationToken cancellationToken = default)
+    {
+        if (scenarioId is not Guid id) return reservoir;
+        Scenario scenario = await GetAsync(id, cancellationToken);
+        if (!string.IsNullOrWhiteSpace(reservoir) &&
+            !string.Equals(reservoir.Trim(), scenario.ReservoirName, StringComparison.OrdinalIgnoreCase))
+            throw new ScenarioApiException(
+                StatusCodes.Status409Conflict,
+                "Scenario reservoir mismatch",
+                $"Scenario {id:D} is bound to reservoir '{scenario.ReservoirName}'.");
+        return scenario.ReservoirName;
+    }
+
     public async Task<AnalysisPackage> GetPackageAsync(
         Guid fieldId,
         Guid? scenarioId,

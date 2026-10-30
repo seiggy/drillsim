@@ -172,6 +172,37 @@ public sealed class CompletionBindingTests
 
 
     [Test]
+    public async Task Register_ShortProducingOpeningSharingOnlyCoarseCellsWithDisjointIsolation_KeepsItsCells()
+    {
+        Harness harness = await CreateHarnessAsync(ApprovedPathKind.AsDrilled);
+        ApprovedCompletionBindingRequest design = CompletionRequest(harness.Path.BindingId) with
+        {
+            Openings =
+            [
+                Opening("short-perf", 10, 20, CompletionOpeningType.Perforated),
+                Opening("isolation", 20, 700, CompletionOpeningType.Isolated) with { Efficiency = 0 }
+            ]
+        };
+        ApprovedCompletionBindingRequest probe = CompletionRequest(harness.Path.BindingId) with
+        {
+            Openings = [Opening("short-perf-probe", 10, 20, CompletionOpeningType.Perforated)]
+        };
+
+        ApprovedCompletionBindingMetadata metadata = await harness.Completions.RegisterAsync(harness.World, design);
+        ResolvedCompletionBinding resolved = (await harness.Completions.ResolveAsync(
+            harness.World, metadata.CompletionBindingId))!;
+        ResolvedCompletionBinding probed = (await harness.Completions.ResolveAsync(harness.World,
+            (await harness.Completions.RegisterAsync(harness.World, probe)).CompletionBindingId))!;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(resolved.Openings.Single().Connections, Is.Not.Empty);
+            Assert.That(resolved.Openings.Single().Connections.Select(c => (c.I, c.J, c.K)),
+                Is.EqualTo(probed.Openings.Single().Connections.Select(c => (c.I, c.J, c.K))));
+        });
+    }
+
+    [Test]
     public async Task Binding_RestartIsDeterministicIdempotentAndImmutableWithAudits()
     {
         Harness harness = await CreateHarnessAsync(ApprovedPathKind.AsDrilled);

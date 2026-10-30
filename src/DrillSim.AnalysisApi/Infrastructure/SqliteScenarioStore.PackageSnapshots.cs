@@ -39,13 +39,11 @@ public sealed partial class SqliteScenarioStore
     {
         await InitializeAsync(cancellationToken);
         await using SqliteConnection connection = await OpenConnectionAsync(cancellationToken);
-        using SqliteTransaction transaction = connection.BeginTransaction(deferred: true);
         ScenarioClonePackageSnapshot? snapshot = await FindClonePackageSnapshotAsync(
             connection,
-            transaction,
+            null,
             scenario.ScenarioId,
             cancellationToken);
-        transaction.Commit();
         if (snapshot is null)
             return null;
         if (snapshot.ClonedFieldId != scenario.ClonedFieldId ||
@@ -102,7 +100,7 @@ public sealed partial class SqliteScenarioStore
 
     private static async Task<ScenarioClonePackageSnapshot?> FindClonePackageSnapshotAsync(
         SqliteConnection connection,
-        SqliteTransaction transaction,
+        SqliteTransaction? transaction,
         Guid scenarioId,
         CancellationToken cancellationToken)
     {
@@ -196,13 +194,11 @@ public sealed partial class SqliteScenarioStore
     {
         await InitializeAsync(cancellationToken);
         await using SqliteConnection connection = await OpenConnectionAsync(cancellationToken);
-        using SqliteTransaction transaction = connection.BeginTransaction(deferred: true);
         ScenarioPackageSnapshot? snapshot = await FindScenarioPackageSnapshotAsync(
             connection,
-            transaction,
+            null,
             scenario,
             cancellationToken);
-        transaction.Commit();
         return snapshot;
     }
 
@@ -297,7 +293,7 @@ public sealed partial class SqliteScenarioStore
 
     private static async Task<ScenarioPackageSnapshot?> FindScenarioPackageSnapshotAsync(
         SqliteConnection connection,
-        SqliteTransaction transaction,
+        SqliteTransaction? transaction,
         Scenario scenario,
         CancellationToken cancellationToken)
     {

@@ -189,7 +189,8 @@ public sealed class ScenarioServiceTests
     public void ScenarioModelVersions_UsesFrozenVersions()
     {
         Assert.That(ScenarioModelVersions.World, Is.EqualTo("reservoir-hidden-world-v3"));
-        Assert.That(ScenarioModelVersions.Scoring, Is.EqualTo("scoring-model-v1"));
+        Assert.That(ScenarioModelVersions.Scoring, Is.EqualTo("scoring-model-v2"));
+        Assert.That(ScenarioModelVersions.LegacyScoring, Is.EqualTo("scoring-model-v1"));
     }
 
     [Test]

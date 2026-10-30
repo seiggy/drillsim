@@ -254,7 +254,7 @@ Version contract:
 |---|---|
 | Hidden geological world | `reservoir-hidden-world-v3` |
 | Synthetic observation model | `observation-model-v1` |
-| Blind scoring model | `scoring-model-v1` |
+| Blind scoring model | `scoring-model-v1`; new scenarios `scoring-model-v2` |
 
 ### Recommended defaults
 
@@ -801,6 +801,26 @@ target distance, rank correlation, ranking regret, and calibration coverage
 remain explicitly unavailable until multiple candidate paths and at least 20
 worlds are sampled.
 
+`scoring-model-v2` (frozen on scenarios created after 2026-10-27; v1 scenarios
+and their correction keep v1) changes only hidden-truth expected paydirt. v1
+summed measured-depth trapezoids between per-cell truth samples flagged
+`NTG >= 0.5`, ignoring porosity, permeability and fluids, and counted any path
+outside the reservoir between two samples. v2 applies the sealed prediction's
+own analysis-binding rock cutoffs (`porosity >= porosityCutoff` and
+`permeability >= permeabilityCutoffM2`; analysis-configuration-v1 defaults when a
+prediction has no binding) and credits each qualifying cell from its first
+bound-path sample until the next sample or until the path leaves that column's
+reservoir top/base or reaches TD, so exit/re-entry gaps are excluded and the last
+cell is counted. When the binding names a `targetFluid` (`Oil` or `Gas`), v2 also
+requires that fluid to have the highest truth saturation in the cell; bindings
+without it (all runs before 2026-10-28) are scored exactly as before, and their
+configuration hashes are unchanged because an absent `targetFluid` is not
+serialized. The hidden world for those runs is conditioned on calibration
+`troll-sognefjord-immiscible-black-oil-v3` (5 GOC and 5 OWC controls, Simandoux saturations, from the
+synthetic Troll oil rim); earlier worlds remain gas-water. The revealed-observation pay is still the summed length of
+non-isolated observable completion openings (GR/RHOB/NPHI/RT/caliper qualifiers);
+logs carry no permeability, so it cannot apply the same cutoffs.
+
 ### Dual basis
 
 Every score is calculated:
@@ -993,7 +1013,25 @@ Implemented read-only tools:
 - `analyze_asof_field`;
 - `get_scenario_scorecard`.
 
-`submit_prediction_draft` remains planned.
+`submit_prediction_draft` is replaced by human-reviewed AI forecast drafting
+(`POST /api/forecast-drafts`, `forecast-draft-v1`). The agent reuses the
+read-only formation evidence tools plus `estimate_formation_structure_at_target`
+(deterministic IDW top/base TVD, `formation-structure-idw-v1`) and
+`validate_forecast`. It returns an unsaved draft for the selected frozen-source
+target; the browser fills the prediction form only after explicit review.
+Drafting rejects (409, before any model call) targets outside the simulator
+coverage and requires `totalDepthM` within its TVD envelope.
+
+`GET /api/fields/{fieldId}/simulator-coverage` (`simulator-coverage-v1`)
+estimates the hidden world's extent from the same visible structural controls
+that `scripts/seed_reservoir_world.py` conditions on: their bounding box plus
+1500 m (2000 m seed padding less a 500 m frame-safety buffer), and a maximum
+TVD of deepest base + max(1000, base - top) - 100 m.
+
+`POST /api/prospect-briefs` (`prospect-brief-v1`) returns a short, cited,
+plain-language brief for one eligible target (headline, recommendation,
+2-4 reasons, 1-4 risks, 0-3 next checks), with citations kept in arrays rather
+than inline text. It uses the same read-only tools plus `validate_prospect_brief`.
 
 The agent cannot seal, approve, bind, execute, reveal, or score.
 
@@ -1101,10 +1139,50 @@ P5-P8 tasks remain open; they are not duplicated or silently redefined.
 - [x] P9.4 Add rotation, common depth exaggeration, fluid selection, and depth cutting.
 - [ ] P9.5 Calibrate uncertainty envelopes and held-out geometry accuracy; no heuristic confidence percentages.
 - [ ] P9.6 Resolve common vertical datums and incorporate structural-only controls without fabricated trajectories.
+  - [x] Hidden-world and analysis structural controls use `structural-controls-surveyed-or-inlier-v1`
+    (`scripts/seed_reservoir_world.py`, `PetrophysicsAnalysisService.ReadStructuralControls`): an MD
+    formation interval becomes TVD only through the bore's own survey covering both ends. With at least four
+    surveyed controls, an unsurveyed control is kept as an assumed-vertical pick only when its well has no
+    surveyed control and its MD top and MD thickness lie inside the Tukey far-out fences (Q1 - 3 IQR,
+    Q3 + 3 IQR, linear quantiles) of the surveyed TVD tops and thicknesses; otherwise it is excluded and
+    logged. Property controls require a covering survey. On Troll Sognefjord this excludes nine
+    controls (31/5-4 A/AR/AR2 and 31/2-16 S/SR, whose 982 m and 731 m MD "thicknesses" had inflated the
+    world to 450-640 m near the ranked targets; 31/2-17 S and 31/2-20 S MD-top outliers; and re-entries
+    31/2-1 R and 31/6-8 R). The re-conditioned world `rsw_136b0ffa...` (profile `rsp_b1c3a00e...`) is
+    about 90-140 m thick at the top-ranked candidates. Setup profiles are listed newest-first, so the
+    newest conditioning is the default; worlds bound to existing scenarios are unchanged. Common vertical
+    datums remain open.
 - [ ] P9.7 Remove canonical 29/46-to-30/47 publication-count assumptions.
-- [ ] P9.8 Establish physically defensible production-rate, PVT, and schedule calibration.
+- [x] P9.8 Establish physically defensible production-rate, PVT, and schedule calibration.
+  - `production-calibration-default-v2` capped every phase at 8e-9 m3/s and produced only about
+    135 of 1,826 days (a shut-in/restart/control-change test pattern), so five-year volumes stayed
+    near 0.1 m3. Runs that used it keep it.
+  - `production-calibration-default-v3` (new runs): one producer flowing continuously for five years
+    under 15 MPa BHP control, capped at 0.05 reservoir m3/s (about 4,320 m3/day); initial step 1 day,
+    maximum step 15 days, CG relative tolerance 1e-10 (1e-6 failed the 1e-6 material-balance gate at
+    these rates), 600 samples per well. Measured on a 64x64x20 Troll world: about 3 s per run,
+    material-balance error at most 2e-8.
+  - Stage A still reports reservoir m3. `ProductionSurfaceConversion` divides by generic Troll-like
+    formation volume factors (Bg 0.00515 rm3/Sm3 from 20.5 MPa, 68 degC, z 0.88; Bo 1.12; Bw 1.01) before
+    the meter and scoring, only for v3. Laboratory PVT, solution gas, and pressure-dependent Bg remain open.
+  - The shut-in requirement is removed from both the Stage A and DrillingOperations schedule validators.
+  - Completion mapping keeps a short producing opening's own coarse cells when an
+    MD-disjoint isolation interval shares all of them (previously a hard S6
+    `CompletionBindingRejected` on Preview grids); designs that were accepted before
+    map exactly as before.
 - [x] P9.9 Add guided prediction authoring alongside the complete JSON contract.
 - [ ] P9.10 Share a versioned interpretation model across logs, sections, geometry, and ranking.
+- [x] P9.11 Condition hidden-world rock properties on net sand. The world factory treats control
+  porosity/permeability as net-sand values and mixes shale back in log-linearly by net-to-gross
+  (`ReservoirWorldFactory` cell mixing), but the seed passed gross-interval means (shale already
+  included) with a hard-coded 1e-20 m2 shale, counting shale twice: 31/5-4 S (gross geometric
+  3.7 mD, ~85 m qualifying rock at ~700 mD) became ~0.13 mD world cells and hidden truth pay 0 m.
+  The seed now uses net-lithology (FORCE 30000/65030) PHIE mean and PERM geometric mean, and
+  shale porosity/permeability from the observed non-net log samples (29 samples: 0.21, 0.01 mD), so
+  a control cell reproduces its well's gross geometric-mean permeability. New default profile
+  `rsp_c2d1f08a...` (world `rsw_f7dfab06...`); earlier worlds and scored scenarios are unchanged.
+  Cells still carry no sub-cell bedding, so qualifying truth pay approaches the gross column where
+  neighbours are good rock.
 
 ### First geometry slice: acceptance and limits
 

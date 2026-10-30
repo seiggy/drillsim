@@ -264,7 +264,7 @@ internal sealed class FormationInterpretationTools
             allowCitations: false);
     }, cancellationToken);
 
-    private string Run(Func<string> read, CancellationToken ct)
+    internal string Run(Func<string> read, CancellationToken ct)
     {
         lock (_gate)
         {
@@ -278,7 +278,7 @@ internal sealed class FormationInterpretationTools
         }
     }
 
-    private string Publish(object value, bool allowCitations = true)
+    internal string Publish(object value, bool allowCitations = true)
     {
         string json = Serialize(value);
         int bytes = Encoding.UTF8.GetByteCount(json);
@@ -308,7 +308,7 @@ internal sealed class FormationInterpretationTools
         {
             foreach ((string key, JsonNode? child) in obj)
             {
-                if (key is "evidenceId" or "wellEvidenceId" or "wellBoreEvidenceId" or "clusterEvidenceId")
+                if (key is "evidenceId" or "wellEvidenceId" or "wellBoreEvidenceId" or "clusterEvidenceId" or "geologyEvidenceId")
                 {
                     if (child is JsonValue value && value.TryGetValue<string>(out string? id) && _visible.Contains(id))
                         _delivered.Add(id);

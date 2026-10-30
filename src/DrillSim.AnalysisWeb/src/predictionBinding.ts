@@ -2,7 +2,7 @@ import { configurationErrors, configurationKey, defaultConfiguration } from './a
 import { visibleEvidenceIds } from './evidence'
 import type {
   AnalysisResult, FieldPackage, PredictionBody, PredictionCapabilities, QuantileValues,
-  RankedCandidate, Scenario, VersionedPredictionAnalysisBinding,
+  RankedCandidate, Scenario, TargetFluid, VersionedPredictionAnalysisBinding,
 } from './types'
 
 export const predictionBindingVersion = 'prediction-analysis-binding-v1'
@@ -101,12 +101,15 @@ export function validatePredictionBinding(binding: unknown): asserts binding is 
   }
   object(value, ['version', 'modelVersion', 'configuration', 'configurationSha256', 'analysisSha256', 'scenarioId', 'fieldId', 'reservoirName', 'asOfUtc', 'target'], 'analysisBinding')
   if (value.modelVersion !== 'petrophysics-screening-v1') throw new Error('Unsupported analysis binding model version.')
-  object(value.configuration, ['version', 'porosityCutoff', 'permeabilityCutoffM2', 'wellExclusionRadiusM', 'gridPointsPerAxis', 'idwNeighborCount'], 'analysisBinding.configuration')
+  const configKeys = ['version', 'porosityCutoff', 'permeabilityCutoffM2', 'wellExclusionRadiusM', 'gridPointsPerAxis', 'idwNeighborCount']
+  const configuration = value.configuration as Record<string, unknown> | undefined
+  object(value.configuration, configuration && Object.hasOwn(configuration, 'targetFluid') ? [...configKeys, 'targetFluid'] : configKeys, 'analysisBinding.configuration')
   const config = value.configuration
   if (typeof config.version !== 'string' || typeof config.porosityCutoff !== 'number' || typeof config.permeabilityCutoffM2 !== 'number' ||
       typeof config.wellExclusionRadiusM !== 'number' || typeof config.gridPointsPerAxis !== 'number' || typeof config.idwNeighborCount !== 'number' ||
       configurationErrors({ version: config.version, porosityCutoff: config.porosityCutoff, permeabilityCutoffM2: config.permeabilityCutoffM2,
-        wellExclusionRadiusM: config.wellExclusionRadiusM, gridPointsPerAxis: config.gridPointsPerAxis, idwNeighborCount: config.idwNeighborCount }).length) {
+        wellExclusionRadiusM: config.wellExclusionRadiusM, gridPointsPerAxis: config.gridPointsPerAxis, idwNeighborCount: config.idwNeighborCount,
+        ...(Object.hasOwn(config, 'targetFluid') ? { targetFluid: config.targetFluid as TargetFluid } : {}) }).length) {
     throw new Error('Analysis binding configuration is invalid; every setting requires its documented numeric type.')
   }
   if (!hash(value.configurationSha256) || !hash(value.analysisSha256)) throw new Error('Binding fingerprints must be 64 lowercase hexadecimal characters.')
@@ -133,7 +136,7 @@ export function validateBoundPredictionBody(body: PredictionBody) {
   }
   validatePredictionBinding(body.analysisBinding)
   const binding = body.analysisBinding
-  if (binding.target.candidateId !== body.candidateId || !samePay(binding.target.expectedPaydirtM, body.expectedPaydirtM)) throw new Error('Body candidate and expected pay must match the bound target exactly.')
+  if (binding.target.candidateId !== body.candidateId) throw new Error('Body candidate must match the bound target exactly.')
   if (body.proposedWellPath.some(station => station.eastingM !== binding.target.eastingM || station.northingM !== binding.target.northingM)) {
     throw new Error('Point-screening binding v1 requires every path station at the candidate easting/northing. Directional edits are retained, not flattened; this geometry cannot be saved or sealed under v1.')
   }

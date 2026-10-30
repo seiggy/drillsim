@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "troll-sognefjord-immiscible-black-oil-v1",
+  "id": "troll-sognefjord-immiscible-black-oil-v3",
   "fieldId": "502fea8b-4d85-5d40-86a7-f5b7655d89d6",
   "reservoirName": "SOGNEFJORD FM",
   "classification": "ModelEstimated",
@@ -16,7 +16,7 @@
   },
   "provenance": {
     "basis": [
-      "FORCE 2020 log-derived porosity, resistivity, lithofacies, and permeability proxies",
+      "FORCE 2020 log-derived porosity, resistivity, lithofacies, gamma-ray (Larionov) shale volume with Simandoux saturation, and permeability proxies",
       "SODIR Troll/Sognefjord wellbore and lithostratigraphic interval records"
     ],
     "missingEvidence": [
@@ -103,44 +103,87 @@
   },
   "contactInitialization": {
     "method": "Pressure-gradient and saturation-transition fit from logged controls",
-    "gasOilContactDepth": null,
-    "oilWaterContactDepth": null,
-    "gasWaterContactDepth": {
-      "value": 1587.6712726739269,
+    "gasOilContactDepth": {
+      "value": 1554.609483969345,
       "unit": "m TVD",
       "statistic": "median"
     },
-    "gasWaterControlPoints": [
-      {
-        "eastingM": -5613.5659165357065,
-        "northingM": 11854.545247394592,
-        "contactDepthTvdM": 1580.660254369486,
-        "evidenceId": "geology:1fdc0755-c8d2-552f-9da0-50fac52b9252"
-      },
-      {
-        "eastingM": 5907.212274535792,
-        "northingM": 10513.169288353063,
-        "contactDepthTvdM": 1594.6822909783677,
-        "evidenceId": "geology:28a28167-69e1-58a3-883c-5ca9255ee52d"
-      },
-      {
-        "eastingM": 667.7945611266186,
-        "northingM": -5942.772581114434,
-        "contactDepthTvdM": 1646.0826496067968,
-        "evidenceId": "geology:872c17b4-29d0-55d8-99be-1c1d10d72585"
-      },
-      {
-        "eastingM": 7813.6911618398735,
-        "northingM": -24459.508733252063,
-        "contactDepthTvdM": 1569.3023302369254,
-        "evidenceId": "geology:d0f64d25-4369-5083-9bce-2d2312047b39"
-      }
-    ],
+    "oilWaterContactDepth": {
+      "value": 1580.660254369486,
+      "unit": "m TVD",
+      "statistic": "median"
+    },
+    "gasWaterContactDepth": null,
+    "gasWaterControlPoints": [],
     "transitionThickness": {
       "value": 12.0,
       "unit": "m"
     },
     "status": "Sealed",
-    "fitVersion": "force-phase-transition-v1"
+    "fitVersion": "force-phase-transition-v1",
+    "gasOilControlPoints": [
+      {
+        "eastingM": -6296.257255857199,
+        "northingM": 9115.988425482996,
+        "contactDepthTvdM": 1554.609483969345,
+        "evidenceId": "geology:e3c91ee1-5d6f-5770-ad03-d5caacbfb7fb"
+      },
+      {
+        "eastingM": -5613.565916535328,
+        "northingM": 11854.545247394592,
+        "contactDepthTvdM": 1555.5860101293838,
+        "evidenceId": "geology:1fdc0755-c8d2-552f-9da0-50fac52b9252"
+      },
+      {
+        "eastingM": 667.794561126997,
+        "northingM": -5942.772581114434,
+        "contactDepthTvdM": 1608.0432329401929,
+        "evidenceId": "geology:872c17b4-29d0-55d8-99be-1c1d10d72585"
+      },
+      {
+        "eastingM": 14458.355506031075,
+        "northingM": -17473.582954234444,
+        "contactDepthTvdM": 1552.726984164889,
+        "evidenceId": "geology:ee99ebd2-ad38-575b-bf7f-4452b02da434"
+      },
+      {
+        "eastingM": 7813.691161840252,
+        "northingM": -24459.508733252063,
+        "contactDepthTvdM": 1554.2545146888635,
+        "evidenceId": "geology:d0f64d25-4369-5083-9bce-2d2312047b39"
+      }
+    ],
+    "oilWaterControlPoints": [
+      {
+        "eastingM": -5613.565916535328,
+        "northingM": 11854.545247394592,
+        "contactDepthTvdM": 1580.660254369486,
+        "evidenceId": "geology:1fdc0755-c8d2-552f-9da0-50fac52b9252"
+      },
+      {
+        "eastingM": 5907.21227453617,
+        "northingM": 10513.169288353063,
+        "contactDepthTvdM": 1594.6822909783677,
+        "evidenceId": "geology:28a28167-69e1-58a3-883c-5ca9255ee52d"
+      },
+      {
+        "eastingM": 667.794561126997,
+        "northingM": -5942.772581114434,
+        "contactDepthTvdM": 1694.1136397517014,
+        "evidenceId": "geology:872c17b4-29d0-55d8-99be-1c1d10d72585"
+      },
+      {
+        "eastingM": 14458.355506031075,
+        "northingM": -17473.582954234444,
+        "contactDepthTvdM": 1572.7899801899746,
+        "evidenceId": "geology:ee99ebd2-ad38-575b-bf7f-4452b02da434"
+      },
+      {
+        "eastingM": 7813.691161840252,
+        "northingM": -24459.508733252063,
+        "contactDepthTvdM": 1574.318268752946,
+        "evidenceId": "geology:d0f64d25-4369-5083-9bce-2d2312047b39"
+      }
+    ]
   }
 }

@@ -229,12 +229,13 @@ public sealed partial class SqliteScenarioStore
         if (state.RunId != scorecard.RunId)
             throw Conflict("Scorecard run mismatch", "Scorecard runId does not match the committed reveal.");
         bool originalModel = scorecard.Correction is null &&
-            string.Equals(scorecard.ScoringModelVersion, ScenarioModelVersions.Scoring, StringComparison.Ordinal);
+            string.Equals(scorecard.ScoringModelVersion, state.ScoringModelVersion, StringComparison.Ordinal);
         bool correctionModel = scorecard.Correction is { } correction &&
             correction.CorrectionVersion == ScoringCorrectionVersions.Correction &&
             correction.OriginalScoringModelVersion == state.ScoringModelVersion &&
+            state.ScoringModelVersion == ScenarioModelVersions.LegacyScoring &&
             scorecard.ScoringModelVersion == ScoringCorrectionVersions.ScoringModel;
-        if (state.ScoringModelVersion != ScenarioModelVersions.Scoring || !(originalModel || correctionModel))
+        if (!ScenarioModelVersions.IsSupportedScoring(state.ScoringModelVersion) || !(originalModel || correctionModel))
         {
             throw Conflict("Scoring model mismatch", "Scorecard scoringModelVersion does not match the frozen scenario model.");
         }

@@ -10,6 +10,32 @@ public sealed class ConfiguredAnalysisService(ScenarioService scenarios, IPetrop
         ConfiguredAnalysisRequest request,
         CancellationToken cancellationToken = default)
     {
+        var (package, reservoir) = await ResolveAsync(fieldId, request, cancellationToken);
+        return analysis.Analyze(package, reservoir, request.Configuration);
+    }
+
+    public async Task<StaticReservoirModel> BuildReservoirModelAsync(
+        Guid fieldId,
+        StaticReservoirModelRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (request.Targets is { Count: > 50 } || request.Targets?.Any(t => t is null || string.IsNullOrWhiteSpace(t.Id) ||
+                t.Id.Length > 200 || !double.IsFinite(t.EastingM) || !double.IsFinite(t.NorthingM)) == true)
+            throw Invalid("targets must be at most 50 points with a nonempty id and finite eastingM/northingM.");
+        var (package, reservoir) = await ResolveAsync(fieldId,
+            new(request.Configuration, request.ScenarioId, request.AsOf, request.Reservoir), cancellationToken);
+        if (string.IsNullOrWhiteSpace(reservoir))
+            throw Invalid("reservoir is required for a live field scope.");
+        return PetrophysicsAnalysisService.BuildStaticModel(package, reservoir, request.Configuration, request.Targets)
+            ?? throw new ScenarioApiException(StatusCodes.Status404NotFound, "No reservoir model",
+                $"No located visible pick carries formation '{reservoir}', so no reservoir model can be built.");
+    }
+
+    private async Task<(AnalysisPackage Package, string? Reservoir)> ResolveAsync(
+        Guid fieldId,
+        ConfiguredAnalysisRequest request,
+        CancellationToken cancellationToken)
+    {
         AnalysisConfiguration.Validate(request.Configuration);
         if (fieldId == Guid.Empty || request.ScenarioId == Guid.Empty)
             throw Invalid("fieldId and scenarioId must be nonempty UUIDs.");
@@ -31,7 +57,7 @@ public sealed class ConfiguredAnalysisService(ScenarioService scenarios, IPetrop
         if (package.FieldId != fieldId)
             throw new ScenarioApiException(StatusCodes.Status409Conflict, "Field package mismatch",
                 "The package does not belong to the requested field.");
-        return analysis.Analyze(package, reservoir, request.Configuration);
+        return (package, reservoir);
     }
 
     private static ScenarioApiException Invalid(string detail) =>

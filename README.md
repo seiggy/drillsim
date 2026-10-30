@@ -12,8 +12,8 @@ be built, launched, observed, and managed together.
 
 ## What is included
 
-- 20 drilling service APIs, a .NET analysis API, a React interpretation
-  workstation, and the Cluster Blazor web application
+- 20 drilling service APIs, a .NET analysis API, a five-step React
+  web app, and the Cluster Blazor web application
 - .NET Aspire orchestration, service discovery, health checks, and telemetry
 - A persistent Aspire-managed SQLite database for each service
 - OpenAPI documents with Scalar API reference pages
@@ -21,45 +21,48 @@ be built, launched, observed, and managed together.
 
 ## See the workflow
 
-The [illustrated demo guide](docs/index.html) explains all **19 engineering
-tasks** with inline UI screenshots. Its **39 tutorial steps in Chapters 1–4**
-were validated end to end. The September 16, 2026 run used the real services
-and AI model, then completed a new simulation with **60 production months and
-94 evaluation metrics**. Existing field records and completed scenarios remained
-unchanged.
+DrillSim is a synthetic decision-support demo. The web app at
+`http://localhost:5173` walks through five steps, each answering one question:
 
-See [Preflight & datasets](docs/index.html#preflight) for the complete local
-setup, sample-data imports, simulator model preparation and backup/reset steps.
+1. **Field — What do we know?** Well counts, wells with rock-quality logs,
+   average net pay and the area the simulator can drill, with Map, 2D Section,
+   3D Reservoir, Logs and Crossplot views.
+2. **Prospects — Where should we drill?** The five best drillable targets with
+   low / best / high net-pay ranges on a map, plus what the reservoir model holds
+   at each (gas and oil thickness). **Looking for** (Any / Oil / Gas) re-ranks by
+   that fluid's pay; the forecast and the score follow it. **AI second opinion** returns a
+   cited brief on why the target looks good and what could make it wrong
+   (about 50 seconds).
+3. **Forecast — What will we find?** Creates a run for the target. **Draft
+   forecast with AI** fills net pay, reservoir top and base depth, total depth,
+   fluids and production (60–120 seconds). The AI starts from the screening net
+   pay and must cite evidence for any change; the screening value stays in the
+   prediction binding and is scored as a baseline. **Fill from reservoir model**
+   fills the form from the reservoir model without AI. Edit anything, then **Lock forecast** to seal and approve it in
+   one step.
+4. **Drill — Drill it in the simulator.** **Drill this well** runs the blind
+   simulator end to end: load the hidden model, drill, survey, sample, log,
+   complete, produce for five years, publish and score. Failures are explained
+   in plain language.
+5. **Results — How did we do?** The forecast against the new well's logs, the
+   hidden truth and simple rules of thumb, plus five years of simulated production
+   in surface m³ (continuous flow at 15 MPa bottom-hole pressure, capped at 4,320
+   reservoir m³/day, generic volume factors); all metrics are in an appendix.
 
-**Locate the next prospect.** Azure Maps places the offshore field's wells and
-ranked targets alongside P90/P50/P10 estimates, nearby controls and evidence
-coverage.
+[![Prospects step with five ranked targets, net-pay ranges and the map](docs/screenshots/redesign-prospects.png)](docs/screenshots/redesign-prospects.png)
 
-[![Azure Maps field view with well locations, ranked targets, paydirt estimates and the evidence bank](docs/screenshots/chapter-1-map.png)](docs/screenshots/showcase-map.png)
+[![Results step comparing the forecast, the new well and rules of thumb](docs/screenshots/redesign-results.png)](docs/screenshots/redesign-results.png)
 
-**Explore the reservoir.** Inspect formation intervals, fluid estimates, survey
-trajectories and nearby drilling targets. Camera and mesh controls are separate
-from the applied ranking settings.
+Net pay is a rock-quality proxy (thickness passing porosity and permeability
+cutoffs), not reserves, and the P90/P50/P10 ranges are uncalibrated. The
+simulator's hidden truth never reaches the browser or the AI, and the AI never
+changes numbers or saves anything without the user. Customer implementations
+need a real geoscientist.
 
-[![DrillSim 3D reservoir, survey trajectories, target estimates and guided tutorial](docs/screenshots/chapter-3-reservoir.png)](docs/screenshots/showcase-reservoir.png)
-
-**Draft and compare interpretations.** A local Agent Framework agent retrieves
-evidence with read-only tools. Review its citations before accepting the notes;
-save and compare exact hypothesis revisions separately.
-
-[![Cited AI formation interpretation with review controls and engineer notes](docs/screenshots/chapter-3-interpretation.png)](docs/screenshots/chapter-3-step-02.png)
-
-**Run a simulation from the GUI.** Create a scenario, review the editable
-forecast, save, seal and approve it. Choose the model preset and resolution,
-prepare and start the simulator, approve completion, then publish and evaluate.
-The example forecasts and resulting production are synthetic workflow data,
-not calibrated commercial predictions.
-
-[![Completed simulation evaluation with expected-paydirt error, bounds and aggregate metrics](docs/screenshots/chapter-4-evaluation.png)](docs/screenshots/showcase-evaluation.png)
-
-Select an image to open its full-page capture. The guide also includes
-[production charts](docs/screenshots/showcase-production.png), per-step actions
-and expected results, and the application architecture.
+The [demo guide](docs/index.html) has the step-by-step walkthrough, a
+10-minute demo script, troubleshooting and the architecture. See
+[Preflight & datasets](docs/index.html#preflight) for local setup, dataset
+imports, simulator model preparation and reset.
 
 ## Prerequisites
 
@@ -162,90 +165,145 @@ intentionally not advertised as public MCP servers.
 
 ## Analysis workstation
 
-The `analysis-web` resource provides the Hypothesis Sequencer field-analysis
-portal. Its deterministic field package and expected-paydirt analysis work
-without a model connection. Aspire exposes it at the stable development origin
-`http://localhost:5173` for Azure Maps CORS configuration.
+The `analysis-web` resource is the React app. Aspire exposes it at the stable
+development origin `http://localhost:5173`, which Azure Maps CORS allows. The
+ranking, forecast form, simulator and results work without a model connection.
 
-### Demo guide and guided tutorial
+### Using the app
 
-Open **Demo & architecture guide** in the app for the HTML presenter script, or
-open [`docs/index.html`](docs/index.html) directly in a browser. It covers every
-task, the engineering inputs and outputs, and the services behind the workflow.
-The same document is the repository's GitHub Pages site. The Pages workflow
-publishes it after these files reach `main`; select **GitHub Actions** under the
-repository's **Settings → Pages → Build and deployment**. Pages serves the guide,
-not the running simulator.
+The header holds **Field**, **Reservoir** and **Run** menus, plus **Tour**,
+**Demo guide** and **Settings**. The Field menu lists original datasets; the Run
+menu lists earlier runs for that field, such as "Target #1 · Oct 27, 2026,
+2:05 PM", with a plain status (*forecast in progress*, *drilling*, *drilling
+failed*, *results ready*). Choosing a run opens the step it reached. Forecast,
+Drill and Results show *Needs a target* until a run exists.
 
-Choose **Guided tutorial** to follow four short chapters in the app. The yellow
-outline identifies the relevant control. Use **Prev** and **Next**, skip an
-exercise, or close the tutorial at any time. The grid exercise waits for your
-actual Apply result; tutorial navigation never applies settings or saves records.
-Any edits you make remain after you close the tutorial.
+Only targets inside the prepared simulator model's area are listed on
+Prospects, and Forecast refuses a total depth deeper than the model, so a well
+can no longer be planned outside simulator coverage from the UI.
 
-The Field menu distinguishes **Original data** from **Simulated results**.
-Simulated results include a scenario description and date. Scenario status is
-shown separately from its name: **Scored** means evaluation is complete.
-These labels do not rename or merge stored fields.
+**Settings** holds every adjustable value, stored in the browser:
 
-In **Correlation**, choose **Draft interpretation with AI** to generate a proposed
-name, target rationale and formation notes from the displayed evidence and applied
-settings. The request includes your current notes; a loaded hypothesis uses its
-saved evidence. Review the citations and limitations, then choose **Use this
-draft** to fill the form. Existing notes require confirmation before replacement.
-**Save hypothesis** remains a separate action. The agent uses the configured
-Azure OpenAI connection; unavailable models and invalid responses leave your text
-unchanged. Manual notes and the example note remain available.
+| Setting | Default |
+| --- | --- |
+| Minimum porosity | 12% |
+| Minimum permeability | 1 mD |
+| Wells used per target (inverse-distance neighbours) | 4 |
+| Keep-away distance from existing wells | 500 m |
+| Grid points per side | 15 (225 points) |
+| Simulator model detail | Preview (Standard is finer and slower) |
+| Approve the completion design automatically | On |
+| Your name or initials (recorded on lock and drill) | Demo analyst |
+| Hide automated test runs | On |
 
-AI availability reports configuration, not available model capacity. If the
-provider returns 429, drafting shows **AI capacity limit reached**, retains your
-notes, and makes no automatic retry. Retry only after quota or capacity is available.
-In Aspire's `analysis-api` structured logs, `FormationInterpretationFailure`
-(event 8300) includes the original exception, its stack and inner exceptions, and
-`ProviderStatusCode`, correlated with the HTTP request trace and span. Browser
-errors remain sanitized.
+Saving analysis settings re-scores every target; runs already started keep the
+settings they were locked with. **Tour** opens a side panel with the purpose,
+what to do and what to look for on each step. It only navigates.
 
-All three analysis agents run locally in Microsoft Agent Framework: field notes
-(`/agui`), scenario-scoped notes (`/agui/scenario`) and formation drafting.
-They use the Responses API so Astra can reason while calling tools.
-Response storage and background execution are disabled, and encrypted reasoning
-continuation stays within each request's local tool loop. Scenario notes retain
-their clock-bound evidence tools; they cannot access unrestricted field evidence.
+### Demo guide
 
-The formation agent's `invoke_agent` span contains a child model span for
-the model request. In **Development**, both spans capture input/output messages,
-including notes and field evidence; treat trace exports accordingly. Message
-capture is off outside Development. The chat span records token usage when the
-provider returns it; a rejected request may have no usage or output. Both layers
-use Aspire's existing telemetry source and exporter configuration, with no
-separate OTLP endpoint.
-The formation agent starts with a small brief rather than sending the complete
-dataset on every request. Its read-only tools summarize formation picks, read the
-exact applied screening results, search records, inspect formation/log summaries,
-and read engineer notes. It can request larger pages or the full prepared context
-when the task needs it. Tools operate on the same verified snapshot throughout
-the request, and final citations must refer to evidence actually returned.
+Open **Demo guide** in the app, or [`docs/index.html`](docs/index.html)
+directly. The same page is the repository's GitHub Pages site, published by the
+Pages workflow from `main` (select **GitHub Actions** under **Settings → Pages →
+Build and deployment**). Pages serves the guide, not the running simulator.
 
-The initial brief is at most 8 KiB; the complete prepared snapshot retains the
-existing 192 KiB safety bound. Generous execution safeguards allow 128 tool calls,
-40 function-invocation iterations, 2 MiB of cumulative retrieved data and a
-10-minute request deadline. These are runaway-execution limits, not a small-context
-target. Cancellation remains available, and provider failures are not retried
-automatically.
+### AI agents
 
-In **Evidence → Data sources**, records are grouped by dataset, preparation and
-classification. Expand the affected wellbores to trace each record to its source.
-Shared files, licenses and credits are listed once. Original source, curve and
-coordinate metadata is available through JSON downloads rather than raw data dumps.
+The analysis agents run locally in the Analysis API on Microsoft Agent
+Framework and call the Azure AI Foundry deployment through the Responses API.
+Each reads one verified evidence snapshot through read-only tools, checks its
+answer with a validation tool, and may cite only evidence those tools returned.
+None can save, approve, drill or reveal anything. Response storage and
+background execution are disabled.
 
-Tutorial checks use the existing frontend runner:
+| Agent | Endpoint | Used by the UI |
+| --- | --- | --- |
+| Prospect brief | `POST /api/prospect-briefs` | Prospects → **AI second opinion** |
+| Forecast draft | `POST /api/forecast-drafts` | Forecast → **Draft forecast with AI** |
+| Formation interpretation | `POST /api/formation-interpretation` | No (server-side only) |
+| AG-UI field and scenario notes | `/agui`, `/agui/scenario` | No (server-side only) |
+| Ask DrillSim assistant | `/agui/assistant`, `GET /api/assistant/status` | Header → **Ask DrillSim** |
+
+The prospect brief returns a verdict (*Worth drilling*, *Drill with caution* or
+*Not yet — check first*), a headline, reasons, rated risks and checks, each
+citing the wells it is based on. It must answer *Not yet* for a target outside
+simulator coverage. The forecast agent calls a deterministic tool that
+interpolates the reservoir top and base at the target from nearby picks
+(inverse distance, survey-converted where stations exist), reviews logs and
+screening, and drafts total depth, fluids, contacts, production, assumptions and
+reasoning; a `validate_forecast` tool checks it before it answers. The target
+and expected net pay stay deterministic, and the user still edits and locks the
+forecast.
+
+The formation-interpretation agent and the field and scenario AG-UI endpoints
+remain available server-side for API clients, but the redesigned UI no longer
+calls them.
+
+#### Ask DrillSim assistant
+
+The chat panel is a [Vercel AI SDK](https://ai-sdk.dev) `useChat` client
+(`src/DrillSim.AnalysisWeb/src/components/AssistantPanel.tsx`) talking AG-UI to
+`/agui/assistant` through a small transport (`assistantTransport.ts`). Each
+screen publishes what it shows with `useAssistantContext(id, description,
+value)`; those items travel as AG-UI `context`, and `AssistantPageContext`
+prepends them to the latest user message because the AG-UI host does not
+forward context to the model.
+
+The agent runs on the GitHub Copilot harness
+(`Microsoft.Agents.AI.GitHub.Copilot`) with bring-your-own-key: model calls go
+to the same Azure OpenAI deployment using an `AzureCliCredential` bearer token,
+so no GitHub Copilot sign-in is used. The harness is sandboxed: built-in tools
+(shell, files, web, sub-agents), config discovery and plugins are off, and the
+permission handler approves only DrillSim's own tools. To extend it:
+
+- **Tools** — add an `AIFunction` in `DrillSimAssistant.CreateTools`
+  (`src/DrillSim.AnalysisApi/Services/DrillSimAssistant.cs`); it is allowed
+  automatically. Keep tools read-only. Give it a plain label in `toolLabels`
+  in `AssistantPanel.tsx`.
+- **Skills** — add `src/DrillSim.AnalysisApi/AssistantSkills/<name>/SKILL.md`
+  (copied to the output on build). The starter `drillsim-glossary` skill
+  explains DrillSim terms in plain language.
+
+Answers can include rich content, and none of it is rendered as HTML:
+
+- **Tables** — markdown pipe tables, parsed by the panel's own small markdown
+  renderer into React elements (numeric columns right-aligned, at most 60 rows).
+  Any HTML the model writes shows as plain text.
+- **Charts** — the `show_chart` tool (bar, line or scatter; up to 6 series of
+  100 points). The server validates the arguments and returns problems so the
+  model can retry; the browser validates them again (`parseChartSpec` in
+  `AssistantChart.tsx`) and draws its own SVG with a **Show data** table.
+  Series named gas, oil or water use the app's fluid colours. To add another
+  visual, add a display-only tool and render its `dynamic-tool` part in
+  `MessageBody`.
+
+The first question after the Analysis API starts takes up to about a minute
+while the Copilot runtime starts a session; later answers take 5–30 seconds.
+Ask one warm-up question before a demo.
+
+AI availability reports configuration, not model capacity. A provider 429 is
+shown as "The AI service is at capacity"; nothing is retried automatically.
+Failures log `ProspectBriefFailure` (event 8320), `ForecastDraftFailure` (8310)
+or `FormationInterpretationFailure` (8300) in Aspire's `analysis-api`
+structured logs, with the original exception and `ProviderStatusCode`,
+correlated with the request trace. Browser errors remain sanitized.
+
+Agent `invoke_agent` spans contain a child model span. In **Development**, both
+capture input and output messages, including field evidence; treat trace
+exports accordingly. Message capture is off outside Development. Agents start
+from a small brief (at most 8 KiB) and fetch more through tools within
+runaway-execution limits (128 tool calls, 2 MiB of retrieved data, 10-minute
+deadline). Cancellation is available, and provider failures are not retried.
+
+Frontend checks use the existing runner:
 
 ```powershell
 Set-Location .\src\DrillSim.AnalysisWeb
-npm run test:tutorial
+npm run build
+npm run test:forecast-ai
 # Optional browser checks using an already installed Playwright module:
 $env:DRILLSIM_PLAYWRIGHT_MODULE = "<absolute-path-to-playwright>\index.mjs"
-npm run test:tutorial:browser
+npm run test:guide:browser
 ```
 
 Aspire automatically generates missing internal service keys and persists them
@@ -319,10 +377,10 @@ Before S2 generates a drilling path, it registers the approved **Planned** path
 with the reservoir service. A path outside the prepared model's coverage is
 rejected before drilling or survey artifacts are created. S4 still checks the
 **AsDrilled** path, because steering can leave the model even when the plan fits.
-The Simulation panel explains which path was rejected and how to proceed:
-create a new scenario with a compatible target/path, or have the operator provide
-a model covering that location. Changing the seed or Preview/Standard resolution
-does not expand the model's area; existing approved paths and failed runs are not rewritten.
+The Drill step explains the failure in plain language and points back to
+Prospects, which lists only targets inside the model's area. Changing the seed
+or Preview/Standard resolution does not expand that area; existing approved
+paths and failed runs are not rewritten.
 
 In Aspire, the reservoir service logs `ReservoirRequestRejected` (event 8400)
 with the HTTP status, diagnostic code and field-by-field validation errors on
@@ -332,27 +390,17 @@ codes rather than forwarding private model details or arbitrary backend text.
 Older runs recorded only as `StageADataMismatch` retain that original code;
 their missing validation detail cannot be recovered from the old trace.
 
-For an uncommitted S8 publication rejected by a destination service, **New
-evidence** can offer **Recover staged publication** after the underlying import
-problem is corrected. Inspect the staged fingerprints and operation counts,
-enter the local audit label and correction reason, and acknowledge that exact
-review. Recovery preserves the same run and staged plan; **Publish reveal and
-evaluate** is a separate action with a new attempt key. An uncertain response
-must be retried with its saved key, not treated as rollback. Recovery is unavailable
-for unrelated failures, changed evidence, or an activated/prepared/committed reveal.
-It uses the same local-only antiforgery-protected operator facade; labels are
-audit annotations, not authenticated identities.
-Architecture and geology cleanup retain every publication-marked record,
-regardless of its simulation date. A missing previously verified record blocks
-recovery; restoration requires explicit review of the saved immutable payload
-and confirmation of its original business hash.
-
-For an eligible rejected scorecard with the historical absolute-error-bound
-defect, **Evaluation** offers **Append corrected evaluation**. Review the
-original/corrected fingerprints and correction reason before appending the
-versioned artifact. The rejected artifact, original inputs and point scores
-remain intact. Use **Run / retry evaluation** separately to publish it; neither
-operation repeats drilling or publication.
+Two repair actions remain on the local operator facade
+(`/api/operator/scenarios/{id}/runs/{runId}/...`) but have no button in the
+redesigned UI. `recover-publication` re-attempts an uncommitted S8 publication
+rejected by a destination service after the import problem is fixed; it
+requires acknowledging the exact staged-plan hash and preserves the same run
+and plan. `correct-score` appends a corrected, versioned scorecard for the
+historical absolute-error-bound defect without changing the rejected artifact,
+inputs or point scores. Neither repeats drilling or publication, and an
+uncertain response must be retried with its saved action key. Labels are audit
+annotations, not authenticated identities. Architecture and geology cleanup
+retain every publication-marked record regardless of its simulation date.
 
 The hidden reservoir service conditions deterministic structured worlds from
 logged controls and runs an adaptive immiscible oil/water/gas IMPES kernel. Its

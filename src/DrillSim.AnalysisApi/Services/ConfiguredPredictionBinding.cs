@@ -26,7 +26,7 @@ internal static class ConfiguredPredictionBinding
             binding.AsOfUtc is null || binding.AsOfUtc == default(DateTimeOffset) || binding.AsOfUtc == DateTimeOffset.MaxValue ||
             binding.AsOfUtc.Value.Offset != TimeSpan.Zero || binding.Target is not PredictionAnalysisTarget target ||
             target.CandidateId != body.CandidateId || !double.IsFinite(target.EastingM) || !double.IsFinite(target.NorthingM) ||
-            Math.Abs(target.EastingM) > 1e9 || Math.Abs(target.NorthingM) > 1e9 || target.ExpectedPaydirtM != body.ExpectedPaydirtM)
+            Math.Abs(target.EastingM) > 1e9 || Math.Abs(target.NorthingM) > 1e9)
             throw Mismatch("The analysis binding must identify the exact scope, configuration, candidate and output quantiles.");
         // v1 is a point-screening result, not an integrated directional-well forecast.
         if (body.ProposedWellPath.Any(station =>
@@ -86,7 +86,7 @@ internal static class ConfiguredPredictionBinding
             "baseline-four-neighbor-idw-v3", "baseline-uncertainty-aware-rank1-v3"
         },
         sourceScope = "Scenario source field and initialAsOfUtc only; immutable visible source snapshot required.",
-        targetRule = "Any eligible full-grid candidate. Every planned station must use its exact eastingM/northingM; expectedPaydirtM must equal its P90/P50/P10.",
+        targetRule = "Any eligible full-grid candidate. Every planned station must use its exact eastingM/northingM. The binding records the candidate's screening P90/P50/P10; the forecast's expectedPaydirtM may differ from it.",
         minimumLocatedControls = 4,
         fourNeighborBaselineRule = "Exactly four nearest located controls with configured cutoffs, grid and exclusion; independent of the main idwNeighborCount.",
         limitation = "Qualifying-rock point-screening proxy, not hydrocarbon presence, reserves or a path-integrated forecast. Formation, fluid/contact and production forecasts remain explicit human inputs.",

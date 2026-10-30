@@ -845,6 +845,33 @@ public sealed class RevealTests
     }
 
     [Test]
+    public async Task CloneSnapshot_ConcurrentReadsDoNotOpenNestedTransactions()
+    {
+        RevealFixture fixture = await CreateFixtureAsync(ScenarioStatus.HumanApproved);
+        RevealRequest request = CreateRequest(fixture.CloneId);
+        await fixture.Reveals.PrepareAsync(fixture.Scenario.ScenarioId, request);
+        await fixture.Reveals.FinalizeAsync(fixture.Scenario.ScenarioId, Finalize(request));
+
+        var sharedStore = new SqliteScenarioStore(new SqliteConnectionStringBuilder
+        {
+            DataSource = _databasePath,
+            Cache = SqliteCacheMode.Shared
+        }.ToString());
+        var scenarios = new ScenarioService(
+            sharedStore,
+            new MapPackageService(CreatePackage(fixture.SourceId), CreatePackage(fixture.CloneId)),
+            new CanonicalJsonHasher(),
+            new FixedTimeProvider(T1));
+        Scenario revealed = await scenarios.GetAsync(fixture.Scenario.ScenarioId);
+
+        AnalysisPackage[] packages = await Task.WhenAll(Enumerable.Range(0, 32).Select(_ =>
+            scenarios.GetPackageAsync(fixture.CloneId, revealed.ScenarioId, T1)));
+
+        Assert.That(packages.Select(package => package.Sha256),
+            Is.All.EqualTo(request.ClonePackage!.Sha256));
+    }
+
+    [Test]
     public async Task CloneSnapshot_TamperingIsDetectedOnRestart()
     {
         RevealFixture fixture = await CreateFixtureAsync(ScenarioStatus.HumanApproved);

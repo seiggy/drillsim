@@ -56,9 +56,15 @@ export interface AnalysisConfiguration {
   wellExclusionRadiusM: number
   gridPointsPerAxis: number
   idwNeighborCount: number
+  /** Omitted for any hydrocarbon. Never send null: the server hashes an omitted value differently. */
+  targetFluid?: TargetFluid
 }
 
+export type TargetFluid = 'Oil' | 'Gas'
+
 export interface RankedCandidate {
+  /** Share of the reservoir model's good rock holding the configured target fluid; pay is already scaled by it. */
+  targetFluidFraction?: number
   rank: number
   candidateId: string
   eastingM: number

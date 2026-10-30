@@ -16,7 +16,8 @@ try {
     await server.ssrLoadModule('/src/scenarioCreation.ts')
   const { defaultConfiguration } = await server.ssrLoadModule('/src/analysisConfiguration.ts')
   const { createScenario } = await server.ssrLoadModule('/src/api.ts')
-  const { ScenarioCreation } = await server.ssrLoadModule('/src/components/ScenarioCreation.tsx')
+  const { defaultSettings } = await server.ssrLoadModule('/src/settings.ts')
+  const { ForecastScreen } = await server.ssrLoadModule('/src/screens/ForecastScreen.tsx')
   const input = {
     sourceFieldId: 'original-field', reservoirName: 'SOGNEFJORD FM', name: ' Reviewed demo ',
     asOfUtc: '2026-09-16T12:30:00Z', purpose: ' Explore the synthetic well outcome ',
@@ -69,20 +70,18 @@ try {
   await assert.rejects(createScenario(attempt.payload), /Review the UTC/)
   let effects = 0
   globalThis.fetch = async () => { effects++; throw new Error('Rendering is read-only') }
-  const props = { sourceFieldId: input.sourceFieldId, sourceFieldName: 'Troll original', reservoirName: input.reservoirName,
-    configuration: input.configuration, onCreated: () => effects++, onClose: () => effects++ }
-  const html = renderToStaticMarkup(createElement(ScenarioCreation, props))
-  assert.match(html, /Scenario name/)
-  assert.match(html, /Evidence cutoff \(UTC\)/)
-  assert.match(html, /disabled=""[^>]*>Create scenario/)
-  assert.doesNotMatch(html, /type="text"[^>]*value="[a-f0-9]{64}"/, 'No raw hash entry is required.')
-  storage.set(scenarioCreationKey(input.sourceFieldId, input.reservoirName), JSON.stringify(attempt))
-  const retry = renderToStaticMarkup(createElement(ScenarioCreation, props))
-  assert.match(retry, /<fieldset disabled=""/)
-  assert.match(retry, /Retry same scenario creation/)
-  assert.match(retry, /Reviewed demo/)
+  const candidate = { candidateId: 'candidate:one', rank: 2, eastingM: 10, northingM: 20, p90NetPayM: 1, p50NetPayM: 2, p10NetPayM: 3,
+    neighborEvidenceIds: [] }
+  const pkg = { fieldId: input.sourceFieldId, sha256: 'a'.repeat(64), generatedAt: attempt.payload.asOfUtc, field: {}, wells: [], dataGaps: [] }
+  const html = renderToStaticMarkup(createElement(ForecastScreen, {
+    pkg, reservoir: input.reservoirName, candidate, settings: { ...defaultSettings, analysis: input.configuration },
+    onRunChanged: () => effects++, onProspects: () => effects++, onDrill: () => effects++,
+  }))
+  assert.match(html, /What will this well find\?/)
+  assert.match(html, /target #2/)
+  assert.match(html, /disabled=""[^>]*>Lock forecast/)
   assert.equal(effects, 0)
-  console.log('Scenario creation checks passed: versioned Web Crypto fingerprint, UTC validation, stable uncertain retries, response identity, local restoration and read-only rendering.')
+  console.log('Scenario creation checks passed: versioned Web Crypto fingerprint, UTC validation, stable uncertain retries, response identity, local restoration and a Forecast screen render that never creates a run.')
 } finally {
   globalThis.fetch = originalFetch
   delete globalThis.sessionStorage

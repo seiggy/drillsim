@@ -226,7 +226,6 @@ internal sealed class CompletionProductionService(
         double tolerance = 1e-10 * horizon;
         double expectedStart = 0;
         bool hasProduction = false;
-        bool hasShutIn = false;
         for (int index = 0; index < request.Schedule.Count; index++)
         {
             CompletionProductionScheduleSegment? segment = request.Schedule[index];
@@ -256,7 +255,6 @@ internal sealed class CompletionProductionService(
                 errors.Add(key, "Minimum BHP must not exceed maximum BHP.");
             if (segment.ShutIn)
             {
-                hasShutIn = true;
                 continue;
             }
             hasProduction = true;
@@ -274,8 +272,6 @@ internal sealed class CompletionProductionService(
             errors.Add("schedule", "Production schedule must exactly span five 365.25-day years.");
         if (!hasProduction)
             errors.Add("schedule", "At least one producing segment is required.");
-        if (!hasShutIn)
-            errors.Add("schedule", "At least one shut-in segment is required.");
         if (!double.IsFinite(request.InitialTimeStepSeconds) || !(request.InitialTimeStepSeconds > 0))
             errors.Add("initialTimeStepSeconds", "Initial timestep must be finite and positive.");
         if (request.Solver.MaximumSamplesPerWell < 60)

@@ -29,6 +29,8 @@ public static class FormationInterpretationEndpoints
                     .Build()),
             enableSensitiveData));
         services.AddSingleton<FormationInterpretationService>();
+        services.AddSingleton<ForecastDraftService>();
+        services.AddSingleton<ProspectBriefService>();
         return services;
     }
 #pragma warning restore OPENAI001
@@ -36,6 +38,41 @@ public static class FormationInterpretationEndpoints
     public static IEndpointRouteBuilder MapFormationInterpretation(this IEndpointRouteBuilder endpoints)
     {
         RouteGroupBuilder group = endpoints.MapGroup("/api/formation-interpretation");
+        group.WithAgentErrorHandling("Formation interpretation", new EventId(8300, "FormationInterpretationFailure"));
+        group.MapGet("/status", (FormationInterpretationService service) => Results.Ok(service.Status));
+        group.MapPost("", async (HttpContext context, FormationInterpretationService service) =>
+            Results.Ok(await service.DraftAsync(
+                await ReadBodyAsync<FormationInterpretationRequest>(context, "formation interpretation", FormationInterpretationAgent.JsonOptions), context.RequestAborted)))
+            .RequireLocalOperatorMutation();
+        return endpoints;
+    }
+
+    public static IEndpointRouteBuilder MapForecastDrafts(this IEndpointRouteBuilder endpoints)
+    {
+        RouteGroupBuilder group = endpoints.MapGroup("/api/forecast-drafts");
+        group.WithAgentErrorHandling("Forecast draft", new EventId(8310, "ForecastDraftFailure"));
+        group.MapGet("/status", (ForecastDraftService service) => Results.Ok(service.Status));
+        group.MapPost("", async (HttpContext context, ForecastDraftService service) =>
+            Results.Ok(await service.DraftAsync(
+                await ReadBodyAsync<ForecastDraftRequest>(context, "forecast draft", ForecastDraftAgent.JsonOptions), context.RequestAborted)))
+            .RequireLocalOperatorMutation();
+        return endpoints;
+    }
+
+    public static IEndpointRouteBuilder MapProspectBriefs(this IEndpointRouteBuilder endpoints)
+    {
+        RouteGroupBuilder group = endpoints.MapGroup("/api/prospect-briefs");
+        group.WithAgentErrorHandling("Prospect brief", new EventId(8320, "ProspectBriefFailure"));
+        group.MapGet("/status", (ProspectBriefService service) => Results.Ok(service.Status));
+        group.MapPost("", async (HttpContext context, ProspectBriefService service) =>
+            Results.Ok(await service.ExplainAsync(
+                await ReadBodyAsync<ProspectBriefRequest>(context, "prospect brief", ProspectBriefAgent.JsonOptions), context.RequestAborted)))
+            .RequireLocalOperatorMutation();
+        return endpoints;
+    }
+
+    private static void WithAgentErrorHandling(this RouteGroupBuilder group, string subject, EventId eventId)
+    {
         group.AddEndpointFilter(async (invocation, next) =>
         {
             HttpContext context = invocation.HttpContext;
@@ -54,31 +91,26 @@ public static class FormationInterpretationEndpoints
             {
                 Exception diagnosticException = exception is FormationInterpretationModelException model
                     ? model.OriginalException : exception;
-                context.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("DrillSim.AnalysisApi.FormationInterpretation")
-                    .LogError(new EventId(8300, "FormationInterpretationFailure"), diagnosticException,
-                        "Formation interpretation failed with {ErrorType} (provider status {ProviderStatusCode}).",
-                        diagnosticException.GetType().Name, (diagnosticException as ClientResultException)?.Status);
+                context.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger($"DrillSim.AnalysisApi.{eventId.Name}")
+                    .LogError(eventId, diagnosticException,
+                        "{Subject} failed with {ErrorType} (provider status {ProviderStatusCode}).",
+                        subject, diagnosticException.GetType().Name, (diagnosticException as ClientResultException)?.Status);
                 if (exception is FormationInterpretationModelException { RateLimited: true })
                     return Results.Problem(statusCode: 429, title: "AI capacity limit reached",
                         detail: "The AI service cannot accept this request right now. Try again after its quota or capacity is available. Your notes are unchanged; no automatic retry was made.");
                 bool evidenceUnavailable = exception is InvalidDataException or SqliteException;
                 return Results.Problem(statusCode: evidenceUnavailable ? 503 : 502,
-                    title: evidenceUnavailable ? "Formation interpretation evidence unavailable" : "Formation interpretation AI unavailable",
-                    detail: "The evidence or model response could not be verified. No interpretation was saved; no automatic inference retry was attempted.");
+                    title: evidenceUnavailable ? $"{subject} evidence unavailable" : $"{subject} AI unavailable",
+                    detail: "The evidence or model response could not be verified. Nothing was saved; no automatic inference retry was attempted.");
             }
         });
-        group.MapGet("/status", (FormationInterpretationService service) => Results.Ok(service.Status));
-        group.MapPost("", async (HttpContext context, FormationInterpretationService service) =>
-            Results.Ok(await service.DraftAsync(await ReadBodyAsync(context), context.RequestAborted)))
-            .RequireLocalOperatorMutation();
-        return endpoints;
     }
 
-    private static async Task<FormationInterpretationRequest> ReadBodyAsync(HttpContext context)
+    private static async Task<T> ReadBodyAsync<T>(HttpContext context, string subject, JsonSerializerOptions options) where T : class
     {
         const int maximum = 128 * 1024;
         if (!context.Request.HasJsonContentType() || context.Request.ContentLength > maximum)
-            throw HypothesisValidation.Invalid("A JSON formation interpretation request of at most 128 KiB is required.");
+            throw HypothesisValidation.Invalid($"A JSON {subject} request of at most 128 KiB is required.");
         byte[] bytes = new byte[maximum + 1];
         int count = 0;
         while (count < bytes.Length)
@@ -87,15 +119,15 @@ public static class FormationInterpretationEndpoints
             if (read == 0) break;
             count += read;
         }
-        if (count > maximum) throw HypothesisValidation.Invalid("The formation interpretation request exceeds 128 KiB.");
+        if (count > maximum) throw HypothesisValidation.Invalid($"The {subject} request exceeds 128 KiB.");
         try
         {
-            return JsonSerializer.Deserialize<FormationInterpretationRequest>(bytes.AsSpan(0, count), FormationInterpretationAgent.JsonOptions)
-                ?? throw HypothesisValidation.Invalid("A formation interpretation request is required.");
+            return JsonSerializer.Deserialize<T>(bytes.AsSpan(0, count), options)
+                ?? throw HypothesisValidation.Invalid($"A {subject} request is required.");
         }
         catch (JsonException)
         {
-            throw HypothesisValidation.Invalid("Supply only the documented formation interpretation JSON fields and value types.");
+            throw HypothesisValidation.Invalid($"Supply only the documented {subject} JSON fields and value types.");
         }
     }
 }

@@ -6,7 +6,13 @@ public static class ScenarioModelVersions
 {
     public const string World = "reservoir-hidden-world-v3";
     public const string Observation = "observation-model-v1";
-    public const string Scoring = "scoring-model-v1";
+    // v2 scores hidden-truth expected paydirt with the sealed prediction's own rock cutoffs; frozen v1 scenarios
+    // keep scoring-model-v1 (and its absolute-error-bounds correction) forever.
+    public const string Scoring = "scoring-model-v2";
+    public const string LegacyScoring = "scoring-model-v1";
+
+    public static bool IsSupportedScoring(string? version) =>
+        version is Scoring or LegacyScoring;
 }
 
 internal static class ScenarioIdentity

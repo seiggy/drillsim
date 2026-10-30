@@ -108,6 +108,12 @@ app.UseExceptionHandler();
 app.MapLocalOperatorWorkflow();
 app.MapHypotheses();
 app.MapFormationInterpretation();
+app.MapForecastDrafts();
+app.MapProspectBriefs();
+app.MapSimulatorCoverage();
+app.UseWhen(
+    context => context.Request.Path.StartsWithSegments(DrillSimAssistant.Route),
+    branch => branch.Use(AssistantPageContext.InvokeAsync));
 app.UseWhen(
     context => ScenarioAgentScopeBinding.IsScenarioEndpoint(context.Request.Path),
     branch => branch.Use(ScenarioAgentScopeBinding.InvokeAsync));
@@ -148,20 +154,7 @@ app.MapGet("/api/fields/{fieldId:guid}/analysis", async (
     CancellationToken cancellationToken) =>
 {
     AnalysisPackage package = await scenarios.GetPackageAsync(fieldId, scenarioId, asOf, cancellationToken);
-    string? selectedReservoir = reservoir;
-    if (scenarioId is Guid id)
-    {
-        Scenario scenario = await scenarios.GetAsync(id, cancellationToken);
-        if (!string.IsNullOrWhiteSpace(reservoir) &&
-            !string.Equals(reservoir.Trim(), scenario.ReservoirName, StringComparison.OrdinalIgnoreCase))
-        {
-            throw new ScenarioApiException(
-                StatusCodes.Status409Conflict,
-                "Scenario reservoir mismatch",
-                $"Scenario {id:D} is bound to reservoir '{scenario.ReservoirName}'.");
-        }
-        selectedReservoir = scenario.ReservoirName;
-    }
+    string? selectedReservoir = await scenarios.ResolveReservoirAsync(scenarioId, reservoir, cancellationToken);
     return Results.Ok(analysis.Analyze(package, selectedReservoir));
 });
 
@@ -174,6 +167,23 @@ app.MapPost("/api/fields/{fieldId:guid}/analysis", async (
     ConfiguredAnalysisService analysis,
     CancellationToken cancellationToken) =>
     Results.Ok(await analysis.AnalyzeAsync(fieldId, request, cancellationToken)));
+
+app.MapPost("/api/fields/{fieldId:guid}/reservoir-model", async (
+    Guid fieldId,
+    StaticReservoirModelRequest request,
+    ConfiguredAnalysisService analysis,
+    CancellationToken cancellationToken) =>
+    Results.Ok(await analysis.BuildReservoirModelAsync(fieldId, request, cancellationToken)));
+
+app.MapPost("/api/fields/{fieldId:guid}/reservoir-model/columns", async (
+    Guid fieldId,
+    StaticReservoirModelRequest request,
+    ConfiguredAnalysisService analysis,
+    CancellationToken cancellationToken) =>
+{
+    StaticReservoirModel model = await analysis.BuildReservoirModelAsync(fieldId, request, cancellationToken);
+    return Results.Ok(new { model.Method, model.PackageSha256, model.Contacts, model.Inputs, model.Limitations, Columns = model.Targets });
+});
 
 app.MapPost("/api/scenarios", async (
     CreateScenarioRequest request,
@@ -387,6 +397,16 @@ if (agentConfigured)
 #pragma warning restore OPENAI001
     app.MapAGUIServer("/agui", legacyAgent);
     app.MapAGUIServer("/agui/scenario", scenarioAgent);
+
+    AIAgent? assistant = await DrillSimAssistant.CreateAsync(new Uri(endpointValue!, UriKind.Absolute), deploymentName!, agentCredential!,
+        app.Services, app.Services.GetRequiredService<ILoggerFactory>().CreateLogger(DrillSimAssistant.Name), app.Lifetime.ApplicationStopping);
+    if (assistant is not null)
+        app.MapAGUIServer(DrillSimAssistant.Route, assistant);
+    else
+        app.MapPost(DrillSimAssistant.Route, () => Results.Problem(statusCode: StatusCodes.Status503ServiceUnavailable,
+            title: "Assistant unavailable", detail: "The Copilot runtime for the assistant could not start. Check the analysis-api logs."));
+    app.MapGet("/api/assistant/status", () => Results.Ok(new { configured = assistant is not null,
+        reason = assistant is null ? "The Copilot runtime for the assistant could not start." : null }));
 }
 else
 {
@@ -397,6 +417,8 @@ else
 
     app.MapPost("/agui", AgentNotConfigured);
     app.MapPost("/agui/scenario", AgentNotConfigured);
+    app.MapPost(DrillSimAssistant.Route, AgentNotConfigured);
+    app.MapGet("/api/assistant/status", () => Results.Ok(new { configured = false, reason = "Set AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_DEPLOYMENT_NAME to enable the assistant." }));
 }
 
 app.MapDefaultEndpoints();

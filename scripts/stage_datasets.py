@@ -420,7 +420,34 @@ def casing_sections(rows, total_depth):
     return sections
 
 
-def sampled_force_log(record, content):
+# Synthetic, Troll-like thin oil rim: above this TVDSS the hydrocarbon is all gas (gas cap), below it all oil (oil
+# leg). The log-derived (Archie) water transition stays the oil-water contact.
+GAS_OIL_CONTACT_TVDSS_M = {"troll": 1530.0}
+FORCE_SHALE_LITHOLOGY = 65000
+WATER_RESISTIVITY_OHMM = 0.08
+DEFAULT_SHALE_RESISTIVITY_OHMM = 2.0
+
+
+def simandoux_water_saturation(resistivity, porosity, shale_volume, shale_resistivity, water_resistivity=WATER_RESISTIVITY_OHMM):
+    """Simandoux (a=1, m=n=2): 1/Rt = phi^2 Sw^2 / Rw + Vsh Sw / Rsh. Clay conducts, so plain Archie (Vsh = 0)
+    reads shaly gas or oil sand as wet; the shale term removes that conductivity before solving for Sw."""
+    a = porosity * porosity / water_resistivity
+    b = shale_volume / shale_resistivity
+    if a <= 0:
+        return 1.0
+    return (-b + math.sqrt(b * b + 4 * a / resistivity)) / (2 * a)
+
+
+def shale_volume_scale(source_curves):
+    """Per-well linear gamma-ray index endpoints: clean sand at the 5th percentile, shale at the 95th."""
+    gamma = sorted(value for value in source_curves.get("GR", {}).get("Values", []) if finite(value))
+    if len(gamma) < 20:
+        return None
+    clean, shale = gamma[len(gamma) // 20], gamma[len(gamma) * 19 // 20]
+    return (clean, shale) if shale - clean > 1 else None
+
+
+def sampled_force_log(record, content, gas_oil_contact_tvdss=None):
     run = record["GeologicalProperties"]["Petrophysics"]["LogRuns"][0]
     depth_values = run["DepthValues"]
     source_curves = {
@@ -447,6 +474,14 @@ def sampled_force_log(record, content):
     table = []
     gas_fraction = 0.72 if "GAS" in content.upper() else 0.08
     contains_hydrocarbons = content.upper() not in ("", "DRY")
+    gamma_scale = shale_volume_scale(source_curves)
+    lithology_values = source_curves.get("FORCE_2020_LITHOFACIES_LITHOLOGY", {}).get("Values", [])
+    shale_resistivities = sorted(
+        value for index, value in enumerate(source_curves.get("RDEP", {}).get("Values", []))
+        if finite(value) and value > 0 and index < len(lithology_values) and finite(lithology_values[index])
+        and round(lithology_values[index]) == FORCE_SHALE_LITHOLOGY
+    )
+    shale_resistivity = shale_resistivities[len(shale_resistivities) // 2] if shale_resistivities else DEFAULT_SHALE_RESISTIVITY_OHMM
     for index in indices:
         neutron = source_value("NPHI", index)
         density = source_value("RHOB", index)
@@ -456,15 +491,26 @@ def sampled_force_log(record, content):
         resistivity = source_value("RDEP", index)
         lithology = source_value("FORCE_2020_LITHOFACIES_LITHOLOGY", index)
         sandstone = lithology is not None and round(lithology) in (30000, 65030)
+        gamma = source_value("GR", index)
+        # Larionov (older, consolidated rocks): the linear gamma-ray index overstates clay and over-corrects Sw.
+        gamma_index = clamp((gamma - gamma_scale[0]) / (gamma_scale[1] - gamma_scale[0]), 0.0, 1.0) if gamma_scale and gamma is not None else 0.0
+        shale_volume = 0.33 * (2 ** (2 * gamma_index) - 1)
         water_saturation = (
-            clamp(math.sqrt(0.08 / max((resistivity or 0.08) * porosity * porosity, 1e-9)), 0.05, 1.0)
+            clamp(simandoux_water_saturation(resistivity or WATER_RESISTIVITY_OHMM, porosity, shale_volume, shale_resistivity), 0.05, 1.0)
             if sandstone
             else 1.0
         )
         if not contains_hydrocarbons:
             water_saturation = max(0.92, water_saturation)
         hydrocarbon_saturation = (1.0 - water_saturation) if sandstone and contains_hydrocarbons else 0.0
-        gas_saturation = hydrocarbon_saturation * gas_fraction
+        elevation = source_value("Z_LOC", index)
+        if gas_oil_contact_tvdss is not None and elevation is not None:
+            # Free gas and oil segregate by density: gas cap above the GOC, oil leg below. Water saturation stays the
+            # Archie value, so the bound water held in both zones is unchanged.
+            gas_share = 0.0 if -elevation >= gas_oil_contact_tvdss else 1.0
+        else:
+            gas_share = gas_fraction
+        gas_saturation = hydrocarbon_saturation * gas_share
         oil_saturation = hydrocarbon_saturation - gas_saturation
         permeability_md = (
             0.05 * math.exp(35 * porosity) * max(0.02, 1.0 - water_saturation) ** 2
@@ -712,7 +758,7 @@ def force_sodir_records(args):
     for uwi in sorted(metadata):
         source = force_records_by_uwi.get(uwi)
         facts = metadata[uwi]
-        log = sampled_force_log(source, facts.get("wlbContent") or "") if source else None
+        log = sampled_force_log(source, facts.get("wlbContent") or "", GAS_OIL_CONTACT_TVDSS_M.get(config["fieldKey"])) if source else None
         well_id = stable_id(dataset_key, "well", facts["wlbWell"])
         well_bore_id = stable_id(dataset_key, "well-bore", uwi)
         geological_id = stable_id(dataset_key, "geological-properties", uwi)
@@ -1037,6 +1083,14 @@ def self_check():
     sampled = sampled_force_log(fake_record, "OIL")
     assert len(sampled["GeologicalPropertyTable"]) == 3
     assert trajectory_stations(sampled)[0]["md"] == 0
+    shallow, deep = (sampled_force_log(fake_record, "GAS", contact)["Curves"] for contact in (None, 5.0))
+    split = lambda curves, name: next(curve["Values"] for curve in curves if curve["CanonicalMnemonic"] == name)
+    assert all(gas > oil for gas, oil in zip(split(shallow, "SG"), split(shallow, "SO")))
+    assert split(deep, "SG")[0] > split(deep, "SO")[0] and split(deep, "SO")[2] > split(deep, "SG")[2], "Only samples below the GOC turn oil-dominant."
+    assert split(deep, "SO")[0] == 0 and split(deep, "SG")[2] == 0, "The gas cap holds no oil and the oil leg no free gas."
+    archie = simandoux_water_saturation(2.7, 0.26, 0.0, 2.0)
+    assert abs(archie - math.sqrt(0.08 / (2.7 * 0.26 ** 2))) < 1e-12, "Without shale Simandoux is Archie."
+    assert simandoux_water_saturation(2.7, 0.26, 0.6, 2.0) < archie, "Clay conductivity is not counted as water."
     print("self-check passed")
 
 

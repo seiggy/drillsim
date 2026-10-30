@@ -19,7 +19,7 @@ globalThis.sessionStorage = {
 try {
   const { parsePrediction, predictionTemplate, predictionText, predictionDraftKey, readLocalPredictionDraft, predictionSealAttemptKey, readSealActionKey } =
     await server.ssrLoadModule('/src/prediction.ts')
-  const { PredictionEditor } = await server.ssrLoadModule('/src/components/PredictionEditor.tsx')
+  const { PredictionSummary } = await server.ssrLoadModule('/src/screens/ForecastScreen.tsx')
   const { savePrediction, sealPrediction } = await server.ssrLoadModule('/src/api.ts')
   const scenario = { scenarioId: 'one', sourceFieldId: 'field', reservoirName: 'Target', initialAsOfUtc: '2026-01-01T00:00:00Z', asOfUtc: '2026-01-01T00:00:00Z', status: 'Draft' }
   const pkg = { fieldId: 'field', sha256: 'a'.repeat(64), generatedAt: scenario.asOfUtc }
@@ -117,50 +117,24 @@ try {
   await assert.rejects(sealPrediction('one', 3, 'stable-seal-key'), /did not confirm a sealed prediction/)
   globalThis.fetch = async () => new Response(JSON.stringify({ ...saved, scenarioId: 'two' }))
   await assert.rejects(savePrediction('one', body, 3), /different scenario/)
-  const props = { scenario, fieldPackage: pkg, prediction: saved, candidate, onSaved: () => {} }
-  const html = renderToStaticMarkup(createElement(PredictionEditor, props))
-  assert.match(html, /Save draft/)
-  assert.match(html, /<textarea id="prediction-json"/)
-  assert.doesNotMatch(html, /readOnly=""/)
-  assert.match(html, /type="checkbox"/)
-  assert.match(html, /disabled=""[^>]*>Seal reviewed revision/)
-  const blocked = renderToStaticMarkup(createElement(PredictionEditor, { ...props, handoffBlock: 'Configured handoff blocked.' }))
-  assert.match(blocked, /Configured handoff blocked/)
-  assert.match(blocked, /disabled=""[^>]*>Save draft/)
-  assert.match(blocked, /disabled=""[^>]*>Seal reviewed revision/)
-  const bound = renderToStaticMarkup(createElement(PredictionEditor, {
-    ...props, prediction: { ...saved, body: { ...body, analysisBinding: { configurationSha256: 'c'.repeat(64), analysisSha256: 'd'.repeat(64) } } },
-  }))
-  assert.match(bound, /unversioned or unsupported bound draft needs an explicit rebuild/)
-  assert.match(bound, /disabled=""[^>]*>Save draft/)
-  assert.match(bound, /disabled=""[^>]*>Seal reviewed revision/)
-  storage.set(predictionDraftKey('one'), JSON.stringify(local))
-  const restored = renderToStaticMarkup(createElement(PredictionEditor, props))
-  assert.match(restored, /unparseable JSON edits are still preserved/)
-  const sealed = renderToStaticMarkup(createElement(PredictionEditor, {
-    ...props, scenario: { ...scenario, status: 'PredictionSealed' }, prediction: { ...saved, seal: { sha256: 'b'.repeat(64) } },
-  }))
-  assert.match(sealed, /Saved revision 3 · Sealed/)
-  assert.match(sealed, /ledger below/)
-  assert.match(sealed, /Scenario reference/)
-  assert.ok(sealed.includes('b'.repeat(64)))
-  assert.match(sealed, /Download immutable saved JSON/)
-  assert.match(sealed, /separate local backup differs/)
-  assert.doesNotMatch(sealed, /<textarea|Prediction JSON ·|unparseable JSON edits are still preserved|Edit the complete prediction as JSON/)
-  assert.doesNotMatch(sealed, />Save draft|>Seal reviewed revision/)
-  assert.deepEqual(JSON.parse(storage.get(predictionDraftKey('one'))), local, 'Immutable presentation retains the original local backup')
-  const approved = renderToStaticMarkup(createElement(PredictionEditor, {
-    ...props, prediction: { ...saved, approval: { actor: 'Reviewer', approvedUtc: scenario.asOfUtc, sealedSha256: 'b'.repeat(64) } },
-  }))
-  assert.match(approved, /Saved revision 3 · Approved/)
-  assert.doesNotMatch(approved, /<textarea|>Save draft/)
-  const absent = renderToStaticMarkup(createElement(PredictionEditor, {
-    ...props, prediction: undefined, scenario: { ...scenario, status: 'Scored' },
-  }))
-  assert.match(absent, /No saved prediction record is loaded/)
-  assert.match(absent, /Download local JSON/)
-  assert.doesNotMatch(absent, /<textarea|Saved revision undefined|separate local backup differs|Download immutable saved JSON/)
-  console.log('Prediction checks passed: complete contract, missing numbers, scoped local copy, revision/CSRF/action-key seal headers, disabled sessions, conflicts and read-only seal.')
+  let renderRequests = 0
+  globalThis.fetch = async () => { renderRequests++; throw new Error('Rendering is read-only') }
+  const sealedRecord = { ...saved, seal: { sha256: 'b'.repeat(64) } }
+  const summary = renderToStaticMarkup(createElement(PredictionSummary, { prediction: sealedRecord }))
+  assert.match(summary, /Expected net pay<\/dt><dd>20 m<\/dd><small>10 m – 30 m<\/small>/)
+  assert.match(summary, /Reservoir top<\/dt><dd>1,?550 m<\/dd><small>1,?500 m – 1,?600 m/)
+  assert.match(summary, /Reservoir base<\/dt><dd>1,?750 m<\/dd>/)
+  assert.match(summary, /Total depth<\/dt><dd>2,?000 m<\/dd>/)
+  assert.match(summary, /Fluids<\/dt><dd>Gas<\/dd><small>GWC 1,?750 m<\/small>/)
+  assert.match(summary, /5-year gas · oil<\/dt><dd>0\.0 M m³<\/dd><small>0 m³ oil/)
+  assert.doesNotMatch(summary, /NaN|undefined|<textarea|<input/, 'A locked forecast is presented read-only.')
+  const sparse = renderToStaticMarkup(createElement(PredictionSummary, { prediction: { ...sealedRecord,
+    body: { ...body, formations: [], contactPredictions: [], productionForecasts: [] } } }))
+  assert.match(sparse, /Reservoir top<\/dt><dd>—<\/dd>/)
+  assert.match(sparse, /No contacts/)
+  assert.match(sparse, /5-year gas · oil<\/dt><dd>—<\/dd>/)
+  assert.equal(renderRequests, 0)
+  console.log('Prediction checks passed: complete contract, missing numbers, scoped local copy, revision/CSRF/action-key seal headers, disabled sessions, conflicts and read-only locked summary.')
 } finally {
   globalThis.fetch = originalFetch
   delete globalThis.sessionStorage

@@ -156,6 +156,89 @@ public sealed class DeterministicScoringTests
   Assert.That(error!.Message,Does.Contain("bounds containing its scored value"));
  }
  static IReadOnlyList<ScorecardMetric> Calculate(F f,AnalysisPredictionBodyDto p)=>DeterministicScoringModel.Calculate("Reservoir",p,f.Baselines,f.Truth,f.Logs,f.Completion,f.Survey,f.ProductionTruth,f.Series);
+ static IReadOnlyList<ScorecardMetric> CalculateV2(F f,AnalysisPredictionBodyDto p)=>DeterministicScoringModel.CalculateTruthCutoff("Reservoir",p,f.Baselines,f.Truth,p.ProposedWellPath!.Select(x=>new TruthPathStation(x.MeasuredDepthM,x.EastingM,x.NorthingM,x.TrueVerticalDepthM)).ToArray(),f.Logs,f.Completion,f.Survey,f.ProductionTruth,f.Series);
+ [Test]
+ public void NegligibleProductionDenominators_AreUnavailableInsteadOfFailingTheMetricContract()
+ {
+  var f=Fixture(zeroWater:true,missingMonth:false);
+  // Hidden water truth of 1e-27 m3/month (as produced by the live simulator) made monthlyWaterNrmse ~1e30 and S9 fail.
+  var tiny=f with{ProductionTruth=f.ProductionTruth with{MonthlyTruth=f.ProductionTruth.MonthlyTruth.Select(x=>x with{CumulativeWaterM3=x.Month*1e-27}).ToArray(),
+   Checkpoints=f.ProductionTruth.Checkpoints.Select(x=>x with{CumulativeProducedM3=x.CumulativeProducedM3 with{Water=1e-9}}).ToArray()}};
+  var forecast=tiny.Prediction with{ProductionForecasts=tiny.Prediction.ProductionForecasts!.Select(x=>x with{WaterM3=1e7*x.Year}).ToArray()};
+  IReadOnlyList<ScorecardMetric> v1=null!,v2=null!;
+  Assert.DoesNotThrow(()=>v1=Calculate(tiny,forecast));
+  Assert.DoesNotThrow(()=>v2=CalculateV2(tiny,forecast));
+  Assert.Multiple(()=>
+  {
+   foreach(var metrics in new[]{v1,v2})
+   {
+    Assert.That(metrics.Single(x=>x.Name=="monthlyWaterNrmse.HiddenTruth").Status,Is.EqualTo(ScoreMetricStatus.Unavailable));
+    Assert.That(metrics.Single(x=>x.Name=="monthlyWaterNrmse.HiddenTruth").Limitation,Does.Contain("unbounded"));
+    Assert.That(metrics.Single(x=>x.Name=="cumulativeWaterRelativeError.Y1.HiddenTruth").Limitation,Does.Contain("unbounded"));
+    Assert.That(Value(metrics,"monthlyWaterRmse.HiddenTruth"),Is.GreaterThan(0));
+    Assert.DoesNotThrow(()=>ScoreMetricContract.ValidateForPublication(metrics));
+   }
+  });
+ }
+ [Test]
+ public void ScoringV2_HiddenPayAppliesThePredictionsRockCutoffs_WhileV1KeepsNetToGrossThickness()
+ {
+  var f=Fixture();var tight=f with{Truth=f.Truth.Select(x=>x with{PermeabilityM2=1e-16}).ToArray()};
+  var binding=new AnalysisPredictionBindingDto(new AnalysisConfigurationDto("analysis-configuration-v1",.25,9.869233e-16,500,15,4),TestData.HashA,TestData.HashB,ConfiguredPredictionIntegrity.BindingVersion,ConfiguredPredictionIntegrity.AnalysisModelVersion,Guid.Parse(TestData.ScenarioId),Guid.NewGuid(),"Reservoir",DateTimeOffset.Parse("2025-01-01T00:00:00Z"),new("candidate",0,0,new(180,190,210)));
+  IReadOnlyList<ScorecardMetric> v2=CalculateV2(f,f.Prediction);
+  Assert.Multiple(()=>
+  {
+   // Path TVD 100->200 m over MD 0->200 m; base 198 m: cells credited 0->100 m and 100->196 m (exit at the base).
+   Assert.That(Value(v2,"expectedPaydirtP50AbsoluteError.HiddenTruth"),Is.EqualTo(6).Within(1e-9));
+   Assert.That(Value(v2,"expectedPaydirtP50AbsoluteError.Baseline.FourNeighborIdw"),Is.EqualTo(4).Within(1e-9));
+   Assert.That(v2.Single(x=>x.Name=="rankingRegret.HiddenTruth").Limitation,Does.Contain(ScoreArtifactIntegrity.TruthCutoffModelVersion));
+   Assert.That(Value(Calculate(f,f.Prediction),"expectedPaydirtP50AbsoluteError.HiddenTruth"),Is.EqualTo(10).Within(1e-12));
+   Assert.That(Value(CalculateV2(tight,f.Prediction),"expectedPaydirtP50AbsoluteError.HiddenTruth"),Is.EqualTo(190).Within(1e-9));
+   Assert.That(Value(Calculate(tight,f.Prediction),"expectedPaydirtP50AbsoluteError.HiddenTruth"),Is.EqualTo(10).Within(1e-12));
+   Assert.That(Value(CalculateV2(f,f.Prediction with{AnalysisBinding=binding}),"expectedPaydirtP50AbsoluteError.HiddenTruth"),Is.EqualTo(190).Within(1e-9));
+   var forecastPay=f.Prediction with{ExpectedPaydirtM=new(40,70,105),AnalysisBinding=binding with{Configuration=binding.Configuration with{PorosityCutoff=.12}}};
+   Assert.That(Value(CalculateV2(f,forecastPay),"expectedPaydirtP50AbsoluteError.HiddenTruth"),Is.EqualTo(126).Within(1e-9));
+   Assert.DoesNotThrow(()=>ScoreMetricContract.ValidateForPublication(v2));
+  });
+ }
+ [Test]
+ public void ScoringV2_HiddenPayExcludesPathOutsideTheReservoirAndCreditsTheLastCell()
+ {
+  TruthSampleDto Cell(double md,double tvd,double porosity=.25)=>new(md,0,0,tvd,100,150,porosity,1e-13,.8,true,1e7,0,1,0);
+  // Down through the reservoir (top 100, base 150), out of the base at MD 150, back up and re-entering at MD 262.5.
+  TruthPathStation[] reentry=[new(0,0,0,0),new(100,0,0,100),new(200,0,0,200),new(300,0,0,120)];
+  TruthSampleDto[] reentrySamples=[Cell(100,100),Cell(262.5,150)];
+  TruthPathStation[] vertical=[new(0,0,0,0),new(200,0,0,200)];
+  Assert.Multiple(()=>
+  {
+   Assert.That(DeterministicScoringModel.CutoffPay(reentrySamples,reentry,.12,9.869233e-16),Is.EqualTo(50+37.5).Within(1e-9));
+   Assert.That(DeterministicScoringModel.CutoffPay([Cell(100,100),Cell(125,125)],vertical,.12,9.869233e-16),Is.EqualTo(50).Within(1e-9));
+   Assert.That(DeterministicScoringModel.CutoffPay([Cell(100,100),Cell(125,125,.05)],vertical,.12,9.869233e-16),Is.EqualTo(25).Within(1e-9));
+   Assert.That(DeterministicScoringModel.CutoffPay([Cell(100,100,.05),Cell(125,125)],vertical,.12,9.869233e-16),Is.EqualTo(25).Within(1e-9));
+   TruthSampleDto Fluid(double md,double oil,double water,double gas)=>Cell(md,md) with{OilSaturation=oil,WaterSaturation=water,GasSaturation=gas};
+   TruthSampleDto[] column=[Fluid(100,0,.15,.85),Fluid(110,.7,.3,0),Fluid(130,0,1,0)];
+   Assert.That(DeterministicScoringModel.CutoffPay(column,vertical,.12,9.869233e-16),Is.EqualTo(50).Within(1e-9),"No target fluid: all good rock counts.");
+   Assert.That(DeterministicScoringModel.CutoffPay(column,vertical,.12,9.869233e-16,"Gas"),Is.EqualTo(10).Within(1e-9));
+   Assert.That(DeterministicScoringModel.CutoffPay(column,vertical,.12,9.869233e-16,"Oil"),Is.EqualTo(20).Within(1e-9));
+   var withFluid=new AnalysisConfigurationDto("analysis-configuration-v1",.12,9.869233e-16,500,15,4,"Oil");
+   Assert.That(CanonicalJson.Serialize(withFluid with{TargetFluid=null}),Does.Not.Contain("argetFluid"),"Absent target fluid keeps existing configuration hashes.");
+   Assert.That(JsonSerializer.Deserialize<AnalysisConfigurationDto>(CanonicalJson.Serialize(withFluid),CanonicalJson.SerializerOptions),Is.EqualTo(withFluid));
+  });
+ }
+ [Test]
+ public void ScoringV2_IsASupportedVersionedModel_AndTruthPathIsReadFromTheBindingRequest()
+ {
+  string request=CanonicalJson.Serialize(new{worldId="world",stations=new[]{new{measuredDepthM=0d,eastingM=1d,northingM=2d,trueVerticalDepthM=0d},new{measuredDepthM=10d,eastingM=1d,northingM=2d,trueVerticalDepthM=9d}}});
+  var batch=new TruthSampleBatch("batch","run",TestData.ScenarioId,"world","rpb","stage-b-truth-v1",1,TestData.HashA,"{}",request,TestData.HashB,"{}",TestData.HashC,"{}",TestData.HashD,DateTimeOffset.UtcNow);
+  Assert.Multiple(()=>
+  {
+   Assert.That(ScoreArtifactIntegrity.IsSupported("scoring-model-v1"),Is.True);
+   Assert.That(ScoreArtifactIntegrity.IsSupported("scoring-model-v2"),Is.True);
+   Assert.That(ScoreArtifactIntegrity.IsSupported("scoring-model-v999"),Is.False);
+   Assert.That(ScoreCoordinator.TruthPath(batch),Is.EqualTo(new[]{new TruthPathStation(0,1,2,0),new TruthPathStation(10,1,2,9)}));
+   Assert.That(Assert.Throws<ScoringException>(()=>ScoreCoordinator.TruthPath(batch with{CanonicalBindingRequestJson="{}"}))!.DiagnosticCode,Is.EqualTo("ScoringArtifactIntegrityMismatch"));
+  });
+ }
  static double Value(IReadOnlyList<ScorecardMetric> metrics,string name)=>metrics.Single(x=>x.Name==name).Value!.Value;
  static F Fixture(bool zeroWater=false,bool missingMonth=true)
  {

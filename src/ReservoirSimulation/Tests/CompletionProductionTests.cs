@@ -139,8 +139,8 @@ public sealed class CompletionProductionTests
     [TestCase(false, true, false, false)]
     [TestCase(false, false, true, false)]
     [TestCase(false, false, false, true)]
-    public async Task Run_InvalidScheduleGapOverlapHorizonOrMissingShutIn_IsRejected(
-        bool gap, bool overlap, bool shortHorizon, bool removeShutIn)
+    public async Task Run_InvalidScheduleGapOverlapHorizonOrNoProduction_IsRejected(
+        bool gap, bool overlap, bool shortHorizon, bool shutEverything)
     {
         Harness harness = await CreateHarnessAsync();
         CompletionProductionRequest valid = ValidRequest();
@@ -151,13 +151,8 @@ public sealed class CompletionProductionTests
             segments[1] = segments[1] with { StartTimeSeconds = segments[1].StartTimeSeconds - 1_000 };
         if (shortHorizon)
             segments[^1] = segments[^1] with { DurationSeconds = segments[^1].DurationSeconds - 1_000 };
-        if (removeShutIn)
-            segments[1] = segments[1] with
-            {
-                ShutIn = false,
-                ControlMode = WellControlMode.Rate,
-                TargetRateM3PerSecond = -0.00005
-            };
+        if (shutEverything)
+            segments = segments.Select(segment => segment with { ShutIn = true, TargetRateM3PerSecond = 0 }).ToArray();
 
         Assert.ThrowsAsync<ReservoirValidationException>(async () =>
             await harness.Production.RunAsync(harness.World, harness.Completion.CompletionBindingId,
@@ -241,6 +236,36 @@ public sealed class CompletionProductionTests
     }
 
     private string ConnectionString() => $"Data Source={_databasePath}";
+
+    [Test]
+    public async Task Run_ContinuousBhpScheduleWithoutShutIn_ProducesEveryMonth()
+    {
+        Harness harness = await CreateHarnessAsync();
+        double year = CompletionProductionService.YearSeconds;
+        CompletionProductionRequest request = ValidRequest() with
+        {
+            Schedule =
+            [
+                new CompletionProductionScheduleSegment
+                {
+                    StartTimeSeconds = 0, DurationSeconds = 5 * year,
+                    ControlMode = WellControlMode.Bhp, TargetBottomHolePressurePa = 1_000_000,
+                    MaximumAbsoluteRateM3PerSecond = 0.00005
+                }
+            ]
+        };
+
+        CompletionProductionResult result = await harness.Production.RunAsync(
+            harness.World, harness.Completion.CompletionBindingId, request);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.MonthlyTruth.Where(month => month.Month > 0),
+                Has.All.Matches<CompletionProductionMonthlyTruth>(month =>
+                    month.OilRateM3PerSecond + month.WaterRateM3PerSecond + month.GasRateM3PerSecond > 0));
+            Assert.That(result.Checkpoints.Select(checkpoint => checkpoint.MaximumBalanceErrorFraction), Has.All.LessThan(1e-6));
+        });
+    }
 
     private static CompletionProductionRequest ValidRequest()
     {

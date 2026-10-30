@@ -1,8 +1,9 @@
 import { lazy, Suspense, useId, useState } from 'react'
 import { classificationLabel, idOf, nameOf, read } from '../data'
 import type { FieldPackage, JsonRecord, ProposedWellPathStation, RankedCandidate, WellSummary } from '../types'
-import { defaultRockCriteria, fluidPhase, positionAtMd, sampleClass, type RockCriteria } from '../reservoirGeometry'
+import { defaultRockCriteria, fluidPhase, positionAtMd, rockQuality, sampleClass, type RockCriteria } from '../reservoirGeometry'
 import { ReservoirView } from './ReservoirView'
+import type { StaticReservoirModel } from '../reservoirModel'
 import { buildFormationColumn, fluidLabel, qualityLabel, gapLabel } from '../fluidColumn'
 import type { FormationColumn } from '../fluidColumn'
 
@@ -406,6 +407,8 @@ function SectionView({ well, proposedPath }: { well?: WellView; proposedPath?: P
   const detailY = (value: number) => 112 + 224 * (value - (formation?.top ?? 0)) /
     Math.max((formation?.base ?? 1) - (formation?.top ?? 0), 1)
   const trajectory = path(stations.map((station, index) => [x(deviations[index]), y(station.tvd)]))
+  const saturations = formation ? well.samples.filter((sample) => sample.fluidKnown && sample.depth >= formation.top && sample.depth <= formation.base) : []
+  const half = (column.spacingM ?? 5) / 2
 
   return (
     <div className="subsurface-view section-view">
@@ -438,7 +441,7 @@ function SectionView({ well, proposedPath }: { well?: WellView; proposedPath?: P
               const top = positionAtMd(stations, interval.top), base = positionAtMd(stations, interval.base)
               if (!top || !base) return null
               return <rect key={`${interval.value}:${interval.top}`} className={`fluid-zone ${interval.value}`} x="54"
-                fill={interval.value === 'unknown' || interval.value === 'outside' ? `url(#${patternId}-${interval.value})` : undefined}
+                fill={interval.value === 'tight' ? `url(#${patternId}-below-cutoff)` : interval.value === 'unknown' || interval.value === 'outside' ? `url(#${patternId}-${interval.value})` : undefined}
                 y={Math.min(y(top.tvd), y(base.tvd))} width="466" height={Math.abs(y(base.tvd) - y(top.tvd))} />
             })}
             {positionAtMd(stations, formation.top) && <>
@@ -450,15 +453,29 @@ function SectionView({ well, proposedPath }: { well?: WellView; proposedPath?: P
               <rect className="reservoir-detail-bed" x="570" y="42" width="230" height="328" />
               <text className="detail-title" x="580" y="56">{well.formationName.toUpperCase()} · FLUID COLUMN</text>
               <text className="contact-label column-top-label" x="580" y="78">FORMATION TOP · {formation.top.toFixed(1)} m MD</text>
-              <text className="detail-track-title" x="580" y="100">FLUID</text>
+              <text className="detail-track-title" x="580" y="100">ZONE</text>
+              <text className="detail-track-title" x="614" y="100">PORE FLUID</text>
               <text className="detail-track-title" x="720" y="100">QUALITY</text>
               {column.fluids.map((interval) => (
                 <rect key={`detail:${interval.value}:${interval.top}`} className={`fluid-zone detail ${interval.value}`}
-                  fill={interval.value === 'unknown' || interval.value === 'outside' ? `url(#${patternId}-${interval.value})` : undefined}
-                  x="580" y={detailY(interval.top)} width="126" height={detailY(interval.base) - detailY(interval.top)}>
+                  fill={interval.value === 'tight' ? `url(#${patternId}-below-cutoff)` : interval.value === 'unknown' || interval.value === 'outside' ? `url(#${patternId}-${interval.value})` : undefined}
+                  x="580" y={detailY(interval.top)} width="30" height={detailY(interval.base) - detailY(interval.top)}>
                   <title>{`${interval.top.toFixed(1)}–${interval.base.toFixed(1)} m MD: ${fluidLabel(interval.value)}. ${gapLabel(interval.reason)}`}</title>
                 </rect>
               ))}
+              {saturations.map((sample) => {
+                const top = detailY(Math.max(formation.top, sample.depth - half)), base = detailY(Math.min(formation.base, sample.depth + half))
+                const tight = rockQuality(sample, well.criteria ?? defaultRockCriteria) === 'below-cutoff'
+                let left = 614
+                return <g key={`sat:${sample.depth}`} className={`saturation ${tight ? 'tight' : ''}`}>
+                  <title>{`${sample.depth.toFixed(1)} m MD: water ${(sample.water * 100).toFixed(0)}%, oil ${(sample.oil * 100).toFixed(0)}%, gas ${(sample.gas * 100).toFixed(0)}% of the pore space${tight ? '. Tight rock: this water is bound in the rock and does not flow.' : ''}`}</title>
+                  {(['water', 'oil', 'gas'] as const).map((fluid) => {
+                    const width = 92 * Math.max(0, sample[fluid]), x = left
+                    left += width
+                    return width > .2 ? <rect key={fluid} className={`fluid-zone ${fluid}`} x={x} y={top} width={width} height={Math.max(.5, base - top)} /> : null
+                  })}
+                </g>
+              })}
               {column.quality.map((interval) => (
                 <rect key={`quality:${interval.value}:${interval.top}`} className={`column-quality ${interval.value}`}
                   fill={interval.value !== 'qualifying' ? `url(#${patternId}-${interval.value})` : undefined}
@@ -512,7 +529,9 @@ function SectionView({ well, proposedPath }: { well?: WellView; proposedPath?: P
           <span><i className="column-swatch below-cutoff" />Red / striped: below rock cutoffs</span>
           {column.intervals.some((band) => band.reason === 'outside') && <span><i className="column-swatch outside" />Dotted: outside selected formation</span>}
         </div>
-        <p>Fluid color is independent of rock quality. Green meets both rock cutoffs; red stripes mean porosity below {((well.criteria ?? defaultRockCriteria).porosityCutoff * 100).toFixed(1)}% or permeability below {((well.criteria ?? defaultRockCriteria).permeabilityCutoffM2 / 9.869233e-16).toFixed(2)} mD—not empty rock or absent fluid.
+        <p>Zone shows the main fluid in each interval of good rock. Pore fluid shows every log reading split into water, oil and gas by its
+          measured saturation, so a gas zone with some oil and water is visible as such. Faded bars are tight rock, whose water is bound and does not flow.</p>
+        <p>Fluid is shown only where the rock passes the cutoffs. Shale and cemented streaks often read close to 100% water because their water is bound in the rock and cannot flow, so they show red-striped as not reservoir rather than as a water zone. Green meets both rock cutoffs; red stripes mean porosity below {((well.criteria ?? defaultRockCriteria).porosityCutoff * 100).toFixed(1)}% or permeability below {((well.criteria ?? defaultRockCriteria).permeabilityCutoffM2 / 9.869233e-16).toFixed(2)} mD—not empty rock or absent fluid.
           Neutral diagonal hatching means missing, invalid or unclassified data, or no nearby log sample. Unknown quality is neither passing nor failing; no fluid is assumed for unknown fluid intervals.</p>
         <p>{column.spacingM ? `Nominal sample spacing: ${column.spacingM.toFixed(2)} m. ` : 'Too few samples to infer interval coverage. '}
           Adjacent matching classifications are merged using sample midpoints; large sampling gaps stay unknown.
@@ -677,6 +696,9 @@ export function AnalysisWorkspace({
   onWell,
   mapsStatus,
   proposedPath,
+  referenceWellIds,
+  wellLabel = 'WELL',
+  reservoirModel,
 }: {
   mode: WorkspaceMode
   onMode: (mode: WorkspaceMode) => void
@@ -689,6 +711,10 @@ export function AnalysisWorkspace({
   onWell: (wellId: string) => void
   mapsStatus?: { configured: boolean; clientId?: string }
   proposedPath?: ProposedWellPathStation[]
+  /** Restricts the well picker to these well IDs and marks them on the map as the target's reference wells. */
+  referenceWellIds?: string[]
+  wellLabel?: string
+  reservoirModel?: { model?: StaticReservoirModel; loading?: boolean; error?: string }
 }) {
   const selectedWell = wells.find((well) => well.id === selectedWellId) ?? wells[0]
   const [mapOpened, setMapOpened] = useState(mode === 'map')
@@ -701,9 +727,9 @@ export function AnalysisWorkspace({
           <button key={item.id} data-tutorial={`lens-${item.id}`} aria-pressed={mode === item.id} onClick={() => onMode(item.id)}>{item.label}</button>
         ))}
         <label>
-          <span>WELL</span>
+          <span>{wellLabel}</span>
           <select value={selectedWell?.id ?? ''} onChange={(event) => onWell(event.target.value)}>
-            {wells.map((well) => <option key={well.id} value={well.id}>{well.name}</option>)}
+            {wells.filter((well) => !referenceWellIds || referenceWellIds.includes(well.wellId) || well.id === selectedWell?.id).map((well) => <option key={well.id} value={well.id}>{well.name}</option>)}
           </select>
         </label>
       </div>
@@ -711,7 +737,7 @@ export function AnalysisWorkspace({
         {mapOpened && <div hidden={mode !== 'map'} className="map-lens">
           <Suspense fallback={<div className="map-unconfigured"><strong>LOADING AZURE MAPS</strong></div>}>
             <AzureFieldMap fieldPackage={fieldPackage} candidates={candidates} selectedCandidate={selectedCandidate}
-              selectedWellId={selectedWell?.wellId} mapsStatus={mapsStatus} onCandidate={onCandidate}
+              selectedWellId={selectedWell?.wellId} referenceWellIds={referenceWellIds} mapsStatus={mapsStatus} onCandidate={onCandidate}
               onWell={(wellId) => {
                 const bore = wells.find((well) => well.wellId === wellId)
                 if (bore) onWell(bore.id)
@@ -719,7 +745,10 @@ export function AnalysisWorkspace({
           </Suspense>
         </div>}
         {mode === 'section' && <SectionView well={selectedWell} proposedPath={proposedPath} />}
-        {mode === 'trajectory' && <ReservoirView key={fieldPackage.fieldId} wells={wells} selectedWellId={selectedWell?.id ?? ''} onWell={onWell} proposedPath={proposedPath} />}
+        {mode === 'trajectory' && <ReservoirView {...reservoirModel} selectedWellId={selectedWell?.id ?? ''} referenceWellIds={referenceWellIds}
+          onWell={onWell} proposedPath={proposedPath}
+          target={selectedCandidate && { eastingM: selectedCandidate.eastingM, northingM: selectedCandidate.northingM, label: `#${selectedCandidate.rank || 1} · drill here` }}
+          targetColumn={reservoirModel?.model?.targets.find((column) => column.id === selectedCandidate?.candidateId)} />}
         {mode === 'logs' && <LogsView well={selectedWell} />}
         {mode === 'crossplot' && <CrossplotView well={selectedWell} />}
       </div>

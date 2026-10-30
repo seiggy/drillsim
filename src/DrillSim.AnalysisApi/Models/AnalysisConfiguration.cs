@@ -11,9 +11,12 @@ public sealed record AnalysisConfiguration(
     [property: JsonRequired] double PermeabilityCutoffM2,
     [property: JsonRequired] double WellExclusionRadiusM,
     [property: JsonRequired] int GridPointsPerAxis,
-    [property: JsonRequired] int IdwNeighborCount)
+    [property: JsonRequired] int IdwNeighborCount,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? TargetFluid = null)
 {
     public const string CurrentVersion = "analysis-configuration-v1";
+    /// <summary>Allowed <see cref="TargetFluid"/> values; null means any hydrocarbon (rock-quality net pay).</summary>
+    public static readonly IReadOnlyList<string> TargetFluids = ["Oil", "Gas"];
     public static AnalysisConfiguration Default { get; } = new(CurrentVersion, .12, 9.869233e-16, 500, 15, 4);
 
     public static void Validate(AnalysisConfiguration? configuration)
@@ -32,6 +35,8 @@ public sealed record AnalysisConfiguration(
             throw Invalid("gridPointsPerAxis must be between 2 and 51 (at most 2601 grid points).");
         if (configuration.IdwNeighborCount is < 1 or > 32)
             throw Invalid("idwNeighborCount must be between 1 and 32.");
+        if (configuration.TargetFluid is not null && !TargetFluids.Contains(configuration.TargetFluid))
+            throw Invalid("targetFluid must be 'Oil' or 'Gas', or omitted for any hydrocarbon.");
     }
 
     public string ComputeSha256() => PredictionJson.ComputeSha256(this);

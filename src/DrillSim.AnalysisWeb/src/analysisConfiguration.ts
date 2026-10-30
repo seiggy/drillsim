@@ -16,9 +16,18 @@ export const screeningControlLimitation =
 export function configurationKey(config: AnalysisConfiguration) {
   return JSON.stringify([
     config.version, config.porosityCutoff, config.permeabilityCutoffM2,
-    config.wellExclusionRadiusM, config.gridPointsPerAxis, config.idwNeighborCount,
+    config.wellExclusionRadiusM, config.gridPointsPerAxis, config.idwNeighborCount, config.targetFluid ?? null,
   ])
 }
+
+/** Sets or clears the target fluid without ever writing null (see AnalysisConfiguration.targetFluid). */
+export function withTargetFluid(config: AnalysisConfiguration, fluid?: AnalysisConfiguration['targetFluid']): AnalysisConfiguration {
+  const { targetFluid: _previous, ...rest } = config
+  return fluid ? { ...rest, targetFluid: fluid } : rest
+}
+
+/** 'net pay', 'oil pay' or 'gas pay' for labels. */
+export const payLabel = (config?: AnalysisConfiguration) => config?.targetFluid ? `${config.targetFluid.toLowerCase()} pay` : 'net pay'
 
 export function configurationErrors(config: AnalysisConfiguration) {
   const errors: string[] = []
@@ -28,6 +37,7 @@ export function configurationErrors(config: AnalysisConfiguration) {
   if (!Number.isFinite(config.wellExclusionRadiusM) || config.wellExclusionRadiusM < 0 || config.wellExclusionRadiusM > 100000) errors.push('Screening-control exclusion radius must be between 0 and 100000 m.')
   if (!Number.isInteger(config.gridPointsPerAxis) || config.gridPointsPerAxis < 2 || config.gridPointsPerAxis > 51) errors.push('Grid points per axis must be an integer from 2 to 51.')
   if (!Number.isInteger(config.idwNeighborCount) || config.idwNeighborCount < 1 || config.idwNeighborCount > 32) errors.push('IDW neighbors must be an integer from 1 to 32.')
+  if ('targetFluid' in config && config.targetFluid !== 'Oil' && config.targetFluid !== 'Gas') errors.push('Target hydrocarbon must be oil or gas, or omitted for any hydrocarbon.')
   return errors
 }
 

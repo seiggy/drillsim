@@ -6,23 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "test": "node tests/assistant.test.mjs && node tests/forecast-draft.test.mjs && node tests/operator.test.mjs && node tests/prediction-binding.test.mjs && node tests/prediction.test.mjs && node tests/production.test.mjs && node tests/reservoir.test.mjs && node tests/results.test.mjs && node tests/scenario-creation.test.mjs && node tests/workflow.test.mjs",
     "test:production": "node tests/production.test.mjs",
     "test:prediction": "node tests/prediction.test.mjs",
     "test:prediction-binding": "node tests/prediction-binding.test.mjs",
     "test:scenario": "node tests/scenario-creation.test.mjs",
-    "test:simulation:browser": "node tests/simulation.browser.mjs",
     "test:reservoir": "node tests/reservoir.test.mjs",
-    "test:sequencer": "node tests/sequencer.test.mjs",
     "test:operator": "node tests/operator.test.mjs",
-    "test:hypotheses": "node tests/hypotheses.test.mjs",
-    "test:hypotheses:browser": "node tests/hypotheses.browser.mjs",
-    "test:tutorial": "node tests/tutorial.test.mjs",
-    "test:tutorial:browser": "node tests/tutorial.browser.mjs",
     "test:guide:browser": "node tests/guide.browser.mjs",
-    "test:provenance": "node tests/provenance.test.mjs",
-    "test:provenance:browser": "node tests/provenance.browser.mjs",
-    "test:formation-ai": "node tests/formation-interpretation.test.mjs",
-    "test:formation-ai:browser": "node tests/formation-interpretation.browser.mjs",
+    "test:forecast-ai": "node tests/assistant.test.mjs && node tests/forecast-draft.test.mjs",
+    "test:workflow": "node tests/workflow.test.mjs",
     "preview": "vite preview"
   },
   "devDependencies": {
@@ -34,9 +27,11 @@
     "vite": "^7.1.7"
   },
   "dependencies": {
-    "@ag-ui/client": "^0.1.1-canary.beta.0",
+    "@ag-ui/client": "^1.0.3",
+    "@ai-sdk/react": "^4.0.152",
+    "ai": "^7.0.148",
     "azure-maps-control": "^3.7.4",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   }
 }

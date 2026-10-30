@@ -68,9 +68,10 @@ internal sealed class PersistentWorldManager(
         CancellationToken cancellationToken = default)
     {
         WorldSetupRequestValidator.ValidateScope(fieldId, reservoirName);
-        Dictionary<string, WorldGenerationRequest> templates = await GetSetupTemplatesAsync(
+        OrderedDictionary<string, WorldGenerationRequest> templates = await GetSetupTemplatesAsync(
             fieldId, reservoirName, cancellationToken);
-        WorldSetupProfile[] profiles = templates.Keys.Order(StringComparer.Ordinal)
+        // Newest conditioning first: callers offer the first profile as the default for new scenarios.
+        WorldSetupProfile[] profiles = templates.Keys.Reverse()
             .Select(profileId => new WorldSetupProfile(
                 profileId,
                 $"{reservoirName} conditioned model ({profileId[4..12]})",
@@ -85,7 +86,7 @@ internal sealed class PersistentWorldManager(
         CancellationToken cancellationToken = default)
     {
         WorldSetupRequestValidator.Validate(request);
-        Dictionary<string, WorldGenerationRequest> templates = await GetSetupTemplatesAsync(
+        OrderedDictionary<string, WorldGenerationRequest> templates = await GetSetupTemplatesAsync(
             request.FieldId, request.ReservoirName, cancellationToken);
         if (!templates.TryGetValue(request.ProfileId, out WorldGenerationRequest? template))
             return null;
@@ -106,12 +107,12 @@ internal sealed class PersistentWorldManager(
         }
     }
 
-    private async Task<Dictionary<string, WorldGenerationRequest>> GetSetupTemplatesAsync(
+    private async Task<OrderedDictionary<string, WorldGenerationRequest>> GetSetupTemplatesAsync(
         Guid fieldId,
         string reservoirName,
         CancellationToken cancellationToken)
     {
-        var templates = new Dictionary<string, WorldGenerationRequest>(StringComparer.Ordinal);
+        var templates = new OrderedDictionary<string, WorldGenerationRequest>(StringComparer.Ordinal);
         PersistedWorldSpec? after = null;
         while (true)
         {

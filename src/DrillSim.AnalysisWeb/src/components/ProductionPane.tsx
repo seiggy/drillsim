@@ -42,7 +42,7 @@ export function ProductionPane({ fieldPackage, scenario, reveal, metadata, predi
       <header className="production-heading">
         <div>
           <h4 id="production-title">Synthetic corrected production</h4>
-          <p>{series.wellName} · {metadata.monthCount} published months · m³, not reserves.</p>
+          <p>{series.wellName} · {metadata.monthCount} published months · m³ at surface (standard conditions), not reserves.</p>
         </div>
         <div className="production-controls">
           <label>Display<select value={mode} onChange={(event) => setMode(event.target.value)}>
@@ -67,7 +67,7 @@ export function ProductionPane({ fieldPackage, scenario, reveal, metadata, predi
             const y = (value: number) => top + 82 - 82 * value / (maximum || 1)
             return <g key={phase}>
               <text x="12" y={top + 10} className="production-phase-label">{phaseLabels[phase]}</text>
-              <text x="12" y={top + 30}>{mode === 'monthly' ? 'm³/month' : 'm³ total'}</text>
+              <text x="12" y={top + 30}>{mode === 'monthly' ? 'surface m³/month' : 'surface m³ total'}</text>
               {[0, .5, 1].map((fraction) => <g key={fraction}>
                 <line className="plot-grid" x1="100" x2="790" y1={top + 82 * (1 - fraction)} y2={top + 82 * (1 - fraction)} />
                 <text x="800" y={top + 82 * (1 - fraction) + 4}>{maximum > 0 && maximum < .001 && fraction > 0
@@ -91,7 +91,7 @@ export function ProductionPane({ fieldPackage, scenario, reveal, metadata, predi
       </div>
       <div className="scenario-table-wrap" tabIndex={0} role="region" aria-label="Cumulative production checkpoints">
         <table className="scenario-table">
-          <caption>1-, 3-, and 5-year cumulative volumes (m³)</caption>
+          <caption>1-, 3-, and 5-year cumulative volumes (surface m³)</caption>
           <thead><tr><th scope="col">Checkpoint</th>{productionPhases.map((phase) => <th key={phase} scope="col">{phaseLabels[phase]}</th>)}</tr></thead>
           <tbody>{metadata.checkpointYears.map((year) => {
             const total = cumulative[year * 12 - 1]
@@ -115,7 +115,7 @@ export function ProductionPane({ fieldPackage, scenario, reveal, metadata, predi
         <summary>Monthly readings and allocation ({months.length} months)</summary>
         <div className="scenario-table-wrap" tabIndex={0} role="region" aria-label="Monthly production readings">
           <table className="scenario-table">
-            <caption>Corrected monthly observations (m³)</caption>
+            <caption>Corrected monthly observations (surface m³)</caption>
             <thead><tr><th scope="col">Month</th>{productionPhases.map((phase) => <th key={phase} scope="col">{phaseLabels[phase]}</th>)}<th scope="col">Days producing</th><th scope="col">Allocated</th></tr></thead>
             <tbody>{months.map((month) => <tr key={month.month}>
               <th scope="row">{month.month}</th>{productionPhases.map((phase) => <td key={phase}>{formatVolume(month[phase])}</td>)}

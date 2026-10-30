@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict'
-import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -13,7 +12,7 @@ const server = await createServer({
 try {
   const { readRevealedProduction, cumulativeProduction, productionPath } = await server.ssrLoadModule('/src/production.ts')
   const { ProductionPane } = await server.ssrLoadModule('/src/components/ProductionPane.tsx')
-  const { ScenarioSequenceWorkspace } = await server.ssrLoadModule('/src/components/ScenarioWorkspace.tsx')
+  const { ResultsScreen } = await server.ssrLoadModule('/src/screens/ResultsScreen.tsx')
   const scenario = {
     scenarioId: 'scenario', clonedFieldId: 'clone', sourceFieldId: 'source', status: 'Scored',
     initialAsOfUtc: '2024-01-01T00:00:00Z', asOfUtc: '2024-01-02T00:00:00Z',
@@ -92,16 +91,22 @@ try {
   assert.doesNotMatch(html, /NaN|Infinity|undefined/)
   const gaps = renderToStaticMarkup(createElement(ProductionPane, { ...props, fieldPackage: missing }))
   assert.match(gaps, /11\/12 readings available/)
-  const withheld = renderToStaticMarkup(createElement(ScenarioSequenceWorkspace, {
-    fieldPackage: pkg, scenario: { ...scenario, status: 'HumanApproved' },
-    stepIndex: 18, resources: { loading: false, error: '' },
-  }))
-  assert.doesNotMatch(withheld, /production-chart|Synthetic production well/)
+  let fetches = 0
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = async () => { fetches++; throw new Error('Rendering must not load results') }
+  try {
+    const withheld = renderToStaticMarkup(createElement(ResultsScreen, {
+      run: { ...scenario, status: 'HumanApproved' }, pkg, onProspects: () => fetches++,
+    }))
+    assert.match(withheld, /Loading results/)
+    assert.doesNotMatch(withheld, /production-chart|Synthetic production well/, 'Production stays withheld until results are loaded.')
+    assert.equal(fetches, 0)
+  } finally {
+    globalThis.fetch = originalFetch
+  }
   const mismatch = renderToStaticMarkup(createElement(ProductionPane, { ...props, fieldPackage: { ...pkg, fieldId: 'foreign' } }))
   assert.match(mismatch, /role="alert"/)
   assert.doesNotMatch(mismatch, /production-chart/)
-  const css = await readFile(new URL('../src/index.css', import.meta.url), 'utf8')
-  assert.match(css, /\.stage-canvas\.scenario-stage\s*\{[^}]*display:\s*block/, 'Scenario panes must not inherit the map/readout grid.')
   console.log('Production view checks passed: scope, provenance, calendars, nulls, exact checkpoints, chart gaps and rendered states.')
 } finally {
   await server.close()

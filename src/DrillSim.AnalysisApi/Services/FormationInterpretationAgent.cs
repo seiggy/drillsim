@@ -64,16 +64,26 @@ public sealed partial class FormationInterpretationAgent(
     internal async Task<FormationInterpretationDraft> GenerateAsync(
         FormationInterpretationEvidence evidence, CancellationToken ct)
     {
-        if (createAgent is null)
-            throw new ScenarioApiException(503, "Formation interpretation AI unavailable", Status.Reason!);
-        ct.ThrowIfCancellationRequested();
         var tools = new FormationInterpretationTools(evidence);
-        ChatOptions chatOptions = AgentResponsesOptions.Create(Instructions, tools.CreateFunctions());
-        chatOptions.MaxOutputTokens = 4000;
-        chatOptions.ResponseFormat = ChatResponseFormat.ForJsonSchema<FormationInterpretationDraft>(JsonOptions);
+        string? text = await RunAsync("DrillSimFormationInterpretation", Instructions,
+            ChatResponseFormat.ForJsonSchema<FormationInterpretationDraft>(JsonOptions), tools.CreateFunctions(),
+            tools.Brief, 4000, ct);
+        tools.ValidateCompletion();
+        return Parse(text, tools.DeliveredCitations);
+    }
+
+    internal async Task<string?> RunAsync(string name, string instructions, ChatResponseFormat format,
+        IList<AITool> functions, string message, int maxOutputTokens, CancellationToken ct)
+    {
+        if (createAgent is null)
+            throw new ScenarioApiException(503, "AI drafting unavailable", Status.Reason!);
+        ct.ThrowIfCancellationRequested();
+        ChatOptions chatOptions = AgentResponsesOptions.Create(instructions, functions);
+        chatOptions.MaxOutputTokens = maxOutputTokens;
+        chatOptions.ResponseFormat = format;
         var options = new ChatClientAgentOptions
         {
-            Name = "DrillSimFormationInterpretation",
+            Name = name,
             // The factory supplies bounded function invocation and chat telemetry.
             UseProvidedChatClientAsIs = true,
             ChatOptions = chatOptions
@@ -85,11 +95,9 @@ public sealed partial class FormationInterpretationAgent(
             .Build();
         try
         {
-            AgentResponse response = await agent.RunAsync(
-                new ChatMessage(ChatRole.User, tools.Brief), cancellationToken: ct);
+            AgentResponse response = await agent.RunAsync(new ChatMessage(ChatRole.User, message), cancellationToken: ct);
             ct.ThrowIfCancellationRequested();
-            tools.ValidateCompletion();
-            return Parse(response.Text, tools.DeliveredCitations);
+            return response.Text;
         }
         finally
         {

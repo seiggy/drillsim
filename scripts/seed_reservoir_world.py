@@ -85,6 +85,76 @@ def interpolate_tvd(stations, measured_depth):
     return interpolate_station(stations, measured_depth, "TVD")
 
 
+# P9.6 structural-control rule (mirrored by PetrophysicsAnalysisService.ReadStructuralControls):
+# an MD formation interval is converted to TVD only with the wellbore's own survey stations covering both ends.
+# When at least MINIMUM_SURVEYED_CONTROLS surveyed controls exist, an unsurveyed control is kept (as an assumed-
+# vertical pick) only if its parent well has no surveyed control and its MD top and MD thickness both lie inside
+# the Tukey far-out fences (Q1 - 3 IQR, Q3 + 3 IQR; linear quantiles) of the surveyed TVD tops and thicknesses.
+# Deviated or sidetracked bores without surveys (e.g. a 982 m MD "thickness") are excluded instead of being
+# treated as vertical. With fewer surveyed controls the legacy assumed-vertical behaviour is kept and reported.
+STRUCTURAL_CONTROL_RULE = "structural-controls-surveyed-or-inlier-v1"
+MINIMUM_SURVEYED_CONTROLS = 4
+INLIER_FENCE_IQR = 3.0
+
+
+def covering_survey_tvd(stations, top_md, base_md):
+    ordered = sorted(
+        (read(station, "MD"), read(station, "TVD"))
+        for station in stations or []
+        if all(
+            isinstance(value, (int, float)) and math.isfinite(value)
+            for value in (read(station, "MD"), read(station, "TVD"))
+        )
+    )
+    if not ordered or top_md < ordered[0][0] or base_md > ordered[-1][0]:
+        return None
+    return interpolate_tvd(stations, top_md), interpolate_tvd(stations, base_md)
+
+
+def linear_quantile(values, fraction):
+    ordered = sorted(values)
+    position = (len(ordered) - 1) * fraction
+    lower = math.floor(position)
+    upper = min(lower + 1, len(ordered) - 1)
+    return ordered[lower] + (position - lower) * (ordered[upper] - ordered[lower])
+
+
+def far_out_fences(values):
+    q1, q3 = linear_quantile(values, 0.25), linear_quantile(values, 0.75)
+    spread = INLIER_FENCE_IQR * (q3 - q1)
+    return q1 - spread, q3 + spread
+
+
+def select_structural_controls(candidates):
+    """Return (kept, excluded) candidates under STRUCTURAL_CONTROL_RULE."""
+    surveyed = [candidate for candidate in candidates if candidate["surveyed"]]
+    unsurveyed = [candidate for candidate in candidates if not candidate["surveyed"]]
+    if len(surveyed) < MINIMUM_SURVEYED_CONTROLS:
+        return candidates, []
+    top_fences = far_out_fences([candidate["top"] for candidate in surveyed])
+    thickness_fences = far_out_fences([candidate["base"] - candidate["top"] for candidate in surveyed])
+    surveyed_wells = {candidate["wellId"] for candidate in surveyed if candidate["wellId"]}
+    excluded = {}
+    for candidate in unsurveyed:
+        thickness = candidate["base"] - candidate["top"]
+        if candidate["wellId"] and candidate["wellId"] in surveyed_wells:
+            excluded[id(candidate)] = "parent well has a surveyed control"
+        elif not top_fences[0] <= candidate["top"] <= top_fences[1]:
+            excluded[id(candidate)] = (
+                f"unsurveyed MD top {candidate['top']:.1f} m outside surveyed fences "
+                f"{top_fences[0]:.1f}-{top_fences[1]:.1f} m"
+            )
+        elif not thickness_fences[0] <= thickness <= thickness_fences[1]:
+            excluded[id(candidate)] = (
+                f"unsurveyed MD thickness {thickness:.1f} m outside surveyed fences "
+                f"{thickness_fences[0]:.1f}-{thickness_fences[1]:.1f} m"
+            )
+    return (
+        [candidate for candidate in candidates if id(candidate) not in excluded],
+        [{**candidate, "reason": excluded[id(candidate)]} for candidate in candidates if id(candidate) in excluded],
+    )
+
+
 def finite_values(values, indices):
     return [
         values[index]
@@ -133,9 +203,10 @@ def bore_location(well_bore_id, well_bores, wells, clusters, trajectory, measure
 
 
 def structural_conditioning_points(package, reservoir_name):
+    """Return (points, excluded) structural controls selected by STRUCTURAL_CONTROL_RULE."""
     well_bores, wells, clusters, trajectories = package_indexes(package)
     origin_easting, origin_northing = field_origin(package)
-    points = []
+    candidates = []
     for geology in package["geologicalProperties"]:
         well_bore_id = str(read(geology, "WellBoreID") or "")
         interval = formation_interval(geology, reservoir_name)
@@ -153,18 +224,35 @@ def structural_conditioning_points(package, reservoir_name):
         )
         if not location:
             continue
-        top_tvd = interpolate_tvd(stations, interval[0]) if stations else interval[0]
-        base_tvd = interpolate_tvd(stations, interval[1]) if stations else interval[1]
-        points.append(
+        surveyed_tvd = covering_survey_tvd(stations, *interval)
+        top_tvd, base_tvd = surveyed_tvd or interval
+        candidates.append(
             {
                 "eastingM": location[0] - origin_easting,
                 "northingM": location[1] - origin_northing,
-                "reservoirTopDepthM": min(top_tvd, base_tvd),
-                "reservoirBaseDepthM": max(top_tvd, base_tvd),
+                "top": min(top_tvd, base_tvd),
+                "base": max(top_tvd, base_tvd),
+                "surveyed": surveyed_tvd is not None,
+                "wellId": str(read(well_bores.get(well_bore_id), "WellID") or ""),
                 "evidenceId": f"geology:{record_id(geology)}",
             }
         )
-    return points
+    kept, excluded = select_structural_controls(candidates)
+    points = [
+        {
+            "eastingM": candidate["eastingM"],
+            "northingM": candidate["northingM"],
+            "reservoirTopDepthM": candidate["top"],
+            "reservoirBaseDepthM": candidate["base"],
+            "evidenceId": candidate["evidenceId"],
+            "depthBasis": "survey TVD" if candidate["surveyed"] else "reported MD; no survey, assumed vertical",
+        }
+        for candidate in kept
+    ]
+    return points, [
+        {"evidenceId": candidate["evidenceId"], "reason": candidate["reason"]}
+        for candidate in excluded
+    ]
 
 
 def fluid_contacts(depths, curves, indices, stations):
@@ -227,6 +315,41 @@ def fluid_contacts(depths, curves, indices, stations):
     return transitions
 
 
+NET_LITHOLOGY_CODES = (30000, 65030)
+LEGACY_SHALE_POROSITY = 0.05
+LEGACY_SHALE_PERMEABILITY_M2 = 1e-20
+
+
+def lithology_split(curves, indices):
+    """Split interval samples into (net, shale) by FORCE lithofacies; without lithology every sample is net."""
+    lithology = curves.get("FORCE_2020_LITHOFACIES_LITHOLOGY", [])
+    coded = [
+        (index, round(lithology[index]))
+        for index in indices
+        if index < len(lithology) and isinstance(lithology[index], (int, float)) and math.isfinite(lithology[index])
+    ]
+    if not coded:
+        return list(indices), []
+    return (
+        [index for index, code in coded if code in NET_LITHOLOGY_CODES],
+        [index for index, code in coded if code not in NET_LITHOLOGY_CODES],
+    )
+
+
+def shale_properties(points):
+    """Observed non-net (shale) log porosity mean and permeability geometric mean pooled over property controls.
+
+    The factory mixes these with the net-sand means by net-to-gross, so at a control the world reproduces the
+    well's own gross geometric-mean permeability. Falls back to the legacy constants without shale samples."""
+    porosity = [value for point in points for value in point["_shalePorosity"]]
+    permeability = [value for point in points for value in point["_shalePermeabilityM2"]]
+    if not porosity or not permeability:
+        return LEGACY_SHALE_POROSITY, LEGACY_SHALE_PERMEABILITY_M2, 0
+    mean_porosity = min(max(sum(porosity) / len(porosity), 1e-3), 0.999)
+    geometric_permeability = math.exp(sum(math.log(max(value, 1e-22)) for value in permeability) / len(permeability))
+    return mean_porosity, min(max(geometric_permeability, 1e-22), 1e-14), len(permeability)
+
+
 def conditioning_points(package, reservoir_name):
     well_bores, wells, clusters, trajectories = package_indexes(package)
     origin_easting, origin_northing = field_origin(package)
@@ -250,13 +373,19 @@ def conditioning_points(package, reservoir_name):
             str(read(curve, "CanonicalMnemonic") or "").upper(): read(curve, "Values") or []
             for curve in read(run, "Curves") or []
         }
-        porosity = finite_values(curves.get("PHIE", []), indices)
-        permeability = finite_values(curves.get("PERM", []), indices)
+        net_indices, shale_indices = lithology_split(curves, indices)
+        # The world factory treats control porosity/permeability as net-sand values and mixes shale back in by
+        # net-to-gross, so gross-interval averages would count the shale twice (P9.11).
+        porosity = finite_values(curves.get("PHIE", []), net_indices) or finite_values(curves.get("PHIE", []), indices)
+        permeability = finite_values(curves.get("PERM", []), net_indices) or finite_values(curves.get("PERM", []), indices)
         water = finite_values(curves.get("SW", []), indices)
         gas = finite_values(curves.get("SG", []), indices)
         if not porosity or not permeability or not water or not gas:
             continue
         stations = read(trajectory, "SurveyStationList") or []
+        surveyed_tvd = covering_survey_tvd(stations, *interval)
+        if not surveyed_tvd:
+            continue
         location = bore_location(
             well_bore_id,
             well_bores,
@@ -269,21 +398,23 @@ def conditioning_points(package, reservoir_name):
             continue
         easting = location[0] - origin_easting
         northing = location[1] - origin_northing
-        top_tvd = interpolate_tvd(stations, interval[0])
-        base_tvd = interpolate_tvd(stations, interval[1])
+        top_tvd, base_tvd = surveyed_tvd
         pressure_differentials = [
             gaussian_mean(read(entry, "PressureDifferential"))
             for entry in read(geology, "GeologicalPropertyTable") or []
             if interval[0] <= (gaussian_mean(read(entry, "MeasuredDepth")) or -math.inf) < interval[1]
         ]
         pressure_differentials = [value for value in pressure_differentials if value is not None]
-        lithology = finite_values(curves.get("FORCE_2020_LITHOFACIES_LITHOLOGY", []), indices)
         net_to_gross = (
-            sum(round(value) in (30000, 65030) for value in lithology) / len(lithology)
-            if lithology
+            len(net_indices) / (len(net_indices) + len(shale_indices))
+            if net_indices or shale_indices
             else 1.0
         )
+        # A well can cross a contact more than once (tight or shaly streaks); its contact is the deepest crossing.
+        deepest = {}
         for contact_type, depth in fluid_contacts(depths, curves, indices, stations):
+            deepest[contact_type] = max(depth, deepest.get(contact_type, depth))
+        for contact_type, depth in deepest.items():
             contacts[contact_type].append(
                 {
                     "eastingM": easting,
@@ -304,6 +435,8 @@ def conditioning_points(package, reservoir_name):
                 "waterSaturation": sum(water) / len(water),
                 "gasSaturation": sum(gas) / len(gas),
                 "netToGross": net_to_gross,
+                "_shalePorosity": finite_values(curves.get("PHIE", []), shale_indices),
+                "_shalePermeabilityM2": finite_values(curves.get("PERM", []), shale_indices),
                 "evidenceId": f"geology:{record_id(geology)}",
             }
         )
@@ -338,15 +471,18 @@ def load_calibration(path, package, reservoir_name):
 def calibration_contacts(calibration):
     initialization = calibration["contactInitialization"]
     transition = read(read(initialization, "TransitionThickness"), "Value")
-    gas_water = read(initialization, "GasWaterControlPoints") or []
+
+    def control_points(name):
+        return [
+            {key: value for key, value in point.items() if key != "evidenceId"}
+            for point in read(initialization, name) or []
+        ]
+
     return {
         "transitionThicknessM": transition,
-        "gasWater": [
-            {key: value for key, value in point.items() if key != "evidenceId"}
-            for point in gas_water
-        ],
-        "gasOil": [],
-        "oilWater": [],
+        "gasWater": control_points("GasWaterControlPoints"),
+        "gasOil": control_points("GasOilControlPoints"),
+        "oilWater": control_points("OilWaterControlPoints"),
     }
 
 
@@ -364,7 +500,7 @@ def validate_detected_contacts(detected, sealed, tolerance_m=0.001):
 
 
 def world_request(package, reservoir_name, seed, count_x, count_y, count_z, calibration, calibration_sha256):
-    structural_points = structural_conditioning_points(package, reservoir_name)
+    structural_points, excluded_structural = structural_conditioning_points(package, reservoir_name)
     points, detected_contacts = conditioning_points(package, reservoir_name)
     if len(points) < 4:
         raise ValueError(f"{reservoir_name}: at least four logged conditioning controls are required, found {len(points)}")
@@ -374,6 +510,7 @@ def world_request(package, reservoir_name, seed, count_x, count_y, count_z, cali
         )
     contact_options = calibration_contacts(calibration)
     validate_detected_contacts(detected_contacts, contact_options)
+    shale_porosity, shale_permeability, shale_samples = shale_properties(points)
     return {
         "fieldId": package["fieldId"],
         "reservoirName": reservoir_name,
@@ -403,21 +540,28 @@ def world_request(package, reservoir_name, seed, count_x, count_y, count_z, cali
             "waterSaturationStdDev": 0.04,
             "gasSaturationStdDev": 0.03,
             "netToGrossStdDev": 0.12,
-            "shalePorosity": 0.05,
-            "shalePermeabilityM2": 1e-20,
+            "shalePorosity": shale_porosity,
+            "shalePermeabilityM2": shale_permeability,
         },
         "structuralConditioningPoints": [
-            {key: value for key, value in point.items() if key != "evidenceId"}
+            {key: value for key, value in point.items() if key not in ("evidenceId", "depthBasis")}
             for point in structural_points
         ],
         "conditioningPoints": [
-            {key: value for key, value in point.items() if key != "evidenceId"}
+            {key: value for key, value in point.items() if key != "evidenceId" and not key.startswith("_")}
             for point in points
         ],
         "fluidContacts": contact_options,
     }, {
+        "structuralControlRule": STRUCTURAL_CONTROL_RULE,
         "structuralEvidenceIds": [point["evidenceId"] for point in structural_points],
+        "assumedVerticalStructuralEvidenceIds": [
+            point["evidenceId"] for point in structural_points if point["depthBasis"] != "survey TVD"
+        ],
+        "excludedStructuralControls": excluded_structural,
         "propertyEvidenceIds": [point["evidenceId"] for point in points],
+        "propertyConditioning": "net-sand porosity mean and permeability geometric mean; shale from observed non-net samples",
+        "shaleSampleCount": shale_samples,
         "contactControlCounts": {key: len(value) for key, value in contact_options.items() if isinstance(value, list)},
     }
 
@@ -434,6 +578,25 @@ def main():
     if args.self_check:
         assert read({"MetaInfo": {"ID": "x"}}, "metaInfo") == {"ID": "x"}
         assert abs(interpolate_tvd([{"MD": 0, "TVD": 0}, {"MD": 100, "TVD": 90}], 50) - 45) < 1e-12
+        assert covering_survey_tvd([], 10, 20) is None
+        assert covering_survey_tvd([{"MD": 0, "TVD": 0}, {"MD": 100, "TVD": 90}], 10, 120) is None
+        surveyed = [
+            {"top": 1500 + 10 * index, "base": 1600 + 15 * index, "surveyed": True, "wellId": f"w{index}"}
+            for index in range(5)
+        ]
+        inlier = {"top": 1520, "base": 1640, "surveyed": False, "wellId": "vertical"}
+        thick = {"top": 1621, "base": 2603, "surveyed": False, "wellId": "deviated"}
+        sidetrack = {"top": 1500, "base": 1600, "surveyed": False, "wellId": "w0"}
+        kept, excluded = select_structural_controls(surveyed + [inlier, thick, sidetrack])
+        assert inlier in kept and thick not in kept and sidetrack not in kept and len(excluded) == 2
+        assert select_structural_controls(surveyed[:3] + [thick])[0][-1] is thick
+        lith = {"FORCE_2020_LITHOFACIES_LITHOLOGY": [30000, 65000, 65030, None, 70000]}
+        assert lithology_split(lith, range(5)) == ([0, 2], [1, 4])
+        assert lithology_split({}, range(3)) == ([0, 1, 2], [])
+        controls = [{"_shalePorosity": [0.2, 0.22], "_shalePermeabilityM2": [1e-18, 1e-16]}]
+        porosity, permeability, count = shale_properties(controls)
+        assert abs(porosity - 0.21) < 1e-12 and abs(permeability - 1e-17) < 1e-27 and count == 2
+        assert shale_properties([{"_shalePorosity": [], "_shalePermeabilityM2": []}])[:2] == (0.05, 1e-20)
         print("self-check passed")
         return
 

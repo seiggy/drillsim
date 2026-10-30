@@ -50,31 +50,9 @@ public sealed class FormationInterpretationService(
             result = saved.Analysis;
         }
         else
-        {
-            if (scope.ScenarioId is Guid scenarioId)
-            {
-                Scenario scenario = await scenarios.GetAsync(scenarioId, ct);
-                if (!string.Equals(scope.ReservoirName, scenario.ReservoirName, StringComparison.OrdinalIgnoreCase) ||
-                    (scope.FieldId != scenario.SourceFieldId && scope.FieldId != scenario.ClonedFieldId) ||
-                    scope.AsOfUtc < scenario.InitialAsOfUtc || scope.AsOfUtc > scenario.AsOfUtc)
-                    throw Conflict("The requested field, reservoir or as-of time is outside the selected scenario.");
-                // The general package reader can backfill legacy source snapshots. Drafting must never do that.
-                if (scope.FieldId == scenario.SourceFieldId &&
-                    await scenarioStore.FindScenarioPackageSnapshotAsync(scenario, ct) is null)
-                    throw Conflict("This scenario has no immutable source snapshot. AI drafting cannot migrate or backfill it.");
-                scope = scope with { ReservoirName = scenario.ReservoirName };
-            }
-            package = await scenarios.GetPackageAsync(scope.FieldId, scope.ScenarioId, scope.AsOfUtc, ct);
-            if (package.FieldId != scope.FieldId || package.Sha256 != request.PackageSha256)
-                throw Conflict("The visible package changed. Refresh and review the evidence before drafting.");
-            result = analysis.Analyze(package, scope.ReservoirName, request.Configuration);
-        }
-        if (package.FieldId != scope.FieldId || package.Sha256 != request.PackageSha256 ||
-            result.FieldId != scope.FieldId || result.PackageSha256 != package.Sha256 ||
-            result.AnalysisSha256 != request.AnalysisSha256 || result.Configuration != request.Configuration ||
-            result.ConfigurationSha256 != request.Configuration.ComputeSha256() ||
-            !string.Equals(result.ReservoirName, scope.ReservoirName, StringComparison.OrdinalIgnoreCase))
-            throw Conflict("The package, analysis or applied configuration fingerprint does not match the exact reviewed evidence.");
+            (scope, package, result) = await LoadVerifiedAsync(scenarios, scenarioStore, analysis, scope,
+                request.Configuration, request.PackageSha256, request.AnalysisSha256, Conflict, ct);
+        EnsureExactEvidence(scope, package, result, request.Configuration, request.PackageSha256, request.AnalysisSha256, Conflict);
         CandidateGridPoint? selected = request.SelectedCandidateId is null ? null :
             result.CandidateGrid.SingleOrDefault(point => point.CandidateId == request.SelectedCandidateId &&
                 point.Status == "eligible" && point.Prediction is not null)
@@ -84,6 +62,47 @@ public sealed class FormationInterpretationService(
         return new("formation-interpretation-v1", FormationInterpretationAgent.PromptVersion, scope, package.Sha256,
             result.AnalysisSha256, result.ConfigurationSha256, request.SelectedCandidateId, request.SavedHypothesis,
             request.SnapshotSha256, time.GetUtcNow().ToUniversalTime(), draft);
+    }
+
+    /// <summary>
+    /// Loads the live or scenario-visible package for an explicit scope, re-runs the exact analysis and rejects any
+    /// fingerprint drift. Scenario scopes must match the scenario and, for the source field, an immutable snapshot.
+    /// </summary>
+    internal static async Task<(HypothesisScope Scope, AnalysisPackage Package, AnalysisResult Result)> LoadVerifiedAsync(
+        ScenarioService scenarios, SqliteScenarioStore scenarioStore, IPetrophysicsAnalysisService analysis,
+        HypothesisScope scope, AnalysisConfiguration configuration, string packageSha256, string analysisSha256,
+        Func<string, ScenarioApiException> conflict, CancellationToken ct)
+    {
+        if (scope.ScenarioId is Guid scenarioId)
+        {
+            Scenario scenario = await scenarios.GetAsync(scenarioId, ct);
+            if (!string.Equals(scope.ReservoirName, scenario.ReservoirName, StringComparison.OrdinalIgnoreCase) ||
+                (scope.FieldId != scenario.SourceFieldId && scope.FieldId != scenario.ClonedFieldId) ||
+                scope.AsOfUtc < scenario.InitialAsOfUtc || scope.AsOfUtc > scenario.AsOfUtc)
+                throw conflict("The requested field, reservoir or as-of time is outside the selected scenario.");
+            // The general package reader can backfill legacy source snapshots. Drafting must never do that.
+            if (scope.FieldId == scenario.SourceFieldId &&
+                await scenarioStore.FindScenarioPackageSnapshotAsync(scenario, ct) is null)
+                throw conflict("This scenario has no immutable source snapshot. AI drafting cannot migrate or backfill it.");
+            scope = scope with { ReservoirName = scenario.ReservoirName };
+        }
+        AnalysisPackage package = await scenarios.GetPackageAsync(scope.FieldId, scope.ScenarioId, scope.AsOfUtc, ct);
+        if (package.FieldId != scope.FieldId || package.Sha256 != packageSha256)
+            throw conflict("The visible package changed. Refresh and review the evidence before drafting.");
+        AnalysisResult result = analysis.Analyze(package, scope.ReservoirName, configuration);
+        EnsureExactEvidence(scope, package, result, configuration, packageSha256, analysisSha256, conflict);
+        return (scope, package, result);
+    }
+
+    private static void EnsureExactEvidence(HypothesisScope scope, AnalysisPackage package, AnalysisResult result,
+        AnalysisConfiguration configuration, string packageSha256, string analysisSha256, Func<string, ScenarioApiException> conflict)
+    {
+        if (package.FieldId != scope.FieldId || package.Sha256 != packageSha256 ||
+            result.FieldId != scope.FieldId || result.PackageSha256 != package.Sha256 ||
+            result.AnalysisSha256 != analysisSha256 || result.Configuration != configuration ||
+            result.ConfigurationSha256 != configuration.ComputeSha256() ||
+            !string.Equals(result.ReservoirName, scope.ReservoirName, StringComparison.OrdinalIgnoreCase))
+            throw conflict("The package, analysis or applied configuration fingerprint does not match the exact reviewed evidence.");
     }
 
     private static HypothesisScope Validate(FormationInterpretationRequest? request)

@@ -54,12 +54,14 @@ flow, and pressure-differential curves are explicitly classified as model
 estimates. They make the opportunity workflow executable; they are not measured
 reservoir properties or reserves evidence.
 
-`reservoir-fluid-calibration.json` seals model-estimated PVT, relative
-permeability, and FORCE-derived GWC controls in the field-local Riemannian frame.
-Its SHA-256 is part of both scenario and hidden-world identity.
+`reservoir-fluid-calibration.json` (v3) seals model-estimated PVT, relative
+permeability, and the FORCE-derived GOC and OWC controls in the field-local
+Riemannian frame. Its SHA-256 is part of both scenario and hidden-world identity.
+
+Troll has a synthetic thin oil rim: `stage_datasets.py` makes the hydrocarbon all gas above 1,530 m TVDSS (gas cap) and all oil below it (oil leg, `GAS_OIL_CONTACT_TVDSS_M`); the log water saturation is unchanged, so both zones keep their bound water and the water transition stays the oil-water contact; a well that crosses a contact more than once contributes its deepest crossing. Fields without a configured contact keep the content-based 72/28 gas/oil split. After restaging, reload the Troll records and run `seed_reservoir_world.py`; the seed refuses to run if the contacts detected in the logs differ from the calibration.
 
 The 5 m screening resample uses the FORCE lithofacies codes for sandstone and
 sandstone/shale, density-neutron RMS porosity with a 2.65 g/cc sandstone matrix
-and 1.05 g/cc fluid, and Archie `a=1`, `m=n=2`, `Rw=0.08`. The permeability,
+and 1.05 g/cc fluid, and Simandoux saturation (`a=1`, `m=n=2`, `Rw=0.08`) with Larionov (older rocks) shale volume from a per-well gamma-ray index (5th to 95th percentile) and shale resistivity from the median deep resistivity of the well's shale beds; plain Archie read clay conductivity as water and made shaly gas sands look wet. The permeability,
 phase split, pressure differential, and flow values are uncalibrated model
 proxies and remain tagged `ModelEstimated`.

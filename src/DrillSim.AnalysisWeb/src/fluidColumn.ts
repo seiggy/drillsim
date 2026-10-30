@@ -4,7 +4,7 @@ import type { Fluid } from './reservoirGeometry'
 
 type Range = { top: number; base: number }
 type Gap = 'sample' | 'unobserved' | 'conflict' | 'outside'
-export type FluidState = Fluid | 'unknown' | 'outside'
+export type FluidState = Fluid | 'tight' | 'unknown' | 'outside'
 export type QualityState = 'qualifying' | 'below-cutoff' | 'unknown' | 'outside'
 export interface ColumnBand<T> extends Range { value: T; reason: Gap }
 export interface ColumnInterval extends Range { fluid: FluidState; quality: QualityState; reason: Gap }
@@ -19,7 +19,7 @@ export interface FormationColumn {
 }
 
 export const fluidLabel = (value: FluidState) => ({
-  gas: 'Gas', oil: 'Oil', water: 'Water', unknown: 'Unknown fluid', outside: 'Outside selected formation',
+  gas: 'Gas', oil: 'Oil', water: 'Water', tight: 'Not reservoir (tight rock)', unknown: 'Unknown fluid', outside: 'Outside selected formation',
 })[value]
 export const qualityLabel = (value: QualityState) => ({
   qualifying: 'Meets rock cutoffs', 'below-cutoff': 'Below rock cutoffs', unknown: 'Unknown rock quality',
@@ -53,7 +53,9 @@ export function buildFormationColumn(samples: WellView['samples'], ranges: Range
   const ordered = [...samples].filter((s) => Number.isFinite(s.depth)).sort((a, b) => a.depth - b.depth)
   const readings: Array<{ depth: number; fluid: FluidState; quality: QualityState; reason: Gap }> = []
   for (const sample of ordered) {
-    const fluid = fluidPhase(sample) ?? 'unknown', quality = rockQuality(sample, criteria)
+    // Shale and cemented streaks read near 100% water from bound water that cannot flow; that is not a water zone.
+    const quality = rockQuality(sample, criteria)
+    const fluid: FluidState = quality === 'below-cutoff' ? 'tight' : fluidPhase(sample) ?? 'unknown'
     const last = readings.at(-1)
     if (last?.depth === sample.depth) {
       if (last.fluid !== fluid || last.quality !== quality) {
@@ -97,7 +99,7 @@ export function buildFormationColumn(samples: WellView['samples'], ranges: Range
     rangeFluids.slice(1).forEach((band, i) => {
       const previous = rangeFluids[i]
       if (previous.base !== band.top || previous.value === band.value ||
-          ['unknown', 'outside'].includes(previous.value) || ['unknown', 'outside'].includes(band.value)) return
+          ['unknown', 'outside', 'tight'].includes(previous.value) || ['unknown', 'outside', 'tight'].includes(band.value)) return
       const pair = [previous.value, band.value].sort().join(':')
       const type = pair === 'gas:water' ? 'GasWaterContact' : pair === 'gas:oil' ? 'GasOilContact' : 'OilWaterContact'
       result.contacts.push({ type, depth: band.top })

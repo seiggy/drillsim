@@ -25,14 +25,10 @@ try {
     recoveryAuditError, recoveryReasonError,
     scoreCorrectionBlock, scoreCorrectionKey, scoreCorrectionRetryBlock, retainScoreCorrectionReview,
   } = await server.ssrLoadModule('/src/operator.ts')
-  const { OperatorControls } = await server.ssrLoadModule('/src/components/OperatorControls.tsx')
-  const { OperatorCompletionReview } = await server.ssrLoadModule('/src/components/OperatorCompletionReview.tsx')
-  const { OperatorPublicationRecovery } = await server.ssrLoadModule('/src/components/OperatorPublicationRecovery.tsx')
-  const { OperatorScoreCorrection } = await server.ssrLoadModule('/src/components/OperatorScoreCorrection.tsx')
-  const { SimulatorSetup } = await server.ssrLoadModule('/src/components/SimulatorSetup.tsx')
   const { setupActorError, setupSettingsError, simulatorSetupBlock, setupRetryBlock, validateSimulatorSetup } =
     await server.ssrLoadModule('/src/simulatorSetup.ts')
-  const { lifecycleStatus } = await server.ssrLoadModule('/src/sequencer.ts')
+  const { defaultSettings } = await server.ssrLoadModule('/src/settings.ts')
+  const { DrillScreen } = await server.ssrLoadModule('/src/screens/DrillScreen.tsx')
   const session = { enabled: true, csrfRequestToken: 'csrf-test-token', csrfHeaderName: 'X-DrillSim-CSRF', auditLabelLimitation: 'Local audit only' }
   const scenario = { scenarioId: 'scenario-one', reservoirName: 'Formation', asOfUtc: '2026-01-01T00:00:00Z', status: 'HumanApproved' }
   const available = { enabled: true, reason: null }
@@ -146,9 +142,6 @@ try {
   const run = { runId: 'run-one', status: 'Running', currentStage: 'S2Drill', stages: [], progressPercent: 20 }
   assert.equal(operatorLifecycleLabel('simulation', { ...view, run }), 'Running')
   assert.equal(operatorLifecycleLabel('simulation', { ...view, run: { ...run, status: 'AwaitingApproval' } }), 'Completion approval required')
-  const resources = { scenarioId: scenario.scenarioId, loading: false, error: '', operator: { ...view, run: { ...run, status: 'Scored' } } }
-  assert.equal(lifecycleStatus('evaluation', scenario, resources), 'Scorecard pending', 'Published run state does not invent a missing scorecard')
-  assert.equal(lifecycleStatus('new-evidence', scenario, resources), 'Reveal receipt pending')
 
   const settings = { profileId: 'field-demo', resolution: 'Preview', realizationSeed: 2147483647 }
   const setup = {
@@ -212,17 +205,6 @@ try {
     globalThis.fetch = async () => new Response(JSON.stringify({ ...setup, ...invalid }))
     await assert.rejects(getOperatorSetup(scenario.scenarioId))
   }
-  const setupHtml = renderToStaticMarkup(createElement(SimulatorSetup, {
-    setup, view: unpreparedView, actor: 'Demo operator', blocked: false, error: '', onPrepare: () => { throw new Error('Rendering is read-only') },
-  }))
-  assert.match(setupHtml, /Field demonstration/)
-  assert.match(setupHtml, /disabled=""[^>]*>Prepare simulator/)
-  assert.doesNotMatch(setupHtml, /worldId|operatorKey/)
-  const preparedHtml = renderToStaticMarkup(createElement(SimulatorSetup, {
-    setup: prepared, view, actor: '', blocked: false, error: '', onPrepare: () => {},
-  }))
-  assert.match(preparedHtml, /Simulator prepared/)
-  assert.doesNotMatch(preparedHtml, /<input|<select|>Prepare simulator/)
   const legacySetup = {
     ...prepared, current: null, profiles: [], defaults: { ...settings, profileId: null },
   }
@@ -232,12 +214,6 @@ try {
     return new Response(JSON.stringify(legacySetup))
   }
   assert.deepEqual(await getOperatorSetup(scenario.scenarioId), legacySetup)
-  const legacySetupHtml = renderToStaticMarkup(createElement(SimulatorSetup, {
-    setup: legacySetup, view, actor: '', blocked: false, error: '', onPrepare: () => { throw new Error('Legacy setup must not be re-prepared') },
-  }))
-  assert.match(legacySetupHtml, /Simulator prepared/)
-  assert.match(legacySetupHtml, /Earlier setups may not include a public settings summary/)
-  assert.doesNotMatch(legacySetupHtml, /<input|<select|>Prepare simulator|Choose a preset/)
   assert.equal(operatorLifecycleLabel('simulation', view), 'Ready to start', 'Legacy empty profile options do not override the operator start gate.')
 
   const opening = { reservoirName: 'Formation', type: 'Perforated', topMdM: 1000.123456789, baseMdM: 1050,
@@ -287,17 +263,6 @@ try {
   assert.deepEqual(JSON.parse(requests[0].options.body), { actor: attempt.actor, reviewedOpeningHash: completionView.completion.openingsHash })
   assert.equal(requests[0].options.headers['X-DrillSim-CSRF'], session.csrfRequestToken)
   assert.equal(requests[0].options.headers['Idempotency-Key'], attempt.key)
-  const reviewProps = { view: completionView, scenario, actor: 'Local reviewer', blocked: false, reviewedKey: '', onReview: () => {}, onApprove: () => {} }
-  const notReviewed = renderToStaticMarkup(createElement(OperatorCompletionReview, reviewProps))
-  assert.match(notReviewed, /disabled=""[^>]*>Approve reviewed completion/)
-  for (const value of Object.values(opening)) assert.ok(notReviewed.includes(String(value)), `Every review field is visible: ${value}`)
-  const reviewed = renderToStaticMarkup(createElement(OperatorCompletionReview, { ...reviewProps, reviewedKey: completionReviewKey(completionView) }))
-  assert.doesNotMatch(reviewed, /disabled=""[^>]*>Approve reviewed completion/)
-  const changedHash = renderToStaticMarkup(createElement(OperatorCompletionReview, {
-    ...reviewProps, reviewedKey: completionReviewKey(completionView),
-    view: { ...completionView, completion: { ...completionView.completion, openingsHash: 'f'.repeat(64) } },
-  }))
-  assert.match(changedHash, /disabled=""[^>]*>Approve reviewed completion/, 'Changed review hash cannot inherit an acknowledgement')
 
   const recoveryView = {
     ...view, run: { ...run, status: 'Failed', currentStage: 'S8PublishReveal' },
@@ -358,17 +323,6 @@ try {
   assert.equal(requests[0].options.headers['X-DrillSim-CSRF'], session.csrfRequestToken)
   globalThis.fetch = async () => new Response(JSON.stringify({ ...recoveredResponse, reviewedPublicationHash: 'f'.repeat(64) }))
   await assert.rejects(sendOperatorAttempt(session, recoveryAttempt), /does not confirm/)
-  const recoveryProps = { view: recoveryView, scenarioId: scenario.scenarioId, actor: recoveryAttempt.actor,
-    reason: recoveryAttempt.reason, blocked: false, reviewedKey: '', onReason: () => {}, onReview: () => {}, onRecover: () => {} }
-  assert.match(renderToStaticMarkup(createElement(OperatorPublicationRecovery, recoveryProps)),
-    /disabled=""[^>]*>Recover reviewed publication/)
-  const reviewedRecovery = renderToStaticMarkup(createElement(OperatorPublicationRecovery, { ...recoveryProps, reviewedKey: recoveryKey }))
-  assert.doesNotMatch(reviewedRecovery, /disabled=""[^>]*>Recover reviewed publication/)
-  assert.match(reviewedRecovery, /does not publish evidence/)
-  assert.match(reviewedRecovery, new RegExp(recoveryAttempt.reviewedPublicationHash))
-  assert.match(renderToStaticMarkup(createElement(OperatorPublicationRecovery, { ...recoveryProps, reviewedKey: recoveryKey,
-    view: { ...recoveryView, publicationRecovery: { ...recoveryView.publicationRecovery, reviewedPublicationHash: 'e'.repeat(64) } } })),
-  /disabled=""[^>]*>Recover reviewed publication/)
 
   const correctionView = { ...view, run: { ...run, status: 'Failed', currentStage: 'S9Score' },
     actions: { ...view.actions, correctScore: available, score: { enabled: false } },
@@ -422,46 +376,21 @@ try {
     reason: correctionAttempt.reason, reviewedCorrectionHash: correctionAttempt.reviewedCorrectionHash })
   globalThis.fetch = async () => new Response(JSON.stringify({ ...correctedResponse, correctedScorecardId: 'old-score' }))
   await assert.rejects(sendOperatorAttempt(session, correctionAttempt), /does not confirm/)
-  const correctionProps = { view: correctionView, scenarioId: scenario.scenarioId, actor: correctionAttempt.actor,
-    reason: correctionAttempt.reason, blocked: false, reviewedKey: '', onReason: () => {}, onReview: () => {}, onCorrect: () => {} }
-  assert.match(renderToStaticMarkup(createElement(OperatorScoreCorrection, correctionProps)),
-    /disabled=""[^>]*>Append reviewed score correction/)
-  const reviewedCorrection = renderToStaticMarkup(createElement(OperatorScoreCorrection, { ...correctionProps, reviewedKey: correctionKey }))
-  assert.doesNotMatch(reviewedCorrection, /disabled=""[^>]*>Append reviewed score correction/)
-  assert.match(reviewedCorrection, /Preserve the rejected scorecard/)
-  assert.match(reviewedCorrection, /without publishing evaluation/)
-  assert.match(reviewedCorrection, /old-score/)
-  assert.match(reviewedCorrection, /new-score/)
-  assert.match(renderToStaticMarkup(createElement(OperatorScoreCorrection, { ...correctionProps, reviewedKey: correctionKey,
-    view: { ...correctionView, scoreCorrection: { ...correctionView.scoreCorrection, reviewedCorrectionHash: '6'.repeat(64) } } })),
-  /disabled=""[^>]*>Append reviewed score correction/)
 
   let mutationCount = 0
   globalThis.fetch = async () => { mutationCount++; throw new Error('Rendering must not send requests') }
-  storage.set(operatorAttemptKey(scenario.scenarioId), JSON.stringify({ ...attempt, action: 'publish', runId: 'run-one' }))
-  storage.set(operatorOutcomeKey(scenario.scenarioId), JSON.stringify({
-    scenarioId: scenario.scenarioId, outcome: 'scoring-failed', revealSucceeded: true, scoringStatus: 'failed',
-  }))
-  const html = renderToStaticMarkup(createElement(OperatorControls, {
-    scenario, resources, taskId: 'new-evidence', onView: () => mutationCount++, onArtifactsChanged: () => mutationCount++,
-  }))
-  assert.match(html, /Unresolved publish attempt/)
-  assert.match(html, /Local operator and audit details/)
-  assert.match(html, /Reveal succeeded and remains published/)
-  assert.match(html, /disabled=""[^>]*>Retry same attempt/)
-  assert.doesNotMatch(html, /csrf-test-token/)
+  const drillProps = { run: { ...scenario, seedLabel: 'Target #1 fixture' }, settings: defaultSettings,
+    onRunChanged: () => mutationCount++, onResults: () => mutationCount++, onProspects: () => mutationCount++ }
+  const drillHtml = renderToStaticMarkup(createElement(DrillScreen, drillProps))
+  assert.match(drillHtml, /Drill it in the simulator/)
+  assert.match(drillHtml, /disabled=""[^>]*>Drill this well/, 'Drilling waits for the operator view to confirm an approved forecast.')
+  for (const stage of ['Load the hidden reservoir model', 'Drill the well', 'Design the completion', 'Publish the new well data', 'Score the forecast'])
+    assert.ok(drillHtml.includes(stage), `Pending stage is listed: ${stage}`)
+  assert.equal((drillHtml.match(/<li class="pending">/g) ?? []).length, 10)
+  assert.match(drillHtml, /Run Target #1 fixture\./)
+  assert.doesNotMatch(drillHtml, /role="alert"|Approve and continue|csrf-test-token/)
   assert.equal(mutationCount, 0)
-  storage.set(operatorOutcomeKey(scenario.scenarioId), JSON.stringify({
-    scenarioId: scenario.scenarioId, outcome: 'scoring-failed', revealSucceeded: true,
-    scoringStatus: 'failed', clientAttemptKey: attempt.key,
-  }))
-  const failedHtml = renderToStaticMarkup(createElement(OperatorControls, {
-    scenario, resources, taskId: 'new-evidence', onView: () => {}, onArtifactsChanged: () => {},
-  }))
-  assert.match(failedHtml, /Failed publish attempt/)
-  assert.match(failedHtml, /same saved outcome/)
-  assert.match(failedHtml, /use Evaluation for the new scoring attempt/)
-  console.log('Operator checks passed: exact routes, CSRF, stable scoped retries, reviewed completion and staged-publication fingerprints, explicit recovery without publication, partial outcomes and artifact-safe badges.')
+  console.log('Operator checks passed: exact routes, CSRF, stable scoped retries, reviewed completion and staged-publication fingerprints, explicit recovery without publication, partial outcomes and a read-only Drill screen render.')
 } finally {
   globalThis.fetch = originalFetch
   delete globalThis.sessionStorage
